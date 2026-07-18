@@ -326,7 +326,7 @@ export default function ProjectNewPage() {
 
   return (
     <div className="px-4 pb-8 pt-4">
-      <header className="mb-4">
+      <header className="mb-4 landscape-short:mb-2">
         <button
           type="button"
           className="btn-ghost -ml-2 text-sm"
@@ -337,7 +337,7 @@ export default function ProjectNewPage() {
         <h1 className="page-title mt-2">
           {t("projects.create.title")}
         </h1>
-        <p className="text-sm text-moss-600 dark:text-moss-300">
+        <p className="page-subtitle text-sm text-moss-600 dark:text-moss-300">
           {t("projects.create.subtitle")}
         </p>
       </header>

@@ -65,7 +65,7 @@ export default function DisputesPage() {
 
   return (
     <div className="px-4 pb-8 pt-4">
-      <header className="mb-6">
+      <header className="mb-6 landscape-short:mb-2">
         {/* Reached from Profile's governance cluster (and from
             cross-links between the governance pages), so back follows
             in-app history when there is any and falls back to
@@ -80,7 +80,7 @@ export default function DisputesPage() {
         <h1 className="page-title mt-2">
           {t("disputes.title")}
         </h1>
-        <p className="text-sm text-moss-600 dark:text-moss-300">
+        <p className="page-subtitle text-sm text-moss-600 dark:text-moss-300">
           {t("disputes.subtitle")}
         </p>
       </header>

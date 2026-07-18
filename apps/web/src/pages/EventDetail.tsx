@@ -321,7 +321,7 @@ export default function EventDetailPage() {
         />
       )}
 
-      <header className="mb-4">
+      <header className="mb-4 landscape-short:mb-2">
         <div className="flex items-start justify-between gap-2">
           <h1 className="page-title">{event.title}</h1>
           <OverflowMenu label={t("events.detail.menuLabel")} items={menuItems} />

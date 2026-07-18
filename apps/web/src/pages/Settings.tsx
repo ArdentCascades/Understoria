@@ -58,7 +58,7 @@ export default function SettingsPage() {
   }, []);
   return (
     <div className="px-4 pb-8 pt-4">
-      <header className="mb-4">
+      <header className="mb-4 landscape-short:mb-2">
         {/* Settings' one parent is Profile (gear icon + the labeled
             Settings row). History-aware so returning restores
             Profile's scroll position; a cold entry still lands on
@@ -70,7 +70,7 @@ export default function SettingsPage() {
           className="btn-ghost -ml-2 text-sm"
         />
         <h1 className="page-title mt-2">{t("settings.title")}</h1>
-        <p className="text-sm text-moss-600 dark:text-moss-300">
+        <p className="page-subtitle text-sm text-moss-600 dark:text-moss-300">
           {t("settings.intro")}
         </p>
       </header>

@@ -163,6 +163,35 @@
     @apply font-serif text-display text-canopy-900 dark:text-canopy-50;
   }
 
+  /* landscape-short (a phone held sideways — the shared variant in
+   * tailwind.config.js): height is the scarce axis, so page chrome
+   * yields to content. The display-size title drops to the `title`
+   * token (1.5rem — see fontSize in tailwind.config.js) with its
+   * tighter leading. Card headings that reuse .page-title with a
+   * `text-base` override are unaffected: the utilities layer comes
+   * after this components-layer rule, so text-base still wins.
+   * KEEP this query byte-identical to the landscape-short variant. */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .page-title {
+      font-size: 1.5rem;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+  }
+
+  /* Page-header subtitle — the plain-language sentence under the
+   * page title. Deliberately styleless in portrait/desktop (pages
+   * keep their existing text-sm/text-xs utility classes); the class
+   * exists only so the explanatory sentence folds away in
+   * landscape-short, where it costs a meaningful slice of the
+   * ~390px-tall viewport. Never put a page's only doorway to an
+   * action inside an element carrying this class. */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .page-subtitle {
+      display: none;
+    }
+  }
+
   /* Section heading inside a page. */
   .section-title {
     @apply text-title font-semibold tracking-tight text-bark-800

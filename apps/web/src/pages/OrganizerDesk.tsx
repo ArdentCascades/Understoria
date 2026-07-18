@@ -164,9 +164,9 @@ export default function OrganizerDeskPage() {
 
   return (
     <div className="px-4 pb-8 pt-6">
-      <header className="mb-4">
+      <header className="mb-4 landscape-short:mb-2">
         <h1 className="page-title">{t("desk.title")}</h1>
-        <p className="text-sm text-moss-600 dark:text-moss-300">
+        <p className="page-subtitle text-sm text-moss-600 dark:text-moss-300">
           {t("desk.tagline")}
         </p>
       </header>

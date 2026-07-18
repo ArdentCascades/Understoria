@@ -56,7 +56,7 @@ export default function ProjectArchivePage() {
 
   return (
     <div className="px-4 pb-8 pt-4">
-      <header className="mb-4">
+      <header className="mb-4 landscape-short:mb-2">
         {/* Named parent: the projects tab is where the archive is
             reached from. History-aware so the tab's scroll/filter
             state is restored when it's actually the previous entry. */}
@@ -69,7 +69,7 @@ export default function ProjectArchivePage() {
         <h1 className="page-title mt-2">
           {t("projects.archive.title")}
         </h1>
-        <p className="text-sm text-moss-600 dark:text-moss-300">
+        <p className="page-subtitle text-sm text-moss-600 dark:text-moss-300">
           {t("projects.archive.subtitle")}
         </p>
       </header>

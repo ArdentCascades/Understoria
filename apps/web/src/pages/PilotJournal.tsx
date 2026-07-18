@@ -75,7 +75,7 @@ export default function PilotJournalPage() {
 
   return (
     <div className="px-4 pb-8 pt-4">
-      <header className="mb-4">
+      <header className="mb-4 landscape-short:mb-2">
         <BackLink
           to="/help"
           label={t("pilotJournal.back")}
@@ -83,10 +83,10 @@ export default function PilotJournalPage() {
           className="btn-ghost -ml-2 text-sm"
         />
         <h1 className="page-title mt-2">{t("pilotJournal.title")}</h1>
-        <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
+        <p className="page-subtitle mt-1 text-sm text-moss-600 dark:text-moss-300">
           {t("pilotJournal.intro")}
         </p>
-        <p className="mt-2 text-sm text-moss-600 dark:text-moss-300">
+        <p className="page-subtitle mt-2 text-sm text-moss-600 dark:text-moss-300">
           {t("pilotJournal.privacyNote")}
         </p>
       </header>

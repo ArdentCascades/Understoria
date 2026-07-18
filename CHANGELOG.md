@@ -9,6 +9,17 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+- **Page headers get out of the way on a phone held sideways.** In
+  landscape on a phone (≤500px tall), the big serif page title now
+  renders markedly smaller and the explanatory sentence under it
+  folds away, so content starts near the top instead of a third of
+  the way down the screen. Applies across the app — board, My work,
+  dashboard, calendar, settings, forms and the rest. Anything a
+  member can act on in the header (back buttons, the Help page's
+  links, your identity key on Profile) stays visible. Portrait and
+  desktop are unchanged.
+
 ### Fixed
 - **The navigation bar no longer vanishes when you turn your phone
   sideways.** Rotating to landscape could hide the whole left rail —

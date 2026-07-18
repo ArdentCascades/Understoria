@@ -511,7 +511,7 @@ function ProfileBody({ member }: { member: Member }) {
           aria-label={t("profile.sidebarAriaLabel")}
           className="lg:col-start-2 lg:row-start-1 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto"
         >
-          <header className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <header className="mb-4 flex flex-wrap items-center justify-between gap-2 landscape-short:mb-2">
             <div>
               <h1 className="page-title">{t("profile.title")}</h1>
               {/* Canonical identity spot — the key stays visible, and

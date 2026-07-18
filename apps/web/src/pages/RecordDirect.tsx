@@ -252,7 +252,7 @@ export default function RecordDirectPage() {
   return (
     <div className="mx-auto w-full max-w-lg px-4 py-6">
       <h1 className="page-title mb-1">{t("direct.title")}</h1>
-      <p className="mb-4 text-sm text-moss-700 dark:text-moss-200">
+      <p className="page-subtitle mb-4 text-sm text-moss-700 dark:text-moss-200">
         {t("direct.intro")}
       </p>
 
