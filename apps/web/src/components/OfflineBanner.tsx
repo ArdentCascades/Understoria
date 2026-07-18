@@ -96,8 +96,13 @@ export function OfflineBanner() {
       // mid-screen (see useVirtualKeyboard.ts), but the live region
       // must stay in the a11y tree so offline transitions announce
       // exactly once regardless of keyboard state.
+      // landscape-short (phone held sideways): the BottomNav is a left
+      // rail, so there is no bar to clear — the strip drops to just
+      // above the true bottom edge, and Layout's offline mainPad
+      // shrinks to match.
       className={`pointer-events-none fixed inset-x-0 z-20 px-4 print:hidden
                  bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:bottom-20
+                 landscape-short:bottom-[calc(1rem+env(safe-area-inset-bottom))]
                  ${keyboardOpen ? "opacity-0" : ""}`}
     >
       {!online && (

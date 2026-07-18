@@ -18,6 +18,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import plugin from "tailwindcss/plugin";
+
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: "class",
@@ -147,5 +149,13 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // Phone held sideways: width is abundant, height is scarce — nav moves to a rail (Layout.tsx).
+    plugin(({ addVariant }) => {
+      addVariant(
+        "landscape-short",
+        "@media (orientation: landscape) and (max-height: 500px)",
+      );
+    }),
+  ],
 };

@@ -40,7 +40,7 @@ import "@/i18n";
 // state through the real settings store, backed by fake-indexeddb
 // (src/test/setup.ts). We clear it per test so persistence never leaks
 // between cases.
-import { db, getSetting, SETTING_KEYS } from "@/db/database";
+import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import CalendarPage from "./Calendar";
 import type {
   Event,
@@ -1041,5 +1041,77 @@ describe("CalendarPage month paging", () => {
     expect(container.textContent).toContain("June 2026");
     expect(container.querySelector('a[href="/calendar/event/far"]')).toBeNull();
     vi.useRealTimers();
+  });
+});
+
+// ─── Short-landscape default view ───────────────────────────────────
+//
+// A phone held sideways (the shared `landscape-short` variant —
+// tailwind.config.js: landscape AND ≤500px tall) defaults to the
+// stacked agenda view: jsdom's 1024px innerWidth would otherwise pick
+// the month grid, whose six ~50px rows can't breathe on a short
+// screen. jsdom carries no matchMedia at all — the page treats that
+// as "not short" — so these tests install a stub per case.
+
+describe("CalendarPage short-landscape default view", () => {
+  const SHORT_QUERY = "(orientation: landscape) and (max-height: 500px)";
+
+  function stubMatchMedia(matches: boolean) {
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      writable: true,
+      value: (query: string) =>
+        ({
+          matches: query === SHORT_QUERY ? matches : false,
+          media: query,
+          onchange: null,
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          addListener: () => {},
+          removeListener: () => {},
+          dispatchEvent: () => false,
+        }) as unknown as MediaQueryList,
+    });
+  }
+
+  afterEach(() => {
+    // Restore jsdom's native matchMedia-less window.
+    delete (window as { matchMedia?: unknown }).matchMedia;
+  });
+
+  function selectedTab(): string {
+    const tab = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    ).find((b) => b.getAttribute("aria-selected") === "true");
+    return (tab?.textContent ?? "").trim();
+  }
+
+  it("defaults to agenda when the viewport is short-landscape", () => {
+    stubMatchMedia(true);
+    render(<CalendarPage />);
+    expect(selectedTab()).toMatch(/agenda/i);
+  });
+
+  it("keeps the width-derived month default when not short-landscape", () => {
+    stubMatchMedia(false);
+    // jsdom innerWidth is 1024 — at/above the lg breakpoint.
+    render(<CalendarPage />);
+    expect(selectedTab()).toMatch(/month/i);
+  });
+
+  it("a stored view preference beats the short-landscape default", async () => {
+    stubMatchMedia(true);
+    await setSetting(SETTING_KEYS.calendarViewMode, "month");
+    render(<CalendarPage />);
+    await flushDb(); // restore effect rehydrates the explicit choice
+    expect(selectedTab()).toMatch(/month/i);
+  });
+
+  it("a stored preference also beats the width default outside short-landscape", async () => {
+    stubMatchMedia(false);
+    await setSetting(SETTING_KEYS.calendarViewMode, "week");
+    render(<CalendarPage />);
+    await flushDb();
+    expect(selectedTab()).toMatch(/week/i);
   });
 });

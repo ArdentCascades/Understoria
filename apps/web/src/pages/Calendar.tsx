@@ -68,7 +68,30 @@ function prettifyCategory(c: string): string {
 // is the default; at or above, month is the default. The member's
 // explicit override (a click on a view pill) persists across visits
 // via the Dexie settings table (see the restore effect below).
-function defaultViewForWidth(width: number): ViewMode {
+//
+// short-landscape trumps width: a phone held sideways (the shared
+// `landscape-short` variant in tailwind.config.js) has abundant width
+// but ~390px of height — the month grid's six rows get ~50px each,
+// which is unusable — so the stacked agenda is the default there.
+// Default ONLY: a stored view preference always wins (the restore
+// effect below runs after this and overwrites the default).
+const SHORT_LANDSCAPE_QUERY =
+  "(orientation: landscape) and (max-height: 500px)";
+
+// jsdom (and SSR) have no matchMedia — treat that as "not short".
+function isShortLandscape(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia(SHORT_LANDSCAPE_QUERY).matches
+  );
+}
+
+function defaultViewForViewport(
+  width: number,
+  shortLandscape: boolean,
+): ViewMode {
+  if (shortLandscape) return "agenda";
   return width >= 1024 ? "month" : "agenda";
 }
 
@@ -101,9 +124,14 @@ export default function CalendarPage() {
   const { t, i18n } = useTranslation();
   const keyboardOpen = useVirtualKeyboardOpen();
 
+  // Read ONCE at mount (a lazy useState initializer, never re-run):
+  // the short-landscape default is a mount-time decision, not a live
+  // subscription — mid-session rotation keeps whatever view is up.
+  const [shortLandscapeAtMount] = useState<boolean>(isShortLandscape);
   const [viewMode, setViewMode] = useState<ViewMode>(() =>
-    defaultViewForWidth(
+    defaultViewForViewport(
       typeof window !== "undefined" ? window.innerWidth : 320,
+      shortLandscapeAtMount,
     ),
   );
   const [overrideView, setOverrideView] = useState<boolean>(false);
@@ -114,11 +142,13 @@ export default function CalendarPage() {
     if (typeof window === "undefined") return;
     if (overrideView) return;
     function onResize() {
-      setViewMode(defaultViewForWidth(window.innerWidth));
+      setViewMode(
+        defaultViewForViewport(window.innerWidth, shortLandscapeAtMount),
+      );
     }
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [overrideView]);
+  }, [overrideView, shortLandscapeAtMount]);
 
   // Free-text so an event-specific category ("social" etc.) — outside the
   // legacy `Category` enum — can be selected. "" means no filter.
@@ -596,7 +626,7 @@ export default function CalendarPage() {
           fixed anchor would float detached mid-screen (see
           useVirtualKeyboard.ts). */}
       {!keyboardOpen && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4 print:hidden lg:bottom-6 lg:justify-end lg:px-8">
+        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 flex justify-center px-4 print:hidden lg:bottom-6 lg:justify-end lg:px-8 landscape-short:bottom-[calc(1rem+env(safe-area-inset-bottom))]">
           <div className="pointer-events-auto flex gap-2 rounded-full bg-canopy-50 p-1 shadow-xl ring-1 ring-canopy-200 dark:bg-moss-800 dark:ring-moss-700">
             <Link
               to="/events/new"
