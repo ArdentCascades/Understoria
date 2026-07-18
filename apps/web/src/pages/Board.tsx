@@ -128,7 +128,7 @@ export default function BoardPage() {
   // rail's selects stack full-width between the sticky search and the
   // first card (~150px of chrome), so the rail collapses behind a
   // loud full-width trigger there. At sm+ the rail lays out as a
-  // 3-across row and is always visible (the trigger is `sm:hidden`),
+  // compact wrap row and is always visible (the trigger is `sm:hidden`),
   // so this state has no effect at wider viewports. Default
   // collapsed; deliberately NOT persisted — session-local at most,
   // matching the filter values themselves. Shared across tabs (the
@@ -473,27 +473,24 @@ export default function BoardPage() {
           and reading order agree for screen-reader and keyboard
           users (WCAG 2.4.3 satisfied).
 
-          Filter rails (PostFilterRail / ProjectFilterRail) are
-          rendered TWICE: once inside the middle wrapper between
-          search and list (`lg:hidden`, the mobile-visible copy that
-          participates in the `contents` flatten), and once as an
-          outer-grid child positioned in col-1 (`hidden lg:block`,
-          the desktop-visible copy). The component JSX is identical
-          in both render sites — only the wrapper layout classes
-          differ. Filter state stays in this parent and threads
-          through as props.
+          Filter rails (PostFilterRail / ProjectFilterRail) render
+          ONCE, inside the middle wrapper between search and list, at
+          every breakpoint. They used to render twice (a mobile copy
+          here + a desktop copy in a dedicated 240px col-1 track);
+          the desktop-waste follow-up retired the left rail: on the
+          1024px-capped shell it spent ~26% of the width on three
+          selects and forced the post list to a single column across
+          the whole lg range. The rails now lay out as a compact
+          wrap row of intrinsic-width controls above the list, the
+          reading column keeps the full shell width, and the list
+          holds two card columns from md upward.
 
-          Tradeoff: on DESKTOP the keyboard tab order is
-          tablist → search → list → filter → archive (filter comes
-          AFTER the list because its DOM position in the outer grid
-          is the last sibling). Unusual, but NOT a WCAG violation —
-          desktop users see the filter in col-1 regardless of tab
-          order, and screen-reader reading order on desktop follows
-          the same DOM sequence as on mobile would only if filters
-          were inside the middle wrapper at lg too (which would give
-          up the left-rail layout). We accept desktop tab-after-list
-          to keep the left-rail layout AND mobile-DOM-order-equals-
-          visual-order, which is the WCAG-relevant constraint.
+          Retiring the desktop copy also retired two documented
+          warts: the desktop tab order is now tablist → search →
+          filter → list (filters used to tab-read AFTER the list
+          because the col-1 copy was a later outer-grid sibling),
+          and the duplicated #category-filter / #project-category-
+          filter ids from the two render sites are gone.
 
           The right rail is reserved exclusively for AttentionSection.
           Do NOT dock additional informational components here —
@@ -512,21 +509,15 @@ export default function BoardPage() {
           attention card, and the layout is byte-identical to before
           whenever there is one.
 
-          While the docked post panel is open, BOTH rails cede: the
-          grid collapses to [reading-column, auto] and the filter
-          rail hides with the attention rail. At exactly 1024px the
-          panel + the 240px filter rail left ~290px for the tablist
-          and cards — colliding tab pills, one-word-wide project
-          cards (the pilot screenshots). The panel is triage mode:
-          filters return the moment it closes. */}
-      <div
-        className={`grid grid-cols-1 gap-4 lg:items-start lg:gap-6 ${
-          postPanelOpen
-            ? "lg:grid-cols-[minmax(0,1fr)_auto]"
-            : "lg:grid-cols-[240px_minmax(0,1fr)_auto]"
-        }`}
-      >
-        {/* Right rail. Single grid cell in col 3, sticky. With the
+          While the docked post panel is open the ATTENTION rail
+          still cedes (panel triage wants the width), but the filter
+          row stays: it lives inside the reading column and costs no
+          horizontal track, so members can keep narrowing the list
+          while a post is docked — the old 240px rail had to hide
+          because at exactly 1024px the panel + rail left ~290px for
+          the tablist and cards (the pilot screenshots). */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-6">
+        {/* Right rail. Single grid cell in col 2, sticky. With the
             outer grid on one row track + lg:items-start, its height is
             its own concern — a tall attention card no longer drags the
             middle column's rhythm.
@@ -541,7 +532,7 @@ export default function BoardPage() {
             past). overscroll-contain stops a finished rail scroll
             from chaining into the page. */}
         <div
-          className={`lg:col-start-3 lg:row-start-1 lg:w-[280px] lg:self-start lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:overscroll-contain lg:empty:hidden ${
+          className={`lg:col-start-2 lg:row-start-1 lg:w-[280px] lg:self-start lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:overscroll-contain lg:empty:hidden ${
             // While the post panel is docked, cede the rail's width
             // to it — at exactly 1024px the panel + both rails can't
             // coexist beside a readable card column. The rail is
@@ -557,16 +548,11 @@ export default function BoardPage() {
             laid out as a flex column so tablist → search → list stack
             tightly with no inter-rail height coupling. At mobile it is
             `contents`, dissolving into the outer single-column grid so
-            DOM children flatten into the page stack. The mobile-visible
-            filter rail is rendered HERE between search and list (with
-            `lg:hidden`) so DOM order matches visual order natively —
-            no `order-*` utilities required. The desktop-visible filter
-            rail lives as an outer-grid child in col-1 below. */}
-        <div
-          className={`contents min-w-0 lg:row-start-1 lg:flex lg:flex-col lg:gap-3 ${
-            postPanelOpen ? "lg:col-start-1" : "lg:col-start-2"
-          }`}
-        >
+            DOM children flatten into the page stack. The filter rail's
+            single render site is HERE between search and list, so DOM
+            order matches visual order natively at every breakpoint —
+            no `order-*` utilities required. */}
+        <div className="contents min-w-0 lg:col-start-1 lg:row-start-1 lg:flex lg:flex-col lg:gap-3">
         {/* Mobile sticky header group: tablist + search stick TOGETHER
             at top-0 so a member can flip NEED↔OFFER or search from
             anywhere in a long scroll — previously only the search
@@ -680,26 +666,23 @@ export default function BoardPage() {
           </div>
         )}
 
-        {/* Mobile-visible filter rail copies. These sit between the
-            search input and the list in DOM order, so on mobile
-            (where the middle wrapper is `contents`) the page reads
-            attention → tablist → search → filters-toggle → filter →
-            list, and the list never tab-reads before the controls
-            that filter it. `lg:hidden` keeps these out of the
-            desktop layout where the col-1 outer-grid copy below
-            takes over.
+        {/* Filter rail — the single render site, every breakpoint.
+            It sits between the search input and the list in DOM
+            order, so the page reads attention → tablist → search →
+            filters-toggle → filter → list and the list never
+            tab-reads before the controls that filter it.
 
             Below sm the rail collapses behind the MobileFiltersToggle
             trigger (see the component's comment for the affordance
             rationale); the toggle is `sm:hidden` and the rail flips
-            to `hidden sm:block` while collapsed, so at sm..lg the
-            rail renders exactly as before with no trigger. Trigger
+            to `hidden sm:block` while collapsed, so at sm+ the rail
+            renders as a compact wrap row with no trigger. Trigger
             precedes rail in DOM — DOM order equals visual order in
             every disclosure state (WCAG 2.4.3). This block is NOT
             part of the sticky header group above on purpose: only
             tablist + search stick. */}
         {tab !== "PROJECTS" && (
-          <div className="lg:hidden">
+          <div>
             <MobileFiltersToggle
               open={mobileFiltersOpen}
               activeCount={activePostFilterCount}
@@ -727,7 +710,7 @@ export default function BoardPage() {
         )}
 
         {tab === "PROJECTS" && (
-          <div className="lg:hidden">
+          <div>
             <MobileFiltersToggle
               open={mobileFiltersOpen}
               activeCount={activeProjectFilterCount}
@@ -797,26 +780,30 @@ export default function BoardPage() {
                 />
               )
             ) : (
-              /* `lg:grid-cols-1` is a MEASURED decision, not a typo.
-                 Layout.tsx caps the shell at max-w-screen-lg (1024px)
-                 across the whole lg range, so the middle column is a
-                 constant 1024 − 32 (page px-4) − 240 (left rail) −
-                 280 (right rail) − 48 (2 × gap-6) = 424px at every
-                 lg viewport. Two columns would mean (424 − 12) / 2 ≈
-                 206px cards — unusably cramped. md (no rails) fits 2;
-                 xl (1280 cap → 680px middle → ~334px cards) resumes
-                 2. The 1-col dip at lg is the honest tradeoff for
-                 gaining both rails. */
+              /* Column math (shell capped at max-w-screen-lg, 1024px,
+                 across the whole lg range): with the old 240px filter
+                 rail gone, the reading column at lg is 1024 − 32
+                 (page px-4) − 280 (attention rail, when present) − 24
+                 (gap-6) = 688px → two ~338px cards, comfortably wider
+                 than md's pair; with the attention rail empty (its
+                 common state) the full 992px column holds two ~490px
+                 cards. The old lg 1-col dip existed only to pay for
+                 the 240px rail. */
               <>
-                {/* Sideways with the panel docked (splitCapable), the
-                    reading column is ~55% of an md-wide viewport —
-                    two columns would be ~200px cards, so the md pair
-                    is dropped for the panel's lifetime (the same
-                    dial-back ProjectList does below). */}
+                {/* While the panel is docked the viewport-based md:
+                    breakpoint doesn't know the reading column shrank
+                    (sideways split: ~55% of the viewport; lg dock:
+                    the panel column), so the pair dials back to one
+                    column for the panel's lifetime — the same
+                    dial-back ProjectList does below. */}
                 <ul
                   className={`grid grid-cols-1 gap-3 ${
                     postPanelOpen && splitCapable ? "" : "md:grid-cols-2"
-                  } lg:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3`}
+                  } ${
+                    postPanelOpen
+                      ? "lg:grid-cols-1 xl:grid-cols-2"
+                      : "2xl:grid-cols-3"
+                  }`}
                 >
                   {visiblePosts.map((p) => (
                     <li key={p.id}>
@@ -886,72 +873,22 @@ export default function BoardPage() {
               panelOpen={postPanelOpen}
               tendedScope={scope === "tended"}
             />
-          </div>
-        )}
-        </div>
-        {/* end middle reading column */}
 
-        {/* Desktop-visible left rail: filters. A separate grid child
-            placed in col 1 at lg+, sticky. `hidden lg:block` hides
-            this on mobile — the mobile-visible filter copy is rendered
-            inside the middle wrapper between search and list above
-            so DOM order matches visual order without `order-*`
-            utilities. The filter rail's height is its own concern —
-            single-row grid + lg:items-start means it never couples
-            into the middle column's vertical rhythm.
-
-            Stays hidden while the docked post panel is open — the
-            panel takes the rail's track (see the outer grid). */}
-        {tab !== "PROJECTS" && !postPanelOpen && (
-          <div className="hidden lg:col-start-1 lg:row-start-1 lg:self-start lg:sticky lg:top-4 lg:block">
-            <PostFilterRail
-              categoryFilter={categoryFilter}
-              setCategoryFilter={setCategoryFilter}
-              urgencyFilter={urgencyFilter}
-              setUrgencyFilter={setUrgencyFilter}
-              zoneFilter={zoneFilter}
-              setZoneFilter={setZoneFilter}
-              zones={zones}
-              claimedInScope={claimedInScope}
-              showClaimed={showClaimed}
-              setShowClaimed={setShowClaimed}
-            />
-          </div>
-        )}
-
-        {tab === "PROJECTS" && (
-          <>
-            {!postPanelOpen && (
-            <div className="hidden lg:col-start-1 lg:row-start-1 lg:self-start lg:sticky lg:top-4 lg:block">
-              <ProjectFilterRail
-                projectCategoryFilter={projectCategoryFilter}
-                setProjectCategoryFilter={setProjectCategoryFilter}
-                projectStatusFilter={projectStatusFilter}
-                setProjectStatusFilter={setProjectStatusFilter}
-                onlyWithOpenTasks={onlyWithOpenTasks}
-                setOnlyWithOpenTasks={setOnlyWithOpenTasks}
-                onlyNeedsMoreHands={onlyNeedsMoreHands}
-                setOnlyNeedsMoreHands={setOnlyNeedsMoreHands}
-                onlyHourSized={onlyHourSized}
-                setOnlyHourSized={setOnlyHourSized}
-              />
-            </div>
-            )}
-
-            {/* Bottom jump-offs, grouped by JOB into two tiers so they
-                don't read as a pile of identical links. At lg+ they
-                land in col 1 below the sticky filter rail (implicit
-                rows after row 1); at mobile they stack last in the
-                outer grid.
+            {/* Bottom jump-offs, grouped by JOB into two tiers so
+                they don't read as a pile of identical links. They
+                stack after the list in the reading column at every
+                breakpoint (they used to land in the retired col-1
+                rail track at lg+).
 
                 Tier 1 — "In my care": the member's own cross-project
-                commitments, both deep-linking into the /my-work page.
-                Shown only when there's something to carry / steward —
-                no count bubble, no empty destination (no-notifications;
-                solidarity-not-shame). Grouped under one quiet heading
-                so two links to the same page read as one doorway. */}
+                commitments, both deep-linking into the /my-work
+                page. Shown only when there's something to carry /
+                steward — no count bubble, no empty destination
+                (no-notifications; solidarity-not-shame). Grouped
+                under one quiet heading so two links to the same page
+                read as one doorway. */}
             {(carryingCount > 0 || organizingCount > 0) && (
-              <div className="mt-3 text-center lg:col-start-1 lg:row-start-2 lg:mt-3 lg:text-left">
+              <div className="mt-3 text-center lg:text-left">
                 <p className="text-xs font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
                   {t("board.inMyCareHeading")}
                 </p>
@@ -977,17 +914,21 @@ export default function BoardPage() {
             )}
 
             {/* Tier 2 — the archive: navigation to a rarely-needed
-                place, rendered as the QUIETEST footer link (muted, not
-                a canopy action) so it's clearly the lowest tier and
-                never competes with the controls or the care cluster. */}
+                place, rendered as the QUIETEST footer link (muted,
+                not a canopy action) so it's clearly the lowest tier
+                and never competes with the controls or the care
+                cluster. */}
             <Link
               to="/projects/archive"
-              className="mt-3 block text-center text-xs text-moss-600 underline-offset-2 hover:text-moss-800 hover:underline dark:text-moss-300 dark:hover:text-moss-100 lg:col-start-1 lg:row-start-3 lg:mt-3 lg:text-left"
+              className="mt-3 block text-center text-xs text-moss-600 underline-offset-2 hover:text-moss-800 hover:underline dark:text-moss-300 dark:hover:text-moss-100 lg:text-left"
             >
               {t("projects.archive.viewArchive")}
             </Link>
-          </>
+          </div>
         )}
+        </div>
+        {/* end middle reading column */}
+
       </div>
       </div>
       {/* end board column */}

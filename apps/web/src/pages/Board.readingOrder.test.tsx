@@ -27,11 +27,13 @@
 // utilities, which are visual-only). Screen-reader and keyboard
 // users read the list before the controls that filter it.
 //
-// The fix extracts PostFilterRail / ProjectFilterRail and renders
-// each in two DOM positions — a mobile-visible copy between search
-// and list, a desktop-visible copy as an outer-grid child in col-1
-// — so mobile DOM order matches visual order natively. Every
-// `order-*` Tailwind class is stripped.
+// The fix extracted PostFilterRail / ProjectFilterRail so mobile DOM
+// order matches visual order natively, with every `order-*` Tailwind
+// class stripped. Originally the rails rendered twice (a mobile copy
+// + a desktop col-1 copy with the documented tab-after-list
+// tradeoff); the desktop rail track is now retired and the single
+// render site between search and list serves every breakpoint — so
+// the invariant below now holds for desktop tab order too.
 //
 // These tests lock both invariants:
 //   1. The DOM order at render time is tablist → search → filter →
@@ -212,20 +214,14 @@ describe("Board reading order (WCAG 2.4.3)", () => {
 
     const tablist = container.querySelector('[role="tablist"]');
     const searchInput = container.querySelector('input[type="search"]');
-    // Filter rail is identified by its category select. The desktop
-    // copy is hidden via `hidden lg:block`; the mobile copy is the
-    // one the screen reader reaches first on mobile and is what we
-    // assert against here (jsdom has no viewport so both copies
-    // render; the mobile copy is the one whose wrapper is NOT
-    // `hidden`).
+    // Filter rail is identified by its category select — the SINGLE
+    // render site inside the reading column between search and list
+    // (the desktop col-1 copy, and its duplicated id, are retired).
     const filterSelects = container.querySelectorAll('#category-filter');
     expect(tablist).not.toBeNull();
     expect(searchInput).not.toBeNull();
-    expect(filterSelects.length).toBeGreaterThan(0);
+    expect(filterSelects.length).toBe(1);
 
-    // The MOBILE filter copy is the first one in DOM order — it is
-    // rendered inside the middle wrapper between search and list.
-    // The DESKTOP copy is the outer-grid child later in the tree.
     const mobileFilter = filterSelects[0]!;
     const list = container.querySelector('ul');
     expect(list).not.toBeNull();
@@ -253,8 +249,7 @@ describe("Board reading order (WCAG 2.4.3)", () => {
 
     const tablist = container.querySelector('[role="tablist"]');
     const searchInput = container.querySelector('input[type="search"]');
-    // Mobile filter copy: the first `#project-category-filter` in
-    // the rendered tree.
+    // The project filter rail's single render site.
     const projectCategorySelects = container.querySelectorAll(
       '#project-category-filter',
     );
@@ -334,20 +329,22 @@ describe("Board reading order (WCAG 2.4.3)", () => {
 
 describe("Board desktop rail collapse (screen-real-estate pilot report)", () => {
   // jsdom does no layout, so these lock the CLASS contract the
-  // collapse depends on: the outer grid must not reserve a fixed
-  // col-3 track (auto sizes to the rail wrapper), and the rail
-  // wrapper must carry its own width and hide itself when
+  // collapse depends on: the outer grid must not reserve ANY fixed
+  // side track — the attention column is `auto` (sizes to the rail
+  // wrapper) and the old 240px filter-rail track is retired — and
+  // the rail wrapper must carry its own width and hide itself when
   // AttentionSection renders nothing — otherwise 280px + gap of
   // permanently dead space returns to the right edge of every
   // no-attention visit.
-  it("uses an auto col-3 track, and the rail wrapper self-sizes and hides when empty", () => {
+  it("uses [reading, auto] tracks with no fixed side column, and the rail wrapper self-sizes and hides when empty", () => {
     render(<BoardPage />, "/");
     const gridEl = container.querySelector(
       '[class*="lg:grid-cols-"]',
     ) as HTMLElement;
     expect(gridEl).toBeTruthy();
     const gridClass = gridEl.className;
-    expect(gridClass).toContain("lg:grid-cols-[240px_minmax(0,1fr)_auto]");
+    expect(gridClass).toContain("lg:grid-cols-[minmax(0,1fr)_auto]");
+    expect(gridClass).not.toContain("240px");
     expect(gridClass).not.toContain("280px]");
 
     const marker = container.querySelector(

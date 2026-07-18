@@ -127,6 +127,17 @@ include breaking changes.
   type it. English and Spanish.
 
 ### Changed
+- **The community board's filters moved out of their own column and
+  into one compact row.** On desktop the three filter dropdowns used
+  to occupy a fixed 240px column — about a quarter of the page —
+  while forcing the post list down to a single column of cards. They
+  now sit in one slim row between the search box and the list (the
+  same spot at every screen size), the dropdowns size themselves to
+  their labels, and the list shows two columns of cards on desktop
+  where it showed one. Phones are unchanged (the Filters button still
+  collapses them), keyboard/screen-reader order now reads
+  filters-before-list on desktop too, and the filters stay available
+  while a post is open in the side panel instead of disappearing.
 - **The Dashboard now speaks plainly about reciprocity and needs.**
   A young community whose help all flows one way used to see a big
   "0% — 0 of 9 pairs" under its real exchange totals, which read

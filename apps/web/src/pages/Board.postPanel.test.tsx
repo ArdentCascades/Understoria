@@ -229,19 +229,21 @@ describe("Board docked post panel", () => {
     ).not.toContain("lg:hidden");
   });
 
-  it("cedes the filter rail's grid track while the panel is open", () => {
-    // At exactly 1024px the panel + the 240px rail left ~290px for
-    // the reading column — colliding tab pills, one-word-wide cards
-    // (the pilot screenshots). While open: two grid tracks, no
-    // desktop filter-rail copy. On close: the rail and its track
-    // come straight back.
+  it("keeps the filter row reachable while the panel is open — no 240px rail track ever", () => {
+    // The dedicated 240px desktop filter-rail track is retired: the
+    // filters are a compact row inside the reading column, so they
+    // cost no horizontal track and no longer need to cede while the
+    // panel is docked (the old rail did — at exactly 1024px the
+    // panel + 240px rail left ~290px for the reading column). The
+    // outer grid is the same two-track shape open or closed.
     renderAt("/post/p1?tab=offers");
     const grid = () =>
       container.querySelector('[class*="grid grid-cols-1 gap-4"]')!;
-    const desktopRail = () =>
-      container.querySelector('[class*="lg:sticky"][class*="lg:col-start-1"]');
     expect(grid().className).toContain("lg:grid-cols-[minmax(0,1fr)_auto]");
-    expect(desktopRail()).toBeNull();
+    expect(grid().className).not.toContain("240px");
+    // Filters stay usable during panel triage — the single render
+    // site is in the reading column, before the list.
+    expect(container.querySelector("#category-filter")).not.toBeNull();
 
     const close = container.querySelector<HTMLButtonElement>(
       'button[aria-label="Close post panel"]',
@@ -249,10 +251,11 @@ describe("Board docked post panel", () => {
     act(() => {
       close.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    expect(grid().className).toContain(
-      "lg:grid-cols-[240px_minmax(0,1fr)_auto]",
-    );
-    expect(desktopRail()).not.toBeNull();
+    expect(grid().className).toContain("lg:grid-cols-[minmax(0,1fr)_auto]");
+    expect(grid().className).not.toContain("240px");
+    // Exactly ONE filter render site — the duplicated-id wart from
+    // the two-copies era must not come back.
+    expect(container.querySelectorAll("#category-filter").length).toBe(1);
   });
 });
 
