@@ -128,10 +128,13 @@ function isNearBottom(list: HTMLElement): boolean {
 }
 
 /** Vertical room the long-press menu wants below a bubble — the
- *  emoji row plus the action row (two 44px rows, gaps, padding).
- *  Only used to pick the menu's open DIRECTION; the menu itself
- *  still sizes to its content. Exported for the placement tests. */
-export const MENU_ESTIMATE_PX = 176;
+ *  emoji row plus the action row (two 44px rows, gaps, padding),
+ *  with headroom for the action row wrapping to a second line on
+ *  narrow screens now that Reply joined it (four items don't always
+ *  fit one row at 320px). Only used to pick the menu's open
+ *  DIRECTION; the menu itself still sizes to its content. Exported
+ *  for the placement tests. */
+export const MENU_ESTIMATE_PX = 220;
 
 /**
  * Should the long-press menu open UPWARD (overlaying the thread
@@ -272,6 +275,15 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
   // SOMETHING even when the device can't. In-menu, like "Copied ✓" —
   // feedback stays where the eyes are.
   const [speakFailedId, setSpeakFailedId] = useState<string | null>(null);
+  // Reply (the long-press menu's Reply item): the message being
+  // replied to, shown as a "Replying to…" strip above the composer
+  // (the aboutPostId hint's pattern). QUOTE-STYLE, deliberately not a
+  // protocol feature: the sent message simply carries the quoted
+  // excerpt as leading "> " lines, so every client — old builds,
+  // future builds — reads the reply correctly with zero envelope
+  // changes. Cleared on send, on the strip's ✕, and naturally on
+  // conversation switch (the page remounts per :memberKey).
+  const [replyTo, setReplyTo] = useState<DecryptedMessage | null>(null);
   const copyTimer = useRef<number | null>(null);
   useEffect(
     () => () => {
@@ -319,6 +331,30 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
       }).format(d);
     },
     [t, i18n.language],
+  );
+  // One line of quoted context, composer-strip and "> " prefix alike:
+  // first ~120 chars of the message, newlines flattened; a voice note
+  // (or an undecryptable row) quotes as the voice label instead.
+  const replyExcerpt = useCallback(
+    (m: DecryptedMessage): string => {
+      const source =
+        !m.voice && m.plaintext !== null
+          ? m.plaintext
+          : t("messages.menu.replyVoiceExcerpt");
+      const flat = source.replace(/\s+/g, " ").trim();
+      return flat.length > 120 ? `${flat.slice(0, 119)}…` : flat;
+    },
+    [t],
+  );
+  const handleReply = useCallback(
+    (m: DecryptedMessage) => {
+      setReactFor(null);
+      setReplyTo(m);
+      // Reply means "I'm about to type" — focusing is the point of
+      // the tap, so the mobile no-autofocus rule doesn't apply here.
+      inputRef.current?.focus();
+    },
+    [],
   );
   const handleCopy = useCallback(async (m: DecryptedMessage) => {
     if (m.plaintext === null || !navigator.clipboard) return;
@@ -732,10 +768,21 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
     setSending(true);
     setError(null);
     try {
-      await sendMessage(currentMember.publicKey, otherKey, text, {
+      // Reply rides as leading quote lines ("> Name: excerpt") in the
+      // message body itself — plain text, readable by every client,
+      // no envelope change. See the replyTo state note.
+      const body = replyTo
+        ? `> ${
+            replyTo.senderKey === currentMember.publicKey
+              ? t("messages.reactions.you")
+              : otherName
+          }: ${replyExcerpt(replyTo)}\n\n${text}`
+        : text;
+      await sendMessage(currentMember.publicKey, otherKey, body, {
         aboutPostId: aboutPostId ?? undefined,
       });
       setText("");
+      setReplyTo(null);
       // The message left the composer — drop its persisted draft
       // immediately (don't wait out the debounce window; a restart
       // right after a send must not resurrect sent text).
@@ -1209,6 +1256,19 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                       })}
                     </div>
                     <div className="flex flex-wrap gap-1">
+                      {/* Reply leads the action row (the most-reached-
+                          for messenger action) and is UNIVERSAL — text
+                          and voice bubbles alike; a voice note quotes
+                          as its label. */}
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={() => handleReply(m)}
+                        className="min-h-[44px] rounded-full px-3 text-sm hover:bg-moss-900/10 focus:outline-none focus:ring-2 focus:ring-canopy-400 dark:hover:bg-white/10"
+                      >
+                        {t("messages.menu.reply")}
+                      </button>
                       {m.plaintext !== null && !m.voice && (
                         <>
                           <button
@@ -1330,6 +1390,32 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
             className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-xl hover:bg-canopy-100 dark:hover:bg-canopy-800/60"
             aria-label={t("messages.compose.aboutDismiss")}
             onClick={disarmAbout}
+          >
+            {"✕"}
+          </button>
+        </div>
+      )}
+
+      {/* Pre-send reply strip (same pattern as the ?about= hint just
+          above): shows whose words the next message will quote, with
+          an ✕ to reply without the quote after all. The quote itself
+          is applied at send time (handleSend). */}
+      {replyTo && (
+        <div className="mt-3 flex items-center gap-2 rounded-xl bg-moss-100 pl-3 text-xs text-moss-800 dark:bg-moss-900/60 dark:text-moss-100">
+          <p className="min-w-0 flex-1 truncate py-2">
+            {t("messages.compose.replyingTo", {
+              name:
+                replyTo.senderKey === currentMember.publicKey
+                  ? t("messages.reactions.you")
+                  : otherName,
+              excerpt: replyExcerpt(replyTo),
+            })}
+          </p>
+          <button
+            type="button"
+            className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-xl hover:bg-moss-200 dark:hover:bg-moss-800"
+            aria-label={t("messages.compose.replyDismiss")}
+            onClick={() => setReplyTo(null)}
           >
             {"✕"}
           </button>

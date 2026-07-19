@@ -789,7 +789,9 @@
     "compose": {
       "aboutHint": "Estás escribiendo sobre: {{title}}",
       "aboutHintUnknown": "Estás escribiendo sobre una publicación",
-      "aboutDismiss": "No adjuntar esta publicación"
+      "aboutDismiss": "No adjuntar esta publicación",
+      "replyingTo": "Respondiendo a {{name}}: {{excerpt}}",
+      "replyDismiss": "Responder sin citar este mensaje"
     },
     "noReadReceipts": "Los mensajes son privados. Sin confirmación de lectura.",
     "search": {
@@ -823,7 +825,9 @@
       "speakUnavailable": "Este dispositivo no puede leer mensajes en voz alta",
       "info": "Detalles",
       "infoSent": "Enviado {{when}}",
-      "infoSealed": "Sellado de extremo a extremo — solo tú y {{name}} pueden leerlo."
+      "infoSealed": "Sellado de extremo a extremo — solo tú y {{name}} pueden leerlo.",
+      "reply": "Responder",
+      "replyVoiceExcerpt": "Nota de voz"
     },
     "reactions": {
       "open": "Reaccionar a este mensaje",
