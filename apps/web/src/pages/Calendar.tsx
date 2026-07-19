@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Outlet, useMatch } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
@@ -34,6 +34,11 @@ import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
 import { isOrganizer } from "@/db/projects";
 import { getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import { EmptyState } from "@/components/EmptyState";
+import {
+  ActiveFilterChips,
+  FilterPanelDone,
+  FiltersToggle,
+} from "@/components/filters/FiltersDisclosure";
 import { CalendarAgenda } from "@/components/CalendarAgenda";
 import { CalendarMonth } from "@/components/CalendarMonth";
 import { CalendarWeek } from "@/components/CalendarWeek";
@@ -420,6 +425,59 @@ export default function CalendarPage() {
     setEventsOnly(false);
   };
 
+  // Filters disclosure (the Board's collapsed-filters grammar,
+  // adopted here after the field report that the always-open filter
+  // row pushed the actual calendar off a phone screen): collapsed at
+  // every width behind the shared FiltersToggle pill, applied state
+  // visible as removable chips beside it. Session-only UI state —
+  // the FILTERS persist (see the settings effect above); whether the
+  // drawer is open does not.
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filtersToggleRef = useRef<HTMLButtonElement>(null);
+  const closeFilters = () => {
+    setFiltersOpen(false);
+    filtersToggleRef.current?.focus();
+  };
+  const filterChips: Array<{
+    id: string;
+    label: string;
+    onRemove: () => void;
+  }> = [];
+  if (category !== "") {
+    filterChips.push({
+      id: "category",
+      label: t(`categories.${category}`, {
+        defaultValue: prettifyCategory(category),
+      }),
+      onRemove: () => setCategory(""),
+    });
+  }
+  if (projectId !== "") {
+    const project = projects.find((p) => p.id === projectId);
+    filterChips.push({
+      id: "project",
+      // A vanished project id (row deleted since the filter was set)
+      // still gets a removable chip — the generic label beats a chip
+      // that names nothing.
+      label: project?.title ?? t("calendar.filters.project"),
+      onRemove: () => setProjectId(""),
+    });
+  }
+  if (mine) {
+    filterChips.push({
+      id: "mine",
+      label: t("calendar.filters.mine"),
+      onRemove: () => setMine(false),
+    });
+  }
+  if (eventsOnly) {
+    filterChips.push({
+      id: "eventsOnly",
+      label: t("events.calendar.eventsOnlyChip"),
+      onRemove: () => setEventsOnly(false),
+    });
+  }
+
   // Viewer-ownership sets for the agenda's commitment weighting —
   // "yours" means the viewer organizes / co-organizes the project, or
   // authored the post. Derived from rows the page already holds and the
@@ -491,78 +549,98 @@ export default function CalendarPage() {
         ))}
       </div>
 
-      {/* Filter row */}
-      <div className="mb-stack-md flex flex-wrap items-center gap-2">
-        <label className="flex items-center gap-1 text-xs text-moss-600 dark:text-moss-300">
-          <span className="sr-only">{t("calendar.filters.category")}</span>
-          <select
-            className="input py-1 text-xs"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            aria-label={t("calendar.filters.category")}
+      {/* Filters disclosure — the Board's grammar verbatim: a compact
+          pill trigger with the active count in its label, removable
+          chips keeping applied state visible while collapsed, and the
+          controls in a card drawer with a Done footer that returns
+          focus to the pill. Collapsed by default at every width, so
+          the calendar itself starts a full row higher on a phone
+          (field report: the open filter row pushed it down). */}
+      <div className="mb-stack-sm flex flex-wrap items-center gap-2">
+        <FiltersToggle
+          open={filtersOpen}
+          activeCount={activeFilterCount}
+          controlsId="calendar-filters"
+          onToggle={() => setFiltersOpen((v) => !v)}
+          buttonRef={filtersToggleRef}
+        />
+        <ActiveFilterChips entries={filterChips} />
+      </div>
+
+      <div
+        id="calendar-filters"
+        className={filtersOpen ? "card mb-stack-md" : "hidden"}
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <label className="flex items-center gap-1 text-xs text-moss-600 dark:text-moss-300">
+            <span className="sr-only">{t("calendar.filters.category")}</span>
+            <select
+              className="input py-1 text-xs"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              aria-label={t("calendar.filters.category")}
+            >
+              <option value="">{t("calendar.filters.allCategories")}</option>
+              {availableCategories.map((c) => (
+                <option key={c} value={c}>
+                  {t(`categories.${c}`, { defaultValue: prettifyCategory(c) })}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex items-center gap-1 text-xs text-moss-600 dark:text-moss-300">
+            <span className="sr-only">{t("calendar.filters.project")}</span>
+            <select
+              className="input py-1 text-xs"
+              value={projectId}
+              onChange={(e) => setProjectId(e.target.value)}
+              aria-label={t("calendar.filters.project")}
+            >
+              <option value="">{t("calendar.filters.allProjects")}</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title}
+                </option>
+              ))}
+            </select>
+          </label>
+          {/* "Mine" gets the same labeled-chip treatment as the
+              Events-only chip beside it — a proper toggle rather than a
+              bare checkbox lost among the selects. Own wrap row so the
+              chips stay content-sized side by side instead of
+              stretching full-width in the drawer's phone column
+              (mirrors the Board drawer's toggle group). */}
+          <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMine((v) => !v)}
+            aria-pressed={mine}
+            disabled={!myKey}
+            className={[
+              "rounded-full px-3 py-1 text-xs disabled:opacity-50",
+              mine
+                ? "bg-canopy-700 text-white"
+                : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700",
+            ].join(" ")}
           >
-            <option value="">{t("calendar.filters.allCategories")}</option>
-            {availableCategories.map((c) => (
-              <option key={c} value={c}>
-                {t(`categories.${c}`, { defaultValue: prettifyCategory(c) })}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex items-center gap-1 text-xs text-moss-600 dark:text-moss-300">
-          <span className="sr-only">{t("calendar.filters.project")}</span>
-          <select
-            className="input py-1 text-xs"
-            value={projectId}
-            onChange={(e) => setProjectId(e.target.value)}
-            aria-label={t("calendar.filters.project")}
+            {t("calendar.filters.mine")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setEventsOnly((v) => !v)}
+            aria-pressed={eventsOnly}
+            className={[
+              "rounded-full px-3 py-1 text-xs",
+              eventsOnly
+                ? "bg-canopy-700 text-white"
+                : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700",
+            ].join(" ")}
           >
-            <option value="">{t("calendar.filters.allProjects")}</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.title}
-              </option>
-            ))}
-          </select>
-        </label>
-        {/* "Mine" gets the same labeled-chip treatment as the
-            Events-only chip beside it — a proper toggle rather than a
-            bare checkbox lost among the selects. */}
-        <button
-          type="button"
-          onClick={() => setMine((v) => !v)}
-          aria-pressed={mine}
-          disabled={!myKey}
-          className={[
-            "rounded-full px-3 py-1 text-xs disabled:opacity-50",
-            mine
-              ? "bg-canopy-700 text-white"
-              : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700",
-          ].join(" ")}
-        >
-          {t("calendar.filters.mine")}
-        </button>
-        <button
-          type="button"
-          onClick={() => setEventsOnly((v) => !v)}
-          aria-pressed={eventsOnly}
-          className={[
-            "rounded-full px-3 py-1 text-xs",
-            eventsOnly
-              ? "bg-canopy-700 text-white"
-              : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700",
-          ].join(" ")}
-        >
-          {t("events.calendar.eventsOnlyChip")}
-        </button>
-        {/* Active-filter summary — same signal Board's `filtersActive`
-            drives, rendered as a quiet count beside the controls so a
-            member can see at a glance that the calendar is narrowed. */}
-        {filtersActive ? (
-          <span className="text-xs text-moss-600 dark:text-moss-300">
-            {t("calendar.filters.active", { count: activeFilterCount })}
-          </span>
-        ) : null}
+            {t("events.calendar.eventsOnlyChip")}
+          </button>
+          </div>
+        </div>
+        <FilterPanelDone onDone={closeFilters} />
       </div>
 
       {entries.length === 0 ? (
