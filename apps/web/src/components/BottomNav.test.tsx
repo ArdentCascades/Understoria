@@ -92,11 +92,29 @@ describe("BottomNav", () => {
     render();
     const nav = container.querySelector("nav")!;
     expect(nav.className).toContain("landscape-short:flex-col");
-    expect(nav.className).toContain("landscape-short:w-14");
     expect(nav.className).toContain("landscape-short:overflow-y-auto");
     expect(nav.className).toContain(
       "landscape-short:pl-[env(safe-area-inset-left)]",
     );
+  });
+
+  // Installed-PWA landscape regression (field report: "no navigation
+  // on the home-screen app held sideways"). The rail pads left for the
+  // notch (env(safe-area-inset-left) ≈ 47–59px, viewport-fit=cover) —
+  // if its width is FIXED, border-box lets that padding eat the whole
+  // content box and every icon gets clipped by the rail's own
+  // overflow, leaving a blank strip. The width must GROW by the same
+  // inset the padding consumes, keeping 3.5rem of content: mirror of
+  // the portrait bar's pb-[env(safe-area-inset-bottom)] on an
+  // auto-height bar.
+  it("landscape rail width grows by the notch inset instead of being eaten by it", () => {
+    render();
+    const nav = container.querySelector("nav")!;
+    expect(nav.className).toContain(
+      "landscape-short:w-[calc(3.5rem+env(safe-area-inset-left))]",
+    );
+    // The fixed-width form must not return alongside the padding.
+    expect(nav.className).not.toContain("landscape-short:w-14");
   });
 
   it("hides labels in landscape-short but keeps each link's accessible name", () => {
