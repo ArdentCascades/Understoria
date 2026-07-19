@@ -231,4 +231,18 @@ describe("Calendar filters disclosure", () => {
     const tablist = container.querySelector('[role="tablist"]')!;
     expect(drawer().contains(tablist)).toBe(false);
   });
+
+  it("the view switcher shares the Filters line, right-aligned (Board's scope-pill pattern)", () => {
+    render(<CalendarPage />);
+    const tablist = container.querySelector<HTMLElement>('[role="tablist"]')!;
+    // Same flex row as the pill — one control line, not two…
+    expect(tablist.parentElement).toBe(trigger().parentElement);
+    // …with the switcher holding the right edge, and DOM order
+    // (pill → chips → switcher) matching visual order.
+    expect(tablist.className).toContain("ml-auto");
+    expect(
+      trigger().compareDocumentPosition(tablist) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
 });

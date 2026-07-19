@@ -524,38 +524,18 @@ export default function CalendarPage() {
         </p>
       </header>
 
-      {/* View toggle pills. Three modes, breakpoint-derived default
-          unless the member has picked one explicitly this session. */}
-      <div
-        role="tablist"
-        aria-label={t("calendar.title")}
-        className="mb-stack-sm flex gap-1"
-      >
-        {(["agenda", "month", "week"] as const).map((mode) => (
-          <button
-            key={mode}
-            role="tab"
-            aria-selected={viewMode === mode}
-            onClick={view(mode)}
-            className={[
-              "rounded-full px-3 py-1 text-sm",
-              viewMode === mode
-                ? "bg-canopy-700 text-white"
-                : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-900 dark:text-moss-200 dark:hover:bg-moss-800",
-            ].join(" ")}
-          >
-            {t(`calendar.views.${mode}`)}
-          </button>
-        ))}
-      </div>
-
-      {/* Filters disclosure — the Board's grammar verbatim: a compact
-          pill trigger with the active count in its label, removable
-          chips keeping applied state visible while collapsed, and the
-          controls in a card drawer with a Done footer that returns
-          focus to the pill. Collapsed by default at every width, so
-          the calendar itself starts a full row higher on a phone
-          (field report: the open filter row pushed it down). */}
+      {/* One control line — the Board's grammar verbatim, twice over:
+          [Filters ▸] [active chips] ……… [Agenda|Month|Week]. The
+          Filters pill (a compact trigger with the active count in its
+          label; the controls live in the card drawer below, Done
+          returns focus here) holds the left edge; the view switcher
+          keeps the right edge via ml-auto, exactly like the Board's
+          Being-built/Tended scope pills on its filter line — a second
+          row saved on a phone (field report follow-up). DOM order
+          matches visual order (pill → chips → switcher), so reading
+          order is untouched; with many active chips the switcher
+          wraps to its own right-aligned line. Collapsed by default at
+          every width. */}
       <div className="mb-stack-sm flex flex-wrap items-center gap-2">
         <FiltersToggle
           open={filtersOpen}
@@ -565,6 +545,30 @@ export default function CalendarPage() {
           buttonRef={filtersToggleRef}
         />
         <ActiveFilterChips entries={filterChips} />
+        {/* View toggle pills. Three modes, breakpoint-derived default
+            unless the member has picked one explicitly this session. */}
+        <div
+          role="tablist"
+          aria-label={t("calendar.title")}
+          className="ml-auto flex gap-1"
+        >
+          {(["agenda", "month", "week"] as const).map((mode) => (
+            <button
+              key={mode}
+              role="tab"
+              aria-selected={viewMode === mode}
+              onClick={view(mode)}
+              className={[
+                "rounded-full px-3 py-1 text-sm",
+                viewMode === mode
+                  ? "bg-canopy-700 text-white"
+                  : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-900 dark:text-moss-200 dark:hover:bg-moss-800",
+              ].join(" ")}
+            >
+              {t(`calendar.views.${mode}`)}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div
