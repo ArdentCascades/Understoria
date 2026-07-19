@@ -18,8 +18,10 @@ include breaking changes.
   link; active filters stay visible as removable chips beside the
   button, so you can see and undo what's applied without reopening
   anything. Same look, same behavior, same muscle memory as the
-  community board. The Agenda / Month / Week switcher stays where it
-  was — that's a view, not a filter.
+  community board. The Agenda / Month / Week switcher now shares that
+  same line, holding the right edge — one control row instead of two,
+  the same arrangement as the board's Being-built/Tended pills. (It
+  stays outside the Filters drawer: it's a view, not a filter.)
 - **Community resilience moved to the bottom of the Dashboard.** It
   sat near the top with the community totals, but it's about server
   infrastructure, not community activity — so the human story (hours
