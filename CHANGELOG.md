@@ -10,6 +10,19 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
+- **Settings is organized by who can change each thing.** The page
+  now reads as three labeled zones instead of one flat wall of cards:
+  "On this device" (you flip these; they never leave your device),
+  "How this community is run" (decided together by proposal and vote),
+  and "This node" (your device's link to the community server, whose
+  setup is the operator's domain). Each zone states its authority in
+  plain words up top, so a community threshold no longer looks like a
+  personal toggle. The community zone leads with a read-only summary
+  of the thresholds you currently run on plus a "Propose a change"
+  doorway — the honest face of a setting that a vote, not a switch,
+  changes. The community-config editor moved off Profile into that
+  zone (collapsed beneath the summary) so there's one home for it,
+  not two live editors for the same node config.
 - **The Filters drawer feels like one thing now.** Opening Filters
   used to spill five full-width rows loose onto the page. It now
   opens as a tidy card panel under the Filters button: the two

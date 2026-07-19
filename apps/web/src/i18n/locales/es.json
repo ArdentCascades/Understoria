@@ -2486,10 +2486,34 @@
   "settings": {
     "openSettings": "Abrir ajustes",
     "title": "Ajustes",
-    "intro": "Cómo se comporta Understoria en este dispositivo. Los cambios aquí solo afectan a este dispositivo — no se sincronizan con la comunidad.",
+    "intro": "Agrupado según quién puede cambiar cada cosa, y cómo: desde ajustes que viven solo en este dispositivo, hasta cómo se gobierna toda la comunidad y cómo está configurado el servidor de tu nodo.",
     "back": "← Volver al perfil",
     "betaLine": "Understoria es software en fase beta — gran parte de su código fue escrito con herramientas de IA y revisado por personas, y aún no tiene una auditoría de seguridad independiente. Por favor no guardes datos sensibles aquí. La nota completa está en Ayuda.",
-    "buildStamp": "Compilación {{stamp}}"
+    "buildStamp": "Compilación {{stamp}}",
+    "zones": {
+      "device": {
+        "title": "En este dispositivo",
+        "authority": "Tú cambias esto. Vive solo en este dispositivo: nada de aquí se sincroniza con la comunidad."
+      },
+      "community": {
+        "title": "Cómo se gobierna esta comunidad",
+        "authority": "Se decide en conjunto, por propuesta y voto, no con un interruptor que alguien acciona."
+      },
+      "node": {
+        "title": "Este nodo",
+        "authority": "El enlace de tu dispositivo con el servidor de la comunidad. Cómo se configura el servidor es competencia de quien lo opera."
+      }
+    },
+    "community": {
+      "summary": {
+        "title": "Con qué valores funcionamos ahora",
+        "intro": "Los umbrales que usa esta comunidad actualmente. Para cambiar alguno, proponlo para que la comunidad opine: no es un ajuste personal.",
+        "proposeChange": "Proponer un cambio →",
+        "seeProposals": "Ver propuestas abiertas",
+        "on": "Activado",
+        "off": "Desactivado"
+      }
+    }
   },
   "betaNotice": {
     "dismiss": "Entendido",
