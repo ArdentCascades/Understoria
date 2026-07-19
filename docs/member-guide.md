@@ -919,11 +919,14 @@ A few things worth knowing:
   of failing silently.
 - **Press and hold a message** for the quick menu: an emoji row to
   **react** (your reaction travels sealed, like a message — the
-  other person sees it under the bubble), plus **Copy**, **Speak**
-  (your device reads the message aloud with its own built-in voice
-  — nothing is sent anywhere), and **Info** (the exact send time
-  and a reminder that the message is sealed end to end). Voice
-  notes offer Info only.
+  other person sees it under the bubble), plus **Reply** (a
+  "Replying to…" strip appears above the box, and your message goes
+  out with the quoted line at the top — plain text, so it reads
+  correctly on every device), **Copy**, **Speak** (your device
+  reads the message aloud with its own built-in voice — nothing is
+  sent anywhere), and **Info** (the exact send time and a reminder
+  that the message is sealed end to end). Voice notes offer Reply
+  (quoted as "Voice note") and Info only.
 - **The thread reads like a familiar messenger.** Messages sent
   close together by the same person group into one burst with a
   single time under the last one, and "Today / Yesterday / date"

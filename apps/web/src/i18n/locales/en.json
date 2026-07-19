@@ -789,7 +789,9 @@
     "compose": {
       "aboutHint": "You're writing about: {{title}}",
       "aboutHintUnknown": "You're writing about a post",
-      "aboutDismiss": "Don't attach this post"
+      "aboutDismiss": "Don't attach this post",
+      "replyingTo": "Replying to {{name}}: {{excerpt}}",
+      "replyDismiss": "Reply without quoting this message"
     },
     "noReadReceipts": "Messages are private. No read receipts.",
     "search": {
@@ -823,7 +825,9 @@
       "speakUnavailable": "This device can't read messages aloud",
       "info": "Info",
       "infoSent": "Sent {{when}}",
-      "infoSealed": "Sealed end to end — only you and {{name}} can read it."
+      "infoSealed": "Sealed end to end — only you and {{name}} can read it.",
+      "reply": "Reply",
+      "replyVoiceExcerpt": "Voice note"
     },
     "reactions": {
       "open": "React to this message",

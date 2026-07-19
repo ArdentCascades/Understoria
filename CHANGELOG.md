@@ -9,6 +9,16 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Reply, from the press-and-hold message menu.** Press and hold a
+  message (the same menu that already offers reactions, Copy, Speak,
+  and Info) and tap **Reply**: a "Replying to…" strip appears above
+  the message box, and your message goes out with the quoted line at
+  the top ("> Rosa: meet at the bench?"). The quote is plain text
+  inside the sealed message, so it reads correctly on every device —
+  old builds and new alike. Works for voice notes too (quoted as
+  "Voice note"). The ✕ on the strip sends without the quote.
+
 ### Changed
 - **The Calendar's filters now collapse behind the same "Filters"
   button the Board uses.** The always-open row — two dropdowns, the
