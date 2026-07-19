@@ -22,6 +22,9 @@ import { GuardianShardsCard } from "@/components/GuardianShardsCard";
 import { SecuritySection } from "@/components/SecuritySection";
 import { BlockedContactsPanel } from "@/components/BlockedContactsPanel";
 import { StorageWindowSection } from "@/components/StorageWindowSection";
+import { SettingsZone } from "@/components/settings/SettingsZone";
+import { CommunityRunSummary } from "@/components/settings/CommunityRunSummary";
+import { CommunitySettingsSection } from "@/components/CommunitySettingsSection";
 import { exportData } from "@/lib/exportData";
 import { BUILD_STAMP } from "@/lib/buildStamp";
 import {
@@ -30,17 +33,25 @@ import {
   type StorageStatus,
 } from "@/lib/storageBudget";
 
-// Device-local preferences and admin. Extracted from Profile.tsx so
-// Profile can focus on community participation (who you are + what
-// you've done) and Settings can hold the "how the app behaves on
-// this device" concerns. Reachable from Profile's header gear icon.
+// Settings, organized by SOURCE OF AUTHORITY — the one question that
+// matters at a control: who can change this, and how? Three zones
+// (see SettingsZone) answer it in order of how close the power sits to
+// you:
+//   1. On this device        — you flip these; device-local, unsynced.
+//   2. How this community is run — decided together, by proposal & vote.
+//   3. This node              — set up by whoever runs the server.
+// The old flat CSS-columns wall mixed all three, so a community
+// threshold read like a personal toggle. Now each zone carries a plain
+// authority lead-in, and a control that would misrepresent who holds
+// power over it has no honest home to sit in.
 //
-// Five cards arranged in a CSS-columns layout at lg+ (2 columns —
-// 5 cards isn't enough for 3 to balance well). Mobile falls through
-// to single-column block flow with each card's existing `mb-4` for
-// spacing. EmergencySection is NOT here — it stays on Profile per
-// the privacy-as-precondition principle: panic buttons need to stay
+// EmergencySection is NOT here — it stays on Profile per the
+// privacy-as-precondition principle: panic buttons need to stay
 // reachable in a stress moment, not buried under a settings tap.
+// CommunitySettingsSection moved OFF Profile into zone 2 here — two
+// live editors for one node config was a footgun; the read-only
+// summary is now the face, the editable form the collapsed bootstrap
+// path beneath it.
 export default function SettingsPage() {
   const { t } = useTranslation();
   // Storage budget Phase 0 (docs/storage-budget.md): make the size
@@ -75,17 +86,18 @@ export default function SettingsPage() {
         </p>
       </header>
 
-      <div className="lg:columns-2 lg:gap-4 [&>*]:break-inside-avoid">
+      <SettingsZone
+        id="device"
+        title={t("settings.zones.device.title")}
+        authority={t("settings.zones.device.authority")}
+        columns
+      >
         <LanguageSection />
         <ReadAloudSection />
 
         <AppearanceSection />
 
         <BlockedContactsPanel />
-
-        <NodeSection />
-
-        <ReseedSection />
 
         <SecuritySection />
 
@@ -124,7 +136,36 @@ export default function SettingsPage() {
           </div>
           <StorageWindowSection />
         </section>
+      </SettingsZone>
 
+      <SettingsZone
+        id="community"
+        title={t("settings.zones.community.title")}
+        authority={t("settings.zones.community.authority")}
+      >
+        {/* Read-only mirror of the community's thresholds + the two
+            governance doorways — the honest face of "these are decided
+            together." The editable form below it is the bootstrap path
+            (any member, until vote-to-adopt ships), collapsed so it
+            doesn't read like a personal switch. */}
+        <CommunityRunSummary />
+        <CommunitySettingsSection />
+      </SettingsZone>
+
+      <SettingsZone
+        id="node"
+        title={t("settings.zones.node.title")}
+        authority={t("settings.zones.node.authority")}
+      >
+        {/* Your device's link to the community server, plus the
+            server-side recovery path. How the node itself is set up is
+            the operator's domain; the founder-claim card inside
+            NodeSection self-reveals only on a fresh, unclaimed node. */}
+        <NodeSection />
+        <ReseedSection />
+      </SettingsZone>
+
+      <div>
         {/* The permanent beta/AI disclosure — the always-findable
             copy of the entry-door BetaNotice card (the other lives
             in Help, FAQ "beta-status"). Quiet by design; it belongs

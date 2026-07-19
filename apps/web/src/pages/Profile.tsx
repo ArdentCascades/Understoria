@@ -80,7 +80,6 @@ import {
 } from "@/lib/vouch";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { FounderChip, TrustChip } from "@/components/TrustChip";
-import { CommunitySettingsSection } from "@/components/CommunitySettingsSection";
 import { DisputesSection } from "@/components/DisputesSection";
 import { ProposalsSection } from "@/components/ProposalsSection";
 import { LearnSection } from "@/components/LearnSection";
@@ -754,7 +753,10 @@ function ProfileBody({ member }: { member: Member }) {
             </div>
           </section>
 
-          <CommunitySettingsSection />
+          {/* Community thresholds moved to Settings → "How this
+              community is run" (one home for the node config, presented
+              read-only-first with the bootstrap editor beneath). It no
+              longer lives here. */}
 
           {/* Paired-device inventory. Renders null until the member has
               completed at least one pair from this device (as source or

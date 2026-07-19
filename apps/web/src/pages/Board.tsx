@@ -775,15 +775,23 @@ export default function BoardPage() {
 
         {/* Phone-visible DISCOVERY row (the lg copy lives in the
             command band above). The two links read as ONE action
-            group, distinct from the navigation links below. At
-            landscape-short this row shares a line with the filter
-            row below (discovery left, filters right via the
-            justify-between wrapper); on portrait everything stacks
-            exactly as before. DOM order stays discovery → filters,
-            matching the left→right visual order. */}
-        <div className="landscape-short:flex landscape-short:flex-wrap landscape-short:items-start landscape-short:justify-between landscape-short:gap-x-6 lg:flex lg:flex-wrap lg:items-start lg:justify-between lg:gap-x-6 lg:gap-y-2">
+            group, distinct from the navigation links below.
+
+            On lg the wrapper is a justify-between flex, but only the
+            filter block is visible there (the discovery copy is
+            `lg:hidden`, its links live in the sticky band) — so the
+            filter row spans the full width, Filters left / scope
+            right. Below lg (portrait AND landscape) discovery and the
+            filter row STACK: an earlier landscape pass shared them on
+            one line, but once the Projects scope chips joined the
+            filter row that share pushed Filters to the right half and
+            wrapped the scope beneath it (field report). Stacking
+            gives the filter row its own full width so Filters is
+            left-aligned like desktop, at the cost of one short row.
+            DOM order stays discovery → filters. */}
+        <div className="lg:flex lg:flex-wrap lg:items-start lg:justify-between lg:gap-x-6 lg:gap-y-2">
         {currentMember && (
-          <div className="mb-3 flex flex-wrap items-start gap-x-5 gap-y-2 landscape-short:mb-0 landscape-short:flex-auto lg:hidden">
+          <div className="mb-3 flex flex-wrap items-start gap-x-5 gap-y-2 lg:hidden">
             <DiscoveryLinks
               memberKey={currentMember.publicKey}
               tasks={projectTasks}
@@ -848,7 +856,7 @@ export default function BoardPage() {
         )}
 
         {tab === "PROJECTS" && (
-          <div className="landscape-short:flex-1 lg:flex-1">
+          <div className="lg:flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <FiltersToggle
                 open={mobileFiltersOpen}

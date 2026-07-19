@@ -2486,10 +2486,34 @@
   "settings": {
     "openSettings": "Open settings",
     "title": "Settings",
-    "intro": "How Understoria behaves on this device. Changes here only affect this device — they don't sync across the community.",
+    "intro": "Grouped by who can change each thing, and how — from settings that live only on this device, to how the whole community is run, to how your node's server is set up.",
     "back": "← Back to profile",
     "betaLine": "Understoria is beta software — much of its code was written with AI tools and reviewed by people, with no independent security audit yet. Please keep sensitive data out. The full note is in Help.",
-    "buildStamp": "Build {{stamp}}"
+    "buildStamp": "Build {{stamp}}",
+    "zones": {
+      "device": {
+        "title": "On this device",
+        "authority": "You change these. They live on this device only — nothing here syncs to the community."
+      },
+      "community": {
+        "title": "How this community is run",
+        "authority": "Decided together, by proposal and vote — not a switch any one person flips."
+      },
+      "node": {
+        "title": "This node",
+        "authority": "Your device's link to the community server. How the server itself is set up is the operator's domain."
+      }
+    },
+    "community": {
+      "summary": {
+        "title": "What we run on now",
+        "intro": "The thresholds this community currently uses. To change one, propose it for the community to weigh in — it isn't a personal setting.",
+        "proposeChange": "Propose a change →",
+        "seeProposals": "See open proposals",
+        "on": "On",
+        "off": "Off"
+      }
+    }
   },
   "betaNotice": {
     "dismiss": "Got it",
