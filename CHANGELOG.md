@@ -9,6 +9,24 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+- **The Calendar's filters now collapse behind the same "Filters"
+  button the Board uses.** The always-open row — two dropdowns, the
+  Mine and Events-only chips — pushed the actual calendar well down a
+  phone screen. It's now one compact pill ("Filters", or "Filters ·
+  2 active" when narrowing), opening into a tidy card with a Done
+  link; active filters stay visible as removable chips beside the
+  button, so you can see and undo what's applied without reopening
+  anything. Same look, same behavior, same muscle memory as the
+  community board. The Agenda / Month / Week switcher stays where it
+  was — that's a view, not a filter.
+- **Community resilience moved to the bottom of the Dashboard.** It
+  sat near the top with the community totals, but it's about server
+  infrastructure, not community activity — so the human story (hours
+  exchanged, people, the flow of help) now leads and the resilience
+  card closes the page as a quiet footer, per the field report that
+  it felt too high up.
+
 ### Fixed
 - **The installed app no longer loses its navigation in landscape on
   iPhones with a notch.** The sideways-phone nav rail padded itself

@@ -54,6 +54,11 @@ import { SETTING_KEYS } from "@/db/database";
 import { PostFilterRail } from "@/components/board/PostFilterRail";
 import { ProjectFilterRail } from "@/components/board/ProjectFilterRail";
 import { DiscoveryLinks } from "@/components/board/DiscoveryLinks";
+import {
+  ActiveFilterChips,
+  FilterPanelDone,
+  FiltersToggle,
+} from "@/components/filters/FiltersDisclosure";
 import type {
   Category,
   Project,
@@ -1179,24 +1184,13 @@ function boardPrintParams(
   return params.toString();
 }
 
-/**
- * Mobile-only (<sm) disclosure trigger for the Board filter rails.
- *
- * Affordance ruling (operator): collapsed states must have LOUD,
- * full-width, high-affordance triggers — "very obvious to everyone
- * where to click." Hence a card-styled full-width button (border +
- * shadow + semibold label + chevron) at the 44px touch floor, not a
- * quiet text link.
- *
- * When any filter is narrowing the list, the label switches to
- * "Filters · N active" so a member never wonders why a collapsed
- * rail is shortening the list. Plain text in the label — no badge
- * pill, no dot (no-notifications principle: no badge counts).
- *
- * `sm:hidden`: at sm+ the rail is always visible and this trigger
- * disappears — the disclosure exists only where the rail's selects
- * stack full-width and cost real screen estate.
- */
+// FiltersToggle / ActiveFilterChips / FilterPanelDone moved to
+// components/filters/FiltersDisclosure.tsx when the Calendar adopted
+// the same collapsed-filters grammar — one shared trio, one house
+// pattern. The board-calm reasoning (ONE pill disclosure at every
+// width, chips keep applied state visible and one-tap removable,
+// count as plain label text — no badge, no dot) travels with them.
+
 // Project-only extension categories (no `categories.*` i18n keys —
 // they mirror ProjectFilterRail's inline <option> labels).
 const PROJECT_EXTENSION_CATEGORY_LABELS: Record<string, string> = {
@@ -1204,106 +1198,6 @@ const PROJECT_EXTENSION_CATEGORY_LABELS: Record<string, string> = {
   organizing: "\u{1F4CB} Organizing",
   mutual_aid_drive: "\u{1F49B} Mutual aid drive",
 };
-
-/** Bottom-right "Done" inside the open filter drawer — closes the
- *  disclosure without reaching back up to the pill and returns focus
- *  to the trigger (handled by the caller's onDone). Right-aligned,
- *  quiet register; the drawer's controls are the loud content. */
-function FilterPanelDone({ onDone }: { onDone: () => void }) {
-  const { t } = useTranslation();
-  return (
-    <div className="mt-3 flex justify-end">
-      <button
-        type="button"
-        onClick={onDone}
-        className="touch-target inline-flex items-center px-2 text-sm font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
-      >
-        {t("board.filters.done")}
-      </button>
-    </div>
-  );
-}
-
-function FiltersToggle({
-  open,
-  activeCount,
-  controlsId,
-  onToggle,
-  buttonRef,
-}: {
-  open: boolean;
-  activeCount: number;
-  /** id of the collapsible rail wrapper this trigger controls. */
-  controlsId: string;
-  onToggle: () => void;
-  /** The panel's "Done" button returns focus here on close, so
-   *  keyboard / screen-reader members land back on the trigger
-   *  rather than at the top of <body>. */
-  buttonRef?: React.Ref<HTMLButtonElement>;
-}) {
-  const { t } = useTranslation();
-  // ONE disclosure at every width (board-calm pass): a compact pill
-  // trigger — including on phones, where the old full-width card
-  // stopped earning its row once the Being-built/Tended scope chips
-  // moved beside it (field report: they collided flush under the
-  // card; a pill lets [Filters][scope] share one line). The rail's
-  // controls collapse behind it everywhere — the active-filter CHIPS
-  // beside this button keep applied state visible and one-tap
-  // removable, so collapsing costs a click only when actually
-  // changing filters. aria-expanded/aria-controls carry the
-  // disclosure semantics; the count is announced in the label
-  // ("Filters · 2 active").
-  return (
-    <button
-      ref={buttonRef}
-      type="button"
-      aria-expanded={open}
-      aria-controls={controlsId}
-      onClick={onToggle}
-      className="card flex min-h-[44px] items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold text-canopy-800 transition-colors hover:bg-moss-50 active:bg-moss-100 dark:text-canopy-200 dark:hover:bg-moss-800"
-    >
-      <span>
-        {activeCount > 0
-          ? t("board.filters.toggleActive", { count: activeCount })
-          : t("board.filters.toggle")}
-      </span>
-      {/* Sighted-only state cue; aria-expanded carries the meaning. */}
-      <span aria-hidden="true" className="text-moss-600 dark:text-moss-300">
-        {open ? "▾" : "▸"}
-      </span>
-    </button>
-  );
-}
-
-/** Active-filter chips beside the Filters toggle: the applied state
- *  stays visible while the controls themselves are collapsed, and
- *  each chip removes its filter in one tap. Every chip carries an
- *  explicit accessible name ("Remove filter: …") and the 44px
- *  touch-target floor. */
-function ActiveFilterChips({
-  entries,
-}: {
-  entries: Array<{ id: string; label: string; onRemove: () => void }>;
-}) {
-  const { t } = useTranslation();
-  if (entries.length === 0) return null;
-  return (
-    <>
-      {entries.map((e) => (
-        <button
-          key={e.id}
-          type="button"
-          onClick={e.onRemove}
-          aria-label={t("board.filters.removeFilter", { label: e.label })}
-          className="touch-target inline-flex items-center gap-1 rounded-full bg-canopy-100 px-3 py-1 text-sm font-medium text-canopy-900 hover:bg-canopy-200 dark:bg-canopy-900/60 dark:text-canopy-100 dark:hover:bg-canopy-900"
-        >
-          {e.label}
-          <span aria-hidden="true">×</span>
-        </button>
-      ))}
-    </>
-  );
-}
 
 function ProjectList({
   projects,

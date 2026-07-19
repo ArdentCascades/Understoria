@@ -234,7 +234,7 @@ export default function DashboardPage() {
 
       {/* Desktop pairing (the stretched-cards half of the desktop
           pilot reports): at lg+ the "community as a whole" cards —
-          total hours, federation rollup, resilience, the proposals
+          total hours, federation rollup, the proposals
           doorway — flow into two columns instead of each spanning
           ~1400px of card for a paragraph of content. Plain grid
           auto-placement, so DOM order (and the mobile stack, where
@@ -298,11 +298,6 @@ export default function DashboardPage() {
           </p>
         </section>
       )}
-
-      {/* Community resilience (docs/community-resilience.md Phase A):
-          clustered with the federation rollup — the other "community
-          as a whole" infrastructure surface. */}
-      <ResilienceCard />
 
       {/* Governance doorway, kept beside the federation rollup so the
           "community as a whole" surfaces cluster. One quiet line —
@@ -509,6 +504,19 @@ export default function DashboardPage() {
           </section>
         </>
       )}
+
+      {/* Community resilience (docs/community-resilience.md Phase A)
+          closes the page — operator ruling: it's infrastructure
+          health, not community activity, so the human story (hours,
+          people, flow of help) leads and the server story reads as
+          the page's quiet footer. Full-width like the roles card
+          above it. (The card renders null for the one tick before
+          its local snapshot loads; the divider showing alone for
+          that frame is invisible in practice.) */}
+      <div className="my-2 landscape-short:my-1">
+        <LeafDivider variant="short" />
+      </div>
+      <ResilienceCard />
       </div>
       </div>
     </div>

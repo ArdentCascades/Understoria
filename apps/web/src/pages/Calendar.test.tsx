@@ -989,8 +989,12 @@ describe("CalendarPage", () => {
       container.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
     ).find((b) => /agenda/i.test(b.textContent ?? ""));
     expect(agendaPill?.getAttribute("aria-selected")).toBe("true");
+    // Scoped to [aria-pressed] like mineChip(): with the filters
+    // disclosure, an ACTIVE filter also renders a removable chip with
+    // the same visible text but no pressed state — the drawer's
+    // toggle is the one that carries it.
     const restoredEventsOnly = Array.from(
-      container.querySelectorAll<HTMLButtonElement>("button"),
+      container.querySelectorAll<HTMLButtonElement>("button[aria-pressed]"),
     ).find((b) => /events only/i.test(b.textContent ?? ""));
     expect(restoredEventsOnly?.getAttribute("aria-pressed")).toBe("true");
     expect(mineChip().getAttribute("aria-pressed")).toBe("true");

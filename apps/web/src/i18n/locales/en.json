@@ -326,7 +326,13 @@
     "learnMore": "Learn more",
     "showMore": "Show more",
     "showLess": "Show less",
-    "markdownHint": "Formatting: **bold**, _italic_, - lists, and links"
+    "markdownHint": "Formatting: **bold**, _italic_, - lists, and links",
+    "filters": {
+      "toggle": "Filters",
+      "toggleActive": "Filters · {{count}} active",
+      "removeFilter": "Remove filter: {{label}}",
+      "done": "Done"
+    }
   },
   "why": {
     "trigger": "(why?)",
@@ -497,9 +503,7 @@
       "project": "Project",
       "mine": "Mine",
       "allCategories": "All categories",
-      "allProjects": "All projects",
-      "active_one": "Filters · {{count}} active",
-      "active_other": "Filters · {{count}} active"
+      "allProjects": "All projects"
     },
     "density": {
       "line_one": "{{count}} exchange completed",
@@ -2282,17 +2286,13 @@
     "openCount": "({{count}})",
     "showClaimed": "Show {{count}} claimed",
     "filters": {
-      "toggle": "Filters",
-      "toggleActive": "Filters · {{count}} active",
       "categoryAriaLabel": "Filter by category",
       "urgencyAriaLabel": "Filter by urgency",
       "zoneAriaLabel": "Filter by zone",
       "allCategories": "All categories",
       "allUrgencies": "All urgencies",
       "allZones": "All zones",
-      "removeFilter": "Remove filter: {{label}}",
-      "claimedShown": "Claimed shown",
-      "done": "Done"
+      "claimedShown": "Claimed shown"
     },
     "projectFilters": {
       "category": {

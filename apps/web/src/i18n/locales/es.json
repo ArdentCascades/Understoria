@@ -326,7 +326,13 @@
     "learnMore": "Leer más",
     "showMore": "Ver más",
     "showLess": "Ver menos",
-    "markdownHint": "Formato: **negrita**, _cursiva_, - listas y enlaces"
+    "markdownHint": "Formato: **negrita**, _cursiva_, - listas y enlaces",
+    "filters": {
+      "toggle": "Filtros",
+      "toggleActive": "Filtros · {{count}} activos",
+      "removeFilter": "Quitar filtro: {{label}}",
+      "done": "Listo"
+    }
   },
   "why": {
     "trigger": "(¿por qué?)",
@@ -497,9 +503,7 @@
       "project": "Proyecto",
       "mine": "Mías",
       "allCategories": "Todas las categorías",
-      "allProjects": "Todos los proyectos",
-      "active_one": "Filtros · {{count}} activo",
-      "active_other": "Filtros · {{count}} activos"
+      "allProjects": "Todos los proyectos"
     },
     "density": {
       "line_one": "{{count}} intercambio realizado",
@@ -2282,17 +2286,13 @@
     "openCount": "({{count}})",
     "showClaimed": "Mostrar {{count}} tomadas",
     "filters": {
-      "toggle": "Filtros",
-      "toggleActive": "Filtros · {{count}} activos",
       "categoryAriaLabel": "Filtrar por categoría",
       "urgencyAriaLabel": "Filtrar por urgencia",
       "zoneAriaLabel": "Filtrar por zona",
       "allCategories": "Todas las categorías",
       "allUrgencies": "Todas las urgencias",
       "allZones": "Todas las zonas",
-      "removeFilter": "Quitar filtro: {{label}}",
-      "claimedShown": "Tomadas visibles",
-      "done": "Listo"
+      "claimedShown": "Tomadas visibles"
     },
     "projectFilters": {
       "category": {
