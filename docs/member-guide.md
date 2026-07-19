@@ -1007,14 +1007,21 @@ Open the **Menu** (top right) and tap **your own name** to see:
   hours (when the node closes out an exchange a partner never got
   to). The governance pair: proposal deliberation period and
   minimum affirm votes. Plus an invite-only onboarding toggle and
-  an editor for custom community milestones. A yellow note names
-  the two ways a change can land: edits made here apply
-  immediately, or you can send the same change through a community
-  proposal instead — the panel links straight to starting one.
+  an editor for custom community milestones. These now live in
+  **Settings → "How this community is run"**, shown read-only first —
+  the thresholds you currently run on, with a **"Propose a change"**
+  doorway, since a vote (not a switch) is how they're meant to change.
+  A collapsed editor beneath keeps the immediate-edit path for the
+  bootstrap period, before the vote-to-adopt flow ships.
 - **Add another device** — set up Understoria on a second device
-  (a laptop as well as your phone, say) under one identity. (See §12a.)
+  (a laptop as well as your phone, say) under one identity. This
+  lives in **Settings → "On this device"**, beside the Recovery Kit
+  and Guardians — the tools for keeping your account across devices.
+  (See §12a.)
 - **Paired devices** — a list of the devices you've added, so you can
-  see what you've authorized.
+  see what you've authorized. This stays on the Profile page, next to
+  Emergency: removing a device has no undo of its own — the way to cut
+  a device off is Emergency → Hard purge.
 - **Emergency** — panic buttons in case a device is at risk (§15).
   Stays on the Profile page (not under Settings) so it's reachable
   in a stress moment without an extra tap.
@@ -1064,7 +1071,7 @@ Ctrl/Cmd+K.) Settings holds:
 ## 12a. Using Understoria on more than one device
 
 If you do organizing work at a laptop but answer needs from your
-phone, you don't have to choose. **Profile → Add another device** lets
+phone, you don't have to choose. **Settings → Add another device** lets
 you run Understoria on a second device as the *same member* — one
 identity, one balance, one name on the Board — rather than two
 separate identities the community can't tell apart.
@@ -1089,7 +1096,7 @@ moves and what doesn't, so there are no surprises:
 
 On the device you already use:
 
-1. **Profile → Add another device**, read the card, and continue.
+1. **Settings → Add another device**, read the card, and continue.
 2. The app warns you first: **the code it's about to show is your
    identity for the next 5 minutes.** Security cameras, doorbell cams,
    and webcams can read a code off your screen from across a room. Do

@@ -22,6 +22,7 @@ import { GuardianShardsCard } from "@/components/GuardianShardsCard";
 import { SecuritySection } from "@/components/SecuritySection";
 import { BlockedContactsPanel } from "@/components/BlockedContactsPanel";
 import { StorageWindowSection } from "@/components/StorageWindowSection";
+import { AddDeviceSection } from "@/components/AddDeviceSection";
 import { SettingsZone } from "@/components/settings/SettingsZone";
 import { CommunityRunSummary } from "@/components/settings/CommunityRunSummary";
 import { CommunitySettingsSection } from "@/components/CommunitySettingsSection";
@@ -100,6 +101,15 @@ export default function SettingsPage() {
         <BlockedContactsPanel />
 
         <SecuritySection />
+
+        {/* Identity-continuity trio — "keep your account, and be on
+            more than one device." Add-device is the live path (pair a
+            device you hold now); Recovery Kit and Guardians are the
+            fallbacks if you lose everything. Add-device moved here from
+            Profile's account index, where it was under-surfaced; its
+            paired-device inventory stays on Profile by Emergency, since
+            un-pairing is Emergency → Hard purge. */}
+        <AddDeviceSection />
 
         <RecoveryKitCard />
 

@@ -19,12 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { IconSettings } from "@/components/visual";
@@ -709,9 +704,11 @@ function ProfileBody({ member }: { member: Member }) {
           />
 
           {/* "Community & account" index — one compact section of labeled
-              rows replacing the five standalone cards that used to sprawl
-              here (Learn, Disputes, Proposals, the Settings row, Add
-              device). Rare-need surfaces index into a row each; the
+              rows replacing the standalone cards that used to sprawl
+              here (Learn, Disputes, Proposals, the Settings row). "Add
+              another device" briefly lived here too but moved into
+              Settings' "On this device" zone to sit with Recovery Kit
+              and Guardians. Rare-need surfaces index into a row each; the
               every-visit surfaces live above. Disputes and Proposals keep
               their open counts (attention-on-open, not a notification).
               CommunitySettings stays OUT of the index as its own card
@@ -738,18 +735,14 @@ function ProfileBody({ member }: { member: Member }) {
 
               {/* Labeled doorway to device-local Settings — discoverable
                   by reading, not just by recognizing the header gear
-                  (which stays, for muscle memory). */}
+                  (which stays, for muscle memory). "Add another device"
+                  now lives inside Settings' "On this device" zone,
+                  beside Recovery Kit and Guardians (the identity-
+                  continuity cluster); the doorway below reaches it. The
+                  paired-device inventory (PairingLogSection) stays here
+                  by Emergency, since un-pairing is Emergency → Hard
+                  purge. */}
               <SettingsRowSection />
-
-              {/* AddDevice ships in the device-pairing series (design
-                  note: docs/device-pairing.md). Its entry point is an
-                  index row whose disclosure keeps one deliberate step
-                  before the sensitive pairing flow — pairing a device is
-                  weightier than sharing an invite. The paired-device
-                  inventory (PairingLogSection) is what keeps the
-                  Emergency adjacency now: its only remediation path IS
-                  Emergency → Hard purge. */}
-              <AddDeviceSection />
             </div>
           </section>
 
@@ -1097,46 +1090,6 @@ function SettingsRowSection() {
         </span>
       </Link>
     </div>
-  );
-}
-
-// Entry point for the device-pairing flow (docs/device-pairing.md).
-// A disclosure row, not a navigation row: the summary keeps one
-// deliberate step between browsing the index and the sensitive
-// pairing flow at /add-device. The flow itself is unchanged — the
-// disclosed CTA navigates to the same page as the old card's button.
-function AddDeviceSection() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  return (
-    <details className="py-2">
-      <summary className="-m-2 flex min-h-[44px] cursor-pointer items-center justify-between gap-3 rounded-xl p-2 marker:hidden hover:bg-moss-50 dark:hover:bg-moss-900">
-        <div className="min-w-0 flex-1">
-          <h3
-            id="profile-addDevice-heading"
-            className="text-sm font-semibold text-moss-800 dark:text-moss-100"
-          >
-            {t("profile.addDevice.title")}
-          </h3>
-          <p className="text-sm text-moss-600 dark:text-moss-300">
-            {t("profile.addDevice.subtitle")}
-          </p>
-        </div>
-        {/* No trailing glyph of our own: the global stylesheet already
-            appends the house ▾/▴ disclosure chevron to every
-            `details > summary` (index.css), which distinguishes this
-            row from the index's `›` navigation rows. */}
-      </summary>
-      <div className="mt-3">
-        <button
-          type="button"
-          className="btn-secondary"
-          onClick={() => navigate("/add-device")}
-        >
-          {t("profile.addDevice.cta")}
-        </button>
-      </div>
-    </details>
   );
 }
 

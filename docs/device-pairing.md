@@ -233,10 +233,14 @@ ceiling). No tiling, no multi-QR sequencing.
 
 ### 6.1 Entry point
 
-`Profile → Add another device`. The affordance is intentionally
-placed alongside the existing emergency / panic-button section, not
-next to invites or "share my profile" — pairing a device is more
-sensitive than either.
+`Settings → "On this device" → Add another device`. The entry sits
+with the Recovery Kit and Guardian Shards — the identity-continuity
+cluster ("keep your account, and be on more than one device") — not
+next to invites or "share my profile", since pairing a device is more
+sensitive than either. (It previously lived on Profile next to the
+emergency / panic-button section; that adjacency now belongs to the
+paired-device *inventory* alone — see §6.x / PairingLogSection —
+because un-pairing a device *is* Emergency → Hard purge.)
 
 ### 6.2 Comparison card (before the camera-warning gate)
 
@@ -453,7 +457,7 @@ Flow:
    screen shows a **two-emoji recognition badge** derived from the
    key, the "go approve it" steps, and a countdown, then polls its
    grant channel.
-2. The member's SIGNED-IN device, on Profile → Add another device,
+2. The member's SIGNED-IN device, on Settings → Add another device,
    polls `GET /api/link-request` — which returns pending requests
    *from the same address bucket only* — and renders each as a card
    with its badge and age. One tap on **Link it** seals the

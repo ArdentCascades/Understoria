@@ -312,23 +312,24 @@ describe("ProfilePage — 'Community & account' index", () => {
     expect(settingsRow).toBeDefined();
   });
 
-  it("keeps the Add-device flow behind a default-closed disclosure row", () => {
+  it("no longer hosts the Add-device entry — it moved to Settings", () => {
     render();
-    const heading = headingByText("Add another device");
-    const details = heading.closest("details");
-    expect(details).not.toBeNull();
-    expect(details!.open).toBe(false);
-    // The flow's entry CTA survives inside the disclosure.
-    const cta = Array.from(details!.querySelectorAll("button")).find(
-      (b) => (b.textContent ?? "").trim() === "Start pairing",
-    );
-    expect(cta).toBeDefined();
-    // ...and the row lives inside the index section.
+    // "Add another device" left the Profile index for Settings' "On
+    // this device" zone (beside Recovery Kit / Guardians). Guard the
+    // move: the entry heading and its "Start pairing" CTA must not
+    // render on Profile anymore. (The paired-device inventory stays on
+    // Profile by Emergency — that's a different surface with a
+    // different heading.)
     expect(
-      headingByText("Community & account").closest("section")!.contains(
-        details!,
+      Array.from(container.querySelectorAll("h1,h2,h3,h4")).some(
+        (h) => (h.textContent ?? "").trim() === "Add another device",
       ),
-    ).toBe(true);
+    ).toBe(false);
+    expect(
+      Array.from(container.querySelectorAll("button")).some(
+        (b) => (b.textContent ?? "").trim() === "Start pairing",
+      ),
+    ).toBe(false);
   });
 });
 
