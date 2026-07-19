@@ -150,6 +150,23 @@ describe("Settings authority zones", () => {
     ).not.toBeNull();
   });
 
+  it("device zone hosts the relocated Add-device card (moved from Profile)", () => {
+    render(<SettingsPage />);
+    const deviceSection = container.querySelector<HTMLElement>(
+      'section[aria-labelledby="settings-zone-device"]',
+    )!;
+    // The entry sits with its identity-continuity siblings in the
+    // device zone; its "Start pairing" CTA is present here now.
+    const heading = Array.from(
+      deviceSection.querySelectorAll("h1,h2,h3,h4"),
+    ).some((h) => (h.textContent ?? "").trim() === "Add another device");
+    expect(heading).toBe(true);
+    const cta = Array.from(deviceSection.querySelectorAll("button")).some(
+      (b) => (b.textContent ?? "").trim() === "Start pairing",
+    );
+    expect(cta).toBe(true);
+  });
+
   it("node zone holds the device's link to the community server", () => {
     render(<SettingsPage />);
     const nodeSection = container.querySelector<HTMLElement>(

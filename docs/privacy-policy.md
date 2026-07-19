@@ -47,7 +47,7 @@ the community node or to any third party:
   see it; we cannot recover it. If you lose your passphrase, the
   identity is gone.
   The single exception is the **device-pairing flow you initiate**
-  (Profile → Add another device). When you choose to pair a second
+  (Settings → Add another device). When you choose to pair a second
   device, the key is wrapped under a fresh one-time passphrase the
   source device generates and displayed as a QR code on this
   device's screen for up to 5 minutes. It is not transmitted to

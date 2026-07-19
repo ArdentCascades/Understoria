@@ -10,6 +10,14 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
+- **"Add another device" is easier to find.** It was buried at the
+  bottom of Profile's "Community & account" list, behind a disclosure.
+  It now lives in **Settings → "On this device"**, right beside the
+  Recovery Kit and Guardians — the three tools that keep your account
+  safe and let you use it on more than one device, together in one
+  place. The list of devices you've already paired stays on Profile
+  next to Emergency, because the only way to cut a device off is the
+  Emergency → Hard purge button.
 - **Settings is organized by who can change each thing.** The page
   now reads as three labeled zones instead of one flat wall of cards:
   "On this device" (you flip these; they never leave your device),
