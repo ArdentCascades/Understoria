@@ -121,11 +121,22 @@ export function BottomNav() {
   // five NavLinks, same labels at every width.
   //
   // landscape-short (a phone held sideways — the shared variant in
-  // tailwind.config.js) gets the SAME rail, but compact: 3.5rem wide,
-  // ICONS ONLY (there's no room for labels at 390px tall — each link
-  // keeps its name via aria-label below, so hiding the text never
-  // strips the accessible name), left safe-area padding for the notch,
-  // and overflow-y-auto so all five items survive a 320px-tall screen.
+  // tailwind.config.js) gets the SAME rail, but compact: 3.5rem of
+  // CONTENT, ICONS ONLY (there's no room for labels at 390px tall —
+  // each link keeps its name via aria-label below, so hiding the text
+  // never strips the accessible name), left safe-area padding for the
+  // notch, and overflow-y-auto so all five items survive a 320px-tall
+  // screen.
+  //
+  // The rail's width is calc(3.5rem + env(safe-area-inset-left)), NOT
+  // a fixed w-14: with border-box a fixed width would let the notch
+  // padding EAT the content box — on an installed PWA in landscape
+  // (viewport-fit=cover, inset ≈ 47–59px on notched iPhones) that
+  // left a blank 56px strip with every icon clipped by the rail's own
+  // overflow ("no navigation" field report, home-screen app only).
+  // Padding must ADD to the dimension it protects, exactly like the
+  // portrait bar's pb-[env(safe-area-inset-bottom)] adds height to an
+  // auto-height bar.
   // No pinned Settings slot here either — it left the lg rail for the
   // me-menu (see the note at the bottom), and landscape-short has even
   // less height to spend than lg does.
@@ -145,7 +156,7 @@ export function BottomNav() {
                  backdrop-blur supports-[backdrop-filter]:bg-white/70
                  dark:border-moss-800 dark:bg-moss-950/95
                  lg:flex lg:w-20 lg:flex-col lg:border-r lg:border-t-0 lg:pb-0
-                 landscape-short:flex landscape-short:w-14 landscape-short:flex-col
+                 landscape-short:flex landscape-short:w-[calc(3.5rem+env(safe-area-inset-left))] landscape-short:flex-col
                  landscape-short:overflow-y-auto landscape-short:border-r
                  landscape-short:border-t-0 landscape-short:pb-0
                  landscape-short:pl-[env(safe-area-inset-left)]"

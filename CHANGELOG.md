@@ -9,6 +9,15 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **The installed app no longer loses its navigation in landscape on
+  iPhones with a notch.** The sideways-phone nav rail padded itself
+  away from the notch, but its width was fixed — so the padding ate
+  the entire rail and every icon was clipped, leaving a blank strip
+  where navigation should be. The rail now widens by exactly the
+  notch inset, so the icons always sit visible just right of it.
+  Phones without a notch, portrait, and desktop are unchanged.
+
 ### Changed
 - **"Add another device" is easier to find.** It was buried at the
   bottom of Profile's "Community & account" list, behind a disclosure.
