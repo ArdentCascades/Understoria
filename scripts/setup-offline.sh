@@ -71,6 +71,71 @@ mkdir -p "$TARGET"
 tar -xzf "$DRIVE_ROOT/source/understoria-source.tar.gz" -C "$TARGET"
 ok "Source unpacked."
 
+# ─── Restore mode (sealed env on the drive) ──────────────────────────
+#
+# A drive built with --include-env carries the community's server
+# keys encrypted under a passphrase (private/env.sealed). Restoring
+# is then the WHOLE install: decrypt .env, start the services. Zero
+# questions — the crisis-time path a non-technical person can walk
+# with the emergency sheet. Declining (or a missing sealed env)
+# falls through to the normal interactive setup.
+if [ -f "$DRIVE_ROOT/private/env.sealed" ]; then
+  command -v openssl >/dev/null 2>&1 \
+    || fail "openssl not found — needed to unseal this drive's server keys."
+  say ""
+  say "This drive carries the community's sealed server keys."
+  say "Restoring with them brings the server back exactly as it was"
+  say "— no questions. You need the drive passphrase (it was chosen"
+  say "when the drive was built, and stored separately from it)."
+  printf 'Restore using the sealed keys? [Y/n]: '
+  IFS= read -r answer || true
+  if [ "$answer" != "n" ] && [ "$answer" != "N" ]; then
+    attempt=0
+    while :; do
+      attempt=$((attempt + 1))
+      printf 'Drive passphrase: '
+      IFS= read -rs pass; printf '\n'
+      if printf '%s' "$pass" | openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
+           -in "$DRIVE_ROOT/private/env.sealed" -out "$TARGET/.env.tmp" \
+           -pass stdin 2>/dev/null; then
+        unset pass
+        break
+      fi
+      rm -f "$TARGET/.env.tmp"
+      if [ "$attempt" -ge 3 ]; then
+        say "Still not matching. You can try again later, or continue"
+        say "with the fresh interactive setup instead."
+        printf 'Try the passphrase again? [Y/n]: '
+        IFS= read -r again || true
+        if [ "$again" = "n" ] || [ "$again" = "N" ]; then
+          unset pass
+          say "Continuing to interactive setup (the sealed keys stay on the drive, untouched)."
+          break
+        fi
+        attempt=0
+      else
+        say "That passphrase didn't unlock it — check for typos and try again."
+      fi
+    done
+    if [ -f "$TARGET/.env.tmp" ]; then
+      mv "$TARGET/.env.tmp" "$TARGET/.env"
+      chmod 600 "$TARGET/.env"
+      ok "Server keys restored (.env, chmod 600)."
+      cd "$TARGET"
+      say "Starting services from the pre-loaded images..."
+      docker compose up -d --no-build
+      say ""
+      ok "Services started."
+      say ""
+      say "SUCCESS. Phones on this server's network can open the"
+      say "community's address once it resolves here — the WiFi +"
+      say "local-DNS pattern is docs/offline-resilience.md §4 (a copy"
+      say "is on this drive). Status: docker compose ps"
+      exit 0
+    fi
+  fi
+fi
+
 say ""
 say "Handing off to the interactive setup (offline mode)..."
 say ""

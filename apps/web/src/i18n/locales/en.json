@@ -3477,6 +3477,12 @@
       "repo": "public repository",
       "walkthrough": "Start a new community from this download — the full walkthrough"
     },
+    "flashDrive": {
+      "title": "Flash drive",
+      "body": "One script builds a complete install drive: the app's images, its source code, and the docs. A machine with Docker can then become a node — or rebuild this one — without downloading a byte. Run it on the server, in good times:",
+      "sealed": "Adding --include-env seals this server's keys onto the drive under a passphrase and prints an emergency sheet — whoever holds the drive, the passphrase, and the sheet can bring the community back with one command. Store the passphrase separately from the drive: together they are the node.",
+      "drill": "The full runbook is docs/flash-drive-install.md (a copy travels on the drive). The flash-drive drill below proves yours actually works — before you need it."
+    },
     "drills": {
       "title": "Disaster drills",
       "intro": "Practice these recoveries before you need them. The checklists live only on this device — the linked runbooks in the repository stay the source of truth.",
@@ -3508,9 +3514,9 @@
         "title": "Flash-drive drill",
         "body": "Proves a node can be provisioned (or rebuilt) from the community’s flash drive on a machine with no internet.",
         "step1": "Build the drive in good times: scripts/make-flash-drive.sh, then copy the UNDERSTORIA folder onto a flash drive.",
-        "step2": "On a machine with Docker installed and its internet OFF, run install/setup-offline.sh from the drive and finish the setup questions.",
+        "step2": "On a machine with Docker installed and its internet OFF, run START-HERE.sh from the drive: a sealed drive restores with just the passphrase; a fresh drive asks the setup questions.",
         "step3": "Join two phones to the new node’s network: post from one, see it on the other.",
-        "step4": "On someone else’s computer, verify the drive: sha256sum -c MANIFEST.txt (and the signature, if the drive is signed).",
+        "step4": "On someone else’s computer, run the drive’s verify.sh — it checks every file against MANIFEST.txt (check the signature too, if the drive is signed).",
         "step5": "Carry an update: docker load the drive’s images onto a running node, docker compose up -d, and confirm the history is intact."
       }
     }

@@ -3477,6 +3477,12 @@
       "repo": "repositorio público",
       "walkthrough": "Crea una comunidad nueva desde esta descarga — la guía completa"
     },
+    "flashDrive": {
+      "title": "Memoria USB",
+      "body": "Un solo script prepara una memoria de instalación completa: las imágenes de la app, su código fuente y la documentación. Una máquina con Docker puede entonces convertirse en un nodo — o reconstruir este — sin descargar ni un byte. Ejecútalo en el servidor, en tiempos buenos:",
+      "sealed": "Con --include-env, las claves de este servidor viajan en la memoria selladas bajo una frase de paso, junto con una hoja de emergencia para imprimir — quien tenga la memoria, la frase y la hoja puede levantar la comunidad de nuevo con un solo comando. Guarda la frase separada de la memoria: juntas son el nodo.",
+      "drill": "El manual completo es docs/flash-drive-install.md (una copia viaja en la memoria). El simulacro de memoria USB, abajo, comprueba que la tuya de verdad funciona — antes de necesitarla."
+    },
     "drills": {
       "title": "Simulacros de desastre",
       "intro": "Practica estas recuperaciones antes de necesitarlas. Las listas viven solo en este dispositivo — los manuales enlazados en el repositorio siguen siendo la fuente de verdad.",
@@ -3508,9 +3514,9 @@
         "title": "Simulacro de memoria USB",
         "body": "Comprueba que un nodo puede instalarse (o reconstruirse) desde la memoria USB de la comunidad en una máquina sin internet.",
         "step1": "Prepara la memoria en tiempos buenos: scripts/make-flash-drive.sh, y copia la carpeta UNDERSTORIA a una memoria USB.",
-        "step2": "En una máquina con Docker instalado y SIN internet, ejecuta install/setup-offline.sh desde la memoria y completa las preguntas.",
+        "step2": "En una máquina con Docker instalado y SIN internet, ejecuta START-HERE.sh desde la memoria: una memoria sellada se restaura solo con la frase de paso; una memoria fresca hace las preguntas de instalación.",
         "step3": "Conecta dos teléfonos a la red del nuevo nodo: publica desde uno y míralo aparecer en el otro.",
-        "step4": "En la computadora de otra persona, verifica la memoria: sha256sum -c MANIFEST.txt (y la firma, si la memoria está firmada).",
+        "step4": "En la computadora de otra persona, ejecuta verify.sh desde la memoria — revisa cada archivo contra MANIFEST.txt (revisa también la firma, si la memoria está firmada).",
         "step5": "Lleva una actualización: docker load con las imágenes de la memoria en un nodo activo, docker compose up -d, y confirma que la historia sigue intacta."
       }
     }
