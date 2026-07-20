@@ -3479,7 +3479,7 @@
     },
     "drills": {
       "title": "Disaster drills",
-      "intro": "Practice the two recoveries before you need them. These checklists live only on this device — the linked runbooks in the repository stay the source of truth.",
+      "intro": "Practice these recoveries before you need them. The checklists live only on this device — the linked runbooks in the repository stay the source of truth.",
       "lastDrilled": "Last drilled {{date}}.",
       "notYet": "Not drilled yet.",
       "markToday": "We ran it today",
@@ -3503,6 +3503,15 @@
         "step4": "Watch the restore finish, then pull from a second member's device and check the history is all there.",
         "step5": "Turn the read gate back on (READ_AUTH=on) and confirm members still get in with their receipts alone.",
         "step6": "Remove the recovery settings from the server."
+      },
+      "flashDrive": {
+        "title": "Flash-drive drill",
+        "body": "Proves a node can be provisioned (or rebuilt) from the community’s flash drive on a machine with no internet.",
+        "step1": "Build the drive in good times: scripts/make-flash-drive.sh, then copy the UNDERSTORIA folder onto a flash drive.",
+        "step2": "On a machine with Docker installed and its internet OFF, run install/setup-offline.sh from the drive and finish the setup questions.",
+        "step3": "Join two phones to the new node’s network: post from one, see it on the other.",
+        "step4": "On someone else’s computer, verify the drive: sha256sum -c MANIFEST.txt (and the signature, if the drive is signed).",
+        "step5": "Carry an update: docker load the drive’s images onto a running node, docker compose up -d, and confirm the history is intact."
       }
     }
   },

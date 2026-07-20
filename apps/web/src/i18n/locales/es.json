@@ -3479,7 +3479,7 @@
     },
     "drills": {
       "title": "Simulacros de desastre",
-      "intro": "Practica las dos recuperaciones antes de necesitarlas. Estas listas viven solo en este dispositivo — los manuales enlazados en el repositorio siguen siendo la fuente de verdad.",
+      "intro": "Practica estas recuperaciones antes de necesitarlas. Las listas viven solo en este dispositivo — los manuales enlazados en el repositorio siguen siendo la fuente de verdad.",
       "lastDrilled": "Último simulacro: {{date}}.",
       "notYet": "Aún sin simulacro.",
       "markToday": "Lo hicimos hoy",
@@ -3503,6 +3503,15 @@
         "step4": "Espera a que termine la restauración, luego sincroniza desde el dispositivo de un segundo miembro y revisa que toda la historia esté ahí.",
         "step5": "Vuelve a activar la puerta de lectura (READ_AUTH=on) y confirma que los miembros siguen entrando solo con sus recibos.",
         "step6": "Quita los ajustes de recuperación del servidor."
+      },
+      "flashDrive": {
+        "title": "Simulacro de memoria USB",
+        "body": "Comprueba que un nodo puede instalarse (o reconstruirse) desde la memoria USB de la comunidad en una máquina sin internet.",
+        "step1": "Prepara la memoria en tiempos buenos: scripts/make-flash-drive.sh, y copia la carpeta UNDERSTORIA a una memoria USB.",
+        "step2": "En una máquina con Docker instalado y SIN internet, ejecuta install/setup-offline.sh desde la memoria y completa las preguntas.",
+        "step3": "Conecta dos teléfonos a la red del nuevo nodo: publica desde uno y míralo aparecer en el otro.",
+        "step4": "En la computadora de otra persona, verifica la memoria: sha256sum -c MANIFEST.txt (y la firma, si la memoria está firmada).",
+        "step5": "Lleva una actualización: docker load con las imágenes de la memoria en un nodo activo, docker compose up -d, y confirma que la historia sigue intacta."
       }
     }
   },

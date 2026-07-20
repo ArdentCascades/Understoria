@@ -32,6 +32,13 @@
 # Usage:
 #   scripts/setup.sh                    interactive
 #   scripts/setup.sh --skip-dns         interactive, no DNS check
+#   scripts/setup.sh --offline          flash-drive / air-gapped mode:
+#                                       no network touches at all —
+#                                       images must already be loaded
+#                                       (docker load; see
+#                                       scripts/setup-offline.sh and
+#                                       docs/flash-drive-install.md).
+#                                       Implies --skip-dns.
 #   scripts/setup.sh --help             usage
 #
 # Non-interactive mode (for CI / re-runs):
@@ -98,9 +105,16 @@ confirm() {
 # ─── Args ────────────────────────────────────────────────────────────
 
 SKIP_DNS=0
+OFFLINE=0
 for arg in "$@"; do
   case "$arg" in
     --skip-dns) SKIP_DNS=1 ;;
+    # Offline = ZERO network touches: no DNS lookups, no public-IP
+    # curl, no image builds (npm install lives inside the Dockerfiles),
+    # no registry pulls, no apt installs, no TLS polling. The images
+    # must already be `docker load`ed (scripts/setup-offline.sh does
+    # that from a flash drive built by scripts/make-flash-drive.sh).
+    --offline) OFFLINE=1; SKIP_DNS=1 ;;
     --help|-h)
       sed -n '2,/^set -euo/p' "$0" | sed -e 's/^# \{0,1\}//' -e 's/^set -euo pipefail//'
       exit 0 ;;
@@ -224,7 +238,11 @@ create_swapfile() {
 
 mem_kb=$(awk '/^MemTotal:/{print $2}' /proc/meminfo 2>/dev/null || echo 0)
 swap_kb=$(awk '/^SwapTotal:/{print $2}' /proc/meminfo 2>/dev/null || echo 0)
-if [ "$mem_kb" -gt 0 ] && [ "$mem_kb" -lt 1572864 ] && [ "$swap_kb" -lt 1048576 ]; then
+# Offline mode never builds (images arrive pre-built via docker load),
+# and the swap exists solely to survive the web-image build — skip the
+# whole prompt rather than scare a Pi operator about a build that
+# will never run.
+if [ "$OFFLINE" -eq 0 ] && [ "$mem_kb" -gt 0 ] && [ "$mem_kb" -lt 1572864 ] && [ "$swap_kb" -lt 1048576 ]; then
   warn "This host has less than 1.5 GB RAM and little or no swap."
   warn "The web image build will likely die with exit code 134 (out of memory)."
   say ""
@@ -271,23 +289,41 @@ fi
 say ""
 say "${c_bold}Step 1 of 4 — Your web address${c_off}"
 say ""
-say "Your community will live at a web address you own (a domain or"
-say "subdomain). Before this step works, that address must already"
-say "point at THIS server in your DNS settings (an 'A record' with"
-say "this machine's IP) — the script checks for you in a moment."
-say "The padlock certificate (HTTPS) is set up automatically for"
-say "free via Let's Encrypt; they just need an email address in case"
-say "a certificate ever has a problem."
+if [ "$OFFLINE" -eq 1 ]; then
+  say "Offline mode: use your community's REAL domain — the storm-hub"
+  say "pattern (docs/offline-resilience.md §4) answers it on the local"
+  say "network, so members' installed apps just work. A LAN name is"
+  say "also accepted for a bench test. No DNS or certificate checks"
+  say "run in this mode; certificates renew whenever the node next"
+  say "sees the internet (~90-day offline runway)."
+else
+  say "Your community will live at a web address you own (a domain or"
+  say "subdomain). Before this step works, that address must already"
+  say "point at THIS server in your DNS settings (an 'A record' with"
+  say "this machine's IP) — the script checks for you in a moment."
+  say "The padlock certificate (HTTPS) is set up automatically for"
+  say "free via Let's Encrypt; they just need an email address in case"
+  say "a certificate ever has a problem."
+fi
 say ""
 
 ask "Domain (e.g. understoria.example.org)" DOMAIN
 [ -n "$DOMAIN" ] || fail "DOMAIN is required."
 case "$DOMAIN" in
   *.*) : ;;
-  *) fail "DOMAIN must be a fully-qualified domain name." ;;
+  *)
+    # A bare LAN hostname is a legitimate bench-test target offline;
+    # everywhere else an FQDN-less domain is a typo.
+    [ "$OFFLINE" -eq 1 ] || fail "DOMAIN must be a fully-qualified domain name." ;;
 esac
 
-ask "ACME email (for Let's Encrypt expiry notices)" ACME_EMAIL
+if [ "$OFFLINE" -eq 1 ]; then
+  # Unused until the node sees the internet; a valid-shaped default
+  # keeps .env complete without inventing a fake question.
+  ask "ACME email (used when the node next sees the internet)" ACME_EMAIL "unused-offline@example.invalid"
+else
+  ask "ACME email (for Let's Encrypt expiry notices)" ACME_EMAIL
+fi
 case "$ACME_EMAIL" in
   *@*.*) : ;;
   *) fail "ACME_EMAIL doesn't look like an e-mail address." ;;
@@ -406,10 +442,21 @@ say "All three are saved into the .env file — you'll be reminded to"
 say "back that file up at the end."
 say ""
 
-info "Building understoria/server image..."
-DOMAIN="$DOMAIN" docker compose build understoria >/dev/null 2>&1 \
-  || fail "docker compose build understoria failed. Run it directly to see the error."
-ok "Image built."
+if [ "$OFFLINE" -eq 1 ]; then
+  # No building offline — `docker compose build` runs npm install
+  # inside the Dockerfiles. The images must already be loaded
+  # (docker load from the drive's images/ directory).
+  server_image="understoria/server:${UNDERSTORIA_VERSION:-0.3.0}"
+  info "Offline mode: checking for pre-loaded image $server_image..."
+  docker image inspect "$server_image" >/dev/null 2>&1 \
+    || fail "Image $server_image not loaded. Run the drive's install/setup-offline.sh (or docker load the tars in images/) first."
+  ok "Pre-loaded image found."
+else
+  info "Building understoria/server image..."
+  DOMAIN="$DOMAIN" docker compose build understoria >/dev/null 2>&1 \
+    || fail "docker compose build understoria failed. Run it directly to see the error."
+  ok "Image built."
+fi
 
 info "Generating Ed25519 system key..."
 keygen_output="$(docker compose run --rm --no-deps --entrypoint node understoria \
@@ -567,7 +614,13 @@ say ""
 say "${c_bold}Automatic security updates${c_off}"
 say "${c_dim}The single best thing for a server you won't log into often:"
 say "the operating system patches its own security holes. Say yes.${c_off}"
-if [ -f /etc/apt/sources.list ] || [ -d /etc/apt/sources.list.d ]; then
+# apt update/install are network operations — offline mode notes the
+# obligation instead of failing halfway through an install.
+if [ "$OFFLINE" -eq 1 ]; then
+  info "Offline mode: can't install packages without internet."
+  info "When this machine next sees the internet, enable automatic"
+  info "security updates (Debian/Ubuntu: apt-get install unattended-upgrades)."
+elif [ -f /etc/apt/sources.list ] || [ -d /etc/apt/sources.list.d ]; then
   if dpkg -s unattended-upgrades >/dev/null 2>&1; then
     if systemctl is-enabled --quiet unattended-upgrades 2>/dev/null \
        || [ -f /etc/apt/apt.conf.d/20auto-upgrades ]; then
@@ -729,21 +782,43 @@ print_claim_steps() {
 
 say ""
 say "${c_bold}Ready to launch${c_off}"
-say "${c_dim}Saying yes builds and starts everything (a few minutes of"
-say "scrolling text), then waits up to 3 minutes while the padlock"
-say "certificate is issued — the script watches and tells you the"
-say "moment your address answers securely.${c_off}"
-if confirm "Bring the node up now (docker compose up -d --build)?"; then
+if [ "$OFFLINE" -eq 1 ]; then
+  up_cmd="docker compose up -d --no-build"
+  say "${c_dim}Saying yes starts everything from the pre-loaded images."
+  say "No certificate is requested (that needs internet) — the TLS"
+  say "poll is skipped and the offline posture is summarized instead.${c_off}"
+else
+  up_cmd="docker compose up -d --build"
+  say "${c_dim}Saying yes builds and starts everything (a few minutes of"
+  say "scrolling text), then waits up to 3 minutes while the padlock"
+  say "certificate is issued — the script watches and tells you the"
+  say "moment your address answers securely.${c_off}"
+fi
+if confirm "Bring the node up now ($up_cmd)?"; then
   say ""
   info "Starting services..."
-  docker compose up -d --build
+  $up_cmd
   say ""
   ok "Services started."
-  # Give Caddy a moment to start before we start hammering it. ACME
-  # itself takes 30-90s after that; the poll loop covers it.
-  sleep 5
-  if verify_tls; then
-    verify_config || true
+  if [ "$OFFLINE" -eq 1 ]; then
+    # No ACME, no external polling. Say what a LAN-only node honestly
+    # is: the storm-hub runbook's posture, cert runway included.
+    say ""
+    say "${c_bold}Offline posture (docs/offline-resilience.md §4)${c_off}"
+    say "  - Members reach this node once its address resolves on the"
+    say "    local network (the storm hub's WiFi + local-DNS pattern)."
+    say "  - HTTPS works only with existing cert material (a cert"
+    say "    obtained in good times, backed up and restored here);"
+    say "    renewal resumes when the node next sees the internet."
+    say "  - Drill it before depending on it: two phones, WAN off,"
+    say "    post on one, see it on the other."
+  else
+    # Give Caddy a moment to start before we start hammering it. ACME
+    # itself takes 30-90s after that; the poll loop covers it.
+    sleep 5
+    if verify_tls; then
+      verify_config || true
+    fi
   fi
   print_claim_steps
   say ""
@@ -752,7 +827,7 @@ if confirm "Bring the node up now (docker compose up -d --build)?"; then
 else
   print_claim_steps
   say ""
-  say "Done. When you're ready: ${c_bold}docker compose up -d --build${c_off}"
+  say "Done. When you're ready: ${c_bold}$up_cmd${c_off}"
 fi
 
 # ─── Backup reminder ─────────────────────────────────────────────────

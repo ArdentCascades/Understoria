@@ -1,10 +1,15 @@
 # Installing Understoria from a flash drive
 
-Status: PLAN (operator-requested). Companion to
-`docs/offline-resilience.md` (the storm hub serves the community when
-the internet dies; the flash drive is how the SOFTWARE ITSELF travels
-to a machine that can't download it) and `docs/bootstrap-from-a-node.md`
-(what happens after the node is up). Nothing here is built yet.
+Status: **SHIPPED (PR 1 + PR 2)** — `scripts/make-flash-drive.sh`
+builds the drive (§2), `scripts/setup-offline.sh` + `setup.sh
+--offline` provision from it (§3), and the flash-drive drill is on
+the Infrastructure page's checklists (§6). The paper-kit PDFs took
+§4's honest fallback (README.txt points at the running node's /print
+pages; headless pre-rendering stays a tracked follow-up). Companion
+to `docs/offline-resilience.md` (the storm hub serves the community
+when the internet dies; the flash drive is how the SOFTWARE ITSELF
+travels to a machine that can't download it) and
+`docs/bootstrap-from-a-node.md` (what happens after the node is up).
 
 ## 0. What problem the drive solves
 
