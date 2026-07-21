@@ -2088,6 +2088,29 @@ We are not trying to protect against:
   are where recognition is actually verified, and the avatar
   (`MemberAvatar`, derived from the same key) still gives every
   name a visual identity handle at a glance.
+- **Sealed server keys on the flash drive (drive + passphrase =
+  the node).** A drive built with `make-flash-drive.sh
+  --include-env` carries the node's live `.env` — the server signing
+  keys, founder trust roots, and every operational secret —
+  encrypted as `private/env.sealed` (AES-256-CBC, PBKDF2-SHA256 at
+  200,000 iterations, salted; passphrase chosen at build time and
+  never written to the drive, the manifest, or any file). The point
+  IS the exposure: a non-technical person restoring the community
+  after total node loss with one passphrase and one command
+  (`docs/flash-drive-install.md` §3b). Mitigations: the encryption
+  itself; the drive's README, the sealed-env README, and the printed
+  emergency sheet all state "whoever holds this drive AND its
+  passphrase can become this community's server — store them
+  separately"; a passphrase-less finder gets ciphertext plus source
+  code they could have downloaded anyway; three failed decrypt
+  attempts fall through to the ordinary fresh-install path rather
+  than looping forever. Residual, named: an adversary holding both
+  drive and passphrase is indistinguishable from the community
+  restoring itself — key rotation plus the re-seed runbook
+  (operator-guide §6) is the recovery from that compromise, and
+  offline brute-force against a weak passphrase is bounded only by
+  the 200k-iteration KDF, so the build prompt insists on a phrase,
+  not a word.
 
 ## 8. Guidance for reviewers
 

@@ -1,10 +1,19 @@
 # Installing Understoria from a flash drive
 
-Status: PLAN (operator-requested). Companion to
-`docs/offline-resilience.md` (the storm hub serves the community when
-the internet dies; the flash drive is how the SOFTWARE ITSELF travels
-to a machine that can't download it) and `docs/bootstrap-from-a-node.md`
-(what happens after the node is up). Nothing here is built yet.
+Status: **SHIPPED (PR 1 + PR 2 + ease-of-use layer)** —
+`scripts/make-flash-drive.sh` builds the drive (§2),
+`scripts/setup-offline.sh` + `setup.sh --offline` provision from it
+(§3), and the flash-drive drill is on the Infrastructure page's
+checklists (§6). The ease-of-use layer (§3b) adds `START-HERE.sh` /
+`verify.sh` at the drive root, the sealed-env restore path
+(`--include-env`), a personalized printed emergency sheet, and a
+"Flash drive" card on the Infrastructure page. The paper-kit PDFs
+took §4's honest fallback (README.txt points at the running node's
+/print pages; headless pre-rendering stays a tracked follow-up). Companion
+to `docs/offline-resilience.md` (the storm hub serves the community
+when the internet dies; the flash drive is how the SOFTWARE ITSELF
+travels to a machine that can't download it) and
+`docs/bootstrap-from-a-node.md` (what happens after the node is up).
 
 ## 0. What problem the drive solves
 
@@ -29,7 +38,12 @@ Three journeys, in the order they happen in real life:
 
 ```
 UNDERSTORIA/
+├── START-HERE.sh               ← the one thing to run (→ setup-offline.sh)
 ├── README.txt                  ← plain-text quickstart, printed tone
+├── EMERGENCY-SHEET.txt         ← print + fold: the crisis-time steps,
+│                                  personalized with the community's
+│                                  domain and operator contact
+├── verify.sh                   ← friendly wrapper over the manifest check
 ├── MANIFEST.txt                ← every file + SHA256, optionally signed
 ├── images/
 │   ├── understoria-web-<ver>.tar    ← docker save output
@@ -39,9 +53,12 @@ UNDERSTORIA/
 │   ├── docker-compose.yml      ← the release's compose file
 │   └── env.template            ← annotated, matches setup.sh prompts
 ├── install/
-│   └── setup-offline.sh        ← the drive-side entry point
+│   └── setup-offline.sh        ← the drive-side installer
+├── private/                    ← only on --include-env drives
+│   ├── env.sealed              ← the node's .env, AES-256 under a passphrase
+│   └── README.txt              ← what it is, why it's encrypted
 ├── source/                     ← pack-source.sh output (AGPL §13:
-│   ├── understoria-src.tar.gz     the drive DISTRIBUTES binaries, so
+│   ├── understoria-source.tar.gz  the drive DISTRIBUTES binaries, so
 │   └── understoria.bundle         it must carry Corresponding Source)
 └── docs/
     ├── operator-guide.md, deploy-alternatives.md,
@@ -96,6 +113,45 @@ Update journey: `docker load` the new tars, `docker compose up -d` —
 already just works once images travel by drive; README.txt documents
 it as the upgrade path. The `source/` git bundle doubles as the way
 to move the repo itself (`git clone understoria.bundle`).
+
+## 3b. The ease-of-use layer (for non-technical hands)
+
+The scripts above assume the person at the keyboard is comfortable
+with paths and prompts. In a real crisis the person holding the drive
+may not be. Three additions close that gap:
+
+**`START-HERE.sh` and `verify.sh` at the drive root.** The name IS
+the instruction — no path to type, no docs to find first.
+`START-HERE.sh` just executes `install/setup-offline.sh`; `verify.sh`
+wraps `sha256sum -c MANIFEST.txt` in plain ✓/✗ language ("every file
+checks out" / "N files don't match — get a fresh drive") and exits
+0/1 so drills can script it.
+
+**Sealed server keys (`--include-env`).** Passing the node's live
+`.env` to `make-flash-drive.sh` writes `private/env.sealed`: the file
+encrypted with `openssl enc -aes-256-cbc -pbkdf2 -iter 200000` under
+a passphrase chosen at build time (or taken from
+`DRIVE_ENV_PASSPHRASE` for scripted builds). `setup-offline.sh`
+detects it and offers **restore mode**: type the passphrase, and the
+node comes back exactly as it was — same keys, same domain, zero
+setup questions. Three failed attempts offers the fall-through to
+the normal interactive setup, so a forgotten passphrase never bricks
+the fresh-install path. The posture cost is real and stated plainly
+on the drive and in the threat model: **drive + passphrase = the
+node.** Store them separately; the passphrase never travels on the
+drive, in the manifest, or in any file.
+
+**`EMERGENCY-SHEET.txt`.** A one-page, print-and-fold sheet generated
+at build time and personalized from the sealed env's `DOMAIN` and
+operator contact: what this drive is, the five crisis steps, where
+the passphrase hint lives ("stored separately — ask ___"). Paper
+survives dead phones; the sheet is the bridge between the drive in a
+drawer and the person who finds it.
+
+The Infrastructure page grew a "Flash drive" card (next to "The
+software itself") so the capability is discoverable in the app, not
+only in this doc; the drill's steps now name `START-HERE.sh` and
+`verify.sh` directly.
 
 ## 4. The paper half
 

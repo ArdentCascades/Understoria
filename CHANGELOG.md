@@ -10,6 +10,34 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Install Understoria from a flash drive.** A new
+  `scripts/make-flash-drive.sh` (run in good times, with internet)
+  packs everything a node needs onto a USB drive: the pre-built
+  server images, the setup scripts, the full source code (the AGPL
+  asks for it, and resilience wants it anyway), the operator and
+  storm-hub documentation, and a checksummed — optionally signed —
+  manifest so anyone can verify the drive wasn't tampered with. On
+  the target machine, `install/setup-offline.sh` provisions the node
+  without downloading a byte: `setup.sh` gained an `--offline` mode
+  that skips every network touch (no image builds, no DNS or
+  public-IP checks, no certificate polling, no package installs) and
+  says honestly what a LAN-only node can and cannot do. A third
+  disaster drill — the flash-drive drill — joins the Infrastructure
+  page's checklists. Full design and limits:
+  docs/flash-drive-install.md.
+- **The flash drive works for non-technical hands.** The drive root
+  now carries `START-HERE.sh` (the name is the instruction — it runs
+  the installer, no paths to type) and `verify.sh` (the manifest
+  check in plain ✓/✗ language). Building with `--include-env .env`
+  seals the node's server keys onto the drive, encrypted under a
+  passphrase chosen at build time: the installer detects the sealed
+  keys and offers a zero-question restore — type the passphrase and
+  the community's server comes back exactly as it was. A personalized
+  `EMERGENCY-SHEET.txt` (print it, fold it, tape it to the drive)
+  walks whoever finds the drive through those steps, and a "Flash
+  drive" card on the Infrastructure page makes the whole capability
+  discoverable in the app. Stated plainly everywhere it matters:
+  drive + passphrase = the node — store them separately.
 - **Reply, from the press-and-hold message menu.** Press and hold a
   message (the same menu that already offers reactions, Copy, Speak,
   and Info) and tap **Reply**: a "Replying to…" strip appears above

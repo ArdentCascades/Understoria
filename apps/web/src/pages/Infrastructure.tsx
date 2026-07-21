@@ -59,12 +59,13 @@ import {
 // as down), and nothing here scores, ranks, or alarms — no red
 // anywhere, information over urgency.
 
-/** The two drills, in the order the docs recommend running them.
+/** The drills, in the order the docs recommend running them.
  *  Step TEXT lives in i18n (infra.drills.<id>.step1..N); the docs
  *  named in each card remain the source of truth. */
 const DRILLS = [
   { id: "stormHub", steps: 6, docRef: "docs/offline-resilience.md §4" },
   { id: "reseed", steps: 6, docRef: "docs/community-reseed.md" },
+  { id: "flashDrive", steps: 5, docRef: "docs/flash-drive-install.md §6" },
 ] as const;
 
 export default function InfrastructurePage() {
@@ -321,6 +322,8 @@ export default function InfrastructurePage() {
         </section>
 
         <SourceCard />
+
+        <FlashDriveCard />
       </div>
 
       {/* Drills */}
@@ -502,6 +505,36 @@ export function SourceCard() {
         >
           {t("infra.source.walkthrough")} →
         </Link>
+      </p>
+    </section>
+  );
+}
+
+// The drive is how the software itself travels without a network
+// (docs/flash-drive-install.md). This card can't build one — that's
+// a shell script on a machine with Docker — but it makes the
+// capability discoverable next to the drill that proves it, instead
+// of living only in a doc nobody opens until the outage.
+export function FlashDriveCard() {
+  const { t } = useTranslation();
+  return (
+    <section className="card mb-4">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+        {t("infra.flashDrive.title")}
+      </h2>
+      <p className="text-sm text-moss-700 dark:text-moss-200">
+        {t("infra.flashDrive.body")}
+      </p>
+      {/* Command stays verbatim and horizontally scrollable —
+          wrapping a shell line changes its meaning. */}
+      <pre className="mt-2 overflow-x-auto rounded-lg bg-moss-950 p-3 text-xs leading-relaxed text-moss-100">
+        <code>bash scripts/make-flash-drive.sh /media/your-drive --include-env .env</code>
+      </pre>
+      <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
+        {t("infra.flashDrive.sealed")}
+      </p>
+      <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
+        {t("infra.flashDrive.drill")}
       </p>
     </section>
   );
