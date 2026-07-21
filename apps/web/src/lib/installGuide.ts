@@ -10,6 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { getSetting, SETTING_KEYS, setSetting } from "@/db/database";
+import { isDesktopShell } from "@/lib/desktop";
 
 // Detection + capture + dismiss helpers for the "Add to Home Screen"
 // install guide. The human-facing affordance that turns an already-
@@ -354,6 +355,9 @@ export function currentInstallEnvironment(): InstallEnvironment {
   if (typeof navigator === "undefined") {
     return { kind: "manual", device: "desktop" };
   }
+  // The desktop shell (AppImage) IS the installed app — it must never
+  // classify as "desktop browser" and nag about installing itself.
+  if (isDesktopShell()) return { kind: "installed" };
   return detectInstallEnvironment({
     ua: navigator.userAgent,
     platform: navigator.platform,

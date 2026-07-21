@@ -20,6 +20,7 @@
  */
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { shareOrigin } from "@/lib/appOrigin";
 import { wifiQrValue } from "@/lib/offlineKit";
 import { InviteQRCode } from "@/components/InviteQRCode";
 import { PrintFooter, PrintToolbar } from "@/components/PrintChrome";
@@ -53,8 +54,8 @@ export default function PrintOfflineKitPage() {
   const [password, setPassword] = useState("");
 
   const wifiQr = wifiQrValue({ ssid, password });
-  const host = window.location.host;
-  const origin = window.location.origin;
+  const origin = shareOrigin();
+  const host = new URL(origin).host;
 
   return (
     <div className="px-4 pb-8 pt-6 print:bg-white print:px-0 print:pb-0 print:pt-0 print:text-black">

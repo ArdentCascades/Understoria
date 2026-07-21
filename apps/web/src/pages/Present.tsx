@@ -13,6 +13,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { shareOrigin } from "@/lib/appOrigin";
 import { InviteQRCode } from "@/components/InviteQRCode";
 import { formatAbsoluteDateTime } from "@/lib/format";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
@@ -74,8 +75,7 @@ export default function PresentPage() {
     return () => window.clearInterval(id);
   }, []);
 
-  const origin =
-    typeof window !== "undefined" ? window.location.origin : "";
+  const origin = shareOrigin();
   const anonymous = t("present.anonymous");
 
   // Config parses fresh each render, so a plain compute (buildGatheringSlides

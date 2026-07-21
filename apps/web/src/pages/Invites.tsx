@@ -13,6 +13,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { shareOrigin } from "@/lib/appOrigin";
 import { humanizeError } from "@/lib/humanizeError";
 import { formatDeadline, formatRelativeTime, shortKey } from "@/lib/format";
 import { revokeInvite, setInviteNote } from "@/db/invites";
@@ -122,7 +123,7 @@ export default function InvitesPage() {
   }
 
   function inviteUrl(inv: InviteRow): string {
-    return `${window.location.origin}/invite#${inv.encoded}`;
+    return `${shareOrigin()}/invite#${inv.encoded}`;
   }
 
   async function handleSaveNote(token: string) {

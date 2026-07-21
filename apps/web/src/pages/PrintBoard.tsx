@@ -22,6 +22,7 @@ import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { shareOrigin } from "@/lib/appOrigin";
 import { filterBoardPosts } from "@/lib/boardFilter";
 import { formatHours } from "@/lib/format";
 import { InviteQRCode } from "@/components/InviteQRCode";
@@ -85,7 +86,7 @@ export default function PrintBoardPage() {
         {t(type === "OFFER" ? "print.board.titleOffers" : "print.board.titleNeeds")}
       </h1>
       <p className="mt-1 text-sm text-moss-700 dark:text-moss-200 print:text-black">
-        {window.location.host}
+        {new URL(shareOrigin()).host}
         {filterSummary.length > 0 && (
           <> · {t("print.board.filtered", { filters: filterSummary.join(" · ") })}</>
         )}
@@ -122,7 +123,7 @@ export default function PrintBoardPage() {
               </div>
               <div className="shrink-0">
                 <InviteQRCode
-                  value={`${window.location.origin}/post/${p.id}`}
+                  value={`${shareOrigin()}/post/${p.id}`}
                   size={96}
                   ariaLabel={t("print.board.qrAria", { title: p.title })}
                 />
@@ -136,7 +137,7 @@ export default function PrintBoardPage() {
           takes a need home. Capped — a strip only works as a strip. */}
       <TearOffStrip
         tabs={visible.slice(0, 8).map((p) => ({
-          value: `${window.location.origin}/post/${p.id}`,
+          value: `${shareOrigin()}/post/${p.id}`,
           label: p.title,
         }))}
         qrAriaLabel={t("print.tabs.qrAria")}

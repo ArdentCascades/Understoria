@@ -36,6 +36,7 @@ import { CategoryBadge } from "@/components/CategoryBadge";
 import { DockedPanelDockContext } from "@/components/DockedPanel";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
 import { shareUrl } from "@/lib/share";
+import { shareOrigin } from "@/lib/appOrigin";
 import { Markdown } from "@/components/Markdown";
 import { AudioPostPlayer } from "@/components/AudioPostPlayer";
 import { AvailabilityChips } from "@/components/AvailabilityChips";
@@ -247,7 +248,7 @@ export default function PostDetailPage() {
   // the manual-copy guidance as an error. Mirrors TaskDetailBody.
   async function handleCopyLink() {
     const result = await shareUrl({
-      url: `${window.location.origin}/post/${post!.id}`,
+      url: `${shareOrigin()}/post/${post!.id}`,
       title: post!.title,
     });
     if (result === "copied" || result === "shared") {

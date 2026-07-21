@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
 import { db } from "@/db/database";
+import { shareOrigin } from "@/lib/appOrigin";
 import { isAuthoritativeCancellation } from "@/lib/eventCancellation";
 import { InviteQRCode } from "@/components/InviteQRCode";
 import { PrintFooter, PrintToolbar } from "@/components/PrintChrome";
@@ -133,7 +134,7 @@ export default function PrintShiftRosterPage() {
         </div>
         <div className="shrink-0">
           <InviteQRCode
-            value={`${window.location.origin}/events/${event.id}`}
+            value={`${shareOrigin()}/events/${event.id}`}
             size={112}
             ariaLabel={t("print.roster.qrAria")}
           />

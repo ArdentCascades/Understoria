@@ -1,0 +1,34 @@
+# AppImage-only on purpose: one artifact that runs on any Linux
+# without a package manager — the same philosophy as the flash drive
+# (docs/desktop-appimage.md §3). deb/rpm/flatpak are named non-goals
+# until a community needs one.
+appId: coop.understoria.desktop
+productName: Understoria
+directories:
+  output: release
+  buildResources: build
+files:
+  - dist/**
+  - web-dist/**
+  - build/icon.png
+  - package.json
+linux:
+  target:
+    - AppImage
+  category: Network
+  # Without this, electron-builder derives the executable from the
+  # npm package name (@understoria/desktop → "@understoriadesktop")
+  # and refuses the "@" as path-unsafe.
+  executableName: understoria
+  icon: build/icon.png
+  synopsis: Community mutual-aid timebank
+  description: >-
+    Understoria — a federated mutual-aid timebank. This desktop app
+    carries the full member app with no installed browser required,
+    and can join a community node that has never been online.
+appImage:
+  artifactName: Understoria-${version}-${arch}.AppImage
+# The shell has no native modules and never needs a rebuild.
+npmRebuild: false
+# Manual updates by design (docs/desktop-appimage.md §6) — no
+# publish/update configuration belongs here.

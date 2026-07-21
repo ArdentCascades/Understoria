@@ -27,6 +27,7 @@ import { listShiftsForEvent } from "@/db/eventShifts";
 import { getSecretKey } from "@/db/secrets";
 import { isAuthoritativeCancellation } from "@/lib/eventCancellation";
 import { humanizeError } from "@/lib/humanizeError";
+import { shareOrigin } from "@/lib/appOrigin";
 import { shortKey } from "@/lib/format";
 import { eventCategoryMeta } from "@/lib/categories";
 import { BackLink, useHistoryAwareBack } from "@/components/BackLink";
@@ -228,7 +229,7 @@ export default function EventDetailPage() {
   // the manual-copy guidance as an error. Mirrors TaskDetailBody.
   async function handleCopyLink() {
     const result = await shareUrl({
-      url: `${window.location.origin}/events/${event!.id}`,
+      url: `${shareOrigin()}/events/${event!.id}`,
       title: event!.title,
     });
     if (result === "copied" || result === "shared") {
@@ -247,7 +248,7 @@ export default function EventDetailPage() {
   // emits no VALARM (reminders belong to the member's own calendar
   // app, per §11.5a) and no ATTENDEE/ORGANIZER properties.
   function handleAddToCalendar() {
-    const ics = buildEventIcs(event!, { appUrl: window.location.origin });
+    const ics = buildEventIcs(event!, { appUrl: shareOrigin() });
     const file = icsFilename(event!.title);
     const blob = new Blob([ics], { type: "text/calendar" });
     const url = URL.createObjectURL(blob);

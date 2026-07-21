@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
 import { db } from "@/db/database";
+import { shareOrigin } from "@/lib/appOrigin";
 import { isAuthoritativeCancellation } from "@/lib/eventCancellation";
 import { InviteQRCode } from "@/components/InviteQRCode";
 import { PrintFooter, PrintToolbar } from "@/components/PrintChrome";
@@ -86,7 +87,8 @@ export default function PrintEventFlyerPage() {
     );
   }
 
-  const eventUrl = `${window.location.origin}/events/${event.id}`;
+  const eventUrl = `${shareOrigin()}/events/${event.id}`;
+  const shareHost = new URL(shareOrigin()).host;
   const locale = i18n.resolvedLanguage;
 
   return (
@@ -106,7 +108,7 @@ export default function PrintEventFlyerPage() {
       <div className="mx-auto max-w-xl text-center">
         <h1 className="page-title print:text-black">{event.title}</h1>
         <p className="mt-1 text-sm font-medium text-moss-700 dark:text-moss-200 print:text-black">
-          {window.location.host}
+          {shareHost}
         </p>
 
         <dl className="mx-auto mt-4 max-w-md text-sm text-moss-700 dark:text-moss-200 print:text-black">
@@ -143,7 +145,7 @@ export default function PrintEventFlyerPage() {
         </div>
 
         <p className="mx-auto mt-4 max-w-md text-sm text-moss-700 dark:text-moss-200 print:text-black">
-          {t("print.flyer.rsvp", { host: window.location.host })}
+          {t("print.flyer.rsvp", { host: shareHost })}
         </p>
 
         <PrintFooter />

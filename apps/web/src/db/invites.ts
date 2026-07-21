@@ -28,6 +28,7 @@ import {
 import { markOnboarded } from "./onboarding";
 import { createMember } from "./seed";
 import { generateKeyPair, sign } from "@/lib/crypto";
+import { shareOrigin } from "@/lib/appOrigin";
 import {
   createInvite,
   decodeAndVerifyInvite,
@@ -78,9 +79,7 @@ export interface IssuedInvite {
 
 export async function issueInvite(
   input: IssueInviteInput,
-  origin: string = typeof window !== "undefined"
-    ? window.location.origin
-    : "",
+  origin: string = shareOrigin(),
 ): Promise<IssuedInvite> {
   let secretKey: string;
   try {

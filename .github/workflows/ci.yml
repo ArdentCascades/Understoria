@@ -34,8 +34,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends build-essential python3
 
+      # The Electron binary (~110 MB) is only needed to LAUNCH the
+      # desktop shell — its typecheck/tests/build run without it, so
+      # this job skips the download. The AppImage workflow installs
+      # it for real.
       - name: Install dependencies
         run: npm ci
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
 
       - name: Typecheck across workspaces
         run: npm run typecheck

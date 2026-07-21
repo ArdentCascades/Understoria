@@ -186,7 +186,11 @@ context to install (service worker, WebCrypto). So:
   cert on every member's phone) whose threat-model cost is real and
   whose UX is hostile; document it as out of scope rather than
   half-ship it. If a genuinely offline-born pilot appears, that's
-  its own design doc.
+  its own design doc. **Partial dent since:** the desktop AppImage
+  (`docs/desktop-appimage.md`) needs no browser-trusted certificate
+  at all, so *laptops* can join a never-online node today; the gap
+  now applies to phones specifically. Carrying the AppImage on this
+  drive is that plan's Phase 2.
 
 ## 6. Drills (the house rule: nothing counts until drilled)
 

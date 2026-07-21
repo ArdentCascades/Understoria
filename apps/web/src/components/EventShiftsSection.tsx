@@ -26,6 +26,7 @@ import {
 import { humanizeError } from "@/lib/humanizeError";
 import { buildShiftIcs, icsFilename } from "@/lib/eventIcs";
 import { downloadIcs } from "@/lib/ics";
+import { shareOrigin } from "@/lib/appOrigin";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { useToast } from "@/state/ToastContext";
 import type { Event, EventShiftRow, ShiftSignupRow } from "@/types";
@@ -365,7 +366,7 @@ export function EventShiftsSection({
                       downloadIcs(
                         file,
                         buildShiftIcs(shift, event, {
-                          appUrl: window.location.origin,
+                          appUrl: shareOrigin(),
                         }),
                       );
                       // Same feedback as the whole-event export: a
