@@ -597,8 +597,13 @@ export default function EventNewPage() {
             preference, where the fields stack full-width: at 125% font
             the native pickers cannot render their values un-clipped
             side by side on narrow phones, and largest-text members
-            have already chosen legibility over density. */}
-        <div className="grid grid-cols-[1.4fr_1fr] gap-2 [.text-largest_&]:grid-cols-1">
+            have already chosen legibility over density.
+            minmax(0, Nfr) — not bare Nfr — because iOS Safari sizes fr
+            tracks from a date/time input's UA-intrinsic width and does
+            not honor min-width:0 on form controls, so a bare-fr row
+            blows out past the right edge of the phone screen. Putting
+            the zero minimum on the TRACK is the fix Safari respects. */}
+        <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-2 [.text-largest_&]:grid-cols-1">
           <input
             type="date"
             className="input min-w-0"
@@ -666,11 +671,13 @@ export default function EventNewPage() {
                 cell for the date input and moves the (checked) toggle
                 below — the common case costs one row, the overnight
                 case two. */}
+            {/* minmax(0,…) tracks for the same iOS-Safari reason as the
+                Starts row above. */}
             <div
               className={
                 endsOtherDay
-                  ? "grid grid-cols-[1.4fr_1fr] items-center gap-2 [.text-largest_&]:grid-cols-1"
-                  : "grid grid-cols-2 items-center gap-2 [.text-largest_&]:grid-cols-1"
+                  ? "grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] items-center gap-2 [.text-largest_&]:grid-cols-1"
+                  : "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-2 [.text-largest_&]:grid-cols-1"
               }
             >
               {endsOtherDay && (

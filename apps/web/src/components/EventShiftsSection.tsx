@@ -629,7 +629,7 @@ export function EventShiftsSection({
                 <legend className="text-sm font-medium">
                   {t("events.shifts.startsLabel")}
                 </legend>
-                <div className="grid gap-2 sm:grid-cols-2">
+                <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                   <input
                     type="date"
                     className="input"
@@ -652,7 +652,7 @@ export function EventShiftsSection({
                 <legend className="text-sm font-medium">
                   {t("events.shifts.endsLabel")}
                 </legend>
-                <div className="grid gap-2 sm:grid-cols-2">
+                <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                   <input
                     type="date"
                     className="input"

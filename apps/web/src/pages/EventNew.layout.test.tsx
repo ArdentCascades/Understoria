@@ -205,6 +205,33 @@ describe("EventNew layout", () => {
     }
   });
 
+  it("date/time rows use minmax(0,…) tracks, never bare fr (iOS overflow contract)", () => {
+    // iOS Safari sizes bare-fr grid tracks from a date/time input's
+    // UA-intrinsic width and ignores min-width:0 on form controls, so
+    // a `grid-cols-[1.4fr_1fr]` row overflows the phone screen (the
+    // IMG_8249 report: the Starts time field ran off the right edge).
+    // The zero minimum must live on the TRACK. This pins the contract
+    // for every grid row that contains a native date/time input.
+    render();
+
+    const dateTimeInputs = Array.from(
+      container.querySelectorAll('input[type="date"], input[type="time"]'),
+    );
+    expect(dateTimeInputs.length).toBeGreaterThan(0);
+    for (const input of dateTimeInputs) {
+      const row = input.parentElement!;
+      const gridClasses = (row.getAttribute("class") ?? "")
+        .split(/\s+/)
+        .filter((c) => c.includes("grid-cols-["));
+      for (const cls of gridClasses) {
+        // Every fr inside an arbitrary-value track list is wrapped:
+        // no `[`- or `_`-adjacent bare `Nfr` allowed.
+        expect(cls).not.toMatch(/[[_](?:\d+(?:\.\d+)?)fr/);
+        expect(cls).toContain("minmax(0,");
+      }
+    }
+  });
+
   it("work-day deep-link: the banner spans the top in place of the rail, before the form", async () => {
     mockState.projects = [project()];
     render("/events/new?projectId=proj-1");
