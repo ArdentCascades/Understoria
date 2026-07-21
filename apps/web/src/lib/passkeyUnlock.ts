@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { b64encode, randomBytes, utf8encode } from "./bytes";
+import { isDesktopShell } from "./desktop";
 
 /**
  * Passkey unlock — the WebAuthn half of the device-master-key envelope
@@ -104,8 +105,15 @@ const PRF_SALT_LENGTH = 32;
 const HKDF_SALT = "understoria-passkey-kek";
 const HKDF_INFO = "unlock-v1";
 
-/** Sync capability check: does this browser have WebAuthn at all? */
+/** Sync capability check: does this browser have WebAuthn at all?
+ *  The desktop shell (app:// origin) is excluded even though the
+ *  APIs exist there: WebAuthn binds credentials to a registrable
+ *  domain, which a custom scheme doesn't have — create/get would
+ *  fail with a SecurityError. The UI degrades exactly as on a
+ *  browser without WebAuthn: passphrase-only, which secrets.ts
+ *  guarantees is always sufficient. */
 export function supportsPasskeys(): boolean {
+  if (isDesktopShell()) return false;
   return (
     typeof PublicKeyCredential !== "undefined" &&
     typeof navigator !== "undefined" &&

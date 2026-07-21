@@ -34,6 +34,7 @@ import { MarkdownHint } from "@/components/MarkdownHint";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
 import { TaskPrivateChecklist } from "@/components/TaskPrivateChecklist";
 import { shareUrl } from "@/lib/share";
+import { shareOrigin } from "@/lib/appOrigin";
 import { matchTaskSkills } from "@/lib/taskSkillMatch";
 import { recordTaskTouch } from "@/lib/lastTouched";
 import { suggestSplitting } from "@/lib/taskPresentation";
@@ -219,7 +220,7 @@ export function TaskDetailBody({
   // the existing manual-copy guidance as an error.
   async function handleCopyLink() {
     const result = await shareUrl({
-      url: `${window.location.origin}/project/${task.projectId}/task/${task.id}`,
+      url: `${shareOrigin()}/project/${task.projectId}/task/${task.id}`,
       title: task.title,
     });
     if (result === "copied" || result === "shared") {

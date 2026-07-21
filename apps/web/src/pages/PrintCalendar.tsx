@@ -21,6 +21,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { shareOrigin } from "@/lib/appOrigin";
 import { InviteQRCode } from "@/components/InviteQRCode";
 import { PrintFooter, PrintToolbar } from "@/components/PrintChrome";
 import type { Event } from "@/types";
@@ -104,7 +105,7 @@ export default function PrintCalendarPage() {
         {t("print.calendar.title")}
       </h1>
       <p className="mt-1 text-sm font-medium text-moss-700 dark:text-moss-200 print:text-black">
-        {window.location.host}
+        {new URL(shareOrigin()).host}
       </p>
 
       {upcoming.length === 0 ? (
@@ -140,7 +141,7 @@ export default function PrintCalendarPage() {
                     </div>
                     <div className="shrink-0">
                       <InviteQRCode
-                        value={`${window.location.origin}/events/${ev.id}`}
+                        value={`${shareOrigin()}/events/${ev.id}`}
                         size={64}
                         ariaLabel={t("print.calendar.qrAria", {
                           title: ev.title,

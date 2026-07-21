@@ -36,6 +36,7 @@ import {
 } from "@/db/taskPlans";
 import { getTaskSteps } from "@/content/taskSteps";
 import { downloadIcs, plannedDayIcs } from "@/lib/ics";
+import { shareOrigin } from "@/lib/appOrigin";
 import { useToast } from "@/state/ToastContext";
 import { recordTaskTouch } from "@/lib/lastTouched";
 
@@ -380,7 +381,7 @@ export function TaskPrivateChecklist({
                     summary: taskTitle,
                     day: plannedDay,
                     description: t("projects.task.plan.icsDescription"),
-                    url: `${window.location.origin}/project/${projectId}/task/${taskId}`,
+                    url: `${shareOrigin()}/project/${projectId}/task/${taskId}`,
                   }),
                 );
                 showToast(

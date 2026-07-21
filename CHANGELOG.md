@@ -10,6 +10,25 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Understoria as a Linux desktop app (AppImage).** A new
+  `apps/desktop` shell wraps the exact same app in a single
+  carryable file — no installed browser, no add-to-homescreen, no
+  browser-vendor install policies. Because the desktop app loads
+  from local disk, encryption and the local database work even
+  against a plain-HTTP LAN node: a laptop running the AppImage can
+  join a community node that has never been online — the first real
+  dent in the "born-offline gap" the flash-drive plan had to name
+  as a non-goal (phones still need the certificate path). Join from
+  the desktop by pairing from your phone (the paste-code path), or
+  create a fresh identity and set the node address in Settings.
+  Share links, QR codes, and calendar files produced on desktop
+  carry the community's real web address, not an app:// URL.
+  Passkey unlock isn't possible in the shell (the passphrase always
+  works — that guarantee is unchanged) and camera QR scanning falls
+  back to paste. Updates are deliberately manual — no auto-update
+  channel pointed at member laptops; CI builds the artifact
+  (`.github/workflows/appimage.yml`). Design, security posture, and
+  phases: docs/desktop-appimage.md.
 - **Install Understoria from a flash drive.** A new
   `scripts/make-flash-drive.sh` (run in good times, with internet)
   packs everything a node needs onto a USB drive: the pre-built

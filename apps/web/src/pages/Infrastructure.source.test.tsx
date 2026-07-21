@@ -92,9 +92,13 @@ describe("SourceCard", () => {
     const hrefs = Array.from(container.querySelectorAll("a")).map((a) =>
       a.getAttribute("href"),
     );
-    expect(hrefs).toContain("/source/understoria-source.tar.gz");
-    expect(hrefs).toContain("/source/understoria.bundle");
-    expect(hrefs).toContain("/source/SHA256SUMS");
+    // Hrefs are absolute via shareOrigin() — on the web that is
+    // exactly window.location.origin, so these stay same-origin.
+    expect(hrefs).toContain(
+      `${window.location.origin}/source/understoria-source.tar.gz`,
+    );
+    expect(hrefs).toContain(`${window.location.origin}/source/understoria.bundle`);
+    expect(hrefs).toContain(`${window.location.origin}/source/SHA256SUMS`);
   });
 
   it("treats the SPA fallback (200, text/html) as absent — the pre-feature deployment case", async () => {
@@ -113,7 +117,11 @@ describe("SourceCard", () => {
     const text = container.textContent ?? "";
     expect(text).toContain("doesn't offer a source download yet");
     expect(text).toContain("public repository");
-    expect(container.querySelector('a[href="/source/understoria-source.tar.gz"]')).toBeNull();
+    expect(
+      container.querySelector(
+        `a[href="${window.location.origin}/source/understoria-source.tar.gz"]`,
+      ),
+    ).toBeNull();
   });
 
   it("treats a network error as absent rather than crashing", async () => {

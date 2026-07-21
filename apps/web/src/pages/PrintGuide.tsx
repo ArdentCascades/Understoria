@@ -22,6 +22,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { FAQ_SECTIONS } from "@/content/faq";
 import { FAQ_SECTIONS_ES } from "@/content/faq.es";
+import { shareOrigin } from "@/lib/appOrigin";
 import { resolveGuideEntries } from "@/lib/printGuide";
 import { PrintFooter, PrintToolbar } from "@/components/PrintChrome";
 
@@ -47,7 +48,7 @@ export default function PrintGuidePage() {
         {t("print.guide.title")}
       </h1>
       <p className="mt-1 text-sm font-medium text-moss-700 dark:text-moss-200 print:text-black">
-        {window.location.host} · {t("print.guide.tagline")}
+        {new URL(shareOrigin()).host} · {t("print.guide.tagline")}
       </p>
 
       <div className="mt-6 gap-8 sm:columns-2">

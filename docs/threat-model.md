@@ -2088,6 +2088,38 @@ We are not trying to protect against:
   are where recognition is actually verified, and the avatar
   (`MemberAvatar`, derived from the same key) still gives every
   name a visual identity handle at a glance.
+- **Desktop shell (Linux AppImage): a new client runtime, named
+  costs.** `apps/desktop` wraps the byte-identical web bundle in
+  Electron so a member needs no installed browser and — because the
+  `app://` origin is a secure context by construction — can join a
+  node that has never held a browser-trusted certificate
+  (`docs/desktop-appimage.md`). What this adds to the surface, and
+  what contains it: (1) *Chromium ships inside the artifact* — the
+  AppImage inherits Chromium's CVE cadence, so desktop builds must
+  be rebuilt when Electron patches; recorded as an operator/release
+  obligation, and the app shows its build stamp in Settings. (2)
+  *A filesystem-privileged main process* — contained by keeping it
+  glue-thin over pure, tested policy modules: renderer sandboxed
+  (`contextIsolation`, `sandbox`, no `nodeIntegration`, **no
+  preload bridge at all**), permissions allowlisted (media,
+  clipboard-read, sanitized clipboard-write, wake-lock; all else
+  denied), navigation locked to `app://`, `window.open` limited to
+  the print popup, external links only ever handed to the OS as
+  http(s)/mailto (never `file:` or foreign schemes), CSP with
+  hashed inline scripts (no `unsafe-inline` for script). (3) *No
+  auto-update, deliberately* — a self-updating binary is a
+  supply-chain surface pointed at member laptops; updates travel
+  the community's own channels (CI artifact, node, flash drive),
+  and turning on auto-update is a future governance decision, not a
+  default. (4) *Capability honesty*: WebAuthn passkeys cannot bind
+  to a domainless `app://` origin, so the desktop build reports
+  passkeys unsupported (passphrase unlock remains guaranteed);
+  camera QR scanning is absent in Electron and every scan surface
+  falls back to paste. Residual, named: a compromised AppImage
+  file is a compromised client — the same class as a malicious
+  browser extension on the web path; the mitigation is source
+  (drive/node/CI artifacts are checksummed and, on drives,
+  optionally signed), not code.
 - **Sealed server keys on the flash drive (drive + passphrase =
   the node).** A drive built with `make-flash-drive.sh
   --include-env` carries the node's live `.env` — the server signing

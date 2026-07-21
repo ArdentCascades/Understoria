@@ -21,6 +21,7 @@
 import { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { shareOrigin } from "@/lib/appOrigin";
 import { decodeAndVerifyInvite } from "@/lib/invite";
 import { formatAbsoluteDate } from "@/lib/format";
 import { InviteQRCode } from "@/components/InviteQRCode";
@@ -74,7 +75,8 @@ export default function PrintInvitePage() {
     );
   }
 
-  const inviteUrl = `${window.location.origin}/invite#${encoded}`;
+  const inviteUrl = `${shareOrigin()}/invite#${encoded}`;
+  const shareHost = new URL(shareOrigin()).host;
 
   return (
     <div className="px-4 pb-8 pt-6 print:bg-white print:px-0 print:pb-0 print:pt-0 print:text-black">
@@ -86,7 +88,7 @@ export default function PrintInvitePage() {
           {t("print.invite.headline")}
         </h1>
         <p className="mt-1 text-sm font-medium text-moss-700 dark:text-moss-200 print:text-black">
-          {window.location.host}
+          {shareHost}
         </p>
 
         <p className="mx-auto mt-4 max-w-md text-sm text-moss-700 dark:text-moss-200 print:text-black">
@@ -116,7 +118,7 @@ export default function PrintInvitePage() {
         <TearOffStrip
           tabs={Array.from({ length: 6 }, () => ({
             value: inviteUrl,
-            label: window.location.host,
+            label: shareHost,
           }))}
           qrAriaLabel={t("print.invite.qrAria")}
         />

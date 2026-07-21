@@ -23,6 +23,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
+import { shareOrigin } from "@/lib/appOrigin";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import {
   LAST_SEEN_REMOVAL_QUORUM,
@@ -404,7 +405,10 @@ export function SourceCard() {
     let cancelled = false;
     void (async () => {
       try {
-        const res = await fetch("/source/manifest.json", {
+        // On the web shareOrigin() === location.origin, so this stays
+        // a same-origin fetch; in the desktop shell it resolves against
+        // the community node instead of the app:// origin.
+        const res = await fetch(`${shareOrigin()}/source/manifest.json`, {
           cache: "no-store",
         });
         const type = res.headers.get("content-type") ?? "";
@@ -455,7 +459,7 @@ export function SourceCard() {
             {tarball && (
               <li>
                 <a
-                  href={`/source/${tarball.name}`}
+                  href={`${shareOrigin()}/source/${tarball.name}`}
                   download
                   className="font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
                 >
@@ -468,7 +472,7 @@ export function SourceCard() {
             {bundle && (
               <li>
                 <a
-                  href={`/source/${bundle.name}`}
+                  href={`${shareOrigin()}/source/${bundle.name}`}
                   download
                   className="font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
                 >
@@ -480,7 +484,7 @@ export function SourceCard() {
             )}
             <li>
               <a
-                href="/source/SHA256SUMS"
+                href={`${shareOrigin()}/source/SHA256SUMS`}
                 download
                 className="font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
               >

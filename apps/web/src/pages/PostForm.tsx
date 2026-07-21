@@ -26,6 +26,7 @@ import { useToast } from "@/state/ToastContext";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
 import { cancelPost, createPost } from "@/db/actions";
 import { humanizeError } from "@/lib/humanizeError";
+import { shareOrigin } from "@/lib/appOrigin";
 import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
 import { tabToParam } from "@/lib/boardTab";
 import { useDraftAutosave } from "@/lib/useDraftAutosave";
@@ -185,7 +186,7 @@ export default function PostFormPage() {
       t("bodyDoubling.postDescription", {
         task: companyTask.title,
         project: project?.title ?? "",
-        url: `${window.location.origin}/project/${companyTask.projectId}/task/${companyTask.id}`,
+        url: `${shareOrigin()}/project/${companyTask.projectId}/task/${companyTask.id}`,
       }),
     );
   }, [companyTask, companySeedable, projects, t]);

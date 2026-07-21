@@ -26,6 +26,7 @@ import { MyTasksSection } from "@/pages/MyTasks";
 import { MyProjectsSection } from "@/pages/MyProjects";
 import { buildShiftIcs, icsFilename } from "@/lib/eventIcs";
 import { downloadIcs } from "@/lib/ics";
+import { shareOrigin } from "@/lib/appOrigin";
 import { useToast } from "@/state/ToastContext";
 import { askedOfYou, type AskedOfYouItem } from "@/lib/mentions";
 import { stripMarkdown } from "@/lib/markdown";
@@ -519,7 +520,7 @@ function ShiftRow({ upcoming }: { upcoming: UpcomingShift }) {
           const file = icsFilename(`${shift.label} ${event.title}`);
           downloadIcs(
             file,
-            buildShiftIcs(shift, event, { appUrl: window.location.origin }),
+            buildShiftIcs(shift, event, { appUrl: shareOrigin() }),
           );
           showToast(t("toast.icsShiftSaved", { file }));
         }}

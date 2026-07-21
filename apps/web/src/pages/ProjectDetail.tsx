@@ -48,6 +48,7 @@ import { listLinksForProject } from "@/db/eventProjectLinks";
 import { fileAdoptionProposal, lastOrganizerActivityAt } from "@/db/adoption";
 import { ADOPTION_MIN_DELIBERATION_DAYS } from "@/lib/autoCloseProposals";
 import { humanizeError } from "@/lib/humanizeError";
+import { shareOrigin } from "@/lib/appOrigin";
 import { matchesQuery } from "@/lib/messageSearch";
 import { matchesFilter, type TaskFilter } from "@/lib/taskFilter";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
@@ -409,7 +410,7 @@ export default function ProjectDetailPage() {
   // `project` — the early `!project` guard above already returned.
   const handleCopyProjectLink = async () => {
     const result = await shareUrl({
-      url: `${window.location.origin}/project/${project.id}`,
+      url: `${shareOrigin()}/project/${project.id}`,
       title: project.title,
     });
     if (result === "copied" || result === "shared") {

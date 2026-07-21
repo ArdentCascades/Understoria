@@ -22,6 +22,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
+import { shareOrigin } from "@/lib/appOrigin";
 import { IconSettings } from "@/components/visual";
 import {
   balanceFor,
@@ -1642,7 +1643,7 @@ function InvitesSection({
   const activeUrl =
     shareUrl ??
     (latestOpen
-      ? `${window.location.origin}/invite#${latestOpen.encoded}`
+      ? `${shareOrigin()}/invite#${latestOpen.encoded}`
       : null);
   const isFreshShare = shareUrl !== null;
 

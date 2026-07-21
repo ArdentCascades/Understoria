@@ -49,6 +49,7 @@ import type {
   TaskState,
 } from "@understoria/shared/types";
 import { db, SETTING_KEYS, getSetting, setSetting } from "@/db/database";
+import { primeShareOrigin } from "@/lib/appOrigin";
 import { isDemoBuild } from "@/lib/demo";
 import {
   normalizeNodeUrl,
@@ -131,6 +132,10 @@ export async function writeSubmitConfig(cfg: SubmitConfig): Promise<void> {
       cfg.enabled ? "1" : "0",
     );
   });
+  // The desktop shell derives its share-link origin from this URL
+  // (lib/appOrigin.ts) — this is the single write chokepoint, so the
+  // cache can never go stale.
+  primeShareOrigin(cfg.url);
   // Connecting (or re-pointing) a node re-enqueues every self-authored
   // record already in Dexie — the fix for the invite-onboarding
   // incident where a founder's pre-connection projects/events existed

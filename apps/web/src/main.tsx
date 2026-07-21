@@ -26,6 +26,9 @@ import { ToastProvider } from "@/state/ToastContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import App from "./App";
 import { initInstallCapture } from "@/lib/installGuide";
+import { isDesktopShell } from "@/lib/desktop";
+import { primeShareOrigin } from "@/lib/appOrigin";
+import { readSubmitConfig } from "@/lib/nodeSubmit";
 import "./i18n";
 // Variable serif used for page-level titles only. Browsers load
 // only the unicode-range subsets they need via @font-face rules
@@ -37,6 +40,14 @@ import "./index.css";
 // it early, so the listener must be installed at module load. See
 // lib/installGuide.ts.
 initInstallCapture();
+
+// Desktop shell (app://): share links can't use this origin — prime
+// the public origin from the configured node URL before first render
+// needs it. Fire-and-forget: shareOrigin() falls back safely until
+// the read lands, and writeSubmitConfig re-primes on every change.
+if (isDesktopShell()) {
+  void readSubmitConfig().then((cfg) => primeShareOrigin(cfg.url));
+}
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
