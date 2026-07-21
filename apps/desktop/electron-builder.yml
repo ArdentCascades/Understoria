@@ -16,6 +16,10 @@ linux:
   target:
     - AppImage
   category: Network
+  # Without this, electron-builder derives the executable from the
+  # npm package name (@understoria/desktop → "@understoriadesktop")
+  # and refuses the "@" as path-unsafe.
+  executableName: understoria
   icon: build/icon.png
   synopsis: Community mutual-aid timebank
   description: >-
