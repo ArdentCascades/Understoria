@@ -594,6 +594,13 @@
       "endDateAria": "Fecha de fin",
       "endTimeAria": "Hora de fin",
       "addEndTime": "Agregar hora de fin",
+      "quickPick": {
+        "today": "Hoy",
+        "tomorrow": "Mañana",
+        "dayAria": "Usar {{label}} como fecha de inicio",
+        "timeAria": "Usar {{label}} como hora de inicio",
+        "timeHint": "Aún sin hora — toca el campo de hora, o elige una arriba."
+      },
       "location": "Lugar",
       "locationField": "Lugar",
       "locationPlaceholder": "el banco de la biblioteca",

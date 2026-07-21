@@ -594,6 +594,13 @@
       "endDateAria": "End date",
       "endTimeAria": "End time",
       "addEndTime": "Add an end time",
+      "quickPick": {
+        "today": "Today",
+        "tomorrow": "Tomorrow",
+        "dayAria": "Set the start date to {{label}}",
+        "timeAria": "Set the start time to {{label}}",
+        "timeHint": "No time yet — tap the time field, or pick one above."
+      },
       "location": "Location",
       "locationField": "Location",
       "locationPlaceholder": "the library bench",
