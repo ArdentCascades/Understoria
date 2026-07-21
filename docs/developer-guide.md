@@ -42,10 +42,19 @@ understoria/
 ```
 
 The root `package.json` is an npm workspace over `apps/*` and
-`packages/*` — currently `apps/web`, `apps/server`, and
-`packages/shared`. Root-level scripts (`npm run dev`, `npm test`,
-`npm run typecheck`) build the shared package first, then fan out
-across the workspaces.
+`packages/*` — currently `apps/web`, `apps/server`, `apps/site`
+(the static showcase), `apps/desktop` (the Linux AppImage shell —
+`docs/desktop-appimage.md`), and `packages/shared`. Root-level
+scripts (`npm run dev`, `npm test`, `npm run typecheck`) build the
+shared package first, then fan out across the workspaces.
+
+One workspace quirk: `apps/desktop` depends on Electron, whose
+install step downloads a ~110 MB binary from GitHub releases. In
+environments where that's blocked (the development sandbox, the
+main CI job), install with `ELECTRON_SKIP_BINARY_DOWNLOAD=1 npm ci`
+— every desktop gate (typecheck, tests, `tsc` build) runs without
+the binary; only launching Electron and packaging the AppImage need
+it (`.github/workflows/appimage.yml` does that part).
 
 ## 2. Tech stack, at a glance
 

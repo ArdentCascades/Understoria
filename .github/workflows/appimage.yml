@@ -1,0 +1,63 @@
+# Builds the Linux AppImage (docs/desktop-appimage.md §3). This is
+# where the Electron binary download actually happens — the
+# development sandbox can't reach GitHub releases, so CI is the
+# canonical builder. The artifact is manual-update-by-design: no
+# publish step, no update feed (design doc §6).
+name: AppImage
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/desktop/**'
+      - 'apps/web/**'
+      - 'packages/shared/**'
+      - '.github/workflows/appimage.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/desktop/**'
+      - '.github/workflows/appimage.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: appimage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  appimage:
+    name: Build Linux AppImage
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential python3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Desktop typecheck + tests
+        run: |
+          npm run typecheck --workspace=@understoria/desktop
+          npm run test --workspace=@understoria/desktop
+
+      - name: Build AppImage
+        run: npm run dist --workspace=@understoria/desktop
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: understoria-appimage
+          path: apps/desktop/release/*.AppImage
+          if-no-files-found: error
+          retention-days: 30
