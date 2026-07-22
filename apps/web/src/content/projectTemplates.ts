@@ -4331,6 +4331,839 @@ export const PROJECT_TEMPLATES_EN: readonly ProjectTemplate[] = [
       },
     ],
   },
+  {
+    id: "community-solar-coop",
+    name: "Community Solar & Energy Cooperative",
+    purpose:
+      "Pool neighbors' resources into shared renewable energy that cuts everyone's bills — especially for the renters and households who could never put panels on a roof of their own.",
+    whoItServes:
+      "Renters, low-income households, and anyone shut out of rooftop solar by their roof, their landlord, or their budget.",
+    whatYoullNeed:
+      "Committed members, technical and financial know-how you can borrow or learn, a host site or an existing community-solar program to join, and partner organizations. One thing stated plainly: energy cooperatives carry real financial and legal complexity — get advice from qualified professionals on structure, financing, and contracts before anyone signs anything.",
+    setupHours: 27,
+    defaultCategory: "infrastructure",
+    firstSteps:
+      "Before any panels or paperwork, talk to two groups: " +
+      "neighbors who'd actually join, to gauge real commitment, " +
+      "and a solar co-op a town or state over that's already done " +
+      "it — they'll tell you which model fits your area's rules " +
+      "and which mistakes cost them money. Then read those local " +
+      "rules yourselves, because they, not your enthusiasm, " +
+      "decide what's possible.",
+    commonPitfalls:
+      "Solar co-ops die in the gap between excitement and " +
+      "signatures: a year of meetings about a model your state's " +
+      "rules never allowed, or a contract signed without " +
+      "professional review that locks members into terms nobody " +
+      "understood. The other killer is fuzzy money — if members " +
+      "can't see plainly what they put in and what comes back, " +
+      "trust erodes and the co-op unravels.",
+    pairsWith: ["weatherization-brigade", "bulk-buying-coop"],
+    tasks: [
+      {
+        name: "Gather members and assess interest",
+        description:
+          "Recruit households interested in lower-cost clean energy and find out how committed they really are — vague enthusiasm and a signed-up member are different things. Your numbers shape which models are realistic, so count honestly before you plan.",
+        hours: 4,
+        skills: ["outreach"],
+      },
+      {
+        name: "Learn the models and local rules",
+        description:
+          "Research how community solar works where you live: state laws, net metering, subscription programs, cooperative structures. The rules vary enormously from place to place and they determine what's actually possible — do this before falling in love with any one model.",
+        hours: 5,
+        skills: ["research"],
+      },
+      {
+        name: "Find a site or program to join",
+        description:
+          "Look for a host roof or piece of land for a shared array, or check whether an existing community-solar program will take your group as collective subscribers — joining one is often much faster than building. Weigh both paths with your members before committing.",
+        hours: 4,
+        skills: ["outreach"],
+      },
+      {
+        name: "Sort out financing and legal structure",
+        description:
+          "Decide how the project is funded and governed, and form the cooperative properly. This is the step with real legal and financial implications — bring in qualified professionals to review the structure and every contract, and don't sign until they have.",
+        hours: 5,
+        skills: ["paperwork", "accounting"],
+        follows: [1],
+      },
+      {
+        name: "Partner with installers and providers",
+        description:
+          "Line up reputable installers or providers, compare more than one bid, and confirm warranties and long-term maintenance in writing. A cheap install with no maintenance plan is an expensive one in five years.",
+        hours: 3,
+        skills: ["outreach"],
+      },
+      {
+        name: "Set up the bill-credit and membership system",
+        description:
+          "Work out exactly how savings or credits flow to members and how membership and payments work. Make it transparent and easy to understand — a member should be able to see, on one page, what they put in and what comes back.",
+        hours: 3,
+        skills: ["accounting", "data entry"],
+        follows: [3],
+      },
+      {
+        name: "Educate members on energy use",
+        description:
+          "Help members read their bills and cut their consumption — a kilowatt saved beats a kilowatt generated. Pair the solar savings with plain efficiency tips so households see the difference on paper.",
+        hours: 3,
+        skills: ["teaching"],
+      },
+    ],
+  },
+  {
+    id: "worker-coop-incubator",
+    name: "Worker Cooperative & Job Skills Incubator",
+    purpose:
+      "Help neighbors build job skills and launch worker-owned cooperatives — livelihoods where the people doing the work own the workplace and make the decisions.",
+    whoItServes:
+      "Unemployed and underemployed neighbors, and anyone who wants a real stake in where they work.",
+    whatYoullNeed:
+      "Mentors with business and cooperative experience, training space and materials, startup support you can point ventures toward, and partnerships — cooperative developers, lenders who know co-ops, and your own skill-share program.",
+    setupHours: 27,
+    defaultCategory: "education",
+    firstSteps:
+      "Start with conversations, not a curriculum: sit down with " +
+      "interested members about what they can do and want to " +
+      "build, and look for the skill clusters that could actually " +
+      "become a venture. At the same time, find your area's " +
+      "cooperative developer or an existing worker co-op willing " +
+      "to mentor — their scars are your syllabus, and formation " +
+      "without that guidance is where groups get hurt.",
+    commonPitfalls:
+      "This fails two ways: as a training program that never " +
+      "launches anything, because nobody pushed a skills cluster " +
+      "toward a real venture — or as a launch that skips the " +
+      "boring parts, incorporating on a downloaded template and " +
+      "discovering the governance and tax mess two years in. It " +
+      "also quietly dies when one organizer holds every mentor " +
+      "and funder relationship; share those contacts from day " +
+      "one.",
+    pairsWith: ["skill-share", "solidarity-fund", "time-bank"],
+    tasks: [
+      {
+        name: "Assess member skills and goals",
+        description:
+          "Sit down with members and learn what they can do and what they want to build. You're looking for clusters — three people who can cook, a crew with trade skills, five who clean — because a cluster of skills is the seed of a viable cooperative venture.",
+        hours: 4,
+        skills: ["interviewing"],
+      },
+      {
+        name: "Offer job-readiness and skills training",
+        description:
+          "Run sessions on resumes, interviews, trades, digital skills, and financial literacy. Draw on your skill-share program and bring in outside experts for what nobody local can teach — the goal is capable members whether or not a co-op forms around them.",
+        hours: 5,
+        skills: ["teaching"],
+      },
+      {
+        name: "Teach the cooperative model",
+        description:
+          "Walk members through worker ownership and democratic governance: how profits are shared, how decisions get made, and how it all differs from a traditional business. People can't choose a model they've never seen — use real co-ops as examples.",
+        hours: 4,
+        skills: ["teaching", "facilitation"],
+      },
+      {
+        name: "Support cooperative formation",
+        description:
+          "When a group is ready, help them write a business plan and choose a legal structure. Connect them to lawyers and accountants who know cooperatives rather than improvising the legal and accounting steps — incorporation done wrong is expensive to undo.",
+        hours: 5,
+        skills: ["paperwork"],
+        follows: [2],
+      },
+      {
+        name: "Connect to startup resources",
+        description:
+          "Build a live list of microloans, grants, cooperative-development funds, and incubators, and help ventures actually apply. Most co-op money is out there but badly signposted — your map of it is worth real dollars.",
+        hours: 3,
+        skills: ["research"],
+      },
+      {
+        name: "Provide mentorship",
+        description:
+          "Pair each new venture with an experienced cooperator or business mentor who checks in through the early, fragile stages. The first year is where co-ops fail; a steady mentor who has seen the pattern before changes the odds.",
+        hours: 3,
+      },
+      {
+        name: "Build peer support among ventures",
+        description:
+          "Bring the ventures together into a network where co-ops share lessons, refer customers to each other, and buy from each other. Co-ops that trade with each other survive downturns that kill isolated ones.",
+        hours: 3,
+        skills: ["organizing"],
+      },
+    ],
+  },
+  {
+    id: "elder-meal-delivery",
+    name: "Elder Companionship & Meal Delivery",
+    purpose:
+      "Bring regular meals and friendly visits to homebound elders — the food matters, and the ten minutes of conversation at the door often matters more.",
+    whoItServes:
+      "Isolated, homebound, or frail elderly neighbors — and the families who worry about them from far away.",
+    whatYoullNeed:
+      "Dependable volunteers you've screened, a meal source, planned routes, and simple safety practices for the moment a door goes unanswered.",
+    setupHours: 22,
+    defaultCategory: "food",
+    firstSteps:
+      "Start with the meal source and the first five elders, not " +
+      "a sign-up sheet: talk to the community meal crew or a " +
+      "couple of willing cooks about what they can reliably " +
+      "produce, and ask senior-service workers, parish nurses, " +
+      "and pharmacists who's actually going without. Screen your " +
+      "first volunteers before the first delivery, not after — " +
+      "the trust you're building lives or dies on who walks " +
+      "through those doors.",
+    commonPitfalls:
+      "The dangerous failure is a missed signal — a volunteer who " +
+      "shrugs off an unanswered door because nobody wrote down " +
+      "what to do, or an allergy that never made it onto the " +
+      "route sheet. The slow failure is unreliability: elders " +
+      "plan their day around the visit, and a route that skips " +
+      "weeks teaches them not to count on you. Better five elders " +
+      "served every single week than twenty served sometimes.",
+    pairsWith: ["community-meal", "neighborhood-care-network", "rides-transportation"],
+    learnMore: ["who-sees-what"],
+    tasks: [
+      {
+        name: "Identify homebound elders",
+        description:
+          "Find elders through clinics, senior services, faith groups, and word of mouth. Keep it respectful and strictly opt-in — you're offering a meal and company, not signing anyone up for surveillance.",
+        hours: 3,
+        skills: ["outreach"],
+      },
+      {
+        name: "Recruit and screen volunteers",
+        description:
+          "Anyone entering an elder's home gets vetted: references and basic checks, no exceptions for friends-of-friends. Then aim for consistency — elders do better with the same familiar face at the door each week than with a rotating cast.",
+        hours: 4,
+        skills: ["organizing"],
+      },
+      {
+        name: "Arrange a meal source",
+        description:
+          "Line up meals from a people's kitchen, willing home cooks, or restaurants donating portions. Pay attention to nutrition and easy reheating, and label every container with its contents — an unlabeled meal is a gamble for someone with allergies.",
+        hours: 4,
+        skills: ["cooking", "food safety"],
+      },
+      {
+        name: "Plan delivery routes and schedule",
+        description:
+          "Group elders into efficient routes and set a dependable rhythm — same days, roughly the same times. Build a few unhurried minutes of conversation into every stop; for many elders, that's the real delivery.",
+        hours: 3,
+        skills: ["driving", "organizing"],
+        follows: [0, 2],
+      },
+      {
+        name: "Record dietary, allergy, and emergency info",
+        description:
+          "For each elder, record dietary needs, allergies, medications that matter around food, and emergency contacts. Keep it secure and need-to-know — the driver needs the allergy, not the whole medical history.",
+        hours: 3,
+        skills: ["data entry"],
+      },
+      {
+        name: "Establish a wellness-check protocol",
+        description:
+          "Write down exactly what a volunteer does when an elder doesn't answer or seems unwell: who to call first, when to involve family or emergency services, and how to note what happened. Deciding this in advance beats improvising on a doorstep.",
+        hours: 3,
+        skills: ["writing"],
+        follows: [4],
+      },
+      {
+        name: "Support volunteers and gather feedback",
+        description:
+          "Check in with volunteers regularly, rotate routes when someone needs a break, and ask the elders themselves how the project could serve them better. They'll tell you things the volunteers never see.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "disaster-relief-hub",
+    name: "Disaster Relief Distribution Hub",
+    purpose:
+      "Stand up a hub that can receive, sort, and move supplies fast when disaster hits — because the first days after a flood or fire are won or lost on logistics.",
+    whoItServes:
+      "Residents hit by floods, storms, fires, and other disasters — starting with the neighbors least able to travel or wait.",
+    whatYoullNeed:
+      "A pre-arranged site with a backup, supply-sourcing pipelines, a surge volunteer team, and coordination with the emergency preparedness network — nearly all of it arranged before any disaster, because afterward is too late.",
+    setupHours: 24,
+    defaultCategory: "organizing",
+    suggestsWorkDays: true,
+    firstSteps:
+      "The hub exists on paper long before it exists in a parking " +
+      "lot, so start with the emergency preparedness network — " +
+      "they hold the contact tree and the risk picture — and with " +
+      "the honest question of which building would actually let " +
+      "you in at six in the morning after a flood. Get the site " +
+      "agreement and the backup settled first; every other task " +
+      "keys off an address.",
+    commonPitfalls:
+      "Relief hubs fail in two directions: the hub that exists " +
+      "only as a plan nobody rehearsed, so the real event burns " +
+      "its first day on questions a practice run would have " +
+      "answered — and the hub that opens its doors to a donation " +
+      "flood it can't sort, becoming a warehouse of unusable " +
+      "clothes while people need water. The quieter harm is " +
+      "distribution with barriers: the moment someone must prove " +
+      "they deserve help, you've recreated the system you built " +
+      "this to bypass.",
+    pairsWith: ["emergency-preparedness", "resource-hub-dispatch"],
+    learnMore: ["internet-outage"],
+    tasks: [
+      {
+        name: "Pre-identify a hub site and backup",
+        description:
+          "Find a building or lot that can take deliveries, sort goods, and host a distribution line — plus a backup in case the first is damaged or unreachable. Confirm access and keys with the owners now, in calm weather; a site you can't get into is no site.",
+        hours: 3,
+        skills: ["outreach"],
+      },
+      {
+        name: "Build supply-sourcing pipelines",
+        description:
+          "Arrange in advance where water, food, hygiene, and cleanup supplies would come from — suppliers, partner orgs, drives. Just as important: a way to learn what people actually need after an event, so you aren't buried in the wrong things.",
+        hours: 4,
+        skills: ["outreach", "organizing"],
+      },
+      {
+        name: "Set up intake, sorting, and inventory",
+        description:
+          "Design how donations get received, sorted, and tracked from the moment a truck arrives. Every hub that's drowned in unsorted goods skipped this step — decide your categories, labels, and simple counts before you need them.",
+        hours: 4,
+        skills: ["organizing", "data entry"],
+      },
+      {
+        name: "Create a distribution system",
+        description:
+          "Plan how supplies go out: equitable and low-barrier — no ID checks, no proof of need — with mobile delivery for people who can't reach the hub. Prioritize the most vulnerable first, and write that priority down so it survives the chaos.",
+        hours: 3,
+        skills: ["driving", "organizing"],
+        follows: [2],
+      },
+      {
+        name: "Recruit and train a surge volunteer team",
+        description:
+          "Build a roster of people who can mobilize on short notice, and pre-train them on their roles, safety rules, and your intake and distribution system. A trained team of twelve outworks a well-meaning crowd of fifty.",
+        hours: 4,
+        skills: ["teaching"],
+      },
+      {
+        name: "Coordinate with other responders",
+        description:
+          "Introduce the hub to official emergency agencies and other relief groups before anything happens. Agree on who covers what, so you're filling gaps instead of duplicating — mutual aid moves fastest exactly where the official response is slowest.",
+        hours: 3,
+        skills: ["outreach"],
+      },
+      {
+        name: "Plan communication and safety",
+        description:
+          "Plan for the networks failing: offline contact methods, printed lists, and a tie into the preparedness network's contact tree. Set hard volunteer-safety rules — nobody enters unsafe structures, ever — and put them in writing.",
+        hours: 3,
+        skills: ["writing"],
+      },
+    ],
+  },
+  {
+    id: "recovery-peer-support",
+    name: "Recovery & Sober Peer Support Network",
+    purpose:
+      "Run peer-led support for neighbors in or seeking recovery from substance use — a complement to professional treatment, never a replacement for it.",
+    whoItServes:
+      "People in recovery, people thinking about it, and the families and friends walking alongside them.",
+    whatYoullNeed:
+      "Peer facilitators with lived experience and real training, a safe private space, referral pathways, and boundaries stated plainly: peer support complements professional treatment, it does not replace it; facilitators are not medical providers and must never advise on detox or medication; and there is always a clear plan for connecting anyone in crisis to qualified professional or emergency help.",
+    setupHours: 22,
+    defaultCategory: "emotional_support",
+    firstSteps:
+      "Begin with the people who'll hold the room: find one or " +
+      "two neighbors with solid lived recovery experience, get " +
+      "them into formal peer-support training, and together write " +
+      "the scope — what this network is and is not — before you " +
+      "announce anything. Then meet the local treatment programs " +
+      "and crisis services in person, so your referral pathway is " +
+      "a relationship, not a phone number on a flyer.",
+    commonPitfalls:
+      "This gets dangerous when the line blurs — a well-meaning " +
+      "facilitator advising someone on detox or medication, which " +
+      "can kill, or a group drifting into amateur treatment " +
+      "because the referral pathway was never real. It fails " +
+      "quietly through broken confidentiality — one leaked story " +
+      "empties the room for good — and through facilitator " +
+      "burnout, when the person holding everyone else's recovery " +
+      "has no support for their own.",
+    pairsWith: ["mental-health-peer-support", "harm-reduction-supplies"],
+    learnMore: ["who-sees-what"],
+    tasks: [
+      {
+        name: "Recruit and train peer facilitators",
+        description:
+          "Look for people with lived recovery experience and get them through a recognized peer-recovery support training. Be clear from the first conversation: facilitators are peers, not medical or clinical providers, and the training is what keeps that line safe.",
+        hours: 5,
+        skills: ["facilitation", "teaching"],
+      },
+      {
+        name: "Define scope and boundaries",
+        description:
+          "Write down what the network does — peer support, connection, encouragement — and what it does not: treatment, detox, medical care, medication advice. A written scope protects members from bad advice and protects facilitators from carrying what isn't theirs.",
+        hours: 3,
+        skills: ["writing"],
+      },
+      {
+        name: "Build referral and crisis pathways",
+        description:
+          "Build working relationships with professional treatment programs, medical care, and crisis services, and write an overdose-response plan. When someone in the room needs more than peers can give, the handoff should be a warm phone call, not a pamphlet.",
+        hours: 4,
+        skills: ["outreach", "research"],
+        follows: [1],
+      },
+      {
+        name: "Find a safe, private, substance-free space",
+        description:
+          "Find a room that's confidential, welcoming, and free of judgment and substances — somewhere people can be seen walking into without it broadcasting anything. Libraries, community rooms, and faith spaces with a separate entrance all work.",
+        hours: 2,
+        skills: ["outreach"],
+      },
+      {
+        name: "Set confidentiality and group norms",
+        description:
+          "Agree on the ground rules: what's said here stays here, respect without advice-pushing, and everyone's right to share or to pass. Reaffirm them out loud at the start of every single meeting — norms only protect people while they're fresh.",
+        hours: 3,
+        skills: ["facilitation"],
+      },
+      {
+        name: "Schedule and promote meetings",
+        description:
+          "Offer more than one meeting time so shift workers and parents can come, and promote in plain, low-stigma language — free, open, no requirements. How you word the flyer decides who feels safe showing up.",
+        hours: 3,
+        skills: ["outreach"],
+        follows: [3],
+      },
+      {
+        name: "Support facilitators and prevent burnout",
+        description:
+          "Check in with facilitators regularly, rotate who leads, and make sure they have support of their own — holding space for recovery is heavy work, and a facilitator's own recovery always comes first.",
+        hours: 2,
+        skills: ["listening"],
+      },
+    ],
+  },
+  {
+    id: "community-fitness",
+    name: "Community Fitness & Wellness Groups",
+    purpose:
+      "Get neighbors moving together for free — walking groups, stretching, pickup sports, dance — because feeling good in your body shouldn't cost a gym membership.",
+    whoItServes:
+      "Anyone who wants to move, especially neighbors priced out of gyms, elders, and isolated folks for whom the company matters as much as the exercise.",
+    whatYoullNeed:
+      "Volunteer activity leaders, safe accessible spaces, and very little equipment. A welcoming, no-pressure style matters more than credentials — though anyone leading a physically demanding activity should have the qualifications for it, and every session needs water, warm-ups, and a first-aid kit within reach.",
+    setupHours: 19,
+    defaultCategory: "other",
+    firstSteps:
+      "Before you schedule anything, ask the people you hope " +
+      "will come what they'd actually enjoy — a walking group, " +
+      "chair stretching, a dance night — and what feels " +
+      "possible for their bodies; the answers should pick your " +
+      "activities, not the other way around. Then find one or " +
+      "two leaders whose warmth outweighs their expertise, walk " +
+      "the candidate spaces together, and launch a single " +
+      "reliable weekly session before adding more.",
+    commonPitfalls:
+      "This dies two ways: it turns into a performance — the " +
+      "fittest members set the pace, the talk drifts to weight " +
+      "and appearance, and the very people it's for quietly " +
+      "stop coming — or it gets inconsistent, because nothing " +
+      "kills a walking group faster than showing up to a " +
+      "cancelled session twice. Skipping the boring safety " +
+      "basics is the third: no warm-up, no water, no first-aid " +
+      "kit, and one bad fall ends the whole thing.",
+    pairsWith: ["disability-support-network", "neighborhood-care-network"],
+    learnMore: ["community-events"],
+    tasks: [
+      {
+        name: "Survey interests and activity levels",
+        description:
+          "Ask around — at the laundromat, the senior building, the school gate — about what kinds of movement people enjoy and what feels accessible. Let the answers lead: a template full of sports nobody asked for helps no one.",
+        hours: 2,
+        skills: ["outreach"],
+      },
+      {
+        name: "Recruit activity leaders",
+        description:
+          "Find volunteers to lead walks, stretching, dance, or pickup games. A welcoming, no-pressure style beats expertise for most activities — but anyone leading something physically demanding should hold the appropriate qualification for it.",
+        hours: 3,
+        skills: ["outreach"],
+      },
+      {
+        name: "Find safe spaces",
+        description:
+          "Ask about parks, community halls, and school gyms — free or cheap, and reachable without a car. Check each space for a range of bodies and abilities: level ground, seating, shade, bathrooms, and somewhere to shelter if the weather turns.",
+        hours: 3,
+      },
+      {
+        name: "Plan inclusive, all-levels programming",
+        description:
+          "Design every activity so people can join at their own pace and modify freely — a chair option for the stretch, a short loop inside the long walk. Keep the framing on feeling good, moving, and connecting, never on appearance or performance.",
+        hours: 3,
+      },
+      {
+        name: "Address safety and health",
+        description:
+          "Build warm-ups and hydration into every session, keep a stocked first-aid kit on hand, and suggest people new to exercise check with a doctor first. Teach leaders to watch for overexertion and to make slowing down feel normal, not embarrassing.",
+        hours: 3,
+        skills: ["first aid"],
+      },
+      {
+        name: "Set a schedule and spread the word",
+        description:
+          "Pick consistent times people can build a habit around and stick to them. Promote widely — flyers, group chats, word of mouth — and say explicitly that all ages, sizes, and abilities are welcome, because plenty of people assume they aren't.",
+        hours: 3,
+        skills: ["outreach"],
+      },
+      {
+        name: "Build community and consistency",
+        description:
+          "Make the sessions social: names learned, newcomers greeted, a few minutes of chat built in. Celebrate showing up rather than any metric — the connection is what keeps people coming back long after the novelty wears off.",
+        hours: 2,
+        skills: ["facilitation"],
+      },
+    ],
+  },
+  {
+    id: "urban-orchard",
+    name: "Urban Orchard & Food Forest",
+    purpose:
+      "Plant fruit and nut trees and perennial food plants on shared land — a food forest that, once established, feeds the neighborhood for free for decades.",
+    whoItServes:
+      "The whole community, including neighbors who haven't arrived yet — trees planted this year become a long-term source of free fresh food for everyone.",
+    whatYoullNeed:
+      "Long-term land access (a season-to-season handshake isn't enough for trees), climate-suited trees and plants, volunteers for planting days, and a small crew of stewards committed for years, not months. Confirm water access before anything goes in the ground.",
+    setupHours: 21,
+    defaultCategory: "food",
+    suggestsWorkDays: true,
+    firstSteps:
+      "The land conversation comes before everything: talk to " +
+      "land trusts, the parks department, faith congregations " +
+      "with unused ground — anyone who can commit a site for a " +
+      "decade, not a season — and confirm water while you're at " +
+      "it. In parallel, find one person with real fruit-tree " +
+      "experience to anchor the design, and ask neighbors what " +
+      "they'd actually pick and eat, because an orchard of " +
+      "fruit nobody wants just feeds the wasps.",
+    commonPitfalls:
+      "Orchards rarely fail at the planting day — they fail in " +
+      "years two and three, when the crowd is gone and nobody " +
+      "organized watering, so the young trees quietly die " +
+      "their first dry summer. The other killers are shaky " +
+      "land deals revoked just as the trees start bearing, and " +
+      "harvest fights because nobody agreed on sharing norms " +
+      "before the first big crop. Settle the stewardship rota " +
+      "and the sharing rules early, while they're still easy.",
+    pairsWith: ["community-garden", "gleaning-network", "seed-library"],
+    tasks: [
+      {
+        name: "Secure long-term land access",
+        description:
+          "Get a durable written agreement — a long lease, a land trust arrangement, a formal city commitment — because trees need decades, not a season-to-season handshake. Confirm reliable water access on the site before you sign anything.",
+        hours: 5,
+        skills: ["outreach"],
+      },
+      {
+        name: "Plan the planting design",
+        description:
+          "Choose species suited to your climate and design in food-forest layers: canopy trees, shrubs, and ground cover working together. Plan for pollination partners and for the spacing mature trees will need, not the size of the saplings you plant.",
+        hours: 4,
+        skills: ["gardening"],
+      },
+      {
+        name: "Source trees and plants",
+        description:
+          "Line up trees and plants through nurseries, grants, donations, and seasonal bare-root sales — bare-root and young stock cost a fraction of potted mature trees and usually establish better. Order early; good varieties sell out.",
+        hours: 3,
+      },
+      {
+        name: "Prepare the site",
+        description:
+          "Get the ground ready before the trees arrive: improve the soil, lay mulch, set up watering, and mark and clear each planting spot from the design. A prepared site turns a planting day from chaos into an assembly line.",
+        hours: 4,
+        skills: ["gardening"],
+        follows: [1],
+      },
+      {
+        name: "Host planting days",
+        description:
+          "Run community planting days with clear instructions, so every tree goes in at the right depth with a watering basin and mulch — planted wrong, trees fail slowly and invisibly. Make it festive; a planting day is how the neighborhood starts to feel the orchard is theirs.",
+        hours: 5,
+        skills: ["gardening"],
+        follows: [3],
+        recurringCadence: "cycle",
+      },
+      {
+        name: "Set up long-term stewardship",
+        description:
+          "Organize the unglamorous work that decides whether the orchard lives: watering young trees through their first summers, pruning, mulching, and pest management, year after year. A named rota of committed stewards beats a big list of vague volunteers.",
+        hours: 3,
+        skills: ["gardening"],
+      },
+      {
+        name: "Plan harvest sharing",
+        description:
+          "Agree on picking and sharing norms before the first big crop, not after the first argument — who harvests, when, and how much. Route surplus to community fridges, pantries, and shared meals so nothing rots on the branch.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "new-parent-support",
+    name: "Postpartum & New Parent Support Network",
+    purpose:
+      "Wrap practical support around new and expecting parents — meals on the doorstep, errands run, dishes done, and peers who've been there — through pregnancy and the raw postpartum weeks.",
+    whoItServes:
+      "New and expecting parents, especially those without family nearby — the weeks after a birth are when support matters most and often arrives least.",
+    whatYoullNeed:
+      "Volunteers who can cook, run errands, and listen; a meal-train system; a resource directory; and experienced parents as peer supporters. Peer support is not medical or mental health care — postpartum mood disorders are common and serious, so every peer supporter must know the signs and how to gently connect a parent to professional help. And vet anyone who'll enter homes or help with infants before they do either.",
+    setupHours: 21,
+    defaultCategory: "childcare",
+    firstSteps:
+      "Start by asking parents who gave birth in the last year " +
+      "what would actually have helped — the answers (a meal " +
+      "with no visit attached, someone to hold the baby while " +
+      "they shower) are more specific than you'd guess. " +
+      "Introduce the network to midwives, doulas, and " +
+      "pediatric clinics who can offer it to families, recruit " +
+      "two or three experienced parents as your first peer " +
+      "supporters, and settle your vetting practice before " +
+      "anyone crosses a doorstep.",
+    commonPitfalls:
+      "The classic failure is support that serves the " +
+      "supporter: volunteers who arrive on their own schedule, " +
+      "stay too long, and offer parenting opinions instead of " +
+      "doing the dishes — exhausted parents will quietly stop " +
+      "answering the door rather than say so. The graver one " +
+      "is a peer missing the signs of postpartum depression " +
+      "because nobody trained them to recognize it or gave " +
+      "them the words to name it. And support that vanishes " +
+      "after two weeks, just when the casseroles stop and the " +
+      "hard part starts, isn't support at all.",
+    pairsWith: ["diaper-hygiene-bank", "childcare-collective", "welcome-wagon"],
+    learnMore: ["who-sees-what"],
+    tasks: [
+      {
+        name: "Recruit volunteers and peer supporters",
+        description:
+          "Gather cooks, errand-runners, and — most importantly — experienced parents willing to be peer supporters. The parent who remembers their own third sleepless week offers something no pamphlet can.",
+        hours: 3,
+        skills: ["outreach"],
+      },
+      {
+        name: "Set up a meal-train system",
+        description:
+          "Build a simple way to coordinate dropped-off meals through the weeks after a birth: a shared calendar, dietary needs and allergies collected once, food labeled and easy to reheat. Doorstep drop-off should be the default — a meal must never oblige a visit.",
+        hours: 3,
+        skills: ["cooking", "organizing"],
+      },
+      {
+        name: "Offer practical help",
+        description:
+          "Organize volunteers for the unglamorous load: errands, laundry, dishes, and watching older siblings so a parent can rest or get to an appointment. Ask what's wanted each time rather than assuming — useful help follows the parent's list, not the volunteer's.",
+        hours: 3,
+        skills: ["childcare"],
+      },
+      {
+        name: "Build a resource directory",
+        description:
+          "Compile local lactation support, postpartum mental health care, pediatric clinics, and sources of baby supplies — including the diaper bank and childcare collective if your community runs them. Keep it current; a directory of dead phone numbers is worse than none.",
+        hours: 4,
+        skills: ["data entry"],
+      },
+      {
+        name: "Create peer support circles",
+        description:
+          "Start small groups where new parents can be honest about how hard it is, with an experienced parent holding the space. Train peers on the signs of postpartum depression and anxiety and on gently, persistently encouraging professional care — never diagnosing, never waiting.",
+        hours: 3,
+        skills: ["facilitation"],
+      },
+      {
+        name: "Set safety and boundary practices",
+        description:
+          "Vet every volunteer who'll enter homes or help with infants — references at minimum — and write down the boundaries: parents set the terms, visits are short unless invited to be longer, and no one shows up unannounced. Support should never feel like surveillance.",
+        hours: 3,
+      },
+      {
+        name: "Connect to other projects",
+        description:
+          "Link families to the diaper bank, the childcare collective, and the welcome wagon so one point of contact opens all of it. A new parent shouldn't have to discover each program separately at the most exhausted moment of their life.",
+        hours: 2,
+        skills: ["outreach"],
+      },
+    ],
+  },
+  {
+    id: "foster-kinship-support",
+    name: "Foster & Kinship Care Support Network",
+    purpose:
+      "Stand behind foster, kinship, and other caregiving families — clothes and a bed when a child arrives overnight, respite when caregivers are running on empty, and peers who understand the work.",
+    whoItServes:
+      "Foster parents, grandparents and relatives raising children — kinship caregivers often start with a phone call and a few hours' notice — and the kids in their care.",
+    whatYoullNeed:
+      "Volunteers, donated goods across every age and size, respite helpers, and partnerships with agencies and schools. Work involving children in care is sensitive and legally governed: vet everyone who works with children, follow mandatory-reporting and confidentiality rules to the letter, and coordinate with the relevant agencies rather than around them.",
+    setupHours: 24,
+    defaultCategory: "childcare",
+    firstSteps:
+      "Start with a sit-down at the local foster agency or " +
+      "kinship navigator program: learn the rules that govern " +
+      "this work — vetting, mandatory reporting, " +
+      "confidentiality — before you recruit a single " +
+      "volunteer, and let them tell you where the gaps " +
+      "actually are. Then ask a few caregiving families what " +
+      "they needed in their first week and their first year; " +
+      "build toward those answers, not toward a warehouse of " +
+      "goods nobody asked for.",
+    commonPitfalls:
+      "This project can fail loudly or quietly. Loudly: an " +
+      "unvetted volunteer around children, or a family's story " +
+      "shared without permission — either can harm a child, " +
+      "end a placement, and finish the project in a day. " +
+      "Quietly: a mountain of unsorted donations while a " +
+      "caregiver waits three weeks for a toddler bed, or " +
+      "treating the agencies as adversaries until they stop " +
+      "referring families. Small, vetted, and coordinated " +
+      "beats big and improvised here, every time.",
+    pairsWith: ["diaper-hygiene-bank", "free-store", "childcare-collective"],
+    learnMore: ["who-sees-what"],
+    tasks: [
+      {
+        name: "Connect with caregiving families",
+        description:
+          "Reach caregiving families through agencies, schools, and faith groups — kinship caregivers especially, who often take in a grandchild or niece overnight with no preparation and little official support. Make the first contact an offer, never a screening.",
+        hours: 3,
+        skills: ["outreach"],
+      },
+      {
+        name: "Build a goods and clothing supply",
+        description:
+          "Collect clothing, beds, car seats, and everyday supplies across the full range of ages and sizes, since caregivers rarely know who's arriving until they arrive. Check safety items carefully — car seats and cribs have expiration dates and recall lists.",
+        hours: 4,
+        skills: ["organizing"],
+      },
+      {
+        name: "Create a rapid-response supply system",
+        description:
+          "Pack ready-to-go bags — a few days of clothes, toiletries, and a comfort item like a stuffed animal — sorted by age and size, deliverable within hours of a new placement. A child who arrives with nothing should not wait a week to have something of their own.",
+        hours: 3,
+        follows: [1],
+      },
+      {
+        name: "Organize respite support",
+        description:
+          "Arrange safe, properly vetted care so caregivers can rest, keep appointments, or just breathe — caregiver burnout is one of the main reasons placements break down. Coordinate with the agencies on who may provide respite care and under what rules.",
+        hours: 4,
+        skills: ["childcare"],
+      },
+      {
+        name: "Offer peer support groups",
+        description:
+          "Host regular gatherings where foster and kinship caregivers can trade experience and honest advice with people who get it — this work is isolating, and the caregiver three streets over may be carrying the same load alone.",
+        hours: 3,
+        skills: ["facilitation"],
+      },
+      {
+        name: "Build a resource directory",
+        description:
+          "Compile the services, benefits, and trauma-informed supports caregiving families can draw on, and help them navigate systems that are confusing even to professionals. Kinship caregivers in particular often qualify for help nobody ever told them about.",
+        hours: 3,
+        skills: ["data entry"],
+      },
+      {
+        name: "Set child safety and privacy practices",
+        description:
+          "Write down and follow the non-negotiables: vetting for anyone working with children, what mandatory-reporting laws require of your volunteers, and strict privacy for families and kids — no photos, no stories, no details shared without permission.",
+        hours: 4,
+        skills: ["writing"],
+      },
+    ],
+  },
+  {
+    id: "weather-survival-outreach",
+    name: "Cold & Hot Weather Survival Outreach",
+    purpose:
+      "Get survival supplies to unhoused neighbors when the weather turns deadly — blankets and hand-warmers in a cold snap, water and electrolytes in a heat wave — carried out to where people actually are.",
+    whoItServes:
+      "Unhoused and street-connected neighbors exposed to extreme weather — the people for whom a heat wave or cold snap is a life-threatening event, not an inconvenience.",
+    whatYoullNeed:
+      "Weather-specific supplies, outreach volunteers, planned routes, and current connections to shelters and services. Extreme heat and cold kill: every volunteer must be trained to recognize hypothermia and heat stroke and to call for professional medical help without delay — never to wait and see.",
+    setupHours: 24,
+    defaultCategory: "mutual_aid_drive",
+    firstSteps:
+      "Before you buy a single blanket, talk to the outreach " +
+      "workers and organizations already walking these routes " +
+      "— they hold the trust and the knowledge of where people " +
+      "actually are, and they'll tell you what's covered and " +
+      "what's missing. Agree with them on how you'll fit in, " +
+      "set the forecast thresholds that trigger your rounds, " +
+      "and stock the season's supplies while the weather is " +
+      "still mild.",
+    commonPitfalls:
+      "The predictable failure is starting when the weather " +
+      "does: supplies sourced mid-heat-wave arrive after the " +
+      "danger has passed, and strangers appearing for the " +
+      "first time in a crisis get a wary no from people who've " +
+      "learned caution the hard way. The dangerous failures " +
+      "are volunteers trying to manage a medical emergency " +
+      "themselves instead of calling for help immediately, and " +
+      "pressuring people to move or accept shelter — offer, " +
+      "inform, and respect the answer.",
+    pairsWith: ["cooling-warming-center", "harm-reduction-supplies", "resource-hub-dispatch"],
+    tasks: [
+      {
+        name: "Assemble weather-specific kits",
+        description:
+          "Pack kits matched to the season: blankets, warm socks, hats, gloves, and hand-warmers for cold; water, electrolyte packets, sunscreen, hats, and cooling cloths for heat. Add a card with shelter locations and crisis numbers to every kit.",
+        hours: 4,
+      },
+      {
+        name: "Source supplies",
+        description:
+          "Run donation drives, make bulk buys, and ask stores and congregations for contributions — and do it before the season, because sourcing blankets during the first freeze means arriving late. Stockpile enough to restock mid-season.",
+        hours: 4,
+        skills: ["outreach", "driving"],
+      },
+      {
+        name: "Map where to reach people",
+        description:
+          "Work with existing outreach workers to learn where unhoused neighbors actually stay — they hold trust and knowledge built over years, and showing up alongside them beats showing up cold. Keep the map loose and current; people move, especially in bad weather.",
+        hours: 3,
+        skills: ["outreach"],
+      },
+      {
+        name: "Recruit and train outreach volunteers",
+        description:
+          "Train every volunteer before their first round: respectful engagement that takes no for an answer, personal safety and always working in pairs, and recognizing weather-related medical emergencies. Nobody distributes until they've been trained.",
+        hours: 4,
+        skills: ["teaching"],
+      },
+      {
+        name: "Build a distribution and route plan",
+        description:
+          "Plan routes and timing for the days before and during dangerous weather, reaching the most exposed people first — those farthest from services, sleeping outside rather than in vehicles or shelters. Decide in advance what forecast triggers a round.",
+        hours: 3,
+        skills: ["organizing"],
+        follows: [2],
+      },
+      {
+        name: "Connect people to shelters and services",
+        description:
+          "Carry current, verified information on warming and cooling centers, shelter beds, and the resource hub — hours and rules change constantly, and a referral to a closed door burns trust. Offer connections without pressure; the relationship outlasts any one night.",
+        hours: 3,
+        skills: ["outreach"],
+      },
+      {
+        name: "Plan for emergencies",
+        description:
+          "Train every volunteer to recognize hypothermia and heat stroke — confusion, slurred speech, skin hot and dry or cold and clammy — and to call emergency services immediately, not to wait and see. Rehearse what to do while help is coming: shade and water, or blankets and shelter from wind.",
+        hours: 3,
+        skills: ["first aid"],
+      },
+    ],
+  },
 ];
 
 export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
@@ -8671,6 +9504,866 @@ export const PROJECT_TEMPLATES_ES: readonly ProjectTemplate[] = [
           "Etiqueta cada grabación con la fecha, los nombres y lo acordado sobre compartirla. Guarda dos copias en un lugar seguro, entrega a cada narradora o narrador su propia copia y comparte públicamente solo los fragmentos que cada persona aprobó.",
         hours: 2,
         follows: [2],
+      },
+    ],
+  },
+  {
+    id: "community-solar-coop",
+    name: "Cooperativa comunitaria de energía solar",
+    purpose:
+      "Juntar los recursos del vecindario en energía renovable compartida que baje las facturas de todos — sobre todo para inquilinos y hogares que nunca podrían poner paneles en un techo propio.",
+    whoItServes:
+      "Personas que rentan, hogares de bajos ingresos y cualquiera a quien su techo, su casero o su presupuesto le cierra la puerta a los paneles solares propios.",
+    whatYoullNeed:
+      "Miembros comprometidos, conocimientos técnicos y financieros que puedas pedir prestados o aprender, un sitio anfitrión o un programa de energía solar comunitaria existente al que sumarse, y organizaciones aliadas. Algo dicho sin rodeos: las cooperativas de energía implican una complejidad financiera y legal real — busquen asesoría de profesionales calificados sobre estructura, financiamiento y contratos antes de que alguien firme nada.",
+    setupHours: 27,
+    defaultCategory: "infrastructure",
+    firstSteps:
+      "Antes de cualquier panel o papeleo, hablen con dos " +
+      "grupos: los vecinos que de verdad se unirían, para medir " +
+      "el compromiso real, y una cooperativa solar de un pueblo " +
+      "o estado vecino que ya lo haya hecho — ellos te dirán qué " +
+      "modelo encaja con las reglas de tu zona y qué errores les " +
+      "costaron dinero. Luego lean ustedes mismos esas reglas " +
+      "locales, porque son ellas, y no su entusiasmo, las que " +
+      "deciden qué es posible.",
+    commonPitfalls:
+      "Las cooperativas solares mueren en la brecha entre el " +
+      "entusiasmo y las firmas: un año de reuniones sobre un " +
+      "modelo que las reglas de tu estado nunca permitieron, o " +
+      "un contrato firmado sin revisión profesional que amarra a " +
+      "los miembros a términos que nadie entendió. El otro " +
+      "asesino es el dinero borroso — si los miembros no pueden " +
+      "ver con claridad qué pusieron y qué les vuelve, la " +
+      "confianza se erosiona y la cooperativa se deshace.",
+    pairsWith: ["weatherization-brigade", "bulk-buying-coop"],
+    tasks: [
+      {
+        name: "Reúne miembros y mide el interés",
+        description:
+          "Convoca hogares interesados en energía limpia más barata y averigua qué tan comprometidos están de verdad — el entusiasmo vago y un miembro inscrito son cosas distintas. Tus números definen qué modelos son realistas, así que cuenta con honestidad antes de planear.",
+        hours: 4,
+        skills: ["difusión"],
+      },
+      {
+        name: "Aprende los modelos y las reglas locales",
+        description:
+          "Investiga cómo funciona la energía solar comunitaria donde vives: leyes estatales, medición neta, programas de suscripción, estructuras cooperativas. Las reglas varían enormemente de un lugar a otro y determinan qué es posible en realidad — haz esto antes de enamorarte de un modelo.",
+        hours: 5,
+        skills: ["investigación"],
+      },
+      {
+        name: "Encuentra un sitio o un programa al que sumarse",
+        description:
+          "Busca un techo anfitrión o un terreno para un arreglo compartido, o averigua si un programa de energía solar comunitaria existente aceptaría a tu grupo como suscriptores colectivos — sumarse a uno suele ser mucho más rápido que construir. Sopesa ambos caminos con tus miembros antes de comprometerte.",
+        hours: 4,
+        skills: ["difusión"],
+      },
+      {
+        name: "Resuelve el financiamiento y la estructura legal",
+        description:
+          "Decidan cómo se financia y se gobierna el proyecto, y constituyan la cooperativa como corresponde. Este es el paso con implicaciones legales y financieras reales — traigan profesionales calificados que revisen la estructura y cada contrato, y no firmen hasta que lo hayan hecho.",
+        hours: 5,
+        skills: ["trámites", "contabilidad"],
+        follows: [1],
+      },
+      {
+        name: "Asóciate con instaladores y proveedores",
+        description:
+          "Consigue instaladores o proveedores de buena reputación, compara más de una cotización y confirma por escrito las garantías y el mantenimiento a largo plazo. Una instalación barata sin plan de mantenimiento resulta carísima a los cinco años.",
+        hours: 3,
+        skills: ["difusión"],
+      },
+      {
+        name: "Monta el sistema de membresías y créditos en la factura",
+        description:
+          "Definan exactamente cómo llegan los ahorros o créditos a los miembros y cómo funcionan la membresía y los pagos. Háganlo transparente y fácil de entender — un miembro debería poder ver, en una sola página, qué puso y qué le vuelve.",
+        hours: 3,
+        skills: ["contabilidad", "captura de datos"],
+        follows: [3],
+      },
+      {
+        name: "Educa a los miembros sobre su consumo de energía",
+        description:
+          "Ayuda a los miembros a leer sus facturas y a recortar su consumo — un kilovatio ahorrado vale más que un kilovatio generado. Acompaña los ahorros solares con consejos sencillos de eficiencia para que los hogares vean la diferencia en el papel.",
+        hours: 3,
+        skills: ["enseñanza"],
+      },
+    ],
+  },
+  {
+    id: "worker-coop-incubator",
+    name: "Incubadora de cooperativas de trabajo y habilidades laborales",
+    purpose:
+      "Ayudar a las vecinas y vecinos a desarrollar habilidades laborales y lanzar cooperativas de trabajadores — medios de vida donde quienes hacen el trabajo son dueños del lugar y toman las decisiones.",
+    whoItServes:
+      "Vecinos sin empleo o con empleo precario, y cualquiera que quiera una participación real en el lugar donde trabaja.",
+    whatYoullNeed:
+      "Mentores con experiencia empresarial y cooperativa, espacio y materiales de capacitación, apoyos de arranque hacia los que orientar a los emprendimientos, y alianzas — desarrolladores de cooperativas, prestamistas que conozcan las cooperativas y tu propio programa de intercambio de habilidades.",
+    setupHours: 27,
+    defaultCategory: "education",
+    firstSteps:
+      "Empieza con conversaciones, no con un plan de estudios: " +
+      "siéntate con los miembros interesados a hablar de lo que " +
+      "saben hacer y quieren construir, y busca los grupos de " +
+      "habilidades que de verdad podrían convertirse en un " +
+      "emprendimiento. Al mismo tiempo, encuentra al " +
+      "desarrollador de cooperativas de tu zona o una " +
+      "cooperativa de trabajadores existente dispuesta a ser " +
+      "mentora — sus cicatrices son tu plan de estudios, y " +
+      "formar una cooperativa sin esa guía es donde los grupos " +
+      "salen lastimados.",
+    commonPitfalls:
+      "Esto fracasa de dos maneras: como un programa de " +
+      "capacitación que nunca lanza nada, porque nadie empujó un " +
+      "grupo de habilidades hacia un emprendimiento real — o " +
+      "como un lanzamiento que se salta las partes aburridas, " +
+      "constituyéndose con una plantilla descargada y " +
+      "descubriendo el enredo de gobernanza e impuestos dos años " +
+      "después. También muere en silencio cuando una sola " +
+      "persona organizadora concentra cada relación con mentores " +
+      "y financiadores; compartan esos contactos desde el primer " +
+      "día.",
+    pairsWith: ["skill-share", "solidarity-fund", "time-bank"],
+    tasks: [
+      {
+        name: "Evalúa las habilidades y metas de los miembros",
+        description:
+          "Siéntate con los miembros y aprende qué saben hacer y qué quieren construir. Buscas grupos afines — tres personas que cocinan, una cuadrilla con oficios, cinco que limpian — porque un grupo de habilidades es la semilla de un emprendimiento cooperativo viable.",
+        hours: 4,
+        skills: ["entrevistas"],
+      },
+      {
+        name: "Ofrece capacitación laboral y de habilidades",
+        description:
+          "Organiza sesiones sobre currículums, entrevistas, oficios, habilidades digitales y educación financiera. Apóyate en tu programa de intercambio de habilidades y trae expertos de fuera para lo que nadie local pueda enseñar — la meta es tener miembros capaces, se forme o no una cooperativa a su alrededor.",
+        hours: 5,
+        skills: ["enseñanza"],
+      },
+      {
+        name: "Enseña el modelo cooperativo",
+        description:
+          "Guía a los miembros por la propiedad de los trabajadores y la gobernanza democrática: cómo se reparten las ganancias, cómo se toman las decisiones y en qué se diferencia todo de un negocio tradicional. Nadie puede elegir un modelo que nunca ha visto — usa cooperativas reales como ejemplos.",
+        hours: 4,
+        skills: ["enseñanza", "facilitación"],
+      },
+      {
+        name: "Acompaña la formación de cooperativas",
+        description:
+          "Cuando un grupo esté listo, ayúdalo a escribir un plan de negocio y elegir una estructura legal. Conéctalo con abogados y contadores que conozcan las cooperativas en lugar de improvisar los pasos legales y contables — una constitución mal hecha sale cara de deshacer.",
+        hours: 5,
+        skills: ["trámites"],
+        follows: [2],
+      },
+      {
+        name: "Conecta con recursos de arranque",
+        description:
+          "Arma una lista viva de microcréditos, subvenciones, fondos de desarrollo cooperativo e incubadoras, y ayuda a los emprendimientos a postular de verdad. La mayor parte del dinero para cooperativas existe pero está mal señalizado — tu mapa vale dinero real.",
+        hours: 3,
+        skills: ["investigación"],
+      },
+      {
+        name: "Brinda mentoría",
+        description:
+          "Empareja cada emprendimiento nuevo con un cooperativista con experiencia o un mentor de negocios que lo acompañe durante las etapas tempranas y frágiles. El primer año es donde fracasan las cooperativas; un mentor constante que ya ha visto el patrón cambia las probabilidades.",
+        hours: 3,
+      },
+      {
+        name: "Construye apoyo mutuo entre emprendimientos",
+        description:
+          "Reúne a los emprendimientos en una red donde las cooperativas compartan lecciones, se refieran clientes y se compren entre sí. Las cooperativas que comercian entre ellas sobreviven crisis que matan a las que están aisladas.",
+        hours: 3,
+        skills: ["organización"],
+      },
+    ],
+  },
+  {
+    id: "elder-meal-delivery",
+    name: "Compañía y entrega de comidas para personas mayores",
+    purpose:
+      "Llevar comidas regulares y visitas amistosas a personas mayores que no pueden salir de casa — la comida importa, y los diez minutos de conversación en la puerta muchas veces importan más.",
+    whoItServes:
+      "Vecinas y vecinos mayores aislados, confinados en casa o frágiles — y las familias que se preocupan por ellos desde lejos.",
+    whatYoullNeed:
+      "Personas voluntarias confiables y ya verificadas, una fuente de comidas, rutas planificadas y prácticas sencillas de seguridad para el momento en que una puerta no se abre.",
+    setupHours: 22,
+    defaultCategory: "food",
+    firstSteps:
+      "Empieza con la fuente de comidas y las primeras cinco " +
+      "personas mayores, no con una hoja de inscripción: habla " +
+      "con el equipo de la comida comunitaria o con un par de " +
+      "cocineros dispuestos sobre lo que pueden producir de " +
+      "forma confiable, y pregunta a trabajadores de servicios " +
+      "para mayores, enfermeras parroquiales y farmacéuticos " +
+      "quién se está quedando de verdad sin comer. Verifica a " +
+      "tus primeros voluntarios antes de la primera entrega, no " +
+      "después — la confianza que estás construyendo vive o " +
+      "muere según quién cruza esas puertas.",
+    commonPitfalls:
+      "El fracaso peligroso es una señal perdida — un voluntario " +
+      "que le resta importancia a una puerta sin respuesta " +
+      "porque nadie dejó por escrito qué hacer, o una alergia " +
+      "que nunca llegó a la hoja de ruta. El fracaso lento es la " +
+      "falta de constancia: las personas mayores organizan su " +
+      "día alrededor de la visita, y una ruta que se salta " +
+      "semanas les enseña a no contar contigo. Mejor cinco " +
+      "personas atendidas todas las semanas sin falta que veinte " +
+      "atendidas a veces.",
+    pairsWith: ["community-meal", "neighborhood-care-network", "rides-transportation"],
+    learnMore: ["who-sees-what"],
+    tasks: [
+      {
+        name: "Identifica a las personas mayores confinadas en casa",
+        description:
+          "Encuéntralas a través de clínicas, servicios para mayores, grupos de fe y el boca a boca. Hazlo con respeto y de forma estrictamente voluntaria — estás ofreciendo una comida y compañía, no inscribiendo a nadie en un sistema de vigilancia.",
+        hours: 3,
+        skills: ["difusión"],
+      },
+      {
+        name: "Convoca y verifica voluntarios",
+        description:
+          "Cualquiera que entre a la casa de una persona mayor pasa por verificación: referencias y revisiones básicas, sin excepciones para amigos de amigos. Luego apunta a la constancia — a las personas mayores les va mejor con la misma cara conocida en la puerta cada semana que con un elenco rotativo.",
+        hours: 4,
+        skills: ["organización"],
+      },
+      {
+        name: "Consigue una fuente de comidas",
+        description:
+          "Asegura comidas de una cocina popular, cocineros caseros dispuestos o restaurantes que donen porciones. Presta atención a la nutrición y a que sean fáciles de recalentar, y etiqueta cada envase con su contenido — una comida sin etiqueta es una apuesta para alguien con alergias.",
+        hours: 4,
+        skills: ["cocina", "seguridad alimentaria"],
+      },
+      {
+        name: "Planifica las rutas y el calendario de entregas",
+        description:
+          "Agrupa a las personas mayores en rutas eficientes y fija un ritmo confiable — los mismos días, más o menos a las mismas horas. Incluye unos minutos de conversación sin prisa en cada parada; para muchas personas mayores, esa es la verdadera entrega.",
+        hours: 3,
+        skills: ["conducir", "organización"],
+        follows: [0, 2],
+      },
+      {
+        name: "Registra información dietética, de alergias y de emergencia",
+        description:
+          "Para cada persona mayor, registra necesidades dietéticas, alergias, medicamentos que importan alrededor de la comida y contactos de emergencia. Guárdalo seguro y solo para quien lo necesite — quien conduce necesita saber la alergia, no todo el historial médico.",
+        hours: 3,
+        skills: ["captura de datos"],
+      },
+      {
+        name: "Establece un protocolo de verificación de bienestar",
+        description:
+          "Deja por escrito exactamente qué hace un voluntario cuando una persona mayor no responde o se ve mal: a quién llamar primero, cuándo involucrar a la familia o a los servicios de emergencia y cómo anotar lo que pasó. Decidirlo por adelantado es mejor que improvisar en un umbral.",
+        hours: 3,
+        skills: ["redacción"],
+        follows: [4],
+      },
+      {
+        name: "Apoya a los voluntarios y recoge opiniones",
+        description:
+          "Habla con los voluntarios con regularidad, rota las rutas cuando alguien necesite un descanso y pregunta a las propias personas mayores cómo podría servirles mejor el proyecto. Te dirán cosas que los voluntarios nunca ven.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "disaster-relief-hub",
+    name: "Centro de distribución de ayuda ante desastres",
+    purpose:
+      "Levantar un centro que pueda recibir, clasificar y mover insumos rápido cuando golpea un desastre — porque los primeros días después de una inundación o un incendio se ganan o se pierden en la logística.",
+    whoItServes:
+      "Residentes golpeados por inundaciones, tormentas, incendios y otros desastres — empezando por los vecinos con menos posibilidades de trasladarse o de esperar.",
+    whatYoullNeed:
+      "Un sitio acordado de antemano con un respaldo, canales para conseguir insumos, un equipo de voluntarios de emergencia y coordinación con la red de preparación para emergencias — casi todo arreglado antes de cualquier desastre, porque después ya es tarde.",
+    setupHours: 24,
+    defaultCategory: "organizing",
+    suggestsWorkDays: true,
+    firstSteps:
+      "El centro existe en papel mucho antes de existir en un " +
+      "estacionamiento, así que empieza con la red de " +
+      "preparación para emergencias — ellos tienen el árbol de " +
+      "contactos y el panorama de riesgos — y con la pregunta " +
+      "honesta de qué edificio de verdad te dejaría entrar a las " +
+      "seis de la mañana después de una inundación. Cierra " +
+      "primero el acuerdo del sitio y el respaldo; todas las " +
+      "demás tareas dependen de una dirección.",
+    commonPitfalls:
+      "Los centros de ayuda fracasan en dos direcciones: el " +
+      "centro que existe solo como un plan que nadie ensayó, y " +
+      "el evento real quema su primer día en preguntas que un " +
+      "simulacro habría respondido — y el centro que abre sus " +
+      "puertas a una avalancha de donaciones que no puede " +
+      "clasificar, convirtiéndose en una bodega de ropa " +
+      "inservible mientras la gente necesita agua. El daño más " +
+      "silencioso es la distribución con barreras: en el momento " +
+      "en que alguien debe demostrar que merece ayuda, " +
+      "recreaste el sistema que construiste esto para esquivar.",
+    pairsWith: ["emergency-preparedness", "resource-hub-dispatch"],
+    learnMore: ["internet-outage"],
+    tasks: [
+      {
+        name: "Identifica de antemano un sitio y un respaldo",
+        description:
+          "Busca un edificio o terreno que pueda recibir entregas, clasificar bienes y albergar una fila de distribución — más un respaldo por si el primero queda dañado o inaccesible. Confirma el acceso y las llaves con los dueños ahora, con clima en calma; un sitio al que no puedes entrar no es un sitio.",
+        hours: 3,
+        skills: ["difusión"],
+      },
+      {
+        name: "Construye canales de abastecimiento",
+        description:
+          "Acuerda por adelantado de dónde vendrían el agua, la comida y los insumos de higiene y limpieza — proveedores, organizaciones aliadas, colectas. Igual de importante: una forma de saber qué necesita de verdad la gente después de un evento, para que no te entierren las cosas equivocadas.",
+        hours: 4,
+        skills: ["difusión", "organización"],
+      },
+      {
+        name: "Monta la recepción, clasificación e inventario",
+        description:
+          "Diseña cómo se reciben, clasifican y registran las donaciones desde el momento en que llega un camión. Todos los centros que se han ahogado en bienes sin clasificar se saltaron este paso — define tus categorías, etiquetas y conteos sencillos antes de necesitarlos.",
+        hours: 4,
+        skills: ["organización", "captura de datos"],
+      },
+      {
+        name: "Crea un sistema de distribución",
+        description:
+          "Planifica cómo salen los insumos: equitativo y sin barreras — sin pedir identificación ni pruebas de necesidad — con entrega móvil para quien no puede llegar al centro. Prioriza primero a las personas más vulnerables, y deja esa prioridad por escrito para que sobreviva al caos.",
+        hours: 3,
+        skills: ["conducir", "organización"],
+        follows: [2],
+      },
+      {
+        name: "Convoca y entrena un equipo voluntario de emergencia",
+        description:
+          "Arma una lista de personas que puedan movilizarse con poco aviso y entrénalas de antemano en sus roles, las reglas de seguridad y tu sistema de recepción y distribución. Un equipo entrenado de doce rinde más que una multitud bienintencionada de cincuenta.",
+        hours: 4,
+        skills: ["enseñanza"],
+      },
+      {
+        name: "Coordina con otros equipos de respuesta",
+        description:
+          "Presenta el centro a las agencias oficiales de emergencia y a otros grupos de ayuda antes de que pase nada. Acuerden quién cubre qué, para llenar vacíos en lugar de duplicar — la ayuda mutua avanza más rápido justo donde la respuesta oficial es más lenta.",
+        hours: 3,
+        skills: ["difusión"],
+      },
+      {
+        name: "Planifica la comunicación y la seguridad",
+        description:
+          "Prepárate para que fallen las redes: métodos de contacto sin internet, listas impresas y un enlace con el árbol de contactos de la red de preparación. Fijen reglas duras de seguridad para voluntarios — nadie entra a estructuras inseguras, nunca — y déjenlas por escrito.",
+        hours: 3,
+        skills: ["redacción"],
+      },
+    ],
+  },
+  {
+    id: "recovery-peer-support",
+    name: "Red de apoyo entre pares en recuperación y sobriedad",
+    purpose:
+      "Sostener apoyo dirigido por pares para vecinos que están en recuperación del consumo de sustancias o que la buscan — un complemento del tratamiento profesional, nunca un reemplazo.",
+    whoItServes:
+      "Personas en recuperación, personas que la están considerando y las familias y amistades que caminan a su lado.",
+    whatYoullNeed:
+      "Facilitadores pares con experiencia vivida y capacitación real, un espacio seguro y privado, rutas de derivación y límites dichos con claridad: el apoyo entre pares complementa el tratamiento profesional, no lo reemplaza; los facilitadores no son proveedores médicos y nunca deben aconsejar sobre desintoxicación ni medicamentos; y siempre hay un plan claro para conectar a cualquier persona en crisis con ayuda profesional o de emergencia calificada.",
+    setupHours: 22,
+    defaultCategory: "emotional_support",
+    firstSteps:
+      "Empieza por las personas que sostendrán la sala: " +
+      "encuentra a una o dos vecinas o vecinos con experiencia " +
+      "vivida y sólida de recuperación, inscríbelos en una " +
+      "capacitación formal de apoyo entre pares y escriban " +
+      "juntos el alcance — qué es y qué no es esta red — antes " +
+      "de anunciar nada. Luego conoce en persona los programas " +
+      "de tratamiento y los servicios de crisis locales, para " +
+      "que tu ruta de derivación sea una relación, no un número " +
+      "de teléfono en un volante.",
+    commonPitfalls:
+      "Esto se vuelve peligroso cuando la línea se difumina — un " +
+      "facilitador bienintencionado aconsejando a alguien sobre " +
+      "desintoxicación o medicamentos, lo cual puede matar, o un " +
+      "grupo deslizándose hacia el tratamiento amateur porque la " +
+      "ruta de derivación nunca fue real. Fracasa en silencio " +
+      "por la confidencialidad rota — una sola historia filtrada " +
+      "vacía la sala para siempre — y por el agotamiento de los " +
+      "facilitadores, cuando la persona que sostiene la " +
+      "recuperación de todos no tiene apoyo para la suya.",
+    pairsWith: ["mental-health-peer-support", "harm-reduction-supplies"],
+    learnMore: ["who-sees-what"],
+    tasks: [
+      {
+        name: "Convoca y capacita facilitadores pares",
+        description:
+          "Busca personas con experiencia vivida de recuperación y haz que completen una capacitación reconocida de apoyo entre pares en recuperación. Sé claro desde la primera conversación: los facilitadores son pares, no proveedores médicos ni clínicos, y la capacitación es lo que mantiene esa línea segura.",
+        hours: 5,
+        skills: ["facilitación", "enseñanza"],
+      },
+      {
+        name: "Define el alcance y los límites",
+        description:
+          "Deja por escrito qué hace la red — apoyo entre pares, conexión, ánimo — y qué no hace: tratamiento, desintoxicación, atención médica, consejos sobre medicamentos. Un alcance escrito protege a los miembros de los malos consejos y protege a los facilitadores de cargar con lo que no les corresponde.",
+        hours: 3,
+        skills: ["redacción"],
+      },
+      {
+        name: "Construye rutas de derivación y de crisis",
+        description:
+          "Crea relaciones de trabajo con programas de tratamiento profesional, atención médica y servicios de crisis, y escribe un plan de respuesta ante sobredosis. Cuando alguien en la sala necesite más de lo que los pares pueden dar, el traspaso debería ser una llamada cálida, no un folleto.",
+        hours: 4,
+        skills: ["difusión", "investigación"],
+        follows: [1],
+      },
+      {
+        name: "Encuentra un espacio seguro, privado y libre de sustancias",
+        description:
+          "Busca una sala confidencial, acogedora y libre de juicios y de sustancias — un lugar al que la gente pueda entrar sin que eso anuncie nada. Funcionan bien las bibliotecas, los salones comunitarios y los espacios de fe con entrada aparte.",
+        hours: 2,
+        skills: ["difusión"],
+      },
+      {
+        name: "Establece la confidencialidad y las normas del grupo",
+        description:
+          "Acuerden las reglas básicas: lo que se dice aquí se queda aquí, respeto sin empujar consejos y el derecho de cada quien a compartir o a pasar. Reafírmenlas en voz alta al inicio de cada reunión, sin excepción — las normas solo protegen mientras están frescas.",
+        hours: 3,
+        skills: ["facilitación"],
+      },
+      {
+        name: "Programa y difunde las reuniones",
+        description:
+          "Ofrece más de un horario de reunión para que puedan venir quienes trabajan por turnos y quienes crían, y difunde con lenguaje sencillo y sin estigma — gratis, abierto, sin requisitos. Cómo redactas el volante decide quién se siente seguro de llegar.",
+        hours: 3,
+        skills: ["difusión"],
+        follows: [3],
+      },
+      {
+        name: "Apoya a los facilitadores y prevén el agotamiento",
+        description:
+          "Habla con los facilitadores con regularidad, rota quién dirige y asegúrate de que tengan apoyo propio — sostener el espacio para la recuperación ajena es un trabajo pesado, y la propia recuperación de un facilitador siempre va primero.",
+        hours: 2,
+        skills: ["escucha"],
+      },
+    ],
+  },
+  {
+    id: "community-fitness",
+    name: "Grupos comunitarios de ejercicio y bienestar",
+    purpose:
+      "Poner a las vecinas y vecinos a moverse juntos y gratis — grupos de caminata, estiramientos, partidos improvisados, baile — porque sentirte bien en tu cuerpo no debería costar una membresía de gimnasio.",
+    whoItServes:
+      "Cualquiera que quiera moverse, en especial vecinos para quienes el gimnasio queda fuera de alcance, personas mayores y gente aislada para quienes la compañía importa tanto como el ejercicio.",
+    whatYoullNeed:
+      "Personas voluntarias que guíen las actividades, espacios seguros y accesibles, y muy poco equipo. Un estilo acogedor y sin presión importa más que las credenciales — aunque quien dirija una actividad físicamente exigente debe tener la preparación adecuada, y cada sesión necesita agua, calentamiento y un botiquín de primeros auxilios a la mano.",
+    setupHours: 19,
+    defaultCategory: "other",
+    firstSteps:
+      "Antes de agendar nada, pregunta a las personas que " +
+      "esperas que vengan qué disfrutarían de verdad — un grupo " +
+      "de caminata, estiramientos en silla, una noche de baile " +
+      "— y qué se siente posible para sus cuerpos; las " +
+      "respuestas deben elegir tus actividades, no al revés. " +
+      "Luego encuentra a una o dos personas guía cuya calidez " +
+      "pese más que su pericia, recorran juntos los espacios " +
+      "candidatos y lancen una sola sesión semanal confiable " +
+      "antes de agregar más.",
+    commonPitfalls:
+      "Esto muere de dos maneras: se vuelve una competencia — " +
+      "los miembros más en forma marcan el paso, la charla se " +
+      "desvía hacia el peso y la apariencia, y justo la gente " +
+      "para la que es deja de venir en silencio — o se vuelve " +
+      "inconstante, porque nada mata un grupo de caminata más " +
+      "rápido que llegar dos veces a una sesión cancelada. " +
+      "Saltarse lo aburrido de la seguridad es la tercera: sin " +
+      "calentamiento, sin agua, sin botiquín, y una mala caída " +
+      "acaba con todo.",
+    pairsWith: ["disability-support-network", "neighborhood-care-network"],
+    learnMore: ["community-events"],
+    tasks: [
+      {
+        name: "Sondea intereses y niveles de actividad",
+        description:
+          "Pregunta por ahí — en la lavandería, el edificio de personas mayores, la puerta de la escuela — qué tipos de movimiento disfruta la gente y qué se siente accesible. Deja que las respuestas guíen: una plantilla llena de deportes que nadie pidió no ayuda a nadie.",
+        hours: 2,
+        skills: ["difusión"],
+      },
+      {
+        name: "Convoca a personas guía para las actividades",
+        description:
+          "Encuentra voluntarias y voluntarios que dirijan caminatas, estiramientos, baile o partidos improvisados. Un estilo acogedor y sin presión vale más que la pericia para la mayoría de las actividades — pero quien dirija algo físicamente exigente debe contar con la certificación adecuada.",
+        hours: 3,
+        skills: ["difusión"],
+      },
+      {
+        name: "Encuentra espacios seguros",
+        description:
+          "Pregunta por parques, salones comunitarios y gimnasios escolares — gratuitos o baratos, y accesibles sin auto. Revisa cada espacio pensando en cuerpos y capacidades diversas: piso parejo, asientos, sombra, baños y un lugar donde resguardarse si el clima cambia.",
+        hours: 3,
+      },
+      {
+        name: "Planea una programación inclusiva y para todos los niveles",
+        description:
+          "Diseña cada actividad para que la gente pueda sumarse a su propio ritmo y adaptarla con libertad — una opción en silla para el estiramiento, un circuito corto dentro de la caminata larga. Mantén el enfoque en sentirse bien, moverse y conectar, nunca en la apariencia o el rendimiento.",
+        hours: 3,
+      },
+      {
+        name: "Atiende la seguridad y la salud",
+        description:
+          "Incluye calentamiento e hidratación en cada sesión, ten a la mano un botiquín de primeros auxilios bien surtido y sugiere que quien recién empieza a ejercitarse consulte antes con su médico. Enseña a las personas guía a detectar el sobreesfuerzo y a hacer que bajar el ritmo se sienta normal, no vergonzoso.",
+        hours: 3,
+        skills: ["primeros auxilios"],
+      },
+      {
+        name: "Define un horario y corre la voz",
+        description:
+          "Elige horarios consistentes alrededor de los cuales la gente pueda construir un hábito, y respétalos. Promociona por todas partes — volantes, chats grupales, boca a boca — y di explícitamente que todas las edades, tallas y capacidades son bienvenidas, porque mucha gente asume que no lo son.",
+        hours: 3,
+        skills: ["difusión"],
+      },
+      {
+        name: "Cultiva comunidad y constancia",
+        description:
+          "Haz que las sesiones sean sociales: nombres aprendidos, recién llegados bien recibidos, unos minutos de charla incluidos. Celebra el simple hecho de presentarse en vez de cualquier métrica — la conexión es lo que hace que la gente siga viniendo mucho después de que pasa la novedad.",
+        hours: 2,
+        skills: ["facilitación"],
+      },
+    ],
+  },
+  {
+    id: "urban-orchard",
+    name: "Huerto frutal urbano y bosque comestible",
+    purpose:
+      "Plantar árboles frutales, árboles de nueces y plantas comestibles perennes en terrenos compartidos — un bosque comestible que, una vez establecido, alimenta gratis al vecindario por décadas.",
+    whoItServes:
+      "Toda la comunidad, incluidos los vecinos que todavía no llegan — los árboles plantados este año se convierten en una fuente de comida fresca y gratuita a largo plazo para todo el mundo.",
+    whatYoullNeed:
+      "Acceso a la tierra a largo plazo (un acuerdo de palabra de temporada en temporada no basta para árboles), árboles y plantas adecuados al clima, personas voluntarias para las jornadas de plantación y un pequeño equipo de cuidadores comprometidos por años, no por meses. Confirmen el acceso al agua antes de que nada toque la tierra.",
+    setupHours: 21,
+    defaultCategory: "food",
+    suggestsWorkDays: true,
+    firstSteps:
+      "La conversación sobre la tierra va antes que todo: habla " +
+      "con fideicomisos de tierras, el departamento de parques, " +
+      "congregaciones de fe con terreno sin usar — cualquiera " +
+      "que pueda comprometer un sitio por una década, no por " +
+      "una temporada — y de paso confirma el agua. En paralelo, " +
+      "encuentra a una persona con experiencia real en árboles " +
+      "frutales que ancle el diseño, y pregunta a los vecinos " +
+      "qué cosecharían y comerían de verdad, porque un huerto " +
+      "de fruta que nadie quiere solo alimenta a las avispas.",
+    commonPitfalls:
+      "Los huertos rara vez fracasan el día de la plantación — " +
+      "fracasan en los años dos y tres, cuando la multitud ya " +
+      "se fue y nadie organizó el riego, y los árboles jóvenes " +
+      "mueren en silencio en su primer verano seco. Los otros " +
+      "asesinos son acuerdos de tierra frágiles revocados justo " +
+      "cuando los árboles empiezan a dar fruto, y pleitos de " +
+      "cosecha porque nadie acordó normas de reparto antes de " +
+      "la primera gran cosecha. Resuelvan la rotación de " +
+      "cuidados y las reglas de reparto temprano, mientras " +
+      "todavía es fácil.",
+    pairsWith: ["community-garden", "gleaning-network", "seed-library"],
+    tasks: [
+      {
+        name: "Asegura el acceso a la tierra a largo plazo",
+        description:
+          "Consigue un acuerdo escrito duradero — un arrendamiento largo, un arreglo con un fideicomiso de tierras, un compromiso formal de la ciudad — porque los árboles necesitan décadas, no un acuerdo de palabra de temporada en temporada. Confirma un acceso confiable al agua en el sitio antes de firmar nada.",
+        hours: 5,
+        skills: ["difusión"],
+      },
+      {
+        name: "Planea el diseño de plantación",
+        description:
+          "Elige especies adecuadas a tu clima y diseña en capas de bosque comestible: árboles de dosel, arbustos y cubierta vegetal trabajando juntos. Planea los compañeros de polinización y el espacio que necesitarán los árboles adultos, no el tamaño de las plántulas que siembras.",
+        hours: 4,
+        skills: ["jardinería"],
+      },
+      {
+        name: "Consigue los árboles y las plantas",
+        description:
+          "Asegura árboles y plantas a través de viveros, subvenciones, donaciones y ventas de temporada a raíz desnuda — el material joven y a raíz desnuda cuesta una fracción de los árboles maduros en maceta y suele establecerse mejor. Pide con anticipación; las buenas variedades se agotan.",
+        hours: 3,
+      },
+      {
+        name: "Prepara el sitio",
+        description:
+          "Deja el terreno listo antes de que lleguen los árboles: mejora el suelo, extiende acolchado, instala el riego, y marca y despeja cada punto de plantación según el diseño. Un sitio preparado convierte la jornada de plantación de un caos en una línea de montaje.",
+        hours: 4,
+        skills: ["jardinería"],
+        follows: [1],
+      },
+      {
+        name: "Organiza jornadas de plantación",
+        description:
+          "Realiza jornadas comunitarias de plantación con instrucciones claras, para que cada árbol quede a la profundidad correcta, con su cazuela de riego y su acolchado — mal plantados, los árboles fallan lenta e invisiblemente. Hazlo festivo; una jornada de plantación es la manera en que el vecindario empieza a sentir que el huerto es suyo.",
+        hours: 5,
+        skills: ["jardinería"],
+        follows: [3],
+        recurringCadence: "cycle",
+      },
+      {
+        name: "Establece el cuidado a largo plazo",
+        description:
+          "Organiza el trabajo sin gloria que decide si el huerto vive: regar los árboles jóvenes durante sus primeros veranos, podar, acolchar y manejar las plagas, año tras año. Una rotación con nombres de cuidadores comprometidos vale más que una gran lista de voluntarios difusos.",
+        hours: 3,
+        skills: ["jardinería"],
+      },
+      {
+        name: "Planea el reparto de la cosecha",
+        description:
+          "Acuerden normas de recolección y reparto antes de la primera gran cosecha, no después del primer pleito — quién cosecha, cuándo y cuánto. Encaucen el excedente a refrigeradores comunitarios, despensas y comidas compartidas para que nada se pudra en la rama.",
+        hours: 2,
+      },
+    ],
+  },
+  {
+    id: "new-parent-support",
+    name: "Red de apoyo posparto y para nuevas familias",
+    purpose:
+      "Rodear de apoyo práctico a madres y padres recientes o en espera — comidas en la puerta, mandados hechos, platos lavados y pares que ya pasaron por ahí — durante el embarazo y las semanas crudas del posparto.",
+    whoItServes:
+      "Madres y padres recientes o en espera, sobre todo quienes no tienen familia cerca — las semanas después de un nacimiento son cuando el apoyo más importa y menos suele llegar.",
+    whatYoullNeed:
+      "Personas voluntarias que puedan cocinar, hacer mandados y escuchar; un sistema de tren de comidas; un directorio de recursos; y madres y padres con experiencia como pares de apoyo. El apoyo entre pares no es atención médica ni de salud mental — los trastornos del ánimo posparto son comunes y serios, así que cada par de apoyo debe conocer las señales y saber conectar con delicadeza a una madre o un padre con ayuda profesional. Y verifiquen los antecedentes de cualquiera que vaya a entrar a los hogares o ayudar con bebés antes de que haga cualquiera de las dos cosas.",
+    setupHours: 21,
+    defaultCategory: "childcare",
+    firstSteps:
+      "Empieza preguntando a madres y padres que dieron a luz " +
+      "en el último año qué les habría ayudado de verdad — las " +
+      "respuestas (una comida sin visita incluida, alguien que " +
+      "cargue al bebé mientras se bañan) son más específicas de " +
+      "lo que imaginas. Presenta la red a parteras, doulas y " +
+      "clínicas pediátricas que puedan ofrecerla a las " +
+      "familias, convoca a dos o tres madres o padres con " +
+      "experiencia como tus primeros pares de apoyo, y define " +
+      "tu práctica de verificación antes de que alguien cruce " +
+      "una puerta.",
+    commonPitfalls:
+      "El fracaso clásico es un apoyo que sirve a quien apoya: " +
+      "voluntarios que llegan según su propio horario, se " +
+      "quedan demasiado y opinan sobre la crianza en vez de " +
+      "lavar los platos — unas madres y padres agotados " +
+      "dejarán de abrir la puerta en silencio antes que " +
+      "decirlo. El más grave es que un par no vea las señales " +
+      "de la depresión posparto porque nadie lo entrenó para " +
+      "reconocerla ni le dio las palabras para nombrarla. Y un " +
+      "apoyo que desaparece a las dos semanas, justo cuando se " +
+      "acaban los guisados y empieza lo difícil, no es apoyo " +
+      "en absoluto.",
+    pairsWith: ["diaper-hygiene-bank", "childcare-collective", "welcome-wagon"],
+    learnMore: ["who-sees-what"],
+    tasks: [
+      {
+        name: "Convoca voluntarios y pares de apoyo",
+        description:
+          "Reúne a quienes cocinan, hacen mandados y — lo más importante — madres y padres con experiencia dispuestos a ser pares de apoyo. Quien recuerda su propia tercera semana sin dormir ofrece algo que ningún folleto puede dar.",
+        hours: 3,
+        skills: ["difusión"],
+      },
+      {
+        name: "Monta un sistema de tren de comidas",
+        description:
+          "Crea una forma sencilla de coordinar comidas dejadas en la puerta durante las semanas después de un nacimiento: un calendario compartido, necesidades dietéticas y alergias recogidas una sola vez, comida etiquetada y fácil de recalentar. Dejarla en la puerta debe ser lo normal — una comida nunca debe obligar a una visita.",
+        hours: 3,
+        skills: ["cocina", "organización"],
+      },
+      {
+        name: "Ofrece ayuda práctica",
+        description:
+          "Organiza voluntarios para la carga sin gloria: mandados, lavandería, platos y cuidar a los hermanos mayores para que una madre o un padre pueda descansar o llegar a una cita. Pregunta qué se necesita cada vez en lugar de asumir — la ayuda útil sigue la lista de la familia, no la del voluntario.",
+        hours: 3,
+        skills: ["cuidado infantil"],
+      },
+      {
+        name: "Arma un directorio de recursos",
+        description:
+          "Recopila apoyo local de lactancia, atención de salud mental posparto, clínicas pediátricas y fuentes de artículos para bebé — incluidos el banco de pañales y el colectivo de cuidado infantil si tu comunidad los tiene. Mantenlo al día; un directorio de teléfonos muertos es peor que ninguno.",
+        hours: 4,
+        skills: ["captura de datos"],
+      },
+      {
+        name: "Crea círculos de apoyo entre pares",
+        description:
+          "Inicia grupos pequeños donde las madres y padres recientes puedan ser honestos sobre lo difícil que es, con una madre o un padre con experiencia sosteniendo el espacio. Capacita a los pares en las señales de la depresión y la ansiedad posparto y en animar con delicadeza y persistencia a buscar atención profesional — nunca diagnosticar, nunca esperar.",
+        hours: 3,
+        skills: ["facilitación"],
+      },
+      {
+        name: "Define prácticas de seguridad y de límites",
+        description:
+          "Verifica a cada voluntario que vaya a entrar a los hogares o ayudar con bebés — referencias como mínimo — y deja los límites por escrito: la familia pone las condiciones, las visitas son cortas salvo invitación a quedarse más, y nadie llega sin avisar. El apoyo nunca debe sentirse como vigilancia.",
+        hours: 3,
+      },
+      {
+        name: "Conecta con otros proyectos",
+        description:
+          "Enlaza a las familias con el banco de pañales, el colectivo de cuidado infantil y el comité de bienvenida, para que un solo punto de contacto lo abra todo. Una madre o un padre reciente no debería tener que descubrir cada programa por separado en el momento más agotador de su vida.",
+        hours: 2,
+        skills: ["difusión"],
+      },
+    ],
+  },
+  {
+    id: "foster-kinship-support",
+    name: "Red de apoyo a familias de acogida y parientes cuidadores",
+    purpose:
+      "Respaldar a las familias de acogida, a los parientes cuidadores y a otras familias que crían — ropa y una cama cuando un niño llega de un día para otro, respiro cuando quienes cuidan están al límite, y pares que entienden el trabajo.",
+    whoItServes:
+      "Madres y padres de acogida, abuelos y parientes criando niños — los parientes cuidadores suelen empezar con una llamada y unas horas de aviso — y los niños y niñas a su cargo.",
+    whatYoullNeed:
+      "Personas voluntarias, artículos donados de todas las edades y tallas, ayuda de respiro y alianzas con agencias y escuelas. El trabajo con niñez en acogida es delicado y está regulado por ley: verifiquen a todas las personas que trabajen con niños, sigan al pie de la letra las reglas de reporte obligatorio y de confidencialidad, y coordinen con las agencias pertinentes, no a sus espaldas.",
+    setupHours: 24,
+    defaultCategory: "childcare",
+    firstSteps:
+      "Empieza con una reunión en la agencia local de acogida o " +
+      "el programa orientador de cuidado por parientes: aprende " +
+      "las reglas que rigen este trabajo — verificación de " +
+      "antecedentes, reporte obligatorio, confidencialidad — " +
+      "antes de convocar a una sola persona voluntaria, y deja " +
+      "que ellos te digan dónde están de verdad los vacíos. " +
+      "Luego pregunta a algunas familias cuidadoras qué " +
+      "necesitaron en su primera semana y en su primer año; " +
+      "construye hacia esas respuestas, no hacia una bodega de " +
+      "cosas que nadie pidió.",
+    commonPitfalls:
+      "Este proyecto puede fracasar con estruendo o en " +
+      "silencio. Con estruendo: un voluntario sin verificar " +
+      "cerca de los niños, o la historia de una familia " +
+      "compartida sin permiso — cualquiera de las dos puede " +
+      "dañar a un niño, terminar una colocación y acabar con " +
+      "el proyecto en un día. En silencio: una montaña de " +
+      "donaciones sin clasificar mientras una cuidadora espera " +
+      "tres semanas una cama para un niño pequeño, o tratar a " +
+      "las agencias como adversarias hasta que dejan de " +
+      "referir familias. Aquí, lo pequeño, verificado y " +
+      "coordinado le gana a lo grande e improvisado, siempre.",
+    pairsWith: ["diaper-hygiene-bank", "free-store", "childcare-collective"],
+    learnMore: ["who-sees-what"],
+    tasks: [
+      {
+        name: "Conecta con las familias cuidadoras",
+        description:
+          "Llega a las familias cuidadoras a través de agencias, escuelas y grupos de fe — en especial a los parientes cuidadores, que a menudo reciben a un nieto o una sobrina de la noche a la mañana, sin preparación y con poco apoyo oficial. Haz que el primer contacto sea una oferta, nunca un filtro.",
+        hours: 3,
+        skills: ["difusión"],
+      },
+      {
+        name: "Arma una reserva de ropa y artículos",
+        description:
+          "Recolecta ropa, camas, sillas de auto y artículos de uso diario en todo el rango de edades y tallas, porque quienes cuidan rara vez saben quién llega hasta que llega. Revisa con cuidado los artículos de seguridad — las sillas de auto y las cunas tienen fechas de caducidad y listas de retiro del mercado.",
+        hours: 4,
+        skills: ["organización"],
+      },
+      {
+        name: "Crea un sistema de entrega rápida",
+        description:
+          "Prepara mochilas listas para salir — unos días de ropa, artículos de aseo y algo reconfortante como un peluche — ordenadas por edad y talla, entregables a las pocas horas de una nueva colocación. Un niño que llega sin nada no debería esperar una semana para tener algo propio.",
+        hours: 3,
+        follows: [1],
+      },
+      {
+        name: "Organiza el apoyo de respiro",
+        description:
+          "Consigue cuidado seguro y debidamente verificado para que quienes cuidan puedan descansar, cumplir sus citas o simplemente respirar — el agotamiento de quien cuida es una de las principales razones por las que se rompen las colocaciones. Coordina con las agencias quién puede dar cuidado de respiro y bajo qué reglas.",
+        hours: 4,
+        skills: ["cuidado infantil"],
+      },
+      {
+        name: "Ofrece grupos de apoyo entre pares",
+        description:
+          "Organiza encuentros regulares donde las familias de acogida y los parientes cuidadores puedan intercambiar experiencia y consejos honestos con gente que lo entiende — este trabajo aísla, y la cuidadora a tres calles de distancia puede estar cargando lo mismo sola.",
+        hours: 3,
+        skills: ["facilitación"],
+      },
+      {
+        name: "Arma un directorio de recursos",
+        description:
+          "Recopila los servicios, beneficios y apoyos con enfoque en el trauma a los que pueden recurrir las familias cuidadoras, y ayúdalas a navegar sistemas confusos hasta para los profesionales. Los parientes cuidadores, en particular, suelen calificar para ayudas de las que nadie les habló.",
+        hours: 3,
+        skills: ["captura de datos"],
+      },
+      {
+        name: "Define prácticas de seguridad infantil y privacidad",
+        description:
+          "Deja por escrito y cumple lo innegociable: verificación para cualquiera que trabaje con niños, lo que las leyes de reporte obligatorio exigen de tus voluntarios y privacidad estricta para las familias y los niños — sin fotos, sin historias, sin detalles compartidos sin permiso.",
+        hours: 4,
+        skills: ["redacción"],
+      },
+    ],
+  },
+  {
+    id: "weather-survival-outreach",
+    name: "Brigadas de supervivencia ante frío y calor extremos",
+    purpose:
+      "Llevar insumos de supervivencia a las vecinas y vecinos sin techo cuando el clima se vuelve mortal — cobijas y calentadores de manos en una helada, agua y electrolitos en una ola de calor — cargados hasta donde la gente realmente está.",
+    whoItServes:
+      "Vecinas y vecinos sin techo o en situación de calle expuestos al clima extremo — la gente para quien una ola de calor o una helada es un evento que amenaza la vida, no una molestia.",
+    whatYoullNeed:
+      "Insumos específicos para cada clima, voluntarios de calle, rutas planificadas y conexiones vigentes con refugios y servicios. El calor y el frío extremos matan: cada voluntario debe estar capacitado para reconocer la hipotermia y el golpe de calor y para llamar sin demora a ayuda médica profesional — nunca esperar a ver qué pasa.",
+    setupHours: 24,
+    defaultCategory: "mutual_aid_drive",
+    firstSteps:
+      "Antes de comprar una sola cobija, habla con los equipos " +
+      "de trabajo en calle y las organizaciones que ya recorren " +
+      "estas rutas — ellos tienen la confianza y el " +
+      "conocimiento de dónde está realmente la gente, y te " +
+      "dirán qué está cubierto y qué falta. Acuerda con ellos " +
+      "cómo vas a encajar, define los umbrales de pronóstico " +
+      "que activan tus rondas y abastece los insumos de la " +
+      "temporada mientras el clima todavía es templado.",
+    commonPitfalls:
+      "El fracaso predecible es empezar cuando empieza el " +
+      "clima: los insumos conseguidos en plena ola de calor " +
+      "llegan cuando el peligro ya pasó, y los desconocidos " +
+      "que aparecen por primera vez en una crisis reciben un " +
+      "no receloso de gente que aprendió la cautela por las " +
+      "malas. Los fracasos peligrosos son voluntarios que " +
+      "intentan manejar una emergencia médica por su cuenta en " +
+      "vez de pedir ayuda de inmediato, y presionar a la gente " +
+      "a moverse o a aceptar un refugio — ofrece, informa y " +
+      "respeta la respuesta.",
+    pairsWith: ["cooling-warming-center", "harm-reduction-supplies", "resource-hub-dispatch"],
+    tasks: [
+      {
+        name: "Arma paquetes según la temporada",
+        description:
+          "Prepara paquetes acordes a la estación: cobijas, calcetines abrigadores, gorros, guantes y calentadores de manos para el frío; agua, sobres de electrolitos, bloqueador solar, gorras y paños refrescantes para el calor. Agrega a cada paquete una tarjeta con las ubicaciones de los refugios y los números de crisis.",
+        hours: 4,
+      },
+      {
+        name: "Consigue los insumos",
+        description:
+          "Organiza colectas de donaciones, haz compras al por mayor y pide contribuciones a tiendas y congregaciones — y hazlo antes de la temporada, porque buscar cobijas durante la primera helada es llegar tarde. Acumula suficiente para reabastecer a mitad de temporada.",
+        hours: 4,
+        skills: ["difusión", "conducir"],
+      },
+      {
+        name: "Mapea dónde encontrar a la gente",
+        description:
+          "Trabaja con los equipos de calle existentes para saber dónde se quedan realmente las vecinas y vecinos sin techo — ellos tienen una confianza y un conocimiento construidos por años, y llegar a su lado vale más que llegar en frío. Mantén el mapa flexible y al día; la gente se mueve, sobre todo con mal clima.",
+        hours: 3,
+        skills: ["difusión"],
+      },
+      {
+        name: "Convoca y capacita a voluntarios de calle",
+        description:
+          "Capacita a cada voluntario antes de su primera ronda: trato respetuoso que acepta un no por respuesta, seguridad personal y trabajar siempre en pares, y reconocer las emergencias médicas causadas por el clima. Nadie reparte hasta haber sido capacitado.",
+        hours: 4,
+        skills: ["enseñanza"],
+      },
+      {
+        name: "Arma un plan de distribución y rutas",
+        description:
+          "Planea rutas y horarios para los días previos al clima peligroso y durante este, llegando primero a las personas más expuestas — las más alejadas de los servicios, las que duermen a la intemperie y no en vehículos o refugios. Decide por adelantado qué pronóstico activa una ronda.",
+        hours: 3,
+        skills: ["organización"],
+        follows: [2],
+      },
+      {
+        name: "Conecta a la gente con refugios y servicios",
+        description:
+          "Lleva información vigente y verificada sobre centros de abrigo y enfriamiento, camas de refugio y el centro de recursos — los horarios y las reglas cambian todo el tiempo, y una referencia a una puerta cerrada quema la confianza. Ofrece conexiones sin presión; la relación dura más que cualquier noche.",
+        hours: 3,
+        skills: ["difusión"],
+      },
+      {
+        name: "Prepárate para las emergencias",
+        description:
+          "Capacita a cada voluntario para reconocer la hipotermia y el golpe de calor — confusión, habla arrastrada, piel caliente y seca o fría y húmeda — y para llamar de inmediato a los servicios de emergencia, no esperar a ver qué pasa. Ensayen qué hacer mientras llega la ayuda: sombra y agua, o cobijas y resguardo del viento.",
+        hours: 3,
+        skills: ["primeros auxilios"],
       },
     ],
   },

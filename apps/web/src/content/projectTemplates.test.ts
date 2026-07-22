@@ -89,6 +89,17 @@ const EXPECTED_CATEGORY: Record<string, string> = {
   "school-supply-program": "mutual_aid_drive",
   "legal-aid-clinic": "other",
   "resource-hub-dispatch": "organizing",
+  // Set 6
+  "community-solar-coop": "infrastructure",
+  "worker-coop-incubator": "education",
+  "elder-meal-delivery": "food",
+  "disaster-relief-hub": "organizing",
+  "recovery-peer-support": "emotional_support",
+  "community-fitness": "other",
+  "urban-orchard": "food",
+  "new-parent-support": "childcare",
+  "foster-kinship-support": "childcare",
+  "weather-survival-outreach": "mutual_aid_drive",
 };
 
 const VALID_CADENCES: readonly RecurringCadence[] = [
@@ -99,12 +110,12 @@ const VALID_CADENCES: readonly RecurringCadence[] = [
 ];
 
 describe("projectTemplates", () => {
-  it("ships exactly 54 templates in English", () => {
-    expect(PROJECT_TEMPLATES_EN.length).toBe(54);
+  it("ships exactly 64 templates in English", () => {
+    expect(PROJECT_TEMPLATES_EN.length).toBe(64);
   });
 
-  it("ships exactly 54 templates in Spanish", () => {
-    expect(PROJECT_TEMPLATES_ES.length).toBe(54);
+  it("ships exactly 64 templates in Spanish", () => {
+    expect(PROJECT_TEMPLATES_ES.length).toBe(64);
   });
 
   it("en and es share the same id set in the same order", () => {

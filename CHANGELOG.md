@@ -10,6 +10,24 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Ten new project templates (Set 6).** The template gallery grows
+  from 54 to 64: Community Solar & Energy Cooperative, Worker
+  Cooperative & Job Skills Incubator, Elder Companionship & Meal
+  Delivery, Disaster Relief Distribution Hub, Recovery & Sober Peer
+  Support Network, Community Fitness & Wellness Groups, Urban
+  Orchard & Food Forest, Postpartum & New Parent Support Network,
+  Foster & Kinship Care Support Network, and Cold & Hot Weather
+  Survival Outreach. Every template ships in English and Spanish
+  with seven ready-to-claim tasks, per-task tips, suggested starter
+  steps, first-steps and common-pitfalls guidance, and links to the
+  projects it pairs with (the disaster hub builds on the
+  preparedness network; elder meals draw on the people's kitchen;
+  the postpartum and foster networks lean on the diaper bank).
+  Safety boundaries are stated plainly where they matter: peer
+  support never replaces professional treatment or medical care,
+  work with children in care follows vetting and mandatory-reporting
+  rules, and extreme-weather outreach trains volunteers to recognize
+  medical emergencies. Plan: docs/template-set-6-plan.md.
 - **Quick picks on the event form.** One tap sets the common cases:
   Today / Tomorrow / the upcoming Saturday for the start date, and
   9:00 / noon / 6:00 PM for the start time — no picker round-trip.

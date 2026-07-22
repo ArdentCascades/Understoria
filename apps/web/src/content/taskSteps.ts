@@ -1515,6 +1515,306 @@ export const TASK_STEPS: Record<
       "en": ["Rename this week's recording now: date, storyteller's name, sharing agreement","Copy it to a second, genuinely different place — cloud plus phone, not one laptop","Get the storyteller their own copy, on a USB stick or by whatever app they use","Re-read the consent form before posting anything public, and honor any change"],
       "es": ["Renombra ya la grabación de esta semana: fecha, nombre y acuerdo de compartir","Cópiala a un segundo lugar realmente distinto — nube y teléfono, no una sola laptop","Entrega su copia a quien narró, en una memoria USB o por la app que use","Relee el consentimiento antes de publicar algo y respeta cualquier cambio"]
     }
+  ],
+  "community-solar-coop": [
+    {
+      "en": ["Text five neighbors who complain about their power bills and ask for ten minutes each","Draft a sign-up form that asks for a real commitment level, not just an email","Host a kitchen-table info night and count who actually shows up","Sort responses into committed, curious, and no — plan around the committed only"],
+      "es": ["Escribe a cinco vecinos que se quejan del recibo de luz y pídeles diez minutos a cada uno","Arma un formulario que pida un nivel real de compromiso, no solo un correo","Organiza una plática informativa casera y cuenta quién llega de verdad","Clasifica las respuestas en comprometidos, curiosos y no — planea solo con los comprometidos"]
+    },
+    {
+      "en": ["Search your state's name plus 'community solar rules' and save the top official page","Call a solar co-op a town or state over and ask which model their rules allowed","Write a one-page cheat sheet: net metering, subscriptions, co-op ownership — allowed here or not","Flag every rule you don't understand for a lawyer to explain later"],
+      "es": ["Busca el nombre de tu estado más 'reglas de energía solar comunitaria' y guarda la página oficial","Llama a una cooperativa solar cercana y pregunta qué modelo permitieron sus reglas","Haz una hoja resumen: medición neta, suscripciones, propiedad cooperativa — permitido aquí o no","Marca cada regla que no entiendas para que un abogado la explique después"]
+    },
+    {
+      "en": ["List three big sunny roofs nearby: schools, churches, warehouses","Check whether an existing community-solar program will take your group as subscribers","Walk your top host site with the owner and note roof age and open space","Put build vs. join on one page and bring it to the members"],
+      "es": ["Anota tres techos grandes y soleados cerca: escuelas, iglesias, bodegas","Averigua si un programa de energía solar comunitaria ya existente acepta a tu grupo como suscriptores","Recorre tu sitio favorito con la persona dueña y anota la edad del techo y el espacio libre","Pon construir contra unirse en una página y llévala a los miembros"]
+    },
+    {
+      "en": ["Ask your state co-op association for lawyers who know energy co-ops","Book one consult with a lawyer who has formed an energy co-op before","Sketch the money flow on one page: who pays in, who owns what, who gets credits","Compare co-op, LLC, and subscription structures with the professionals","Sign nothing until the lawyer and accountant have read every contract"],
+      "es": ["Pide a la asociación de cooperativas de tu estado abogados que conozcan cooperativas de energía","Agenda una consulta con un abogado que ya haya formado una cooperativa de energía","Dibuja el flujo del dinero en una página: quién aporta, quién es dueño, quién recibe créditos","Compara estructuras — cooperativa, sociedad, suscripción — con los profesionales","No firmes nada hasta que el abogado y el contador hayan leído cada contrato"]
+    },
+    {
+      "en": ["Ask two nearby solar owners which installer they used and if they'd rehire them","Request at least three written bids for the same specs","Ask each bidder who handles maintenance in year five and what the warranty covers","Get warranty and maintenance terms into the contract in writing"],
+      "es": ["Pregunta a dos dueños de paneles cercanos qué instalador usaron y si lo volverían a contratar","Pide al menos tres cotizaciones por escrito con las mismas especificaciones","Pregunta a cada postor quién hace el mantenimiento al quinto año y qué cubre la garantía","Deja los términos de garantía y mantenimiento por escrito en el contrato"]
+    },
+    {
+      "en": ["Open a spreadsheet with one row per member: paid in, credits back, date","Write the credit rules in plain words a new member can read in one minute","Pick one tool for payments and statements and stick to it","Walk one member through their first statement and fix whatever confused them"],
+      "es": ["Abre una hoja de cálculo con una fila por miembro: aportó, créditos recibidos, fecha","Escribe las reglas de créditos en palabras sencillas que se lean en un minuto","Elige una sola herramienta para pagos y estados de cuenta y quédate con ella","Revisa con un miembro su primer estado de cuenta y corrige lo que lo confundió"]
+    },
+    {
+      "en": ["Ask three members to bring a recent power bill to the next meeting","Walk through one bill together, line by line","Share five cheap fixes: LED bulbs, smart strips, thermostat, door seals","Check bills again in a month so members see the difference on paper"],
+      "es": ["Pide a tres miembros llevar un recibo de luz reciente a la próxima reunión","Revisen juntos un recibo, línea por línea","Comparte cinco arreglos baratos: focos LED, multicontactos, termostato, sellos de puertas","Revisen los recibos en un mes para que los miembros vean la diferencia en papel"]
+    }
+  ],
+  "worker-coop-incubator": [
+    {
+      "en": ["Book three 20-minute chats with interested members this week","Ask each one: what can you do, what do you want to build, what hours do you have","Log every answer in one shared sheet and highlight repeated skills","Circle any cluster of three or more matching skills — that's a possible venture"],
+      "es": ["Agenda esta semana tres charlas de 20 minutos con miembros interesados","Pregunta a cada quien: qué sabes hacer, qué quieres construir, cuántas horas tienes","Registra cada respuesta en una hoja compartida y resalta las habilidades repetidas","Encierra cualquier grupo de tres o más habilidades que coincidan — ahí hay un posible negocio"]
+    },
+    {
+      "en": ["Poll members on which skills they want most: resumes, trades, digital, money","Ask the skill-share program who can teach the top two requests","Book one outside expert for the topic nobody local can cover","Schedule the first session and keep it under two hours","Collect feedback at the door and adjust the next session"],
+      "es": ["Pregunta a los miembros qué habilidades quieren más: currículums, oficios, digital, finanzas","Consulta al programa de intercambio de saberes quién puede enseñar las dos más pedidas","Consigue una persona experta de fuera para el tema que nadie local domina","Programa la primera sesión y que no pase de dos horas","Recoge comentarios a la salida y ajusta la siguiente sesión"]
+    },
+    {
+      "en": ["Invite a member of a real worker co-op to speak to the group","Make a one-page comparison: co-op vs. traditional business — profits, decisions, ownership","Walk through how a real co-op votes and splits profits, with numbers","Leave time for the hard questions: pay, conflict, people leaving"],
+      "es": ["Invita a alguien de una cooperativa de trabajo real a platicar con el grupo","Haz una comparación de una página: cooperativa contra negocio tradicional — ganancias, decisiones, propiedad","Muestra con números cómo vota una cooperativa real y cómo reparte ganancias","Deja tiempo para las preguntas difíciles: sueldos, conflictos, salidas"]
+    },
+    {
+      "en": ["Look up your region's cooperative developer and book an intro call","Help the group draft a one-page business plan before any paperwork","Get names of a lawyer and an accountant who have formed co-ops before","Review structure options with the professionals in the room","Hold off on incorporating until the plan and the advisors line up"],
+      "es": ["Busca al desarrollador de cooperativas de tu región y agenda una llamada de presentación","Ayuda al grupo a redactar un plan de negocio de una página antes de cualquier trámite","Consigue nombres de un abogado y un contador que ya hayan formado cooperativas","Revisen las opciones de estructura con los profesionales presentes","No incorporen hasta que el plan y los asesores estén alineados"]
+    },
+    {
+      "en": ["Start a shared doc listing every microloan, grant, and co-op fund you know of","Ask the cooperative developer which funders you're missing","Note each fund's deadline, amount, and requirements","Sit with one venture and finish their first application together"],
+      "es": ["Abre un documento compartido con cada microcrédito, beca y fondo cooperativo que conozcas","Pregunta al desarrollador de cooperativas qué financiadores te faltan","Anota la fecha límite, el monto y los requisitos de cada fondo","Siéntate con un emprendimiento y terminen juntos su primera solicitud"]
+    },
+    {
+      "en": ["Write down three experienced cooperators or business owners you could ask","Invite each to mentor one venture with a monthly check-in","Match mentors to ventures by trade, not just availability","Put the first check-in on the calendar before the venture launches"],
+      "es": ["Anota tres cooperativistas o dueños de negocio con experiencia a quienes podrías pedírselo","Invita a cada uno a acompañar un emprendimiento con una reunión mensual","Empareja mentores y emprendimientos por oficio, no solo por disponibilidad","Agenda la primera reunión antes de que el emprendimiento arranque"]
+    },
+    {
+      "en": ["Invite every venture to one shared lunch or evening meet-up","Have each venture share one problem and one win","Start a group chat for referrals and quick questions","List what the ventures could buy from each other and pin it in the chat"],
+      "es": ["Invita a todos los emprendimientos a una comida o encuentro nocturno compartido","Pide a cada emprendimiento compartir un problema y un logro","Crea un chat grupal para referencias y preguntas rápidas","Listen qué podrían comprarse entre sí los emprendimientos y fíjenlo en el chat"]
+    }
+  ],
+  "elder-meal-delivery": [
+    {
+      "en": ["Call one senior center or parish nurse and ask who could use meals and a visit","List the clinics, faith groups, and pharmacists who see isolated elders","Draft a short opt-in blurb: a meal and a visit, free, no strings","Call or visit each referred elder and ask — never assume","Start a yes-list with address and best contact time"],
+      "es": ["Llama a un centro de adultos mayores o enfermera parroquial y pregunta a quién le servirían comida y visitas","Lista las clínicas, grupos de fe y farmacias que ven a personas mayores aisladas","Redacta un texto corto y voluntario: una comida y una visita, gratis, sin condiciones","Llama o visita a cada persona mayor referida y pregúntale — nunca supongas","Empieza una lista de síes con dirección y mejor horario de contacto"]
+    },
+    {
+      "en": ["Message five dependable people you'd trust in your own grandmother's home","Write the screening rule down: references plus a basic check, no exceptions","Run every volunteer through it before their first delivery","Assign each elder one regular visitor instead of a rotation"],
+      "es": ["Escribe a cinco personas confiables que dejarías entrar a casa de tu propia abuela","Deja la regla por escrito: referencias más verificación básica, sin excepciones","Aplícala a cada voluntario antes de su primera entrega","Asigna a cada persona mayor una visita fija en lugar de rotar gente"]
+    },
+    {
+      "en": ["Ask the community meal crew what they can reliably produce each week","Line up two backup cooks or a restaurant willing to donate portions","Agree on portion count, pickup time, and easy-reheat packaging","Label every container with contents and date before it leaves the kitchen"],
+      "es": ["Pregunta al equipo de comidas comunitarias qué puede producir sin falta cada semana","Consigue dos cocineros de respaldo o un restaurante dispuesto a donar porciones","Acuerden número de porciones, hora de recogida y empaques fáciles de recalentar","Etiqueta cada envase con contenido y fecha antes de que salga de la cocina"]
+    },
+    {
+      "en": ["Plot the yes-list addresses on a map and group them into short routes","Set fixed days and rough times, the same every week","Pad every stop with ten unhurried minutes for conversation","Do a dry run of each route before the first real delivery"],
+      "es": ["Ubica en un mapa las direcciones de tu lista y agrúpalas en rutas cortas","Fija días y horarios aproximados, los mismos cada semana","Suma a cada parada diez minutos sin prisa para conversar","Haz un recorrido de prueba de cada ruta antes de la primera entrega real"]
+    },
+    {
+      "en": ["Make one simple form: dietary needs, allergies, emergency contact","Fill it in with each elder or their family, in person or by phone","Keep the forms locked up or password-protected","Give drivers only what they need at the door: allergies and one contact number"],
+      "es": ["Crea un formulario sencillo: dieta, alergias, contacto de emergencia","Llénalo con cada persona mayor o su familia, en persona o por teléfono","Guarda los formularios bajo llave o con contraseña","Da a quien maneja solo lo necesario en la puerta: alergias y un número de contacto"]
+    },
+    {
+      "en": ["Write the first line: what a volunteer does at an unanswered door","List who gets called, in order: elder's phone, family, emergency services","Add how to write down what happened after any incident","Print the protocol on a wallet card for every volunteer","Walk the team through it out loud before it's ever needed"],
+      "es": ["Escribe la primera línea: qué hace un voluntario ante una puerta sin respuesta","Lista a quién se llama y en qué orden: teléfono de la persona, familia, emergencias","Agrega cómo anotar lo ocurrido después de cualquier incidente","Imprime el protocolo en una tarjeta de bolsillo para cada voluntario","Repásalo en voz alta con el equipo antes de que haga falta"]
+    },
+    {
+      "en": ["Text every volunteer after their first week: how did it go, what felt awkward","Ask each elder one open question: what would make this better","Rotate or pause routes for anyone who sounds stretched","Share one small win with the whole team each month"],
+      "es": ["Escribe a cada voluntario tras su primera semana: cómo te fue, qué se sintió raro","Haz a cada persona mayor una pregunta abierta: qué mejoraría esto","Rota o pausa rutas de quien se oiga agotado","Comparte un pequeño logro con todo el equipo cada mes"]
+    }
+  ],
+  "disaster-relief-hub": [
+    {
+      "en": ["List three buildings with a loading area: schools, churches, union halls","Ask each owner the blunt question: could we get in at 6 a.m. after a flood","Get a written yes and a key arrangement for your top pick and a backup","Walk both sites and note power, water, and where trucks would park"],
+      "es": ["Anota tres edificios con zona de carga: escuelas, iglesias, locales sindicales","Haz a cada dueño la pregunta directa: ¿podríamos entrar a las 6 a.m. tras una inundación?","Consigue un sí por escrito y un acuerdo de llaves para tu favorito y un respaldo","Recorre ambos sitios y anota luz, agua y dónde estacionarían los camiones"]
+    },
+    {
+      "en": ["List where water, food, and hygiene supplies would come from: supplier, partner, or drive","Call one wholesaler and ask about emergency bulk orders on short notice","Agree with partner orgs on who sources what","Decide how you'll learn real needs after an event — one call tree or intake form"],
+      "es": ["Lista de dónde saldrían agua, comida e higiene: proveedor, organización aliada o colecta","Llama a un mayorista y pregunta por pedidos grandes de emergencia con poco aviso","Acuerda con las organizaciones aliadas quién consigue qué","Define cómo sabrán las necesidades reales tras un evento: una cadena de llamadas o un formulario"]
+    },
+    {
+      "en": ["Pick your sorting categories now: water, food, hygiene, cleanup, clothing","Sketch the flow on paper: truck arrives, unload, sort, shelve, count","Make a one-page tally sheet for counts in and out","Print category signs and store them with tape at the site"],
+      "es": ["Elige ya tus categorías de clasificación: agua, comida, higiene, limpieza, ropa","Dibuja el flujo en papel: llega el camión, descargar, clasificar, acomodar, contar","Haz una hoja de conteo de una página para entradas y salidas","Imprime letreros por categoría y guárdalos con cinta en el sitio"]
+    },
+    {
+      "en": ["Write the rule at the top of the page: no ID checks, no proof of need","Put in writing who gets served first when supplies run short","Map delivery runs for people who can't reach the hub","Sketch the pickup line so it moves one way, in one door and out another"],
+      "es": ["Escribe la regla al inicio de la página: sin pedir identificación ni pruebas de necesidad","Deja por escrito a quién se atiende primero cuando escaseen los insumos","Traza rutas de entrega para quienes no pueden llegar al centro","Dibuja la fila de entrega en un solo sentido: entra por una puerta y sale por otra"]
+    },
+    {
+      "en": ["Message ten likely volunteers and ask: could you show up within hours","Write role cards: intake, sorting, distribution, delivery, safety","Run a two-hour practice day with real boxes","Note who did what well and pre-assign roles for the real thing"],
+      "es": ["Escribe a diez posibles voluntarios y pregunta: ¿podrías llegar en cuestión de horas?","Redacta tarjetas de rol: recepción, clasificación, distribución, entrega, seguridad","Organiza un día de práctica de dos horas con cajas reales","Anota quién hizo bien qué y asigna roles por adelantado para el evento real"]
+    },
+    {
+      "en": ["Email your county emergency management office and introduce the hub","List the other relief groups nearby and what each one covers","Meet once and agree on who fills which gap","Swap after-hours contacts and keep a copy on paper"],
+      "es": ["Envía un correo a la oficina de gestión de emergencias local y presenta el centro","Lista los demás grupos de ayuda cercanos y qué cubre cada uno","Reúnanse una vez y acuerden quién cubre cada hueco","Intercambien contactos fuera de horario y guarden una copia en papel"]
+    },
+    {
+      "en": ["Print the volunteer roster and key contacts — assume no internet","Pick an offline fallback: radios, a message board, or runners","Write the hard safety rules: nobody enters unsafe structures, ever","Tie into the preparedness network's contact tree and test it once"],
+      "es": ["Imprime la lista de voluntarios y contactos clave — asume que no habrá internet","Elige un plan sin conexión: radios, un tablero de mensajes o mensajeros a pie","Escribe las reglas duras de seguridad: nadie entra a estructuras inseguras, nunca","Conéctate al árbol de contactos de la red de preparación y pruébalo una vez"]
+    }
+  ],
+  "recovery-peer-support": [
+    {
+      "en": ["Write down one or two neighbors with solid lived recovery experience","Ask each privately if they'd consider facilitating — no pressure, no announcements","Find the nearest recognized peer-recovery training and its next date","Enroll every future facilitator before the first meeting","Say the line out loud from day one: peers, not providers"],
+      "es": ["Anota a una o dos personas vecinas con experiencia sólida y vivida de recuperación","Pregunta a cada una en privado si facilitaría — sin presión y sin anuncios","Busca la capacitación reconocida de apoyo entre pares más cercana y su próxima fecha","Inscribe a cada futuro facilitador antes de la primera reunión","Di la frase en voz alta desde el primer día: pares, no profesionales de salud"]
+    },
+    {
+      "en": ["Open a doc with two columns: what we do, what we never do","Put detox and medication advice at the top of the never column","Have every facilitator read it and sign it","Show the scope to a local treatment professional for a sanity check"],
+      "es": ["Abre un documento con dos columnas: lo que hacemos y lo que nunca hacemos","Pon los consejos de desintoxicación y medicamentos al inicio de la columna del nunca","Haz que cada facilitador lo lea y lo firme","Muestra el alcance a un profesional local de tratamiento para una revisión rápida"]
+    },
+    {
+      "en": ["List the local treatment programs, clinics, and crisis lines","Visit or call each one and introduce the network in person","Ask each: who exactly do we call, and may we use your name","Write an overdose-response plan and post it where meetings happen","Print the contact list and re-check it monthly"],
+      "es": ["Lista los programas de tratamiento, clínicas y líneas de crisis locales","Visita o llama a cada uno y presenta la red en persona","Pregunta a cada quien: ¿a quién exactamente llamamos y podemos usar su nombre?","Escribe un plan de respuesta a sobredosis y pégalo donde se reúnen","Imprime la lista de contactos y revísala cada mes"]
+    },
+    {
+      "en": ["List rooms with a discreet entrance: library, community room, faith space","Visit your top two and check them for privacy and noise","Confirm the room is substance-free and open on your meeting nights","Book a standing slot so the room is always the same one"],
+      "es": ["Lista salas con entrada discreta: biblioteca, salón comunitario, espacio de fe","Visita tus dos favoritas y revisa la privacidad y el ruido","Confirma que la sala esté libre de sustancias y disponible tus noches de reunión","Aparta un horario fijo para que la sala sea siempre la misma"]
+    },
+    {
+      "en": ["Draft the ground rules: what's said here stays here, no advice-pushing, right to pass","Read them to the facilitators and trim anything that sounds preachy","Print them on one card for the meeting room","Plan to read them aloud at the start of every single meeting"],
+      "es": ["Redacta las reglas: lo dicho aquí se queda aquí, sin imponer consejos, derecho a pasar","Léelas a los facilitadores y recorta lo que suene a sermón","Imprímelas en una sola tarjeta para la sala de reuniones","Planea leerlas en voz alta al inicio de absolutamente cada reunión"]
+    },
+    {
+      "en": ["Pick two meeting times: one evening, one daytime or weekend","Draft a flyer in plain words: free, open, no requirements","Cut any wording that hints at shame or diagnosis","Post it where people already go: clinics, laundromats, coffee shops","Ask partner programs to hand it to people directly"],
+      "es": ["Elige dos horarios de reunión: uno de noche y otro de día o fin de semana","Redacta un volante en palabras llanas: gratis, abierto, sin requisitos","Quita cualquier frase que insinúe vergüenza o diagnóstico","Pégalo donde la gente ya va: clínicas, lavanderías, cafeterías","Pide a los programas aliados entregarlo directamente en mano"]
+    },
+    {
+      "en": ["Put a monthly one-on-one with each facilitator on the calendar","Set up a leading rotation so nobody holds every meeting","Ask each facilitator where they get their own support","Say it before anyone needs it: stepping back is always allowed"],
+      "es": ["Agenda en el calendario una charla mensual a solas con cada facilitador","Arma una rotación de quién dirige para que nadie cargue todas las reuniones","Pregunta a cada facilitador dónde recibe su propio apoyo","Dilo antes de que alguien lo necesite: hacerse a un lado siempre está permitido"]
+    }
+  ],
+  "community-fitness": [
+    {
+      "en": ["Write five quick questions about what movement people enjoy and what feels doable","Ask them this week at the laundromat, the senior building, and the school gate","Post the same questions in one neighborhood group chat","Tally the answers and circle the two most-wanted activities"],
+      "es": ["Escribe cinco preguntas rápidas sobre qué movimiento disfruta la gente y qué le resulta posible","Hazlas esta semana en la lavandería, el edificio de personas mayores y la puerta de la escuela","Publica las mismas preguntas en un chat vecinal","Cuenta las respuestas y marca las dos actividades más pedidas"]
+    },
+    {
+      "en": ["List three warm, reliable people you'd trust to lead a walk or a stretch session","Message each with a specific ask: one session a week, no expertise required","For anything physically demanding, ask about qualifications before saying yes","Pair each new leader with a backup who can cover a missed week"],
+      "es": ["Apunta a tres personas cálidas y confiables que podrían guiar una caminata o estiramientos","Escríbeles con una petición concreta: una sesión por semana, sin necesidad de ser expertas","Para lo físicamente exigente, pregunta por certificaciones antes de aceptar","Asigna a cada nueva persona líder un respaldo que cubra una semana perdida"]
+    },
+    {
+      "en": ["List nearby parks, halls, and school gyms reachable without a car","Call or visit each one to ask about cost, hours, and booking","Walk the top two checking level ground, seating, shade, and bathrooms","Note where people could shelter if the weather turns","Book your first choice for a trial month"],
+      "es": ["Apunta parques, salones y gimnasios escolares cercanos a los que se llegue sin auto","Llama o visita cada uno para preguntar costo, horarios y reservas","Recorre los dos mejores revisando piso parejo, asientos, sombra y baños","Anota dónde podría refugiarse la gente si el clima cambia","Reserva tu primera opción por un mes de prueba"]
+    },
+    {
+      "en": ["Write a one-page plan for your first activity, starting from the easiest version","Add a modification to every move: a chair option, a shorter loop","Cut any mention of weight or appearance from the plan and the flyers","Run the plan past one elder and one beginner and adjust it"],
+      "es": ["Escribe el plan de tu primera actividad en una página, partiendo de la versión más fácil","Agrega una variante a cada ejercicio: opción con silla, recorrido más corto","Quita del plan y de los volantes cualquier mención al peso o la apariencia","Muestra el plan a una persona mayor y a una principiante y ajústalo"]
+    },
+    {
+      "en": ["Buy or borrow a first-aid kit and check what's inside","Write a five-minute warm-up into the start of every session plan","Add water breaks to the schedule and a reminder to bring bottles","Brief leaders on spotting overexertion and making rest feel normal","Draft a line suggesting people new to exercise check with a doctor first"],
+      "es": ["Compra o consigue prestado un botiquín y revisa qué trae","Incluye un calentamiento de cinco minutos al inicio de cada sesión","Agrega pausas de agua al horario y un recordatorio de llevar botella","Explica a quienes lideran cómo notar el sobreesfuerzo y normalizar el descanso","Redacta una línea sugiriendo a quienes recién empiezan consultar antes al médico"]
+    },
+    {
+      "en": ["Pick one weekly day and time you can keep for three months","Make a simple flyer that says all ages, sizes, and abilities are welcome","Post it at the laundromat, library, senior building, and clinics","Share it in group chats and ask each member to forward it once","Set a reminder to announce any cancellation early, never silently"],
+      "es": ["Elige un día y hora semanales que puedas sostener tres meses","Haz un volante sencillo que diga: todas las edades, tallas y capacidades son bienvenidas","Pégalo en la lavandería, la biblioteca, el edificio de mayores y las clínicas","Compártelo en los chats y pide a cada integrante reenviarlo una vez","Pon un recordatorio para avisar cualquier cancelación con tiempo, nunca en silencio"]
+    },
+    {
+      "en": ["Start each session with a quick round of names","Ask one regular to greet newcomers at every session","Build five minutes of chat time into the schedule","Celebrate showing up consistently, never weight or performance"],
+      "es": ["Empieza cada sesión con una ronda rápida de nombres","Pide a una persona habitual recibir a quienes llegan por primera vez","Reserva cinco minutos de plática dentro del horario","Celebra la constancia en asistir, nunca el peso ni el rendimiento"]
+    }
+  ],
+  "urban-orchard": [
+    {
+      "en": ["List possible sites: land trusts, parks land, congregations with unused ground","Email or call the most promising owner and ask for a meeting","Ask directly for ten-plus years of access and confirm water on the site","Get the terms into a written agreement before buying a single tree"],
+      "es": ["Apunta sitios posibles: fideicomisos de tierra, terrenos de parques, congregaciones con suelo libre","Escribe o llama a la persona dueña más prometedora y pide una reunión","Pide de frente acceso por diez años o más y confirma que haya agua en el sitio","Consigue los términos en un acuerdo escrito antes de comprar un solo árbol"]
+    },
+    {
+      "en": ["Look up your hardiness zone and list the fruit trees that thrive in it","Ask neighbors which fruits they'd actually pick and eat","Sketch the site in layers: canopy trees, shrubs, ground cover","Check pollination partners for every variety on your list","Space trees for their mature size, not the sapling's"],
+      "es": ["Busca tu zona de clima y apunta los frutales que prosperan en ella","Pregunta al vecindario qué frutas cosecharía y comería de verdad","Dibuja el sitio por capas: árboles altos, arbustos y cubresuelos","Verifica los polinizadores compañeros de cada variedad de tu lista","Deja espacio para el tamaño adulto del árbol, no el de la plantita"]
+    },
+    {
+      "en": ["Find your nearest nurseries and note their bare-root season","Price your plant list bare-root versus potted","Ask about nonprofit discounts, grants, and donation programs","Place the order early — good varieties sell out"],
+      "es": ["Ubica los viveros más cercanos y anota su temporada de raíz desnuda","Cotiza tu lista de plantas a raíz desnuda contra maceta","Pregunta por descuentos para organizaciones, subvenciones y programas de donación","Haz el pedido temprano: las buenas variedades se agotan"]
+    },
+    {
+      "en": ["Mark every planting spot from the design with flags or stakes","Schedule a workday to clear weeds and lay down mulch","Test the water source and lay out hoses or barrels","Stage compost, tools, and stakes next to each planting spot"],
+      "es": ["Marca cada punto de plantación del diseño con banderines o estacas","Agenda una jornada para desyerbar y tender el mantillo","Prueba la fuente de agua y tiende mangueras o barriles","Acomoda composta, herramientas y tutores junto a cada punto"]
+    },
+    {
+      "en": ["Pick a date in planting season and invite widely","Write a one-page how-to: right depth, watering basin, mulch ring","Assign an experienced planter to roam and check every tree","Line up water, snacks, and music — make it a party","End the day by watering every tree in deeply"],
+      "es": ["Elige una fecha en temporada de plantación e invita a todo el mundo","Escribe una guía de una página: profundidad correcta, cajete de riego, anillo de mantillo","Asigna a alguien con experiencia para recorrer y revisar cada árbol","Consigue agua, botanas y música: que sea una fiesta","Cierra el día dando un riego profundo a cada árbol"]
+    },
+    {
+      "en": ["List the year-round jobs: watering, pruning, mulching, pest checks","Ask three people for a named yearly commitment, not vague interest","Make a summer watering rota for the young trees","Put a spring pruning date on the calendar now"],
+      "es": ["Apunta las labores de todo el año: riego, poda, mantillo y revisión de plagas","Pide a tres personas un compromiso anual con nombre, no un interés vago","Arma una rotación de riego de verano para los árboles jóvenes","Agenda desde ya una fecha de poda en primavera"]
+    },
+    {
+      "en": ["Draft simple picking norms: who harvests, when, and how much","Bring the draft to a community meeting before the first crop","Line up homes for surplus: fridges, pantries, shared meals","Post the agreed norms on a sign at the orchard"],
+      "es": ["Redacta normas simples de cosecha: quién corta, cuándo y cuánto","Lleva el borrador a una reunión comunitaria antes de la primera cosecha","Consigue destino para el excedente: refrigeradores, despensas, comidas compartidas","Publica las normas acordadas en un letrero en el huerto"]
+    }
+  ],
+  "new-parent-support": [
+    {
+      "en": ["List people you know who cook, drive, or have raised a baby","Message each one with a specific role: meals, errands, or peer support","Ask two or three experienced parents to be your first peer supporters","Note every volunteer's availability and limits in one place"],
+      "es": ["Apunta a la gente que conoces que cocina, maneja o ya crio a un bebé","Escribe a cada quien con un rol concreto: comidas, mandados o apoyo entre pares","Pide a dos o tres madres o padres con experiencia ser tus primeros apoyos de pares","Anota en un solo lugar la disponibilidad y los límites de cada voluntario"]
+    },
+    {
+      "en": ["Pick a free meal-train tool or shared calendar and set up a test run","Make a short intake form for dietary needs and allergies, asked once","Write the drop-off rules: doorstep by default, labeled, easy to reheat","Test the whole flow with one volunteer family"],
+      "es": ["Elige una herramienta gratuita de tren de comidas o un calendario compartido y pruébala","Haz un formulario corto de dietas y alergias que se pregunte una sola vez","Escribe las reglas de entrega: en la puerta por defecto, etiquetado y fácil de recalentar","Prueba todo el circuito con una familia voluntaria"]
+    },
+    {
+      "en": ["Draft a checklist of offers: errands, laundry, dishes, sibling care","Match each offer with the volunteers who signed up for it","Set the rule: ask the parent what's wanted each visit and follow their list","Schedule the first two weeks of help for your first family"],
+      "es": ["Redacta una lista de ofertas: mandados, lavandería, trastes, cuidado de hermanos","Empareja cada oferta con quienes se apuntaron a ella","Fija la regla: preguntar en cada visita qué se necesita y seguir la lista de la familia","Agenda las primeras dos semanas de apoyo para tu primera familia"]
+    },
+    {
+      "en": ["Start a simple spreadsheet: name, service, phone, hours","Add lactation support, postpartum mental health care, and pediatric clinics","Add local sources of baby supplies, including the diaper bank","Call every number once to confirm it works","Put a directory review date on your calendar every three months"],
+      "es": ["Abre una hoja de cálculo sencilla: nombre, servicio, teléfono, horario","Agrega apoyo de lactancia, salud mental posparto y clínicas pediátricas","Suma fuentes locales de artículos de bebé, incluido el banco de pañales","Llama una vez a cada número para confirmar que funciona","Agenda una revisión del directorio cada tres meses"]
+    },
+    {
+      "en": ["Pick a small, comfortable space and a consistent time","Ask an experienced parent to hold the first circle","Train peers on the signs of postpartum depression and anxiety","Agree the rule: encourage professional care, never diagnose, never wait","Invite three or four parents personally for the first session"],
+      "es": ["Elige un espacio pequeño y cómodo y un horario constante","Pide a una madre o padre con experiencia sostener el primer círculo","Capacita a los pares en las señales de depresión y ansiedad posparto","Acuerden la regla: animar a buscar ayuda profesional, nunca diagnosticar ni esperar","Invita en persona a tres o cuatro familias para la primera sesión"]
+    },
+    {
+      "en": ["Write your vetting steps: references at minimum for anyone entering homes","Draft the boundaries: parents set the terms, visits stay short unless invited longer","Add the rule: no unannounced visits, ever","Walk every volunteer through the practices before their first visit"],
+      "es": ["Escribe tus pasos de verificación: referencias como mínimo para quien entre a los hogares","Redacta los límites: la familia pone las condiciones y las visitas son cortas salvo invitación","Agrega la regla: nunca visitas sin avisar","Repasa las prácticas con cada voluntario antes de su primera visita"]
+    },
+    {
+      "en": ["List the sibling projects: diaper bank, childcare collective, welcome wagon","Meet one organizer from each to agree how referrals flow","Make one shared intake so families tell their story only once","Give every family a single point of contact"],
+      "es": ["Apunta los proyectos hermanos: banco de pañales, colectivo de cuidado, comité de bienvenida","Reúnete con alguien de cada uno para acordar cómo fluyen las referencias","Crea una sola ficha de ingreso para que cada familia cuente su historia una vez","Da a cada familia un único punto de contacto"]
+    }
+  ],
+  "foster-kinship-support": [
+    {
+      "en": ["Call the local foster agency or kinship navigator and ask for a meeting","Ask schools and faith groups to pass your offer along to caregiving families","Write the first-contact message as an offer, never a screening","Ask early families what they needed in week one and in year one"],
+      "es": ["Llama a la agencia de crianza temporal o al navegador de parentesco y pide una reunión","Pide a escuelas y grupos de fe pasar tu oferta a las familias cuidadoras","Redacta el primer mensaje como una oferta, nunca como un filtro","Pregunta a las primeras familias qué necesitaron en la primera semana y el primer año"]
+    },
+    {
+      "en": ["List needs by age: clothes, beds, car seats, everyday supplies newborn to teen","Run a targeted donation drive naming the sizes and items you lack","Check every car seat and crib against expiration dates and recall lists","Sort and label everything by age and size as it arrives","Find dry storage someone can reach on short notice"],
+      "es": ["Haz la lista por edades: ropa, camas, sillas de auto y básicos de recién nacido a adolescente","Organiza una colecta puntual nombrando las tallas y artículos que faltan","Revisa cada silla de auto y cuna contra fechas de caducidad y listas de retiro","Clasifica y etiqueta todo por edad y talla conforme llegue","Consigue un espacio seco al que alguien pueda llegar con poco aviso"]
+    },
+    {
+      "en": ["Draft the packing list: a few days of clothes, toiletries, one comfort item","Pack the first bags sorted by age and size","Recruit two on-call drivers who can deliver within hours","Set up one phone number or inbox for placement requests","Do a timed test run from request to doorstep"],
+      "es": ["Redacta la lista de empaque: ropa para unos días, artículos de aseo y un objeto de consuelo","Arma las primeras mochilas separadas por edad y talla","Recluta a dos personas de guardia que puedan entregar en cuestión de horas","Define un solo teléfono o correo para las solicitudes de colocación","Haz un simulacro cronometrado de la solicitud a la puerta"]
+    },
+    {
+      "en": ["Ask the agency who may provide respite care and under what rules","Recruit and vet respite volunteers to those exact rules","Make a simple booking sheet caregivers can use without begging","Start with short, regular blocks — a predictable evening beats a rare weekend"],
+      "es": ["Pregunta a la agencia quién puede dar cuidado de relevo y bajo qué reglas","Recluta y verifica al voluntariado de relevo según esas reglas exactas","Crea una hoja de reservas que las familias usen sin tener que rogar","Empieza con bloques cortos y regulares: una tarde predecible vale más que un fin de semana raro"]
+    },
+    {
+      "en": ["Pick a regular time and a private, comfortable space","Ask an experienced foster or kinship caregiver to co-host","Invite through the agency and schools — never share family lists","Arrange child care during meetings so caregivers can actually attend","Open every meeting with a confidentiality reminder"],
+      "es": ["Elige un horario fijo y un espacio privado y cómodo","Pide a una cuidadora o cuidador con experiencia co-facilitar el grupo","Invita a través de la agencia y las escuelas; nunca compartas listas de familias","Organiza cuidado infantil durante las reuniones para que de verdad puedan asistir","Abre cada reunión recordando la confidencialidad"]
+    },
+    {
+      "en": ["Start a spreadsheet of services, benefits, and trauma-informed supports","Add the kinship-specific benefits nobody tells caregivers about","Call each entry to confirm it's current before listing it","Offer to sit with families while they navigate applications"],
+      "es": ["Abre una hoja de cálculo de servicios, beneficios y apoyos informados en trauma","Agrega los beneficios de parentesco que nadie les cuenta a las familias","Llama a cada entrada para confirmar que sigue vigente antes de listarla","Ofrece acompañar a las familias mientras llenan las solicitudes"]
+    },
+    {
+      "en": ["Get the vetting and mandatory-reporting rules in writing from the agency","Write your own one-page policy: vetting, reporting duties, confidentiality","Set the privacy rule: no photos, no stories, no details without permission","Walk every volunteer through the policy before any contact with families","Put an annual policy review date on the calendar"],
+      "es": ["Pide a la agencia por escrito las reglas de verificación y de reporte obligatorio","Escribe tu política de una página: verificación, deberes de reporte y confidencialidad","Fija la regla de privacidad: sin fotos, sin historias, sin detalles sin permiso","Repasa la política con cada voluntario antes de cualquier contacto con familias","Agenda en el calendario una revisión anual de la política"]
+    }
+  ],
+  "weather-survival-outreach": [
+    {
+      "en": ["Write two packing lists: one for cold season, one for heat","Print cards with shelter locations and crisis numbers for every kit","Host a packing session and assemble the first twenty kits","Store them somewhere dry that volunteers can reach fast"],
+      "es": ["Escribe dos listas de empaque: una para el frío y otra para el calor","Imprime tarjetas con albergues y números de crisis para cada kit","Organiza una sesión de empaque y arma los primeros veinte kits","Guárdalos en un lugar seco al que el voluntariado llegue rápido"]
+    },
+    {
+      "en": ["Price bulk blankets, socks, water, and electrolytes at two or three suppliers","Ask stores and congregations for donations before the season starts","Run one focused donation drive naming the exact items","Set aside enough stock for a mid-season restock"],
+      "es": ["Cotiza cobijas, calcetines, agua y electrolitos al mayoreo con dos o tres proveedores","Pide donaciones a tiendas y congregaciones antes de que empiece la temporada","Haz una colecta enfocada nombrando los artículos exactos","Aparta existencias suficientes para resurtir a media temporada"]
+    },
+    {
+      "en": ["Contact outreach workers already walking these routes and ask to tag along","Join a round or two before mapping anything on your own","Note locations loosely — people move, especially in bad weather","Make it a habit to update the map after every round"],
+      "es": ["Contacta a quienes ya hacen recorridos de calle y pide acompañarlos","Súmate a una o dos rondas antes de mapear por tu cuenta","Anota las ubicaciones sin rigidez: la gente se mueve, más con mal clima","Acostúmbrate a actualizar el mapa después de cada ronda"]
+    },
+    {
+      "en": ["Draft the training outline: respectful engagement, working in pairs, emergencies","Ask an experienced outreach worker to co-lead the first training","Schedule the session before the season starts","Keep a list of who's trained — nobody distributes without it"],
+      "es": ["Redacta el temario: trato respetuoso, trabajo en parejas y emergencias","Pide a alguien con experiencia en calle co-dirigir la primera capacitación","Agenda la sesión antes de que empiece la temporada","Lleva la lista de quiénes están capacitados: nadie reparte sin estarlo"]
+    },
+    {
+      "en": ["Decide the forecast numbers that trigger a round and write them down","Draft routes that reach the most exposed people first","Assign pairs to each route, with a backup for both","Choose who watches the forecast and sends the go message"],
+      "es": ["Define los números del pronóstico que activan una ronda y déjalos por escrito","Traza rutas que lleguen primero a la gente más expuesta","Asigna parejas a cada ruta, con respaldo para ambas","Decide quién vigila el pronóstico y manda el aviso de salida"]
+    },
+    {
+      "en": ["List warming and cooling centers, shelter beds, and the resource hub","Call each one to verify hours and rules before printing anything","Print small cards volunteers can hand out on rounds","Set a weekly re-check — a referral to a closed door burns trust"],
+      "es": ["Apunta centros de calentamiento y enfriamiento, camas de albergue y el centro de recursos","Llama a cada uno para verificar horarios y reglas antes de imprimir nada","Imprime tarjetas pequeñas para repartir en las rondas","Fija una verificación semanal: mandar a una puerta cerrada quema la confianza"]
+    },
+    {
+      "en": ["Print a pocket card of hypothermia and heat stroke warning signs","Drill the rule at training: call emergency services immediately, never wait and see","Practice what to do while help comes: shade and water, or blankets and windbreak","Have every volunteer save local emergency and crisis numbers in their phone"],
+      "es": ["Imprime una tarjeta de bolsillo con las señales de hipotermia y golpe de calor","Ensaya la regla en la capacitación: llamar a emergencias de inmediato, nunca esperar a ver","Practiquen qué hacer mientras llega la ayuda: sombra y agua, o cobijas y abrigo del viento","Que cada voluntario guarde en su teléfono los números locales de emergencia y crisis"]
+    }
   ]
 };
 
