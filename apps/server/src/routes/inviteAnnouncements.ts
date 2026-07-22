@@ -15,10 +15,21 @@ import {
   verifyInviteAnnouncement,
 } from "@understoria/shared/crypto";
 import type { InviteAnnouncementStore } from "../db.js";
+import type { TrustResolver } from "../trustGate.js";
 
 interface Deps {
   store: InviteAnnouncementStore;
   now?: () => number;
+  /**
+   * Founder-rooted trust gate (trustGate.ts): only a TRUSTED member
+   * may announce an invite — same rule and same 403 posture as the
+   * /redemptions gate on the receipt's inviter (an announcement is
+   * the issue-time half of the same invite). Optional so existing
+   * tests/callers keep the old behavior; a founderless node skips
+   * via `founderlessSkip`. No mirror exemption needed: this surface
+   * is PWA↔node only and not mirror-replicated.
+   */
+  trust?: TrustResolver;
 }
 
 /**
@@ -45,6 +56,8 @@ interface Deps {
  *   - 201 — verified and novel (stored, stamping receivedAt)
  *   - 200 — idempotent replay: same tokenHash, same inviterKey
  *   - 400 — malformed body
+ *   - 403 — inviterKey is not in the founder-rooted trusted set
+ *           (`inviter_not_trusted`, see Deps.trust)
  *   - 409 — tokenHash already announced by a DIFFERENT inviterKey
  *           (poison for the outbox — retrying never succeeds)
  *   - 422 — signature does not verify
@@ -62,7 +75,7 @@ interface Deps {
  */
 export async function registerInviteAnnouncementRoutes(
   app: FastifyInstance,
-  { store, now = () => Date.now() }: Deps,
+  { store, now = () => Date.now(), trust }: Deps,
 ): Promise<void> {
   app.post("/invite-announcements", async (req, reply) => {
     const parsed = parseInviteAnnouncement(req.body);
@@ -85,6 +98,19 @@ export async function registerInviteAnnouncementRoutes(
       }
       reply.code(409);
       return { error: "token_already_announced" };
+    }
+
+    // Founder-rooted trust gate — NEW announcements only (replays of
+    // stored rows stay idempotent-200 above). Same error key as the
+    // /redemptions gate: both refuse the same act, an untrusted
+    // member issuing invites.
+    if (
+      trust &&
+      !trust.founderlessSkip() &&
+      !trust.isTrusted(announcement.inviterKey)
+    ) {
+      reply.code(403);
+      return { error: "inviter_not_trusted" };
     }
 
     store.insert(announcement, now());

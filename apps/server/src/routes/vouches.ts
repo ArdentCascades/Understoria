@@ -13,9 +13,27 @@ import type { FastifyInstance } from "fastify";
 import { verifyVouch } from "@understoria/shared/crypto";
 import type { VouchStore } from "../db.js";
 import { parseVouch } from "../validate.js";
+import { MIRROR_INTERNAL_HEADER } from "../mirrorPull.js";
+import type { TrustResolver } from "../trustGate.js";
 
 interface Deps {
   store: VouchStore;
+  /**
+   * Founder-rooted trust gate (trustGate.ts): only a TRUSTED voucher
+   * may add a vouch edge — the server half of the sybil fix in
+   * @understoria/shared/trust. Optional so existing tests/callers
+   * without the resolver keep the old behavior (and a founderless
+   * node skips the gate via `founderlessSkip`).
+   */
+  trust?: TrustResolver;
+  /**
+   * `BuiltServer.internalBypassToken`. A POST carrying it is the
+   * mirror-pull worker replicating a vouch ANOTHER node already
+   * accepted — trust standing was judged where the record first
+   * entered the community; re-litigating it here would make mirror
+   * convergence diverge. Signature verification is NOT relaxed.
+   */
+  internalToken?: string;
 }
 
 /**
@@ -26,6 +44,13 @@ interface Deps {
  *       201 — accepted (new row inserted)
  *       200 — already had this row (idempotent re-submission)
  *       400 — malformed body
+ *       403 — voucher is not in the founder-rooted trusted set
+ *             (`voucher_not_trusted`) — a pending member's vouch adds
+ *             no trust under the rooted fixpoint, so storing the edge
+ *             would only feed a sybil cluster's bookkeeping. 4xx on
+ *             purpose: the PWA outbox treats it as non-retryable,
+ *             which is right — retrying can't help until the
+ *             voucher's own trust changes.
  *       422 — well-formed but signature doesn't verify
  *
  * GET /vouches
@@ -37,9 +62,12 @@ interface Deps {
  */
 export async function registerVouchRoutes(
   app: FastifyInstance,
-  { store }: Deps,
+  { store, trust, internalToken }: Deps,
 ): Promise<void> {
   app.post("/vouches", async (req, reply) => {
+    const isMirrorApply =
+      internalToken !== undefined &&
+      req.headers[MIRROR_INTERNAL_HEADER] === internalToken;
     const parsed = parseVouch(req.body);
     if (!parsed.ok) {
       reply.code(400);
@@ -55,6 +83,21 @@ export async function registerVouchRoutes(
     if (store.has(vouch.id)) {
       reply.code(200);
       return { stored: false, id: vouch.id };
+    }
+
+    // Founder-rooted trust gate — NEW rows only (the has() replay
+    // above stays idempotent-200), and never for mirror replication
+    // (see Deps.internalToken). A founderless node skips the gate:
+    // with no root the trusted set is empty and every vouch would be
+    // refused; trustGate.ts logs the one-time warning.
+    if (
+      trust &&
+      !isMirrorApply &&
+      !trust.founderlessSkip() &&
+      !trust.isTrusted(vouch.voucherKey)
+    ) {
+      reply.code(403);
+      return { error: "voucher_not_trusted" };
     }
 
     store.insert(vouch);

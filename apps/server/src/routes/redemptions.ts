@@ -17,6 +17,7 @@ import {
 } from "@understoria/shared/crypto";
 import type { InviteAnnouncementStore, RedemptionStore } from "../db.js";
 import { MIRROR_INTERNAL_HEADER } from "../mirrorPull.js";
+import type { TrustResolver } from "../trustGate.js";
 
 interface Deps {
   store: RedemptionStore;
@@ -61,6 +62,21 @@ interface Deps {
    *  so existing tests and callers without the store keep working;
    *  unannounced invites redeem regardless. */
   inviteAnnouncementStore?: InviteAnnouncementStore;
+  /**
+   * Founder-rooted trust gate (trustGate.ts): only a TRUSTED inviter
+   * may admit a new member — the server half of the sybil fix in
+   * @understoria/shared/trust. Applies to NEW receipts only: stored
+   * rows keep replaying 200/409 exactly as before, mirror replication
+   * (internal token) is exempt (an already-accepted receipt must
+   * converge to every mirror), and the reseed grace window is exempt
+   * for the same convergence reason — historical receipts re-uploaded
+   * out of order must not be refused because their inviter's vouches
+   * haven't re-arrived yet. The FIRST founder's own invites pass by
+   * construction (a founder root is trusted with zero vouchers), so
+   * a fresh node bootstraps. Optional so existing tests/callers keep
+   * the old behavior; a founderless node skips via `founderlessSkip`.
+   */
+  trust?: TrustResolver;
 }
 
 /**
@@ -86,6 +102,11 @@ export const REDEMPTION_DELIVERY_GRACE_MS = 7 * 24 * 60 * 60 * 1000;
  *       201 — verified and novel (stored)
  *       200 — idempotent replay: same token, same redeemedBy
  *       400 — malformed body
+ *       403 — the receipt's inviter is not in the founder-rooted
+ *             trusted set (`inviter_not_trusted`, see Deps.trust) —
+ *             a pending member cannot admit new members. 4xx on
+ *             purpose: non-retryable for the PWA outbox until the
+ *             inviter's trust changes.
  *       409 — token already redeemed by a DIFFERENT redeemedBy
  *             (first-writer-wins: the server-side single-use
  *             enforcement the local-only design never had), or the
@@ -127,6 +148,7 @@ export async function registerRedemptionRoutes(
     internalToken,
     reseedGraceUntil = null,
     inviteAnnouncementStore,
+    trust,
   }: Deps,
 ): Promise<void> {
   app.post("/redemptions", async (req, reply) => {
@@ -160,6 +182,22 @@ export async function registerRedemptionRoutes(
       }
       reply.code(409);
       return { error: "token_already_redeemed" };
+    }
+
+    // Founder-rooted trust gate — NEW receipts only, after the
+    // first-writer-wins block so stored rows keep their idempotent
+    // replay semantics, and never for mirror replication or inside
+    // the reseed grace window (convergence of already-accepted
+    // records must not be re-litigated; see Deps.trust).
+    if (
+      trust &&
+      !isMirrorApply &&
+      !reseedWindowOpen &&
+      !trust.founderlessSkip() &&
+      !trust.isTrusted(receipt.invite.inviterKey)
+    ) {
+      reply.code(403);
+      return { error: "inviter_not_trusted" };
     }
 
     // Delivery grace: bound on ARRIVAL time (server clock), not on
