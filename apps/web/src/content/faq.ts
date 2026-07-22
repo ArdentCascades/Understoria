@@ -232,6 +232,15 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "app.'",
           "On a desktop browser, look for the install icon at the " +
             "right end of the address bar.",
+          "On a Linux computer there's also a desktop app — a single " +
+            "file (an AppImage) your community can share, which runs " +
+            "with no browser at all. Make it runnable (right-click → " +
+            "Properties → allow executing, or chmod +x), open it, and " +
+            "pair from your phone: Settings → 'Add another device' on " +
+            "the phone, then the paste-code path on the computer. It " +
+            "counts as its own device, just like the iPhone case " +
+            "below, and it updates only when you replace the file " +
+            "with a newer one.",
           "One thing to know before you install: on iPhone and iPad " +
             "the installed app gets its OWN separate storage, so it " +
             "starts out signed out even though the browser copy is " +
