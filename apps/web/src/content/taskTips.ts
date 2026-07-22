@@ -1499,6 +1499,306 @@ export const TASK_TIPS: Record<
       "en": "Keep the two backups in genuinely different places — a phone and a cloud account, not two folders on the same laptop — and re-check the consent form before anything goes public, since people's wishes drift over the years.",
       "es": "Guarda las dos copias en lugares realmente distintos —un teléfono y una cuenta en la nube, no dos carpetas en la misma computadora— y revisa de nuevo el formulario de consentimiento antes de publicar nada, porque los deseos de la gente cambian con los años."
     }
+  ],
+  "community-solar-coop": [
+    {
+      "en": "Ask interested households for something small but real — a signed pledge or a refundable deposit — and note which utility serves each one; a show of hands at a meeting overcounts your co-op by half.",
+      "es": "Pide a los hogares interesados algo pequeño pero real —un compromiso firmado o un depósito reembolsable— y anota qué empresa eléctrica atiende a cada uno: las manos alzadas en una reunión sobreestiman la cooperativa a la mitad."
+    },
+    {
+      "en": "Start with the DSIRE database and your utility's own community-solar page, then call the state energy office to confirm — a rule that changed last legislative session can quietly invalidate a year of planning.",
+      "es": "Empieza por la base de datos DSIRE y la página de energía solar comunitaria de tu propia empresa eléctrica, y luego confirma con la oficina estatal de energía: una regla que cambió en la última legislatura puede invalidar en silencio un año de planificación."
+    },
+    {
+      "en": "Before anyone falls for a roof, check its age and shading — a roof due for replacement in eight years means paying to remove and reinstall the whole array mid-life. Ask existing programs about waitlists first.",
+      "es": "Antes de que alguien se enamore de un techo, revisa su antigüedad y la sombra que recibe: un techo que habrá que cambiar en ocho años implica pagar por desmontar y reinstalar todo el arreglo a media vida útil. Pregunta primero por las listas de espera de los programas existentes."
+    },
+    {
+      "en": "Hold the line: no member signs anything — subscription, lease, loan — until a lawyer who knows energy co-ops has read it. Budget for that review up front; it costs less than any clause it catches.",
+      "es": "Mantén la regla sin excepciones: ningún miembro firma nada —suscripción, arriendo, préstamo— hasta que lo haya leído un abogado que conozca cooperativas de energía. Presupuesta esa revisión desde el inicio; cuesta menos que cualquier cláusula que detecte."
+    },
+    {
+      "en": "Call references from each installer's five-year-old projects, not last month's — you're hiring for how they handle year-four problems. Get the maintenance plan priced into the bid, not promised verbally.",
+      "es": "Llama a referencias de proyectos que el instalador hizo hace cinco años, no el mes pasado: lo que estás contratando es cómo responde a los problemas del cuarto año. Exige que el plan de mantenimiento venga cotizado en la oferta, no prometido de palabra."
+    },
+    {
+      "en": "Mock up a member's actual monthly statement before launch and test it on your least numbers-friendly member — and show a low-production winter month, not just the sunny-June example, so nobody feels tricked later.",
+      "es": "Haz una maqueta del estado de cuenta mensual real de un miembro antes de lanzar y pruébala con el miembro menos amigo de los números; muestra también un mes de invierno con poca producción, no solo el ejemplo de junio soleado, para que nadie se sienta engañado después."
+    },
+    {
+      "en": "Have members bring a real bill to a walk-through session — decoding rate tiers and delivery charges together lands better than any handout, and the neighbor who cut usage twenty percent is your best teacher.",
+      "es": "Pide a los miembros que lleven una factura real a una sesión conjunta: descifrar entre todos los tramos de tarifa y los cargos de distribución funciona mejor que cualquier folleto, y el vecino que bajó su consumo un veinte por ciento es tu mejor maestro."
+    }
+  ],
+  "worker-coop-incubator": [
+    {
+      "en": "Ask about unpaid and informal work, not just job history — the person who 'just' cooked for a church of two hundred or fixed every cousin's car has venture-grade skills they won't volunteer.",
+      "es": "Pregunta por el trabajo informal y no remunerado, no solo por el historial laboral: la persona que 'solo' cocinaba para una parroquia de doscientos o arreglaba el auto de todos los primos tiene habilidades de nivel empresarial que no va a mencionar por sí sola."
+    },
+    {
+      "en": "Offer every session at least twice, including one evening or weekend slot, and arrange childcare — the members who most need this training are precisely the ones a weekday-morning class filters out.",
+      "es": "Ofrece cada sesión al menos dos veces, incluida una en la noche o el fin de semana, y organiza cuidado infantil: los miembros que más necesitan la capacitación son justo los que una clase entre semana por la mañana deja fuera."
+    },
+    {
+      "en": "Take the group to visit a working co-op and let members grill the worker-owners alone — and teach honestly when a co-op is the wrong fit, because a bad match discovered after incorporation is brutal.",
+      "es": "Lleva al grupo a visitar una cooperativa en funcionamiento y deja que los miembros interroguen a los socios trabajadores sin ti en la sala; enseña también con honestidad cuándo una cooperativa no es la opción adecuada, porque descubrir el mal encaje después de constituirse es brutal."
+    },
+    {
+      "en": "Make the group write the uncomfortable bylaws first — how a member leaves, how a deadlock breaks, how someone gets removed. Ventures that only draft the happy-path rules discover the rest mid-crisis.",
+      "es": "Haz que el grupo redacte primero los estatutos incómodos: cómo se retira un socio, cómo se rompe un empate, cómo se destituye a alguien. Las empresas que solo redactan las reglas del escenario feliz descubren el resto en plena crisis."
+    },
+    {
+      "en": "For each funding source, record the deadline, the paperwork it demands, and a contact human — then recheck quarterly. Half the co-op grants on any list you find are closed, renamed, or out of money.",
+      "es": "Para cada fuente de financiamiento, registra el plazo, los documentos que exige y una persona de contacto, y vuelve a verificar cada trimestre: la mitad de los fondos para cooperativas de cualquier lista están cerrados, con otro nombre o sin dinero."
+    },
+    {
+      "en": "Agree on cadence and scope at the first meeting — a monthly hour on the calendar with an agenda outlives goodwill. Match mentors by industry where you can; a bakery's margins baffle a consultant.",
+      "es": "Acuerden ritmo y alcance en la primera reunión: una hora mensual en el calendario, con agenda, dura más que la buena voluntad. Empareja a los mentores por rubro cuando se pueda; los márgenes de una panadería desconciertan a un consultor."
+    },
+    {
+      "en": "Seed the network with actual transactions, not just meetups — have the cleaning co-op quote the catering co-op's kitchen, and make a round of referral asks a standing agenda item at every gathering.",
+      "es": "Arranca la red con transacciones reales, no solo con encuentros: que la cooperativa de limpieza le cotice la cocina a la de banquetes, y haz que una ronda de pedidos de referidos sea punto fijo de la agenda en cada reunión."
+    }
+  ],
+  "elder-meal-delivery": [
+    {
+      "en": "Let a trusted face make the introduction — the parish nurse or senior-center worker who already knows the elder — because a stranger's knock gets a polite no from the exact people who need this most.",
+      "es": "Deja que una cara de confianza haga la presentación —la enfermera de la parroquia o la trabajadora del centro de mayores que ya conoce a la persona—, porque el toque de un desconocido recibe un no cortés justo de quienes más lo necesitan."
+    },
+    {
+      "en": "Background checks take two to four weeks, so start them before you announce a launch date. In interviews, probe for reliability over enthusiasm — ask what regular weekly commitment they've kept for a year.",
+      "es": "La verificación de antecedentes tarda de dos a cuatro semanas, así que iníciala antes de anunciar una fecha de arranque. En las entrevistas, indaga más la constancia que el entusiasmo: pregunta qué compromiso semanal han mantenido durante un año."
+    },
+    {
+      "en": "Test-reheat a sample meal in an ordinary microwave before committing to any container — some warp or stay cold in the middle — and date every label, because contents without 'made on' still forces a guess.",
+      "es": "Prueba a recalentar una muestra en un microondas común antes de comprometerte con un envase —algunos se deforman o quedan fríos por dentro— y ponle fecha a cada etiqueta, porque el contenido sin el 'preparado el' sigue obligando a adivinar."
+    },
+    {
+      "en": "Cap each route at what leaves ten unhurried minutes per door — five or six stops, usually — and schedule the frailest elders early in the run, so a delay never pushes them to tomorrow.",
+      "es": "Limita cada ruta a lo que deje diez minutos sin prisa por puerta —cinco o seis paradas, por lo general— y programa a las personas más frágiles al inicio del recorrido, para que un retraso nunca las empuje al día siguiente."
+    },
+    {
+      "en": "Print only the allergy and access notes on the route sheet and keep the rest locked away — and set a standing prompt to re-ask after any hospital stay, because that's when medication lists change.",
+      "es": "Imprime en la hoja de ruta solo las alergias y las notas de acceso, y guarda lo demás bajo llave; fija además el hábito de volver a preguntar tras cualquier hospitalización, porque es cuando cambian las listas de medicamentos."
+    },
+    {
+      "en": "Collect a key-holder and a backup contact for every elder when they join, not during the first scare — and shrink the protocol to a wallet card, because nobody reads a binder on a doorstep.",
+      "es": "Averigua quién tiene llave y un contacto de respaldo de cada persona mayor cuando se incorpora, no durante el primer susto, y reduce el protocolo a una tarjeta de bolsillo: nadie lee una carpeta parado frente a una puerta."
+    },
+    {
+      "en": "Ask elders in person, one on one — a mailed survey to this group mostly returns silence — and treat a volunteer's first missed week as a conversation, not a failure; it's usually the early sign of burnout.",
+      "es": "Pregunta a los mayores en persona y a solas —una encuesta por correo a este grupo devuelve sobre todo silencio— y toma la primera semana faltada de un voluntario como una conversación, no como una falla: suele ser la señal temprana del desgaste."
+    }
+  ],
+  "disaster-relief-hub": [
+    {
+      "en": "Check both candidate sites against the flood map and pick a backup on different ground — a hub and its backup on the same low street fail in the same storm. Test the keys yourself.",
+      "es": "Compara ambos sitios candidatos con el mapa de inundaciones y elige un respaldo en otro terreno: un centro y su respaldo en la misma calle baja fallan con la misma tormenta. Prueba las llaves tú mismo."
+    },
+    {
+      "en": "Open vendor accounts and pre-negotiate a purchase agreement now — after a disaster, cash buys exactly what's needed while drives deliver mystery boxes. Ask each supplier in writing what stock they'd commit during an event.",
+      "es": "Abre cuentas con proveedores y negocia desde ahora un acuerdo de compra: después del desastre, el efectivo compra justo lo que hace falta mientras las colectas entregan cajas sorpresa. Pide a cada proveedor por escrito qué inventario comprometería durante un evento."
+    },
+    {
+      "en": "Decide now what you'll refuse — used clothing is the classic hub-killer — and script the polite no for volunteers at the door. A tarp-and-marker floor grid plus a whiteboard count beats software you'll abandon mid-crisis.",
+      "es": "Decide desde ahora qué vas a rechazar —la ropa usada es el clásico verdugo de estos centros— y dales a los voluntarios el 'no' amable ya redactado. Una cuadrícula en el piso con lona y marcador, más un conteo en pizarra, vale más que un software que abandonarás a media crisis."
+    },
+    {
+      "en": "Set per-household quantities before opening day and post them in every local language — visible limits read as fairness, while ad-hoc rationing under pressure reads as favoritism and starts the arguments that empty your volunteer line.",
+      "es": "Define las cantidades por hogar antes del primer día y publícalas en todos los idiomas locales: los límites visibles se leen como equidad, mientras que racionar sobre la marcha bajo presión se lee como favoritismo y desata las peleas que vacían tu fila de voluntarios."
+    },
+    {
+      "en": "Run one real rehearsal a year — trucks, sorting, a mock distribution line — and give every role a named person plus a backup. A no-notice text-tree test tells you who is actually still reachable.",
+      "es": "Haz un ensayo real al año —camiones, clasificación, una fila de entrega simulada— y asigna cada rol a una persona con nombre más un suplente. Una prueba sorpresa de la cadena de mensajes te dice quién sigue de verdad localizable."
+    },
+    {
+      "en": "Get yourselves onto the county's emergency-management contact list and into their meetings now — and trade cell numbers with a named person at each agency, because after a disaster the switchboards are the first thing to drown.",
+      "es": "Entren desde ya a la lista de contactos de la gestión de emergencias del condado y a sus reuniones, e intercambien celulares con una persona concreta de cada agencia, porque tras un desastre las centralitas telefónicas son lo primero que colapsa."
+    },
+    {
+      "en": "Keep printed, laminated copies of the contact tree and site plans at both sites and in two coordinators' cars — and write down the mundane injury rules too: gloves for sorting, two people on every heavy lift.",
+      "es": "Guarda copias impresas y plastificadas de la cadena de contactos y los planos en ambos sitios y en los autos de dos coordinadores; deja también por escrito las reglas mundanas contra lesiones: guantes para clasificar y dos personas para cada carga pesada."
+    }
+  ],
+  "recovery-peer-support": [
+    {
+      "en": "Set a minimum of stable recovery time for facilitators — many programs use two years — and always train at least two, so no meeting and no member ever depends on one person's hardest week.",
+      "es": "Fija un mínimo de recuperación estable para los facilitadores —muchos programas piden dos años— y capacita siempre al menos a dos, para que ninguna reunión ni ningún miembro dependa jamás de la peor semana de una sola persona."
+    },
+    {
+      "en": "Give facilitators the exact sentence for the moment someone asks about detox or medication: 'That's a medical question, and here's who can answer it safely.' Rehearsed words hold when the room's need is pulling hard.",
+      "es": "Dales a los facilitadores la frase exacta para cuando alguien pregunte por la desintoxicación o los medicamentos: 'Esa es una pregunta médica, y aquí está quién puede responderla con seguridad'. Las palabras ensayadas resisten cuando la necesidad de la sala jala fuerte."
+    },
+    {
+      "en": "Keep naloxone at every meeting and train each facilitator to use it, and post the crisis-line numbers where everyone can see them — the overdose plan only counts if it works in the room tonight.",
+      "es": "Ten naloxona en cada reunión y capacita a cada facilitador para usarla, y coloca los números de las líneas de crisis a la vista de todos: el plan ante sobredosis solo cuenta si funciona en la sala esta misma noche."
+    },
+    {
+      "en": "Visit the space at your actual meeting hour and see who's around — a building that hosts a bar night or a loud lobby crowd at seven undoes the discretion a quiet afternoon tour promised.",
+      "es": "Visita el lugar a la hora real de la reunión y mira quién anda cerca: un edificio con noche de bar o un vestíbulo bullicioso a las siete deshace la discreción que prometía un recorrido en una tarde tranquila."
+    },
+    {
+      "en": "Name the exceptions out loud along with the promise — imminent danger to self or others gets help, not silence — because members deserve to know confidentiality's limits before they share, not after.",
+      "es": "Nombra en voz alta las excepciones junto con la promesa —el peligro inminente para sí o para otros recibe ayuda, no silencio—, porque los miembros merecen conocer los límites de la confidencialidad antes de compartir, no después."
+    },
+    {
+      "en": "Hand flyers to the people who talk with folks at decision moments — discharge planners, court navigators, clinic staff — and never post photos from meetings. A consistent room and hour matter more than wide reach.",
+      "es": "Entrega los volantes a quienes hablan con la gente en los momentos de decisión —planificadores de alta, orientadores de tribunales, personal de clínicas— y nunca publiques fotos de las reuniones. Una sala y un horario constantes importan más que el gran alcance."
+    },
+    {
+      "en": "Arrange a monthly debrief for facilitators with someone outside the group, and decide together, in advance, how a facilitator steps back if their own recovery wobbles — a dignified exit ramp designed early prevents a crisis later.",
+      "es": "Organiza una sesión mensual de descarga para los facilitadores con alguien de fuera del grupo, y decidan juntos, por adelantado, cómo un facilitador da un paso al costado si su propia recuperación tambalea: una salida digna diseñada temprano evita una crisis después."
+    }
+  ],
+  "community-fitness": [
+    {
+      "en": "Ask what would stop people from coming — time of day, childcare, feeling judged — not just what sounds fun. The barriers you hear will shape the program more than the activity list does.",
+      "es": "Pregunta qué impediría que la gente venga —el horario, el cuidado de los niños, sentirse juzgada—, no solo qué suena divertido. Las barreras que escuches moldearán el programa más que la lista de actividades."
+    },
+    {
+      "en": "Watch each candidate lead ten minutes before you commit them — warmth shows fast, and so does its absence — and recruit two leaders per activity, because a single leader's vacation cancels the session.",
+      "es": "Observa a cada candidato dirigir diez minutos antes de confirmarlo —la calidez se nota rápido, igual que su ausencia— y recluta dos líderes por actividad, porque las vacaciones de un líder único cancelan la sesión."
+    },
+    {
+      "en": "Visit each space at your planned session hour — the shady, quiet park of a morning visit can be a scorching or sketchy one at 6 pm — and confirm the bathrooms are actually unlocked then.",
+      "es": "Visita cada espacio a la hora prevista de la sesión —el parque sombreado y tranquilo del recorrido matutino puede ser sofocante o inseguro a las seis de la tarde— y confirma que los baños de verdad estén abiertos a esa hora."
+    },
+    {
+      "en": "Demo the gentlest version of every move first and treat it as the default, not the modification — when the chair option leads, nobody has to publicly opt down to use it.",
+      "es": "Muestra primero la versión más suave de cada movimiento y trátala como la opción por defecto, no como la adaptación: cuando la variante con silla va primero, nadie tiene que rebajarse en público para usarla."
+    },
+    {
+      "en": "Have leaders carry a charged phone and know the exact address or park entrance to give emergency services — 'the big field by the school' wastes minutes — and keep a simple emergency-contact card for each regular.",
+      "es": "Que los líderes lleven un teléfono cargado y sepan la dirección exacta o la entrada del parque para darla a los servicios de emergencia —'el campo grande junto a la escuela' hace perder minutos— y ten una tarjeta sencilla de contacto de emergencia por cada asistente habitual."
+    },
+    {
+      "en": "Decide the bad-weather plan before the season starts and announce changes in one consistent place — and remember a personal 'come with me' fills more spots than any flyer; ask each regular to bring one neighbor.",
+      "es": "Define el plan para mal clima antes de que empiece la temporada y anuncia los cambios siempre en el mismo lugar; recuerda que un 'ven conmigo' personal llena más cupos que cualquier volante: pide a cada habitual que traiga a un vecino."
+    },
+    {
+      "en": "Notice absences out loud — a friendly 'we missed you' text after two skipped sessions brings people back, while silence teaches them nobody noticed they were gone. Keep it warm, never guilt-tripping.",
+      "es": "Haz notar las ausencias: un mensaje amable de 'te extrañamos' tras dos sesiones perdidas hace volver a la gente, mientras que el silencio le enseña que nadie notó su falta. Que sea cálido, nunca con reproche."
+    }
+  ],
+  "urban-orchard": [
+    {
+      "en": "Ask what happens to the trees if the land changes hands, and get the answer into the agreement itself — a decade-long lease that dies at sale is a season-to-season handshake wearing a suit.",
+      "es": "Pregunta qué pasa con los árboles si el terreno cambia de dueño, y mete la respuesta en el propio acuerdo: un arriendo de diez años que muere con la venta es un apretón de manos de temporada vestido de contrato."
+    },
+    {
+      "en": "Test the soil for lead and contaminants and call utility-locate before the design is final — a buried gas line or a high lead reading will redraw your map, so let it redraw the paper version.",
+      "es": "Analiza el suelo por plomo y contaminantes y pide el trazado de servicios enterrados antes de cerrar el diseño: una tubería de gas o un nivel alto de plomo te va a redibujar el mapa, así que deja que redibuje la versión en papel."
+    },
+    {
+      "en": "Ask your extension office which disease-resistant varieties actually thrive locally, and be picky about donated trees — a free sapling carrying fire blight into a young orchard is the most expensive gift you'll ever take.",
+      "es": "Pregunta a la oficina de extensión agrícola qué variedades resistentes a enfermedades prosperan de verdad en tu zona, y sé exigente con los árboles donados: un arbolito gratis que trae fuego bacteriano a un huerto joven es el regalo más caro que aceptarás."
+    },
+    {
+      "en": "Sheet-mulch or clear each planting circle weeks ahead, not the morning of, and have water running at the site before planting day — hauling buckets for forty new trees breaks volunteers fast.",
+      "es": "Cubre con cartón y mantillo o despeja cada círculo de plantación con semanas de anticipación, no esa mañana, y ten agua corriendo en el sitio antes del día de plantación: acarrear baldes para cuarenta árboles nuevos agota a los voluntarios enseguida."
+    },
+    {
+      "en": "Plant one demonstration tree together before anyone picks up a shovel, and station an experienced captain per five or six trees — the fatal mistake is planting too deep, so make 'find the root flare' the day's mantra.",
+      "es": "Planten juntos un árbol de demostración antes de que alguien tome una pala, y pon un capitán con experiencia por cada cinco o seis árboles: el error fatal es plantar demasiado hondo, así que haz de 'busca el cuello de la raíz' el mantra del día."
+    },
+    {
+      "en": "Assign watering by name and month on a posted calendar — 'whoever's around' means nobody — and log each visit, because a young tree needs roughly ten to fifteen gallons a week its first two summers.",
+      "es": "Asigna el riego por nombre y mes en un calendario a la vista —'el que ande por ahí' significa nadie— y registra cada visita, porque un árbol joven necesita unos cuarenta a sesenta litros por semana en sus dos primeros veranos."
+    },
+    {
+      "en": "Expect passersby to pick fruit and decide now whether that's fine — most orchards do well posting 'take a few, leave some' — and put the norms on a sign at the gate, not in meeting minutes.",
+      "es": "Cuenta con que los transeúntes tomarán fruta y decide desde ahora si eso está bien —a la mayoría de los huertos les va bien con un letrero de 'toma unas pocas, deja algunas'— y pon las normas en un cartel en la entrada, no en actas de reunión."
+    }
+  ],
+  "new-parent-support": [
+    {
+      "en": "Recruit peer supporters whose youngest is past the baby stage but under five — recent enough to remember it truthfully, far enough out to have capacity. A parent mid-newborn-fog can't hold someone else's.",
+      "es": "Recluta acompañantes pares cuyo hijo menor ya haya pasado la etapa de bebé pero tenga menos de cinco años: lo bastante reciente para recordarla con honestidad, lo bastante lejos para tener energía. Alguien en plena bruma del recién nacido no puede sostener la de otro."
+    },
+    {
+      "en": "Schedule meals every second or third day across six or eight weeks rather than daily for two — the hard stretch outlasts the casserole rush — and suggest a porch cooler so drop-offs never require a doorbell.",
+      "es": "Programa comidas cada dos o tres días durante seis u ocho semanas, en vez de a diario por dos: la etapa dura sobrevive a la avalancha inicial de guisos. Sugiere una hielera en el porche para que la entrega nunca exija tocar el timbre."
+    },
+    {
+      "en": "Offer a specific menu — 'laundry, dishes, or a park hour with the sibling?' — because 'what do you need?' reliably gets 'nothing, we're fine' from a parent too tired to assign tasks to strangers.",
+      "es": "Ofrece un menú concreto —'¿lavo ropa, friego platos o llevo al hermano una hora al parque?'—, porque el '¿qué necesitas?' recibe casi siempre un 'nada, estamos bien' de un padre demasiado cansado para asignar tareas a extraños."
+    },
+    {
+      "en": "Record for each entry what insurance it takes, the real wait time, and whether anyone answers at 2 am — a new parent's crises keep newborn hours, and most directories only list the daytime facts.",
+      "es": "Anota en cada entrada qué seguros acepta, la espera real y si alguien contesta a las dos de la madrugada: las crisis de un padre primerizo siguen el horario del recién nacido, y la mayoría de los directorios solo registran los datos de oficina."
+    },
+    {
+      "en": "Give every peer the same short script for naming it — 'this sounds bigger than tiredness, and it's treatable; can we call together?' — and treat any mention of self-harm as a same-day handoff, never a wait-and-see.",
+      "es": "Dale a cada acompañante el mismo guion breve para nombrarlo —'esto suena a algo más que cansancio, y tiene tratamiento; ¿llamamos juntas?'— y trata cualquier mención de hacerse daño como una derivación el mismo día, nunca como un esperar a ver."
+    },
+    {
+      "en": "Actually call the references — two minutes of 'would you leave your baby with them?' beats any form — and give parents a no-explanation pause button; needing to justify a break is its own burden.",
+      "es": "Llama de verdad a las referencias —dos minutos de '¿le dejarías tu bebé?' valen más que cualquier formulario— y dales a los padres un botón de pausa sin explicaciones: tener que justificar un descanso es una carga en sí misma."
+    },
+    {
+      "en": "Make every referral a warm handoff — a named person expecting their call, not a phone number on a list — and share basics between programs with consent, so an exhausted parent never retells their story from scratch.",
+      "es": "Convierte cada derivación en una entrega cálida —una persona con nombre que espera la llamada, no un número en una lista— y comparte los datos básicos entre programas con consentimiento, para que un padre agotado nunca repita su historia desde cero."
+    }
+  ],
+  "foster-kinship-support": [
+    {
+      "en": "Remember many kinship caregivers never touch the agency system — reach them through school counselors, pediatricians, and benefits offices — and lead every contact with one concrete offer, like a ready bed, not a program description.",
+      "es": "Recuerda que muchos cuidadores por parentesco nunca pasan por la agencia: llégales a través de orientadores escolares, pediatras y oficinas de asistencia, y abre cada contacto con una oferta concreta, como una cama lista, no con la descripción de un programa."
+    },
+    {
+      "en": "Take no car seat with an unknown history — crashes leave invisible damage — and check every seat and crib against the recall list the day it arrives. Sort clothing by size at intake, not 'later.'",
+      "es": "No aceptes ninguna silla de auto con historial desconocido —los choques dejan daños invisibles— y coteja cada silla y cuna con la lista de retiros el día que llega. Clasifica la ropa por talla al recibirla, no 'después'."
+    },
+    {
+      "en": "Pack everything in a real backpack or duffel the child keeps — kids in care too often move their lives in trash bags — and make underwear, socks, and toiletries new, always, no exceptions.",
+      "es": "Empaca todo en una mochila o bolso de verdad que el niño conserve —los niños del sistema demasiadas veces mudan su vida en bolsas de basura— y que la ropa interior, los calcetines y los artículos de aseo sean siempre nuevos, sin excepción."
+    },
+    {
+      "en": "Confirm with the agency, child by child, who is allowed to provide respite before offering it — some placements permit only licensed providers, and a well-meant unauthorized babysit can jeopardize the placement itself.",
+      "es": "Confirma con la agencia, niño por niño, quién está autorizado a dar relevo antes de ofrecerlo: algunas colocaciones solo admiten proveedores con licencia, y un cuidado bienintencionado pero no autorizado puede poner en riesgo la colocación misma."
+    },
+    {
+      "en": "Provide vetted on-site childcare or the caregivers you most want simply can't come — and consider an occasional kinship-only circle, since a grandmother raising her daughter's kids carries griefs a licensed foster parent doesn't.",
+      "es": "Ofrece cuidado infantil verificado en el mismo lugar o los cuidadores que más quieres alcanzar simplemente no podrán venir; considera además un círculo ocasional solo de parentesco, porque una abuela que cría a los hijos de su hija carga duelos que un padre de acogida no."
+    },
+    {
+      "en": "Lead the directory with the money nobody mentions — child-only benefit grants, foster clothing allowances, kinship navigator programs — and pair it with one veteran caregiver willing to walk newcomers through the first application.",
+      "es": "Encabeza el directorio con el dinero que nadie menciona —subsidios exclusivos para el niño, asignaciones de ropa para acogida, programas de navegación por parentesco— y acompáñalo con un cuidador veterano dispuesto a guiar a los nuevos en la primera solicitud."
+    },
+    {
+      "en": "Train every volunteer on mandatory reporting before their first shift — what must be reported, to whom, by when — and make the photo rule absolute: no image of a child in care goes anywhere, ever.",
+      "es": "Capacita a cada voluntario en el reporte obligatorio antes de su primer turno —qué debe reportarse, a quién y en qué plazo— y haz absoluta la regla de fotos: ninguna imagen de un niño bajo cuidado va a ningún lado, jamás."
+    }
+  ],
+  "weather-survival-outreach": [
+    {
+      "en": "Size each kit to be carried all day by someone on foot — a drawstring bag, not a bulky box — and skip cotton socks; wet cotton pulls heat from the body, while wool warms even damp.",
+      "es": "Dimensiona cada kit para que alguien a pie lo cargue todo el día —una bolsa con cordón, no una caja voluminosa— y evita los calcetines de algodón: mojado, el algodón le roba calor al cuerpo, mientras que la lana abriga incluso húmeda."
+    },
+    {
+      "en": "Buy each season's stock at the previous season's clearance — blankets in March, coolers in September, at a third of the price — and ask hotels and gyms for their retired towels and blankets in bulk.",
+      "es": "Compra el inventario de cada temporada en las liquidaciones de la anterior —cobijas en marzo, hieleras en septiembre, a un tercio del precio— y pide a hoteles y gimnasios sus toallas y cobijas dadas de baja, por lote."
+    },
+    {
+      "en": "Guard the map like the sensitive document it is — shared carelessly, it becomes a guide for sweeps and harassment. Keep it with trained outreach volunteers only, and never post locations in any group chat.",
+      "es": "Cuida el mapa como el documento delicado que es: compartido a la ligera, se vuelve una guía para desalojos y acoso. Déjalo solo en manos de voluntarios de calle capacitados y nunca publiques ubicaciones en ningún chat grupal."
+    },
+    {
+      "en": "Pair every new volunteer with a veteran for their first three rounds, and role-play hearing 'no' until accepting it gracefully is automatic — the person who declines tonight will remember who respected that tomorrow.",
+      "es": "Empareja a cada voluntario nuevo con un veterano en sus primeras tres rondas, y practiquen en juego de roles escuchar el 'no' hasta que aceptarlo con gracia sea automático: quien declina esta noche recordará mañana quién lo respetó."
+    },
+    {
+      "en": "Trigger on heat index and overnight lows, not the bare thermometer — a 55-degree night in soaking rain kills — and run routes the day before the peak, while moving to safety is still possible.",
+      "es": "Activa las rondas según el índice de calor y las mínimas nocturnas, no el termómetro a secas —una noche de 13 grados bajo lluvia empapada mata—, y recorre las rutas el día antes del pico, cuando moverse a un lugar seguro todavía es posible."
+    },
+    {
+      "en": "Verify beds by phone the same day, and learn each shelter's dealbreakers — pets, partners, curfews, sobriety rules — so you can say honestly what someone would give up by going. Honest referrals keep trust.",
+      "es": "Verifica las camas por teléfono el mismo día y aprende los impedimentos de cada albergue —mascotas, parejas, toques de queda, reglas de sobriedad— para poder decir con honestidad a qué renunciaría alguien al ir. Las derivaciones honestas conservan la confianza."
+    },
+    {
+      "en": "Drill the counterintuitive sign: someone who was shivering and has stopped is getting worse, not better. The rule stays absolute — call emergency services first, then give shade and water or wind shelter while help comes.",
+      "es": "Practica la señal contraintuitiva: quien temblaba de frío y dejó de temblar está empeorando, no mejorando. La regla es absoluta: llama primero a emergencias, y mientras llega la ayuda ofrece sombra y agua, o abrigo y resguardo del viento."
+    }
   ]
 };
 
