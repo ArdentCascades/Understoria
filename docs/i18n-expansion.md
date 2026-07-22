@@ -100,7 +100,7 @@ repo's disclosed AI-assisted posture:
    member, and is the precondition for languages 3…N not multiplying
    bundle size.
 2. **Translate in member-impact order:** FAQ + start-a-community →
-   event templates → the 54 project templates with their task steps
+   event templates → the 64 project templates with their task steps
    and tips (agent fleet per template, review per template — the same
    process that authored them).
 3. **Honest fallback while in flight:** a language may ship complete
@@ -144,5 +144,5 @@ member-guide/opsec content modules, the print/paper surfaces (already
 |---|---|---|
 | Phase 0 | one focused PR | lazy loading + registry + tests |
 | UI strings, per language | ~2,800 strings | agent bulk + review + layout smoke |
-| Content, per language | ~830KB source | dominated by the 54 templates; ship UI-first |
+| Content, per language | ~1MB source | dominated by the 64 templates; ship UI-first |
 | RTL program | one audit + sweep PR series | precondition for ar/ur only |

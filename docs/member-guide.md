@@ -60,6 +60,16 @@ help:
 Installing changes nothing about your data or identity — it's the
 same app, just easier to find.
 
+On a Linux computer there's a third option: a **desktop app** (a
+single AppImage file your community can hand you — no browser
+needed). Make it runnable (`chmod +x`, or right-click →
+Properties → allow executing) and open it. The easiest way in from
+there is pairing from your phone: **Settings → Add another device**
+on the phone, then the paste-code path on the computer — your
+identity, community connection, and data come across together.
+Updates are manual by design: you replace the file when your
+community shares a newer one.
+
 ### Two banners you might see at the top of the screen
 
 - **"You're offline."** When the device loses connectivity, a

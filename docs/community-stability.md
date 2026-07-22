@@ -296,7 +296,7 @@ wanted.
    render in the peering flow, the docs, or both?
 5. **Checklist page kill-switch** (§8).
 6. **Strike-fund template content** (§5): needs the same
-   plain-language + honesty pass as the other 54 templates, and
+   plain-language + honesty pass as the other 64 templates, and
    probably review by someone who has actually run a fund.
 7. **Build order** *(suggested)*: strike-fund template + resilience
    facet (cheap, standalone) → stability checklist page → peering
