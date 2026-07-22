@@ -35,6 +35,8 @@ import {
   encodeInviteToken,
 } from "@/lib/invite";
 import { getSecretKey, persistSecretKey } from "./secrets";
+import { readFounderHashCapture, resolveFounderRoots } from "@/lib/founderRoots";
+import { inviteIssuanceAllowed } from "@/lib/vouch";
 import {
   enqueueInviteAnnouncementOutbox,
   enqueueInviteRevocationOutbox,
@@ -81,6 +83,41 @@ export async function issueInvite(
   input: IssueInviteInput,
   origin: string = shareOrigin(),
 ): Promise<IssuedInvite> {
+  // ---- Fully-vouched gate (lib/vouch.ts inviteIssuanceAllowed) -----
+  // Runs only when a founder capture exists: without one we keep the
+  // pre-gate behavior and allow — the node enforces inviter trust on
+  // announcements and redemptions regardless, so nothing is lost.
+  const capture = await readFounderHashCapture();
+  if (capture && capture.hashes.length > 0) {
+    const [vouchRows, inviteRows, memberRows] = await Promise.all([
+      db.vouches.toArray(),
+      db.invites.toArray(),
+      db.members.toArray(),
+    ]);
+    // Same resolution as AppContext: hash every known member key
+    // against the capture. The inviter's own key rides along in case
+    // their member row hasn't materialized on this device — that can
+    // only widen the founder set (allow more), never narrow it.
+    const founderRoots = resolveFounderRoots(capture, [
+      ...memberRows.map((m) => m.publicKey),
+      input.inviterKey,
+    ]);
+    const allowed = inviteIssuanceAllowed(input.inviterKey, capture, {
+      vouches: vouchRows,
+      invites: inviteRows,
+      founderRoots,
+    });
+    if (!allowed) {
+      const err = new Error(
+        "Invites open up once the community fully vouches for you — two trusted members need to vouch for you first. Helping neighbors is how that happens.",
+      );
+      // Stable name so callers can branch on it (the UI gates catch
+      // this and render the explanatory card instead).
+      err.name = "NotTrustedError";
+      throw err;
+    }
+  }
+
   let secretKey: string;
   try {
     secretKey = await getSecretKey(input.inviterKey);

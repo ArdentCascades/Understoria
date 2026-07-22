@@ -1842,7 +1842,16 @@
       "bad_signature": "This invite's signature — the tamper-proof stamp proving who made it — didn't verify. A messaging app may have altered the link in transit; try pasting the original message below. If it still fails, do not accept: it may have been tampered with.",
       "already_redeemed": "Someone has already used this invite. Invites are single-use — ask the person who invited you for a fresh link, and paste it below.",
       "revoked": "The person who invited you revoked this invite. If that's a surprise, ask them for a fresh link — you can paste it below.",
-      "self_redeem": "You can't redeem an invite you issued yourself. Share the link with someone else."
+      "self_redeem": "You can't redeem an invite you issued yourself. Share the link with someone else.",
+      "inviter_not_trusted": "This invite can't be used yet — the person who sent it isn't fully vouched for in the community. Once two trusted members vouch for them, their invites will work; until then, ask another member for a link."
+    }
+  },
+  "invites": {
+    "gate": {
+      "title": "Inviting opens up with trust",
+      "body": "Invites bring new people into the community, so they open up once the community has vouched for you — it's how neighbors protect each other from fake accounts.",
+      "progress": "You have {{have}} of {{need}} vouches so far.",
+      "howTo": "Helping people is how you get there: confirmed exchanges are how neighbors get to know you, and any trusted member can vouch for you from your profile."
     }
   },
   "notJoinedCard": {

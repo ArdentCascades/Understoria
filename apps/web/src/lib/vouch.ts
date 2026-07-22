@@ -175,6 +175,39 @@ export function trustStatusWithInvites(
     : "pending_trust";
 }
 
+/**
+ * Client half of "only fully-vouched members can invite".
+ *
+ * The node refuses invite announcements from — and redemptions of
+ * links minted by — a pending-trust inviter (403
+ * `inviter_not_trusted`), so a link issued past this gate could never
+ * actually admit anyone. Trust is the founder-rooted computation
+ * above (`trustStatusWithInvites`), with `ctx.founderRoots` resolved
+ * from the node's captured founder hashes (lib/founderRoots.ts).
+ *
+ * IMPORTANT exception: when the device holds NO founder capture yet
+ * (`capture` null — older server, sync off, fresh install before the
+ * first /config fetch) we keep the OLD behavior and ALLOW. The rooted
+ * computation has no anchor then, so any local refusal would be a
+ * guess — and the node enforces the rule regardless, so allowing here
+ * lets nothing unsafe through. A capture with zero hashes resolves
+ * zero roots (same as no capture, see `resolveFounderRoots`) and is
+ * treated identically.
+ *
+ * Shared by the db guard (db/invites.ts `issueInvite`) and the UI
+ * gates (Profile's Invites card, the /invites page) so both always
+ * agree. Takes only the capture's shape, not the lib/founderRoots
+ * type, to stay import-cycle-free and easy to test.
+ */
+export function inviteIssuanceAllowed(
+  memberKey: string,
+  capture: { hashes: readonly string[] } | null,
+  ctx: TrustContext,
+): boolean {
+  if (!capture || capture.hashes.length === 0) return true;
+  return trustStatusWithInvites(memberKey, ctx) === "trusted";
+}
+
 /** Every valid vouch edge in the context — redeemed invites (implicit
  *  inviter vouches) plus signature-verified manual vouches — for the
  *  whole graph, not just one vouchee. Feeds the rooted fixpoint. */

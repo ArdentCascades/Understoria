@@ -77,6 +77,7 @@ import {
   LAST_SEEN_FOUNDER_HASHES,
   parseFounderHashCapture,
   resolveFounderRoots,
+  type FounderHashCapture,
 } from "@/lib/founderRoots";
 import {
   applyTheme,
@@ -130,6 +131,13 @@ export interface AppContextValue {
    *  fix. Empty until a capture happens (demo builds, sync off,
    *  older servers). */
   founderRoots: ReadonlySet<string>;
+  /** The raw founder-hash capture `founderRoots` was resolved from —
+   *  null until the first /config capture lands. Exposed so gates
+   *  that must mirror the db layer's "no capture yet → keep old
+   *  behavior" exception (db/invites.ts `inviteIssuanceAllowed`) can
+   *  tell "no capture" apart from "capture with no locally
+   *  resolvable roots". */
+  founderHashCapture: FounderHashCapture | null;
   posts: Post[];
   exchanges: Exchange[];
   achievements: Achievement[];
@@ -803,6 +811,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setCurrentMember,
       members: members ?? [],
       founderRoots,
+      founderHashCapture: founderHashCapture ?? null,
       posts: filteredPosts,
       exchanges: exchanges ?? [],
       achievements: achievements ?? [],
@@ -855,6 +864,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setCurrentMember,
       members,
       founderRoots,
+      founderHashCapture,
       filteredPosts,
       exchanges,
       achievements,

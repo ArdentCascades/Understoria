@@ -46,6 +46,18 @@ function looksUserFacing(message: string): boolean {
 
 const FALLBACK = "Something went wrong. Please try again.";
 
+/** Bare server error codes with a known humane translation. The
+ *  node's invite trust gate answers 403 `{error:"inviter_not_trusted"}`
+ *  when a pending-trust member's invite is redeemed or announced;
+ *  the code rides thrown errors and outbox `lastError` strings as-is
+ *  and would otherwise hit the generic fallback. (The localized twin
+ *  lives at `invite.errors.inviter_not_trusted` for surfaces that
+ *  translate — see NodeSection's telemetry.) */
+const CODE_MESSAGES: Record<string, string> = {
+  inviter_not_trusted:
+    "This invite can't be used yet — the person who sent it isn't fully vouched for in the community.",
+};
+
 /**
  * Returns a string safe to show in error UI. Pass any thrown value
  * (TypeScript or runtime); the function never throws.
@@ -53,7 +65,9 @@ const FALLBACK = "Something went wrong. Please try again.";
 export function humanizeError(err: unknown): string {
   if (err == null) return FALLBACK;
   if (typeof err === "string") {
-    return looksUserFacing(err) ? err : FALLBACK;
+    return (
+      CODE_MESSAGES[err] ?? (looksUserFacing(err) ? err : FALLBACK)
+    );
   }
   if (typeof err !== "object") return FALLBACK;
   const e = err as { message?: unknown; code?: unknown };
@@ -62,7 +76,11 @@ export function humanizeError(err: unknown): string {
   // that surfaces with a SCREAMING_CASE code in its message, and its
   // own .message is already humane — so prefer that over a generic
   // code lookup.
+  if (typeof e.code === "string" && CODE_MESSAGES[e.code]) {
+    return CODE_MESSAGES[e.code];
+  }
   const message = typeof e.message === "string" ? e.message : "";
+  if (CODE_MESSAGES[message]) return CODE_MESSAGES[message];
   if (looksUserFacing(message)) return message;
   return FALLBACK;
 }

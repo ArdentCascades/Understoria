@@ -32,7 +32,12 @@ import { isOnboarded } from "./onboarding";
 import { db, getSetting, SETTING_KEYS, setSetting } from "./database";
 import { generateKeyPair } from "@/lib/crypto";
 import { createVouch, trustStatusWithInvites } from "@/lib/vouch";
-import { inviteTokenHash, verifyRedemptionReceipt } from "@understoria/shared/crypto";
+import {
+  founderKeyHash,
+  inviteTokenHash,
+  verifyRedemptionReceipt,
+} from "@understoria/shared/crypto";
+import { LAST_SEEN_FOUNDER_HASHES } from "@/lib/founderRoots";
 import type { RedemptionReceipt } from "@understoria/shared/types";
 
 const NODE = "node_invites";
@@ -116,6 +121,114 @@ describe("issueInvite — server registration", () => {
     // The v11 ruling holds end to end: the raw token never rides the
     // announcement — the server must not hold a live credential.
     expect(outboxRows[0].payload).not.toContain(row.token);
+  });
+});
+
+// "Only fully-vouched members can invite" — the db half. Trust is the
+// founder-rooted computation (lib/vouch.ts trustStatusWithInvites)
+// anchored at the roots resolved from the device's captured founder
+// hashes (lib/founderRoots.ts). The node enforces the same rule on
+// announcements and redemptions (403 inviter_not_trusted); this guard
+// keeps the honest client from minting links that could never admit
+// anyone.
+describe("issueInvite — only fully-vouched members can invite", () => {
+  beforeEach(reset);
+
+  /** Persist a founder capture exactly as the /config fetch does. */
+  async function captureFounders(...founderKeys: string[]) {
+    await setSetting(
+      LAST_SEEN_FOUNDER_HASHES,
+      JSON.stringify({
+        nodeId: NODE,
+        hashes: founderKeys.map((k) => founderKeyHash(NODE, k)),
+        capturedAt: new Date().toISOString(),
+      }),
+    );
+  }
+
+  it("throws NotTrustedError for a pending member when a founder capture exists", async () => {
+    const founder = await createMember({ displayName: "Fern" }, NODE);
+    const pending = await createMember({ displayName: "Pat" }, NODE);
+    await captureFounders(founder.publicKey);
+
+    await expect(
+      issueInvite(
+        {
+          inviterKey: pending.publicKey,
+          inviterName: "Pat",
+          nodeId: NODE,
+        },
+        ORIGIN,
+      ),
+    ).rejects.toMatchObject({ name: "NotTrustedError" });
+
+    // Nothing landed: no local row, no server announcement queued.
+    expect(await db.invites.count()).toBe(0);
+    expect(await db.outbox.count()).toBe(0);
+  });
+
+  it("allows a founder root — trusted by construction, zero vouches", async () => {
+    const founder = await createMember({ displayName: "Fern" }, NODE);
+    await captureFounders(founder.publicKey);
+
+    const { row } = await issueInvite(
+      {
+        inviterKey: founder.publicKey,
+        inviterName: "Fern",
+        nodeId: NODE,
+      },
+      ORIGIN,
+    );
+    expect(row.status).toBe("open");
+  });
+
+  it("allows a member the rooted computation counts as trusted (2 trusted vouchers)", async () => {
+    const f1 = await createMember({ displayName: "Fern" }, NODE);
+    const f2 = await createMember({ displayName: "Sol" }, NODE);
+    const member = await createMember({ displayName: "Vera" }, NODE);
+    await captureFounders(f1.publicKey, f2.publicKey);
+
+    const { getSecretKey } = await import("./secrets");
+    for (const f of [f1, f2]) {
+      await db.vouches.put(
+        createVouch({
+          voucherKey: f.publicKey,
+          voucherSecretKey: await getSecretKey(f.publicKey),
+          voucheeKey: member.publicKey,
+          kind: "manual",
+        }),
+      );
+    }
+
+    const { row } = await issueInvite(
+      {
+        inviterKey: member.publicKey,
+        inviterName: "Vera",
+        nodeId: NODE,
+      },
+      ORIGIN,
+    );
+    expect(row.status).toBe("open");
+  });
+
+  it("keeps the old behavior (allow) when the device holds NO founder capture", async () => {
+    // Documented exception: without a capture the rooted computation
+    // has no anchor, so any local refusal would be a guess — a fresh
+    // device, an older server, or sync-off must not lose the ability
+    // to issue. Nothing unsafe gets through: the node knows its
+    // founders and refuses a pending inviter's announcement and any
+    // redemption of their links regardless of what this client does.
+    const pending = await createMember({ displayName: "Pat" }, NODE);
+
+    const { row } = await issueInvite(
+      {
+        inviterKey: pending.publicKey,
+        inviterName: "Pat",
+        nodeId: NODE,
+      },
+      ORIGIN,
+    );
+    expect(row.status).toBe("open");
   });
 });
 

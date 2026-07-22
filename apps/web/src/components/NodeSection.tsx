@@ -393,6 +393,15 @@ function Telemetry({
   const { t } = useTranslation();
   const haveSuccess = !!lastSuccess && lastSuccess.length > 0;
   const haveError = !!lastError && lastError.length > 0;
+  // Known server codes get their humane, translated copy instead of
+  // the bare wire code. Today: the invite trust gate's 403 — the node
+  // refuses invite announcements (and redemptions) from a member the
+  // community hasn't fully vouched for, and the outbox records the
+  // code verbatim as lastError.
+  const errorMessage =
+    lastError && lastError.includes("inviter_not_trusted")
+      ? t("invite.errors.inviter_not_trusted")
+      : lastError;
 
   if (!haveSuccess && !haveError) {
     return (
@@ -415,7 +424,7 @@ function Telemetry({
       )}
       {haveError && (
         <span className="chip bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200">
-          {t("profile.node.lastError", { message: lastError })}
+          {t("profile.node.lastError", { message: errorMessage })}
         </span>
       )}
     </div>

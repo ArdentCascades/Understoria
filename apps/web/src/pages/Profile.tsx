@@ -69,7 +69,9 @@ import {
 import { isDirectExchangeLabel } from "@understoria/shared/crypto";
 import { SETTING_KEYS, type InviteRow } from "@/db/database";
 import { issueInvite } from "@/db/invites";
+import { InviteTrustGateCard } from "@/components/InviteTrustGateCard";
 import {
+  inviteIssuanceAllowed,
   isFounderRoot,
   trustStatusWithInvites,
   vouchCountFor,
@@ -321,6 +323,7 @@ function ProfileBody({ member }: { member: Member }) {
     proposals,
     setCurrentMember,
     founderRoots,
+    founderHashCapture,
   } = useApp();
   const { t } = useTranslation();
   // `/profile?edit=1` (the Board profile-nudge CTA) means "take me to
@@ -358,6 +361,15 @@ function ProfileBody({ member }: { member: Member }) {
     invites,
   });
   const isFounder = isFounderRoot(currentMember.publicKey, { founderRoots });
+  // Client half of "only fully-vouched members can invite" — the same
+  // founder-rooted computation the db guard runs (db/invites.ts). When
+  // false, the Invites card swaps its Generate flow for the gate
+  // explainer; existing/past invites stay fully visible.
+  const canIssueInvites = inviteIssuanceAllowed(
+    currentMember.publicKey,
+    founderHashCapture ?? null,
+    { vouches, invites, founderRoots },
+  );
   const myInvites = invites.filter(
     (inv) => inv.inviterKey === currentMember.publicKey,
   );
@@ -668,6 +680,8 @@ function ProfileBody({ member }: { member: Member }) {
               member={currentMember}
               nodeId={nodeId}
               invites={myInvites}
+              canIssue={canIssueInvites}
+              vouchCount={trustCount}
             />
 
             {/* The invite hint sits adjacent to the Invites card it
@@ -1572,10 +1586,18 @@ function InvitesSection({
   member,
   nodeId,
   invites,
+  canIssue,
+  vouchCount,
 }: {
   member: Member;
   nodeId: string;
   invites: InviteRow[];
+  /** "Only fully-vouched members can invite" (db/invites.ts
+   *  `inviteIssuanceAllowed`): false swaps the Generate flow for the
+   *  gate explainer. Viewing existing invites is never gated. */
+  canIssue: boolean;
+  /** Distinct-voucher count for the gate's have/need progress line. */
+  vouchCount: number;
 }) {
   const { t } = useTranslation();
   const [issuing, setIssuing] = useState(false);
@@ -1689,33 +1711,43 @@ function InvitesSection({
       <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
         {t("profile.invites.intro")}
       </p>
-      <label className="mb-2 block text-sm">
-        <span className="font-medium">
-          {t("profile.invites.noteLabel")}
-        </span>
-        <input
-          type="text"
-          className="input mt-1"
-          value={noteInput}
-          maxLength={120}
-          onChange={(e) => setNoteInput(e.target.value)}
-          placeholder={t("profile.invites.notePlaceholder")}
-        />
-      </label>
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={handleIssue}
-          disabled={issuing}
-        >
-          {issuing
-            ? t("profile.invites.generating")
-            : latestOpen || shareUrl
-              ? t("profile.invites.generateAnother")
-              : t("profile.invites.generate")}
-        </button>
-      </div>
+      {canIssue ? (
+        <>
+          <label className="mb-2 block text-sm">
+            <span className="font-medium">
+              {t("profile.invites.noteLabel")}
+            </span>
+            <input
+              type="text"
+              className="input mt-1"
+              value={noteInput}
+              maxLength={120}
+              onChange={(e) => setNoteInput(e.target.value)}
+              placeholder={t("profile.invites.notePlaceholder")}
+            />
+          </label>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={handleIssue}
+              disabled={issuing}
+            >
+              {issuing
+                ? t("profile.invites.generating")
+                : latestOpen || shareUrl
+                  ? t("profile.invites.generateAnother")
+                  : t("profile.invites.generate")}
+            </button>
+          </div>
+        </>
+      ) : (
+        /* Pending trust: the Generate flow is replaced by the gate
+           explainer. Everything below — the open-invite box, the
+           summary line, the /invites link — stays: only generation
+           is gated, never viewing what was already issued. */
+        <InviteTrustGateCard have={vouchCount} />
+      )}
 
       {activeUrl && (
         <div className="mt-3 rounded-xl border border-canopy-200 bg-canopy-50 p-3 dark:border-canopy-900/50 dark:bg-canopy-950/20">
