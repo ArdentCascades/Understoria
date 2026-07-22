@@ -417,6 +417,16 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         id: "invite-someone",
         question: "¿Cómo invito a alguien?",
         answer: [
+          "Primero: invitar es algo que hacen los miembros de " +
+            "confianza. Hasta que dos miembros de confianza hayan " +
+            "respondido por ti (la invitación con la que entraste " +
+            "cuenta como la primera), el botón de invitar muestra tu " +
+            "progreso en su lugar. Esto protege a la comunidad: una " +
+            "cadena de desconocidos no puede invitar a más " +
+            "desconocidos. El camino es para lo que existe la app: " +
+            "ayuda a la gente. Cuando el vecindario te conozca, " +
+            "cualquier miembro de confianza puede responder por ti " +
+            "desde tu perfil.",
           "El camino más rápido: abre el Menú (arriba a la derecha) y " +
             "elige Invitar a alguien — te lleva directo a la tarjeta " +
             "de invitaciones. El camino largo es Perfil → Invitaciones.",

@@ -2088,6 +2088,43 @@ We are not trying to protect against:
   are where recognition is actually verified, and the avatar
   (`MemberAvatar`, derived from the same key) still gives every
   name a visual identity handle at a glance.
+- **Founder-rooted trust + trusted-only invites (anti-sybil
+  hardening).** Two connected changes, operator-decided ("we want
+  to protect our communities"). (1) *The trusted tier is now
+  founder-rooted*: a member is trusted if they are a founding trust
+  root or have ≥2 distinct vouchers who are THEMSELVES trusted —
+  a least fixpoint from the founder set
+  (`@understoria/shared/trust`), replacing the flat distinct-voucher
+  count. The flat count had a real hole: two accounts invited by one
+  careless member could vouch each other straight into "trusted"
+  (each held the inviter's implicit vouch plus the sibling's),
+  manufacturing the tier entirely inside a sybil cluster. Rooted,
+  no cluster without a path from a founder can ever bootstrap in.
+  The node enforces the same rule (it holds the full vouch +
+  redemption graph): `POST /vouches` refuses vouches from untrusted
+  vouchers, so a cluster cannot even store its self-vouch edges.
+  (2) *Only trusted members can issue invites.* Client-side the
+  invite surfaces gate with an explanation and a path in (get
+  vouched by helping people); server-side `POST /redemptions`
+  refuses receipts whose inviter is not trusted, so a client-minted
+  invite from a pending member is dead on arrival regardless of UI.
+  Named trade-offs, stated honestly: a genuine newcomer cannot
+  invite their neighbor until two trusted members vouch for them —
+  a deliberate growth-vs-protection trade the operator chose; a
+  single founder alone cannot mint trusted members (it takes two
+  trusted voices), which slows the very first cohort of a
+  one-founder community — mitigations are claiming co-founders or
+  founder-side patience; and members who were "trusted" under the
+  flat count via pending vouchers are demoted until their vouchers
+  qualify — no stored data changes, only the computed tier.
+  Founderless nodes (no NODE_FOUNDER_KEYS and no claimed founder)
+  cannot compute the fixpoint and skip both gates with a logged
+  warning — the same degraded posture as the rest of the
+  founder-dependent machinery. Peer-pull ingestion of
+  already-accepted records is deliberately exempt so federation
+  convergence never diverges. Not yet gated (tracked, undecided):
+  removal co-signing and proposal auto-pass affirms remain
+  membership-only.
 - **Desktop shell (Linux AppImage): a new client runtime, named
   costs.** `apps/desktop` wraps the byte-identical web bundle in
   Electron so a member needs no installed browser and — because the

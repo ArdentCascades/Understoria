@@ -396,6 +396,14 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         id: "invite-someone",
         question: "How do I invite someone?",
         answer: [
+          "First: inviting is something trusted members do. Until " +
+            "two trusted members have vouched for you (the invite " +
+            "you joined on counts as the first), the invite button " +
+            "shows your progress instead. This protects the " +
+            "community — a chain of strangers can't invite more " +
+            "strangers. To get there, do what the app is for: help " +
+            "people. Once neighbors know you, any trusted member can " +
+            "vouch for you from your profile.",
           "The quickest way: open the Menu (top right) and choose " +
             "Invite someone — it takes you straight to the invites " +
             "card. The long way round is Profile → Invites.",

@@ -1140,9 +1140,18 @@ On the new device:
 
 ## 13. Inviting someone new
 
-Two vouches turn a new member into a **trusted** member. Your invite
-counts as the first; someone else will need to vouch for them after
-they join.
+**Inviting is a trusted-member power.** Until two trusted members
+have vouched for you (your own invite counts as the first), the
+invite button is replaced by a short explanation and your progress
+("1 of 2 vouches"). This protects the community from fake accounts:
+a chain of strangers can't invite more strangers. The way in is the
+way everything works here — help people. Confirmed exchanges are how
+neighbors get to know you, and any trusted member can vouch for you
+from your profile page once they do.
+
+Once you're trusted, two vouches are also what will turn *your*
+invitee into a trusted member: your invite counts as their first;
+someone else vouches after they join.
 
 1. Go to **Profile → Invites you've issued**.
 2. Tap **Generate invite link**.
