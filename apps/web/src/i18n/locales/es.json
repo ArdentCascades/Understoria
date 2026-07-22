@@ -367,6 +367,11 @@
     "dismiss": "Entendido",
     "technical": "El aviso aparece en el Tablero hasta que tomes una primera acción — reclamar una publicación, publicar tu propia necesidad u oferta, o descartarlo explícitamente. Cuando ocurre cualquiera de estas, queda descartado por dispositivo. Un reinicio duro (Perfil → Emergencia → Borrado duro) o una instalación nueva lo hacen volver; el estado vive en IndexedDB local (el almacenamiento propio de tu navegador), no en el nodo comunitario (el servidor de tu comunidad)."
   },
+  "vouch": {
+    "errors": {
+      "voucher_not_trusted": "El servidor de la comunidad todavía no cuenta tu aval: los avales empiezan a contar cuando dos personas de confianza respondan por ti. Tu aval firmado está a salvo en este dispositivo y se entregará automáticamente cuando eso ocurra."
+    }
+  },
   "vouchNudge": {
     "label": "Avalar está abierto para ti",
     "title": "Ya puedes avalar",
@@ -2497,7 +2502,11 @@
     "vouching": "Avalando…",
     "vouchedJustNow": "Avalado. Tu declaración firmada quedó guardada en el registro de este dispositivo (su libro de actas) y — si hay un nodo comunitario configurado — va en camino al servidor de la comunidad también.",
     "cannotVouchSelf": "No puedes avalarte a ti misma.",
-    "cannotVouchUntilTrusted": "Podrás avalar cuando tú misma seas confiable. El aval de quien te invitó cuenta como uno; otra persona de la comunidad puede avalarte para sumar el segundo.",
+    "vouchGate": {
+      "title": "Avalar se abre con confianza",
+      "body": "Tu aval le dice a toda la comunidad que esta persona es de las nuestras — así que empieza a contar cuando la comunidad ya responde por ti. Es la misma protección que evita que las cuentas falsas se avalen entre sí.",
+      "howTo": "Ayudar a la gente es el camino: los intercambios confirmados son la manera en que tus vecinos te van conociendo, y cualquier persona de confianza puede avalarte desde tu perfil. Tu propio perfil muestra cuánto te falta."
+    },
     "alreadyFullyTrusted": "Esta persona ya es confiable. Otro aval no cambiaría nada.",
     "alreadyVouchedByYou": "Ya has avalado a esta persona.",
     "backToBoard": "Volver al tablero",

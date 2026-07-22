@@ -56,6 +56,12 @@ const FALLBACK = "Something went wrong. Please try again.";
 const CODE_MESSAGES: Record<string, string> = {
   inviter_not_trusted:
     "This invite can't be used yet — the person who sent it isn't fully vouched for in the community.",
+  // The vouch trust gate's twin: the node refuses POST /vouches from
+  // a member the community hasn't fully vouched for. Reachable when
+  // this device's trust picture is stale (MemberDetail gates the
+  // button, but the node has the final word).
+  voucher_not_trusted:
+    "The community server isn't counting your vouch yet — vouching starts counting once two trusted members have vouched for you.",
 };
 
 /**

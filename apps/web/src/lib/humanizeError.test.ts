@@ -43,6 +43,14 @@ describe("humanizeError", () => {
     expect(humanizeError({ code: "inviter_not_trusted" })).toBe(friendly);
   });
 
+  it("translates the node's voucher_not_trusted code (string, message, or .code)", () => {
+    const friendly =
+      "The community server isn't counting your vouch yet — vouching starts counting once two trusted members have vouched for you.";
+    expect(humanizeError("voucher_not_trusted")).toBe(friendly);
+    expect(humanizeError(new Error("voucher_not_trusted"))).toBe(friendly);
+    expect(humanizeError({ code: "voucher_not_trusted" })).toBe(friendly);
+  });
+
   it("replaces http_<status> fallbacks", () => {
     expect(humanizeError(new Error("http_422"))).toBe(FALLBACK);
     expect(humanizeError(new Error("http_500"))).toBe(FALLBACK);

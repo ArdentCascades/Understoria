@@ -42,6 +42,7 @@ import { BackLink } from "@/components/BackLink";
 import { isFounderRoot, trustStatusWithInvites } from "@/lib/vouch";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { FounderChip, TrustChip } from "@/components/TrustChip";
+import { TrustGateCard } from "@/components/InviteTrustGateCard";
 import { AvailabilityChips } from "@/components/AvailabilityChips";
 import { BlockConfirmCard } from "@/components/BlockConfirmCard";
 import { UnblockConfirmDialog } from "@/components/UnblockConfirmDialog";
@@ -289,9 +290,13 @@ export default function MemberDetailPage() {
         ) : isSelf ? (
           <p className="text-sm text-moss-600 dark:text-moss-300">{t("member.cannotVouchSelf")}</p>
         ) : currentTrust !== "trusted" ? (
-          <p className="text-sm text-moss-600 dark:text-moss-300">
-            {t("member.cannotVouchUntilTrusted")}
-          </p>
+          /* The same gate card every trust-gated action shows, at the
+             moment the member would reach for the button. NO `have`
+             progress here: this is ANOTHER member's page, and a
+             "N of 2 vouches" line would read as their score (the
+             no-leaderboards tripwire below forbids it). Own progress
+             lives on the member's own Profile. */
+          <TrustGateCard i18nBase="member.vouchGate" />
         ) : trust === "trusted" ? (
           <p className="text-sm text-moss-600 dark:text-moss-300">
             {t("member.alreadyFullyTrusted")}

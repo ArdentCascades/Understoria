@@ -367,6 +367,11 @@
     "dismiss": "Got it",
     "technical": "The nudge appears on the Board until you take a first action — claiming a post, posting your own need or offer, or explicitly dismissing it. Once any of these happens, it stays dismissed per-device. A hard reset (Profile → Emergency → Hard purge) or a fresh install brings the nudge back; the state lives in local IndexedDB (your browser's own storage), not on the community node (your community's server)."
   },
+  "vouch": {
+    "errors": {
+      "voucher_not_trusted": "The community server isn't counting your vouch yet — vouching starts counting once two trusted members have vouched for you. Your signed vouch is safe on this device and will be delivered automatically once that happens."
+    }
+  },
   "vouchNudge": {
     "label": "Vouching is open to you",
     "title": "You can vouch now",
@@ -2497,7 +2502,11 @@
     "vouching": "Vouching…",
     "vouchedJustNow": "Vouched. Your signed statement is saved in this device's ledger (its record book) and — if a community node is configured — on its way to the community server too.",
     "cannotVouchSelf": "You can't vouch for yourself.",
-    "cannotVouchUntilTrusted": "Vouching is enabled once you're trusted yourself. Your inviter's vouch is one; another community member can vouch for you to make it two.",
+    "vouchGate": {
+      "title": "Vouching opens up with trust",
+      "body": "Your vouch tells the whole community this person is one of us — so it starts counting once the community has fully vouched for you. It's the same protection that keeps fake accounts from vouching each other in.",
+      "howTo": "Helping people is how you get there: confirmed exchanges are how neighbors get to know you, and any trusted member can vouch for you from your profile. Your own profile shows how far along you are."
+    },
     "alreadyFullyTrusted": "This member is already trusted. Another vouch wouldn't change anything.",
     "alreadyVouchedByYou": "You've already vouched for this member.",
     "backToBoard": "Back to board",
