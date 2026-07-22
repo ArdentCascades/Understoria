@@ -10,6 +10,14 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Quick picks on the event form.** One tap sets the common cases:
+  Today / Tomorrow / the upcoming Saturday for the start date, and
+  9:00 / noon / 6:00 PM for the start time — no picker round-trip.
+  The start time still begins empty on purpose (an event is a
+  signed, permanent record; a time only exists because you chose
+  it), and while it's empty the form now says so plainly — on
+  iPhones an untouched time field used to look like an unlabeled
+  blank pill. English and Spanish.
 - **Understoria as a Linux desktop app (AppImage).** A new
   `apps/desktop` shell wraps the exact same app in a single
   carryable file — no installed browser, no add-to-homescreen, no

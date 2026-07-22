@@ -19,6 +19,13 @@ import { scheduleProjectWorkDay } from "@/db/eventProjectLinks";
 import { isOrganizer } from "@/db/projects";
 import { getSecretKey } from "@/db/secrets";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
+import {
+  formatQuickTime,
+  formatQuickWeekday,
+  quickDays,
+  quickTimes,
+  type QuickDay,
+} from "@/lib/eventQuickPick";
 import { humanizeError } from "@/lib/humanizeError";
 import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
 import { useDraftAutosave } from "@/lib/useDraftAutosave";
@@ -273,6 +280,10 @@ export default function EventNewPage() {
   if (!currentMember) return null;
 
   const lang = i18n.resolvedLanguage ?? "en";
+  const quickDayLabel = (d: QuickDay): string =>
+    d.id === "weekend"
+      ? formatQuickWeekday(d.date, lang)
+      : t(`events.new.quickPick.${d.id}`);
   const pickedTemplate = selectedTemplateId
     ? (getEventTemplate(selectedTemplateId, lang) ?? null)
     : null;
@@ -597,8 +608,13 @@ export default function EventNewPage() {
             preference, where the fields stack full-width: at 125% font
             the native pickers cannot render their values un-clipped
             side by side on narrow phones, and largest-text members
-            have already chosen legibility over density. */}
-        <div className="grid grid-cols-[1.4fr_1fr] gap-2 [.text-largest_&]:grid-cols-1">
+            have already chosen legibility over density.
+            minmax(0, Nfr) — not bare Nfr — because iOS Safari sizes fr
+            tracks from a date/time input's UA-intrinsic width and does
+            not honor min-width:0 on form controls, so a bare-fr row
+            blows out past the right edge of the phone screen. Putting
+            the zero minimum on the TRACK is the fix Safari respects. */}
+        <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-2 [.text-largest_&]:grid-cols-1">
           <input
             type="date"
             className="input min-w-0"
@@ -626,7 +642,56 @@ export default function EventNewPage() {
             required
           />
         </div>
-        {startErrorKey && (
+        {/* Quick picks: one tap covers the common days and times. A
+            tapped chip is a CONSCIOUS choice, so this respects the
+            no-silent-default rule for the start time (see
+            todayDateString above) while fixing its cost — on iOS an
+            empty time input is an unlabeled blank pill, and these
+            chips are the affordance the native control fails to be. */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {quickDays().map((d) => (
+            <button
+              key={d.id}
+              type="button"
+              onClick={() => setStartDate(d.date)}
+              aria-pressed={startDate === d.date}
+              aria-label={t("events.new.quickPick.dayAria", {
+                label: quickDayLabel(d),
+              })}
+              className={[
+                "rounded-full px-3 py-1 text-xs",
+                startDate === d.date
+                  ? "bg-canopy-700 text-white"
+                  : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700",
+              ].join(" ")}
+            >
+              {quickDayLabel(d)}
+            </button>
+          ))}
+          <span aria-hidden="true" className="text-moss-300 dark:text-moss-600">
+            ·
+          </span>
+          {quickTimes().map((tm) => (
+            <button
+              key={tm.id}
+              type="button"
+              onClick={() => setStartTime(tm.time)}
+              aria-pressed={startTime === tm.time}
+              aria-label={t("events.new.quickPick.timeAria", {
+                label: formatQuickTime(tm.time, lang),
+              })}
+              className={[
+                "rounded-full px-3 py-1 text-xs",
+                startTime === tm.time
+                  ? "bg-canopy-700 text-white"
+                  : "bg-moss-100 text-moss-700 hover:bg-moss-200 dark:bg-moss-800 dark:text-moss-200 dark:hover:bg-moss-700",
+              ].join(" ")}
+            >
+              {formatQuickTime(tm.time, lang)}
+            </button>
+          ))}
+        </div>
+        {startErrorKey ? (
           <p
             id="event-start-error"
             role="alert"
@@ -634,6 +699,16 @@ export default function EventNewPage() {
           >
             {t(startErrorKey)}
           </p>
+        ) : (
+          startTime === "" && (
+            /* iOS renders an empty time input as a blank pill with no
+               hint that it's tappable — say what's missing until a
+               time exists (the required-field error takes over after
+               a blur leaves it empty). */
+            <p className="text-xs text-moss-600 dark:text-moss-300">
+              {t("events.new.quickPick.timeHint")}
+            </p>
+          )
         )}
       </fieldset>
       </div>
@@ -666,11 +741,13 @@ export default function EventNewPage() {
                 cell for the date input and moves the (checked) toggle
                 below — the common case costs one row, the overnight
                 case two. */}
+            {/* minmax(0,…) tracks for the same iOS-Safari reason as the
+                Starts row above. */}
             <div
               className={
                 endsOtherDay
-                  ? "grid grid-cols-[1.4fr_1fr] items-center gap-2 [.text-largest_&]:grid-cols-1"
-                  : "grid grid-cols-2 items-center gap-2 [.text-largest_&]:grid-cols-1"
+                  ? "grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] items-center gap-2 [.text-largest_&]:grid-cols-1"
+                  : "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-2 [.text-largest_&]:grid-cols-1"
               }
             >
               {endsOtherDay && (
