@@ -1,11 +1,16 @@
 # Project template Set 6 — implementation plan
 
-Status: **PLAN** — ten new community project templates (solar co-op,
-worker co-op incubator, elder meal delivery, disaster relief hub,
-recovery peer support, fitness groups, urban orchard, new-parent
-support, foster/kinship support, weather survival outreach), from the
-operator-provided Set 6 source document. This plan maps that source
-onto the real content pipeline so implementation is mechanical.
+Status: **SHIPPED** — all ten templates (solar co-op, worker co-op
+incubator, elder meal delivery, disaster relief hub, recovery peer
+support, fitness groups, urban orchard, new-parent support,
+foster/kinship support, weather survival outreach) landed with the
+plan's mappings applied verbatim; the gallery is 64 templates. One
+plan correction discovered in flight: §5's original instruction to
+keep ES `skills` words locale-invariant was wrong — skills are
+locale-local (they feed the plug-in matcher against member-profile
+skill words), so the ES templates use the translated vocabulary
+derived from the existing 54. The rest of this document maps the
+operator-provided Set 6 source onto the content pipeline.
 Sets 1–5 (54 templates) shipped without a plan doc; Set 6 gets one
 because the pipeline has since grown guards (tips/steps coverage
 tests, context-field requirements, category map) that make the

@@ -98,6 +98,7 @@ import {
   registerRemovedAuthorGuard,
 } from "./readAuth.js";
 import { MIRROR_INTERNAL_HEADER } from "./mirrorPull.js";
+import { createTrustResolver } from "./trustGate.js";
 
 export interface BuildOptions {
   config: Config;
@@ -359,6 +360,16 @@ export async function buildServer({
     }
   }
   const membershipResolver = createMembershipResolver(db, config.founderKeys);
+  // Founder-rooted TRUST (trustGate.ts) — a second, stricter closure
+  // over the same roots as the membership resolver: membership says
+  // "you are in the community", trust says "you may grow it" (vouch,
+  // invite). Gates /vouches, /redemptions and /invite-announcements;
+  // skipped (with a one-time warning) while the node has no founder
+  // root at all, same tolerant posture as the unclaimed state above.
+  const trustResolver = createTrustResolver(db, {
+    envFounderKeys: config.founderKeys,
+    warn: (msg) => app.log.warn(msg),
+  });
   registerReadAuthGuard(app, {
     readAuth: config.readAuth,
     resolver: membershipResolver,
@@ -428,7 +439,11 @@ export async function buildServer({
 
   await registerHealthRoutes(app);
   await registerExchangeRoutes(app, { store, resolveTrustedSystemKey });
-  await registerVouchRoutes(app, { store: vouchStore });
+  await registerVouchRoutes(app, {
+    store: vouchStore,
+    trust: trustResolver,
+    internalToken: internalBypassToken,
+  });
   // The message relay (docs/message-relay.md): sealed DM envelopes.
   // The GET is recipient-scoped and self-authenticating regardless of
   // READ_AUTH; the POST's membership gate mirrors the read-auth
@@ -452,6 +467,7 @@ export async function buildServer({
     internalToken: internalBypassToken,
     reseedGraceUntil: config.reseedGraceUntil,
     inviteAnnouncementStore,
+    trust: trustResolver,
   });
   await registerInviteRevocationRoutes(app, {
     store: inviteRevocationStore,
@@ -462,6 +478,7 @@ export async function buildServer({
   // `redeemed` when the receipt lands.
   await registerInviteAnnouncementRoutes(app, {
     store: inviteAnnouncementStore,
+    trust: trustResolver,
   });
   // Live delivery (docs/sync-liveness.md, "server push"): a
   // content-free SSE stream that wakes connected apps whenever this

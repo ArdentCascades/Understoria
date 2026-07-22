@@ -17,10 +17,12 @@ import { shareOrigin } from "@/lib/appOrigin";
 import { humanizeError } from "@/lib/humanizeError";
 import { formatDeadline, formatRelativeTime, shortKey } from "@/lib/format";
 import { revokeInvite, setInviteNote } from "@/db/invites";
+import { inviteIssuanceAllowed, vouchCountFor } from "@/lib/vouch";
 import type { InviteRow } from "@/db/database";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
 import { InviteShareSheet } from "@/components/InviteShareSheet";
+import { InviteTrustGateCard } from "@/components/InviteTrustGateCard";
 
 // Dedicated management surface for the member's issued invites.
 // Extracted from Profile's InvitesSection so the historical list
@@ -52,7 +54,14 @@ const INVITE_STATUS_KEY: Record<InviteRow["status"], string> = {
 };
 
 export default function InvitesPage() {
-  const { currentMember, invites, members } = useApp();
+  const {
+    currentMember,
+    invites,
+    members,
+    vouches,
+    founderRoots,
+    founderHashCapture,
+  } = useApp();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
@@ -98,6 +107,16 @@ export default function InvitesPage() {
   }, [myInvites]);
 
   if (!currentMember) return null;
+
+  // "Only fully-vouched members can invite" — the same founder-rooted
+  // computation as the db guard (db/invites.ts). Gated members keep
+  // full access to their existing/past invites (list, copy, QR,
+  // revoke); only the generate nudge in the empty state changes.
+  const canIssue = inviteIssuanceAllowed(
+    currentMember.publicKey,
+    founderHashCapture ?? null,
+    { vouches, invites, founderRoots },
+  );
 
   async function handleCopy(url: string) {
     try {
@@ -179,13 +198,25 @@ export default function InvitesPage() {
       )}
 
       {sortedInvites.length === 0 ? (
-        <EmptyState
-          illustration="none"
-          variant="inset"
-          title={t("invitesPage.empty.title")}
-          message={t("invitesPage.empty.message")}
-          action={{ label: t("invitesPage.empty.cta"), to: "/profile" }}
-        />
+        canIssue ? (
+          <EmptyState
+            illustration="none"
+            variant="inset"
+            title={t("invitesPage.empty.title")}
+            message={t("invitesPage.empty.message")}
+            action={{ label: t("invitesPage.empty.cta"), to: "/profile" }}
+          />
+        ) : (
+          /* Pending trust: the empty state's "go generate one" nudge
+             points at a control the Profile card has swapped for the
+             same gate — show the explainer here directly instead. */
+          <InviteTrustGateCard
+            have={vouchCountFor(currentMember.publicKey, {
+              vouches,
+              invites,
+            })}
+          />
+        )
       ) : (
         <ul className="card flex flex-col divide-y divide-moss-100 dark:divide-moss-800">
           {sortedInvites.map((inv) => (

@@ -9,6 +9,26 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+- **Trust is now founder-rooted, and inviting is a trusted-member
+  power.** Two protections against fake-account chains, decided by
+  the operator. First, "trusted" now means two vouches from members
+  who are *themselves* trusted, traced back to the community's
+  founders — under the old flat count, two fake accounts invited by
+  one careless member could vouch each other into trusted status;
+  now no cluster can bootstrap itself in, and the server enforces
+  the same rule (it refuses vouches from untrusted vouchers).
+  Second, only trusted members can issue invites: until two trusted
+  members vouch for you, the invite button shows your progress and
+  how to get there — help people, let neighbors get to know you.
+  The server refuses redemptions from untrusted inviters too, so
+  the gate holds even against a modified app. Stated honestly: a
+  brand-new member can no longer invite their neighbor in week one
+  — a deliberate protection-over-growth trade — and reaching
+  trusted takes two trusted voices, not just any two. Everything
+  else a new member can do is unchanged: post, claim, exchange,
+  message, join events and projects from day one.
+
 ### Added
 - **Ten new project templates (Set 6).** The template gallery grows
   from 54 to 64: Community Solar & Energy Cooperative, Worker

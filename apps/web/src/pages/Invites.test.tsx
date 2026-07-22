@@ -33,6 +33,8 @@ vi.mock("@/db/invites", () => ({
 import "@/i18n";
 import { revokeInvite, setInviteNote } from "@/db/invites";
 import InvitesPage from "./Invites";
+import type { FounderHashCapture } from "@/lib/founderRoots";
+import type { SignedVouch } from "@/lib/vouch";
 import type { InviteRow } from "@/db/database";
 import type { Member } from "@/types";
 
@@ -73,6 +75,9 @@ interface MockState {
   currentMember: Member | null;
   invites: InviteRow[];
   members: Member[];
+  vouches: SignedVouch[];
+  founderRoots: ReadonlySet<string>;
+  founderHashCapture: FounderHashCapture | null;
 }
 
 let mockState: MockState;
@@ -96,6 +101,12 @@ beforeEach(() => {
       }),
     ],
     members: [me],
+    vouches: [],
+    // Default: no founder capture on this device → the invite gate
+    // keeps the old behavior (allow), so the pre-gate tests below run
+    // against unchanged surfaces.
+    founderRoots: new Set<string>(),
+    founderHashCapture: null,
   };
   container = document.createElement("div");
   document.body.appendChild(container);
@@ -259,5 +270,53 @@ describe("InvitesPage — local-only 'who is this for?' notes", () => {
         'input[aria-label="Who is this for? (only you see this)"]',
       ),
     ).toBeNull();
+  });
+});
+
+describe("InvitesPage — pending-trust gate on the empty state", () => {
+  const founderKey = "founder-key";
+
+  beforeEach(() => {
+    // A founder capture exists and the founder is NOT me: the rooted
+    // trust computation runs and I am pending with 0 vouches.
+    mockState.founderRoots = new Set([founderKey]);
+    mockState.founderHashCapture = {
+      nodeId,
+      hashes: ["hash-of-founder"],
+    };
+  });
+
+  it("pending member with no invites: gate card instead of the go-generate nudge", () => {
+    mockState.invites = [];
+    render();
+    expect(container.textContent).toContain("Inviting opens up with trust");
+    expect(container.textContent).toContain(
+      "You have 0 of 2 vouches so far.",
+    );
+    // The empty state's "Go to Profile" CTA points at a Generate
+    // control the Profile card has swapped for this same gate.
+    expect(container.textContent).not.toContain("Go to Profile");
+  });
+
+  it("trusted member with no invites: the empty-state CTA is exactly as before", () => {
+    mockState.founderRoots = new Set([founderKey, meKey]);
+    mockState.invites = [];
+    render();
+    expect(container.textContent).not.toContain(
+      "Inviting opens up with trust",
+    );
+    expect(container.textContent).toContain("Go to Profile");
+  });
+
+  it("pending member with existing invites: the list and its actions are untouched", () => {
+    render();
+    // Viewing/managing past invites is never gated.
+    const items = container.querySelectorAll("li");
+    expect(items.length).toBe(2);
+    expect(buttons("Revoke").length).toBe(2);
+    expect(buttons("Copy").length).toBe(2);
+    expect(container.textContent).not.toContain(
+      "Inviting opens up with trust",
+    );
   });
 });

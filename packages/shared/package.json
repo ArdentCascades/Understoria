@@ -23,6 +23,10 @@
     "./crypto": {
       "types": "./dist/crypto.d.ts",
       "default": "./dist/crypto.js"
+    },
+    "./trust": {
+      "types": "./dist/trust.d.ts",
+      "default": "./dist/trust.js"
     }
   },
   "files": [

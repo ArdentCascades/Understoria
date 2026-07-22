@@ -13,6 +13,7 @@ import {
   canonicalMemberReinstatementPayload,
   canonicalReadAuthMessage,
   canonicalRedemptionPayload,
+  canonicalVouchPayload,
   generateKeyPair,
   sign,
   signStateRecord,
@@ -266,17 +267,41 @@ describe("member removal M1 — the record and the gates", () => {
 
   it("chain rule: pre-removal invitees stay; receipts through a removed inviter die; reinstatement is not retroactive", async () => {
     const founder = generateKeyPair();
+    // Second founder root: since the founder-rooted trust gate
+    // (trustGate.ts), only a TRUSTED inviter's receipts are accepted,
+    // and trust needs 2 distinct trusted vouchers — with a single
+    // root nobody but the founder could ever invite. Two roots plus a
+    // manual vouch below make `inviter` trusted, which is what this
+    // chain test needs to exercise the removal rules.
+    const founder2 = generateKeyPair();
     const inviter = generateKeyPair();
     const preInvitee = generateKeyPair();
     const postInvitee = generateKeyPair();
     const postReinstateInvitee = generateKeyPair();
     const [s1, s2] = [1, 2].map(() => generateKeyPair());
     await serverWith({
-      NODE_FOUNDER_KEYS: founder.publicKey,
+      NODE_FOUNDER_KEYS: `${founder.publicKey},${founder2.publicKey}`,
       READ_AUTH: "on",
     });
     const now = Date.now();
     await admit(founder, inviter, now - 3_600_000);
+    // founder2's manual vouch is inviter's second trusted voucher.
+    const vouchPayload = {
+      voucherKey: founder2.publicKey,
+      voucheeKey: inviter.publicKey,
+      createdAt: now - 3_500_000,
+      kind: "manual" as const,
+    };
+    const vouched = await app!.inject({
+      method: "POST",
+      url: "/vouches",
+      payload: {
+        id: `v_${++seq}`,
+        ...vouchPayload,
+        signature: sign(canonicalVouchPayload(vouchPayload), founder2.secretKey),
+      },
+    });
+    expect(vouched.statusCode).toBe(201);
     await admit(founder, s1, now - 3_600_000);
     await admit(founder, s2, now - 3_600_000);
     await admit(inviter, preInvitee, now - 3_000_000);

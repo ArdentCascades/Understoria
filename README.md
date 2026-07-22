@@ -130,6 +130,20 @@ A Caddy reverse-proxy config, VPS notes, Raspberry Pi walk-through,
 and full env-var reference are in the
 [Node Operator Guide](docs/operator-guide.md).
 
+### Other ways in
+
+- **Linux desktop app (AppImage)** — the same member app in one
+  carryable file, no installed browser required. Because it loads
+  from local disk it can join a node that has never been online —
+  a laptop-sized dent in the born-offline gap. Built by CI on every
+  change; design and security posture in
+  [docs/desktop-appimage.md](docs/desktop-appimage.md).
+- **Install from a flash drive** — `scripts/make-flash-drive.sh`
+  packs images, source, docs, and (optionally) the node's sealed
+  keys onto a USB drive; `START-HERE.sh` on the drive provisions or
+  restores a node with no internet at install time. Runbook:
+  [docs/flash-drive-install.md](docs/flash-drive-install.md).
+
 The Node.js community server is shipped: signed-record ingestion
 with verification, the federation pull loop between peer nodes,
 and Docker deployment (see the operator guide above and

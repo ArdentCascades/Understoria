@@ -518,6 +518,20 @@ surface that serves live credentials gets removed, not mothballed.
 
 ## §9 Making the implicit vouch visible to trust computation
 
+> **Since amended — founder-rooted trust + trusted-only invites.**
+> `trustStatusWithInvites` no longer flat-counts distinct vouchers:
+> a voucher only counts if they are *themselves* trusted, computed
+> as a least fixpoint from the founder roots
+> (`@understoria/shared/trust`; threat-model §7 entry
+> "Founder-rooted trust + trusted-only invites"). The node enforces
+> the same rule: `POST /vouches` refuses untrusted vouchers and
+> `POST /redemptions` refuses receipts from untrusted inviters —
+> which is also how the operator's "only fully-vouched members can
+> invite" rule holds against a modified client. Peer-pull ingestion
+> of already-accepted records is exempt (convergence). The
+> mechanics below (implicit vouch stays implicit, edge shapes,
+> dedup) are unchanged.
+
 The implicit vouch **stays implicit — and becomes visible**. No
 synthetic `SignedVouch` is minted (§6 explains why it can't be
 signed honestly). Instead:

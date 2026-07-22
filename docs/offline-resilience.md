@@ -83,6 +83,11 @@ three properties that are each ordinary on their own:
   `https://your-domain` — reach the hub without any
   reconfiguration, mixed-content problem, or new code. Same
   domain, valid cert, working app.
+- **Laptops don't need the certificate at all.** The desktop app
+  (`docs/desktop-appimage.md`) loads from local disk, so it can
+  join a hub over plain HTTP on the LAN — no browser-trusted cert,
+  no runway clock. Phones still need the cert path above; the
+  AppImage narrows the exposure to them.
 
 **Build it (in good times):**
 

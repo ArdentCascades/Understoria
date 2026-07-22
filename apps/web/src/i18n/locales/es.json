@@ -1842,7 +1842,16 @@
       "bad_signature": "La firma de esta invitación — el sello a prueba de alteraciones que demuestra quién la hizo — no verificó. Una app de mensajería pudo alterar el enlace en el camino; intenta pegar el mensaje original abajo. Si aún falla, no la aceptes: puede haber sido manipulada.",
       "already_redeemed": "Alguien ya usó esta invitación. Las invitaciones son de un solo uso — pídele un enlace nuevo a quien te invitó y pégalo abajo.",
       "revoked": "Quien te invitó revocó esta invitación. Si te sorprende, pídele un enlace nuevo — puedes pegarlo abajo.",
-      "self_redeem": "No puedes canjear una invitación que tú misma emitiste. Comparte el enlace con alguien más."
+      "self_redeem": "No puedes canjear una invitación que tú misma emitiste. Comparte el enlace con alguien más.",
+      "inviter_not_trusted": "Esta invitación todavía no se puede usar: quien te la envió aún no cuenta con el aval completo de la comunidad. Cuando dos personas de confianza le den su aval, sus invitaciones funcionarán; mientras tanto, pídele un enlace a otra persona de la comunidad."
+    }
+  },
+  "invites": {
+    "gate": {
+      "title": "Invitar se abre con confianza",
+      "body": "Las invitaciones traen gente nueva a la comunidad, así que se abren cuando la comunidad ya responde por ti: es la forma en que la vecindad se protege de las cuentas falsas.",
+      "progress": "Llevas {{have}} de {{need}} avales.",
+      "howTo": "Ayudar a la gente es el camino: los intercambios confirmados son la manera en que tus vecinos te van conociendo, y cualquier persona de confianza puede avalarte desde tu perfil."
     }
   },
   "notJoinedCard": {

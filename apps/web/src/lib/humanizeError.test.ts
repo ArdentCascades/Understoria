@@ -35,6 +35,14 @@ describe("humanizeError", () => {
     expect(humanizeError(new Error("bad_signature"))).toBe(FALLBACK);
   });
 
+  it("translates the node's inviter_not_trusted code (string, message, or .code)", () => {
+    const friendly =
+      "This invite can't be used yet — the person who sent it isn't fully vouched for in the community.";
+    expect(humanizeError("inviter_not_trusted")).toBe(friendly);
+    expect(humanizeError(new Error("inviter_not_trusted"))).toBe(friendly);
+    expect(humanizeError({ code: "inviter_not_trusted" })).toBe(friendly);
+  });
+
   it("replaces http_<status> fallbacks", () => {
     expect(humanizeError(new Error("http_422"))).toBe(FALLBACK);
     expect(humanizeError(new Error("http_500"))).toBe(FALLBACK);

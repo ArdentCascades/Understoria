@@ -22,6 +22,7 @@ import {
   canonicalPostPayload,
   canonicalReadAuthMessage,
   canonicalRedemptionPayload,
+  canonicalVouchPayload,
   founderKeyHash,
   generateKeyPair,
   sign,
@@ -145,28 +146,52 @@ describe("READ_AUTH=on", () => {
 
   it("admits a member via the redemption-receipt chain; refuses strangers", async () => {
     const founder = generateKeyPair();
+    // Second root: the founder-rooted trust gate (trustGate.ts) only
+    // accepts receipts from a TRUSTED inviter, and trust needs 2
+    // distinct trusted vouchers — founder's invite plus founder2's
+    // manual vouch below make `invitee` trusted so the chain's
+    // second hop still lands.
+    const founder2 = generateKeyPair();
     const invitee = generateKeyPair();
     const grandInvitee = generateKeyPair();
     const stranger = generateKeyPair();
     const a = await serverWith({
       READ_AUTH: "on",
-      NODE_FOUNDER_KEYS: founder.publicKey,
+      NODE_FOUNDER_KEYS: `${founder.publicKey},${founder2.publicKey}`,
     });
 
     // founder -> invitee -> grandInvitee, receipts landing via the
     // ordinary unauthenticated POST route (writes never needed auth;
-    // the receipts themselves are the membership proof).
-    for (const receipt of [
-      makeReceipt(founder, invitee),
-      makeReceipt(invitee, grandInvitee),
-    ]) {
-      const posted = await a.inject({
-        method: "POST",
-        url: "/redemptions",
-        payload: receipt,
-      });
-      expect(posted.statusCode).toBe(201);
-    }
+    // the receipts themselves are the membership proof), with
+    // founder2's vouch promoting invitee to trusted in between.
+    const first = await a.inject({
+      method: "POST",
+      url: "/redemptions",
+      payload: makeReceipt(founder, invitee),
+    });
+    expect(first.statusCode).toBe(201);
+    const vouchPayload = {
+      voucherKey: founder2.publicKey,
+      voucheeKey: invitee.publicKey,
+      createdAt: Date.now(),
+      kind: "manual" as const,
+    };
+    const vouched = await a.inject({
+      method: "POST",
+      url: "/vouches",
+      payload: {
+        id: "v_trust_chain",
+        ...vouchPayload,
+        signature: sign(canonicalVouchPayload(vouchPayload), founder2.secretKey),
+      },
+    });
+    expect(vouched.statusCode).toBe(201);
+    const second = await a.inject({
+      method: "POST",
+      url: "/redemptions",
+      payload: makeReceipt(invitee, grandInvitee),
+    });
+    expect(second.statusCode).toBe(201);
 
     for (const member of [invitee, grandInvitee]) {
       const res = await a.inject({

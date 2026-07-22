@@ -190,6 +190,16 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
             "aplicación.'",
           "En un navegador de escritorio, busca el icono de instalación " +
             "al final derecho de la barra de direcciones.",
+          "En una computadora con Linux también hay una app de " +
+            "escritorio — un solo archivo (un AppImage) que tu " +
+            "comunidad puede compartir y que corre sin navegador. " +
+            "Hazlo ejecutable (clic derecho → Propiedades → permitir " +
+            "ejecutar, o chmod +x), ábrelo y vincúlalo desde tu " +
+            "teléfono: Ajustes → 'Agregar otro dispositivo' en el " +
+            "teléfono, y la vía de pegar el código en la computadora. " +
+            "Cuenta como su propio dispositivo, igual que el caso del " +
+            "iPhone más abajo, y solo se actualiza cuando reemplazas " +
+            "el archivo por uno más nuevo.",
           "Algo que debes saber antes de instalar: en iPhone y iPad la " +
             "app instalada tiene su PROPIO almacenamiento separado, así " +
             "que arranca sin sesión aunque la copia del navegador sí " +
@@ -407,6 +417,16 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         id: "invite-someone",
         question: "¿Cómo invito a alguien?",
         answer: [
+          "Primero: invitar es algo que hacen los miembros de " +
+            "confianza. Hasta que dos miembros de confianza hayan " +
+            "respondido por ti (la invitación con la que entraste " +
+            "cuenta como la primera), el botón de invitar muestra tu " +
+            "progreso en su lugar. Esto protege a la comunidad: una " +
+            "cadena de desconocidos no puede invitar a más " +
+            "desconocidos. El camino es para lo que existe la app: " +
+            "ayuda a la gente. Cuando el vecindario te conozca, " +
+            "cualquier miembro de confianza puede responder por ti " +
+            "desde tu perfil.",
           "El camino más rápido: abre el Menú (arriba a la derecha) y " +
             "elige Invitar a alguien — te lleva directo a la tarjeta " +
             "de invitaciones. El camino largo es Perfil → Invitaciones.",

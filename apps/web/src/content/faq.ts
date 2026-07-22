@@ -232,6 +232,15 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "app.'",
           "On a desktop browser, look for the install icon at the " +
             "right end of the address bar.",
+          "On a Linux computer there's also a desktop app — a single " +
+            "file (an AppImage) your community can share, which runs " +
+            "with no browser at all. Make it runnable (right-click → " +
+            "Properties → allow executing, or chmod +x), open it, and " +
+            "pair from your phone: Settings → 'Add another device' on " +
+            "the phone, then the paste-code path on the computer. It " +
+            "counts as its own device, just like the iPhone case " +
+            "below, and it updates only when you replace the file " +
+            "with a newer one.",
           "One thing to know before you install: on iPhone and iPad " +
             "the installed app gets its OWN separate storage, so it " +
             "starts out signed out even though the browser copy is " +
@@ -387,6 +396,14 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
         id: "invite-someone",
         question: "How do I invite someone?",
         answer: [
+          "First: inviting is something trusted members do. Until " +
+            "two trusted members have vouched for you (the invite " +
+            "you joined on counts as the first), the invite button " +
+            "shows your progress instead. This protects the " +
+            "community — a chain of strangers can't invite more " +
+            "strangers. To get there, do what the app is for: help " +
+            "people. Once neighbors know you, any trusted member can " +
+            "vouch for you from your profile.",
           "The quickest way: open the Menu (top right) and choose " +
             "Invite someone — it takes you straight to the invites " +
             "card. The long way round is Profile → Invites.",

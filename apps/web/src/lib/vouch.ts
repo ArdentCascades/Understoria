@@ -24,6 +24,7 @@ import {
   canonicalVouchPayload,
   verifyVouch,
 } from "@understoria/shared/crypto";
+import { computeTrustedSet, type TrustEdge } from "@understoria/shared/trust";
 import type { SignedVouch, VouchPayload } from "@understoria/shared/types";
 
 // Web-of-trust vouching — Agent 2 task 3.
@@ -143,19 +144,89 @@ export function isFounderRoot(
 }
 
 /**
- * Full trust computation: founding trust roots are trusted by
- * construction; everyone else needs a distinct-voucher set — across
- * both manual vouches and redeemed invites — of at least
- * `MINIMUM_VOUCHES_FOR_TRUST`.
+ * Full trust computation, FOUNDER-ROOTED: founding trust roots are
+ * trusted by construction; everyone else needs at least
+ * `MINIMUM_VOUCHES_FOR_TRUST` distinct vouchers who are THEMSELVES
+ * trusted — computed as a least fixpoint from the founder set
+ * (@understoria/shared/trust). Under the old flat count, two
+ * accounts invited by one member could vouch each other straight
+ * into "trusted" (each held the inviter's implicit vouch plus the
+ * sibling's); rooting the computation closes that sybil hole, and
+ * the node enforces the same rule on /vouches and /redemptions.
+ *
+ * Without `founderRoots` (a device that hasn't captured the node's
+ * founder hashes yet, or tests predating the capture) the fixpoint
+ * has no root, so we fall back to the flat distinct-voucher count —
+ * more permissive locally, but every gate that matters is also
+ * enforced by the node, which always knows its founders.
  */
 export function trustStatusWithInvites(
   memberKey: string,
   ctx: TrustContext,
 ): TrustStatus {
   if (isFounderRoot(memberKey, ctx)) return "trusted";
+  if (ctx.founderRoots && ctx.founderRoots.size > 0) {
+    return computeTrustedSet(ctx.founderRoots, trustEdges(ctx)).has(memberKey)
+      ? "trusted"
+      : "pending_trust";
+  }
   return vouchersFor(memberKey, ctx).size >= MINIMUM_VOUCHES_FOR_TRUST
     ? "trusted"
     : "pending_trust";
+}
+
+/**
+ * Client half of "only fully-vouched members can invite".
+ *
+ * The node refuses invite announcements from — and redemptions of
+ * links minted by — a pending-trust inviter (403
+ * `inviter_not_trusted`), so a link issued past this gate could never
+ * actually admit anyone. Trust is the founder-rooted computation
+ * above (`trustStatusWithInvites`), with `ctx.founderRoots` resolved
+ * from the node's captured founder hashes (lib/founderRoots.ts).
+ *
+ * IMPORTANT exception: when the device holds NO founder capture yet
+ * (`capture` null — older server, sync off, fresh install before the
+ * first /config fetch) we keep the OLD behavior and ALLOW. The rooted
+ * computation has no anchor then, so any local refusal would be a
+ * guess — and the node enforces the rule regardless, so allowing here
+ * lets nothing unsafe through. A capture with zero hashes resolves
+ * zero roots (same as no capture, see `resolveFounderRoots`) and is
+ * treated identically.
+ *
+ * Shared by the db guard (db/invites.ts `issueInvite`) and the UI
+ * gates (Profile's Invites card, the /invites page) so both always
+ * agree. Takes only the capture's shape, not the lib/founderRoots
+ * type, to stay import-cycle-free and easy to test.
+ */
+export function inviteIssuanceAllowed(
+  memberKey: string,
+  capture: { hashes: readonly string[] } | null,
+  ctx: TrustContext,
+): boolean {
+  if (!capture || capture.hashes.length === 0) return true;
+  return trustStatusWithInvites(memberKey, ctx) === "trusted";
+}
+
+/** Every valid vouch edge in the context — redeemed invites (implicit
+ *  inviter vouches) plus signature-verified manual vouches — for the
+ *  whole graph, not just one vouchee. Feeds the rooted fixpoint. */
+function trustEdges(ctx: TrustContext): TrustEdge[] {
+  const edges: TrustEdge[] = [];
+  for (const inv of ctx.invites) {
+    if (
+      inv.status !== "redeemed" &&
+      inv.status !== "redeemed_despite_revocation"
+    )
+      continue;
+    if (!inv.redeemedBy) continue;
+    edges.push({ voucherKey: inv.inviterKey, voucheeKey: inv.redeemedBy });
+  }
+  for (const v of ctx.vouches) {
+    if (!verifyVouch(v)) continue;
+    edges.push({ voucherKey: v.voucherKey, voucheeKey: v.voucheeKey });
+  }
+  return edges;
 }
 
 export interface VoucherRef {
