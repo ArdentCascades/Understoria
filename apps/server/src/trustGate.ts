@@ -143,6 +143,7 @@ export function createTrustResolver(
   let cache: Set<string> | null = null;
   let cachedAtCounts = "";
   let warnedFounderless = false;
+  let warnedSingleFounder = false;
 
   function current(): Set<string> {
     const counts = countStmt.get() as {
@@ -154,6 +155,25 @@ export function createTrustResolver(
     if (cache === null || stamp !== cachedAtCounts) {
       cache = computeServerTrustedSet(db, deps.envFounderKeys);
       cachedAtCounts = stamp;
+      // Single-founder visibility (docs/cofounder-ceremony-plan.md):
+      // with exactly ONE root (env ∪ claimed, deduped), trusted needs
+      // two distinct trusted vouchers that can never exist — the
+      // founder alone can never promote anyone. One-time and lazy,
+      // the founderless warn's sibling; checked only on rebuild (the
+      // stamp covers claimed_founders, and env keys are static).
+      if (!warnedSingleFounder) {
+        const roots = new Set<string>(deps.envFounderKeys);
+        const claimed = db
+          .prepare("SELECT founder_key FROM claimed_founders")
+          .all() as { founder_key: string }[];
+        for (const row of claimed) roots.add(row.founder_key);
+        if (roots.size === 1) {
+          warnedSingleFounder = true;
+          deps.warn?.(
+            "node has exactly ONE founder root: no member can ever reach trusted (promotion needs two distinct trusted vouchers). Add a co-founder (POST /founder-nomination → /founder-accession) or a second NODE_FOUNDER_KEYS root.",
+          );
+        }
+      }
     }
     return cache;
   }

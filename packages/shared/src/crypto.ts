@@ -38,6 +38,10 @@ import type {
   EventCancellationPayload,
   EventPayload,
   Exchange,
+  FounderAccession,
+  FounderAccessionPayload,
+  FounderNomination,
+  FounderNominationPayload,
   InviteAnnouncement,
   InviteAnnouncementPayload,
   InvitePayload,
@@ -1825,4 +1829,194 @@ export function founderKeyHash(nodeId: string, publicKey: string): string {
   return b64encode(
     nacl.hash(utf8encode(`founder-root|${nodeId}|${publicKey}`)),
   );
+}
+
+// -- Co-founder ceremony (docs/cofounder-ceremony-plan.md) ------------------
+
+/** Client-default nomination lifetime: the signed `expiresAt` a
+ *  nominating founder stamps is `nominatedAt + this`. */
+export const FOUNDER_NOMINATION_TTL_MS = 72 * 60 * 60 * 1000;
+
+/** Server sanity bound on the SIGNED window: a nomination whose
+ *  `expiresAt - nominatedAt` exceeds this (or is non-positive) is
+ *  refused `invalid_expiry` — a founder's device cannot mint a
+ *  months-long standing offer of permanent root status. Headroom
+ *  above the 72 h TTL is deliberate: only the ceiling is the node's
+ *  business, the exact TTL is the client's. */
+export const FOUNDER_NOMINATION_MAX_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Canonical bytes the nominating FOUNDER signs. Domain-separated and
+ * pipe-delimited like the sibling founder messages
+ * (`canonicalFounderClaimMessage`, `founderKeyHash`) — every field is
+ * a base64 key/signature, an integer, or the nodeId, so no field can
+ * contain the delimiter. Field order is the wire contract; the
+ * signature is NOT part of the payload.
+ */
+export function canonicalFounderNominationPayload(
+  p: FounderNominationPayload,
+): string {
+  return `founder-nomination|${p.nodeId}|${p.nominatorKey}|${p.nomineeKey}|${p.nominatedAt}|${p.expiresAt}`;
+}
+
+/**
+ * Canonical bytes the NOMINEE signs. Re-serializes the embedded
+ * nomination field-by-field (never trusting transport order) and
+ * INCLUDES the nomination's own signature — the accession attests to
+ * the exact signed nomination that was accepted, the same discipline
+ * as `canonicalRedemptionPayload`. The outer signature is NOT part
+ * of the payload.
+ */
+export function canonicalFounderAccessionPayload(
+  p: FounderAccessionPayload,
+): string {
+  return `founder-accession|${canonicalFounderNominationPayload(p.nomination)}|${p.nomination.signature}|${p.acceptedAt}`;
+}
+
+/**
+ * Verify a founder nomination. Signature by `nominatorKey` plus the
+ * record-internal structural rules every consumer must agree on:
+ * self-nomination is meaningless (the nominator is already a root),
+ * and the signed window must be forward (`nominatedAt < expiresAt`).
+ * AUTHORITY — the nominator being the node's sole current root, the
+ * nominee being a member — depends on node state and lives with the
+ * route, not here.
+ */
+export function verifyFounderNomination(n: FounderNomination): boolean {
+  if (!n.signature) return false;
+  if (n.nominatorKey === n.nomineeKey) return false;
+  if (n.expiresAt <= n.nominatedAt) return false;
+  return verify(
+    canonicalFounderNominationPayload(n),
+    n.signature,
+    n.nominatorKey,
+  );
+}
+
+/**
+ * Verify a founder accession — BOTH signature layers, used
+ * identically by the node route (`POST /founder-accession`) and any
+ * client re-verifying a stored artifact:
+ *
+ * 1. The embedded nomination verifies against `nomination.nominatorKey`
+ *    (`verifyFounderNomination`, structural rules included).
+ * 2. `nominatedAt <= acceptedAt <= expiresAt` — the record-internal
+ *    window. This is signed time, so it holds forever, including
+ *    during a reseed replay when the LIVE expiry is waived.
+ * 3. The outer signature verifies against `nomination.nomineeKey` —
+ *    the nominee's own consent to permanent founding.
+ */
+export function verifyFounderAccession(a: FounderAccession): boolean {
+  if (!a.signature) return false;
+  if (!verifyFounderNomination(a.nomination)) return false;
+  if (a.acceptedAt < a.nomination.nominatedAt) return false;
+  if (a.acceptedAt > a.nomination.expiresAt) return false;
+  return verify(
+    canonicalFounderAccessionPayload(a),
+    a.signature,
+    a.nomination.nomineeKey,
+  );
+}
+
+export type ParseFounderNominationResult =
+  | { ok: true; value: FounderNomination }
+  | { ok: false; error: string };
+
+/**
+ * Shape-level validation for a bare FounderNomination — shared by
+ * the server's `POST /founder-nomination` and (via `fieldPrefix`)
+ * `parseFounderAccession` for the embedded copy, the exact
+ * `parseSignedInvite` arrangement. Cryptographic and time checks
+ * stay separate in the verifier and the routes.
+ */
+export function parseFounderNomination(
+  input: unknown,
+  fieldPrefix = "",
+): ParseFounderNominationResult {
+  if (typeof input !== "object" || input === null) {
+    return {
+      ok: false,
+      error: `${fieldPrefix || "body"} must be a FounderNomination object`,
+    };
+  }
+  const n = input as Record<string, unknown>;
+  for (const f of [
+    "nominatorKey",
+    "nomineeKey",
+    "nodeId",
+    "signature",
+  ] as const) {
+    if (typeof n[f] !== "string" || (n[f] as string).length === 0) {
+      return {
+        ok: false,
+        error: `${fieldPrefix}${f} must be a non-empty string`,
+      };
+    }
+  }
+  for (const f of ["nominatedAt", "expiresAt"] as const) {
+    if (
+      typeof n[f] !== "number" ||
+      !Number.isInteger(n[f]) ||
+      (n[f] as number) <= 0
+    ) {
+      return {
+        ok: false,
+        error: `${fieldPrefix}${f} must be a positive integer (ms epoch)`,
+      };
+    }
+  }
+  return {
+    ok: true,
+    value: {
+      nominatorKey: n.nominatorKey as string,
+      nomineeKey: n.nomineeKey as string,
+      nodeId: n.nodeId as string,
+      nominatedAt: n.nominatedAt as number,
+      expiresAt: n.expiresAt as number,
+      signature: n.signature as string,
+    },
+  };
+}
+
+export type ParseFounderAccessionResult =
+  | { ok: true; value: FounderAccession }
+  | { ok: false; error: string };
+
+/** Shape-level validation for a founder accession (house
+ *  `parseRedemption` shape) — the embedded nomination parses through
+ *  `parseFounderNomination` so the two surfaces can never drift. */
+export function parseFounderAccession(
+  input: unknown,
+): ParseFounderAccessionResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const a = input as Record<string, unknown>;
+
+  const parsedNomination = parseFounderNomination(a.nomination, "nomination.");
+  if (!parsedNomination.ok) {
+    return { ok: false, error: parsedNomination.error };
+  }
+
+  if (typeof a.signature !== "string" || a.signature.length === 0) {
+    return { ok: false, error: "signature must be a non-empty string" };
+  }
+  if (
+    typeof a.acceptedAt !== "number" ||
+    !Number.isInteger(a.acceptedAt) ||
+    a.acceptedAt <= 0
+  ) {
+    return {
+      ok: false,
+      error: "acceptedAt must be a positive integer (ms epoch)",
+    };
+  }
+  return {
+    ok: true,
+    value: {
+      nomination: parsedNomination.value,
+      acceptedAt: a.acceptedAt as number,
+      signature: a.signature as string,
+    },
+  };
 }

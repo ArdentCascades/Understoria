@@ -1577,6 +1577,66 @@ export interface SeedVaultPledge {
 }
 
 /**
+ * Founder nomination — the founder's half of the co-founder ceremony
+ * (docs/cofounder-ceremony-plan.md). Signed by the community's SOLE
+ * founder root to invite `nomineeKey` (an existing member) to become
+ * the second, permanent trust root. Carries a signed expiry so a
+ * stale nomination cannot be played weeks later; the node sanity-
+ * bounds the window (`FOUNDER_NOMINATION_MAX_WINDOW_MS`).
+ *
+ * FIELD ORDER IS THE WIRE CONTRACT — the canonical serializer is
+ * pipe-delimited in declared order. Do NOT reorder.
+ */
+export interface FounderNominationPayload {
+  /** The nominating founder's Ed25519 public key (the signer). */
+  nominatorKey: string;
+  /** The member being nominated as co-founder. */
+  nomineeKey: string;
+  /** The community node the nomination is for — a nomination never
+   *  crosses nodes. */
+  nodeId: string;
+  /** ms epoch, nominator's device clock at signing. */
+  nominatedAt: number;
+  /** ms epoch — the nomination is unplayable after this moment
+   *  (outside a reseed grace window; the record-internal bound
+   *  `acceptedAt <= expiresAt` holds even inside one). */
+  expiresAt: number;
+}
+
+export interface FounderNomination extends FounderNominationPayload {
+  /** Ed25519 detached signature by `nominatorKey` over
+   *  `canonicalFounderNominationPayload(payload)`. */
+  signature: string;
+}
+
+/**
+ * Founder accession — the nominee's half, embedding the whole signed
+ * nomination verbatim (RedemptionReceipt-style), so one record
+ * carries two independently verifiable attestations: the founder's
+ * intent to add this co-founder, and the nominee's own signed
+ * consent to permanent founding. Stateless-verifiable: any node with
+ * the record can validate the full ceremony without the pending
+ * nomination row — which is what makes the accession the reseed
+ * recovery artifact.
+ */
+export interface FounderAccessionPayload {
+  /** Embedded verbatim, its `signature` included in the outer
+   *  canonical payload — the accession attests to the exact signed
+   *  nomination that was accepted. */
+  nomination: FounderNomination;
+  /** ms epoch, nominee's device clock at acceptance. Must satisfy
+   *  `nominatedAt <= acceptedAt <= expiresAt` (record-internal;
+   *  always enforced). */
+  acceptedAt: number;
+}
+
+export interface FounderAccession extends FounderAccessionPayload {
+  /** Ed25519 detached signature by `nomination.nomineeKey` over
+   *  `canonicalFounderAccessionPayload(payload)`. */
+  signature: string;
+}
+
+/**
  * Coarse node-capacity attestation (docs/capacity-forecast.md §6). The
  * ONLY capacity data that ever leaves the node: a traffic-light band, a
  * coarse disk-horizon bucket, and the recruitment trigger — signed by

@@ -34,6 +34,8 @@ import type {
   EventCancellation,
   Exchange,
   FlagReason,
+  FounderAccession,
+  FounderNomination,
   EventRsvpState,
   MemberRemoval,
   MemberReinstatement,
@@ -1480,6 +1482,50 @@ function applyMigrations(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '31')",
+    ).run();
+  }
+
+  if (current < 32) {
+    // Schema v32 — co-founder ceremony (docs/cofounder-ceremony-plan.md
+    // P2). Two tables with opposite lifecycles:
+    //
+    // `founder_nominations` is a pending RELAY shelf, one row per
+    // nominee (INSERT OR REPLACE — a resend supersedes), pruned on
+    // write once `expires_at` passes. It is delivery convenience, not
+    // authority: the accession embeds the whole signed nomination and
+    // is verified statelessly, so losing these rows costs nothing but
+    // a resend.
+    //
+    // `founder_accessions` is the PERMANENT dual-signed artifact —
+    // the accession transaction inserts here AND into
+    // `claimed_founders` (the actual root registration, schema v28)
+    // atomically. Keeping the full record closes the reseed gap the
+    // plan names: `claimed_founders` was never client-reconstructible;
+    // this record is, and re-POSTing it re-derives the root.
+    db.exec(`
+      CREATE TABLE founder_nominations (
+        nominee_key   TEXT PRIMARY KEY,
+        nominator_key TEXT NOT NULL,
+        node_id       TEXT NOT NULL,
+        nominated_at  INTEGER NOT NULL,
+        expires_at    INTEGER NOT NULL,
+        signature     TEXT NOT NULL,
+        received_at   INTEGER NOT NULL
+      );
+      CREATE TABLE founder_accessions (
+        nominee_key          TEXT PRIMARY KEY,
+        nominator_key        TEXT NOT NULL,
+        node_id              TEXT NOT NULL,
+        nominated_at         INTEGER NOT NULL,
+        expires_at           INTEGER NOT NULL,
+        nomination_signature TEXT NOT NULL,
+        accepted_at          INTEGER NOT NULL,
+        signature            TEXT NOT NULL,
+        received_at          INTEGER NOT NULL
+      );
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '32')",
     ).run();
   }
 }
@@ -3288,6 +3334,181 @@ export function createLinkRequestStore(db: DatabaseType): LinkRequestStore {
     },
     count() {
       return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+// --- Co-founder ceremony (docs/cofounder-ceremony-plan.md P2) --------
+
+export interface StoredFounderAccession {
+  accession: FounderAccession;
+  receivedAt: number;
+}
+
+export interface CofounderStore {
+  /** INSERT OR REPLACE keyed on nominee — a resend supersedes the
+   *  previous nomination for the same nominee. */
+  upsertNomination(n: FounderNomination, receivedAt: number): void;
+  /** Expired pending rows are shed on the write path (the messages
+   *  retention posture — a shelf, not an archive). */
+  pruneExpiredNominations(now: number): void;
+  /** The proven recipient's live nomination, or null. Expiry is
+   *  checked live — a row the prune hasn't reached yet must not be
+   *  served. */
+  getNominationForNominee(
+    nomineeKey: string,
+    now: number,
+  ): FounderNomination | null;
+  /** The permanent artifact for one nominee (replay detection). */
+  getAccession(nomineeKey: string): StoredFounderAccession | null;
+  /**
+   * THE accession transaction (plan §1 "enforced transactionally"):
+   * inside one db.transaction, recount the roots (env ∪ claimed,
+   * deduped — root COUNT, never trusted-circle size) and refuse
+   * unless the count is exactly 1 AND that root is the accession's
+   * nominator; then insert into `claimed_founders` AND
+   * `founder_accessions` and delete the pending nomination row.
+   * Returns false on refusal — the losing racer of two concurrent
+   * accessions gets a clean `root_count_not_one`, never a second
+   * root.
+   */
+  accede(
+    a: FounderAccession,
+    envFounderKeys: readonly string[],
+    receivedAt: number,
+  ): boolean;
+}
+
+export function createCofounderStore(db: DatabaseType): CofounderStore {
+  const upsertNominationStmt = db.prepare(`
+    INSERT OR REPLACE INTO founder_nominations
+      (nominee_key, nominator_key, node_id, nominated_at, expires_at,
+       signature, received_at)
+    VALUES
+      (@nomineeKey, @nominatorKey, @nodeId, @nominatedAt, @expiresAt,
+       @signature, @receivedAt)
+  `);
+  const pruneStmt = db.prepare(
+    "DELETE FROM founder_nominations WHERE expires_at < ?",
+  );
+  const getNominationStmt = db.prepare(`
+    SELECT nominator_key, nominee_key, node_id, nominated_at, expires_at,
+           signature
+    FROM founder_nominations
+    WHERE nominee_key = ? AND expires_at >= ?
+  `);
+  const getAccessionStmt = db.prepare(
+    "SELECT * FROM founder_accessions WHERE nominee_key = ?",
+  );
+  const claimedKeysStmt = db.prepare(
+    "SELECT founder_key FROM claimed_founders",
+  );
+  const insertClaimedStmt = db.prepare(
+    "INSERT INTO claimed_founders (founder_key, claimed_at) VALUES (?, ?)",
+  );
+  const insertAccessionStmt = db.prepare(`
+    INSERT INTO founder_accessions
+      (nominee_key, nominator_key, node_id, nominated_at, expires_at,
+       nomination_signature, accepted_at, signature, received_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  const deleteNominationStmt = db.prepare(
+    "DELETE FROM founder_nominations WHERE nominee_key = ?",
+  );
+
+  interface NominationRow {
+    nominator_key: string;
+    nominee_key: string;
+    node_id: string;
+    nominated_at: number;
+    expires_at: number;
+    signature: string;
+  }
+
+  const accedeTx = db.transaction(
+    (
+      a: FounderAccession,
+      envFounderKeys: readonly string[],
+      receivedAt: number,
+    ): boolean => {
+      const roots = new Set<string>(envFounderKeys);
+      for (const row of claimedKeysStmt.all() as { founder_key: string }[]) {
+        roots.add(row.founder_key);
+      }
+      if (roots.size !== 1 || !roots.has(a.nomination.nominatorKey)) {
+        return false;
+      }
+      insertClaimedStmt.run(a.nomination.nomineeKey, receivedAt);
+      insertAccessionStmt.run(
+        a.nomination.nomineeKey,
+        a.nomination.nominatorKey,
+        a.nomination.nodeId,
+        a.nomination.nominatedAt,
+        a.nomination.expiresAt,
+        a.nomination.signature,
+        a.acceptedAt,
+        a.signature,
+        receivedAt,
+      );
+      deleteNominationStmt.run(a.nomination.nomineeKey);
+      return true;
+    },
+  );
+
+  return {
+    upsertNomination(n, receivedAt) {
+      upsertNominationStmt.run({ ...n, receivedAt });
+    },
+    pruneExpiredNominations(now) {
+      pruneStmt.run(now);
+    },
+    getNominationForNominee(nomineeKey, now) {
+      const row = getNominationStmt.get(nomineeKey, now) as
+        | NominationRow
+        | undefined;
+      if (!row) return null;
+      return {
+        nominatorKey: row.nominator_key,
+        nomineeKey: row.nominee_key,
+        nodeId: row.node_id,
+        nominatedAt: row.nominated_at,
+        expiresAt: row.expires_at,
+        signature: row.signature,
+      };
+    },
+    getAccession(nomineeKey) {
+      const row = getAccessionStmt.get(nomineeKey) as
+        | {
+            nominee_key: string;
+            nominator_key: string;
+            node_id: string;
+            nominated_at: number;
+            expires_at: number;
+            nomination_signature: string;
+            accepted_at: number;
+            signature: string;
+            received_at: number;
+          }
+        | undefined;
+      if (!row) return null;
+      return {
+        accession: {
+          nomination: {
+            nominatorKey: row.nominator_key,
+            nomineeKey: row.nominee_key,
+            nodeId: row.node_id,
+            nominatedAt: row.nominated_at,
+            expiresAt: row.expires_at,
+            signature: row.nomination_signature,
+          },
+          acceptedAt: row.accepted_at,
+          signature: row.signature,
+        },
+        receivedAt: row.received_at,
+      };
+    },
+    accede(a, envFounderKeys, receivedAt) {
+      return accedeTx(a, envFounderKeys, receivedAt);
     },
   };
 }
