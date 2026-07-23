@@ -98,12 +98,25 @@ Three kinds, every one on shipped machinery:
   replacing in place — byte-for-byte the RSVP discipline.
 - **`ProposalClosure` (signed, first-writer-wins).** `{id,
   proposalId, outcome: passed|rejected|withdrawn, reason,
-  closedAt, closerKey, nodeId, signerKey, signature}`. Any member
-  may close (unchanged); the SERVER keys closures by `proposalId`
-  and refuses a second one (`200 {stored:false}` — idempotent,
-  convergent: the first accepted closure is the community's answer
-  everywhere). Withdrawn-by-proposer keeps its existing UI meaning
-  but is the same record kind.
+  closedAt, closerKey, nodeId, signerKey, signature}`. The SERVER
+  keys closures by `proposalId` and refuses a second one
+  (`200 {stored:false}` — idempotent, convergent: the first
+  accepted closure is the community's answer everywhere).
+  **Amendment (2026-07, operator-decided): the closer must be
+  TRUSTED** under the founder-rooted closure (403
+  `closer_not_trusted` otherwise, retryable — a pending member's
+  queued closure delivers itself the day they become trusted),
+  with one exemption: a proposer may `withdrawn` their OWN
+  proposal while still pending (self-scoped, enacts nothing).
+  Mirror-internal replication, founderless nodes, and the declared
+  reseed grace window skip the gate; already-stored closures are
+  grandfathered by the idempotent path. Client-side, auto-pass
+  eligibility counts only TRUSTED affirms (blocks count from every
+  member, unchanged — one block from anyone halts auto-pass), and
+  the enact/record-outcome affordances gate behind the shared
+  trust-gate card. See `docs/trusted-governance-plan.md` and the
+  threat-model §7 entry for the convergence argument and named
+  residuals.
 
 **Validity, enforced at ingestion and re-checked on pull:**
 signature verifies; signer is a MEMBER (the resolver from removal

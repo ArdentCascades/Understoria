@@ -70,7 +70,11 @@ structure.
    A single block stops the proposal. Blocks are expected to be
    rare and serious; they are not "I disagree."
 5. **Revision or adoption.** If blocked, the proposal goes back to
-   discussion. Otherwise, it's adopted and logged.
+   discussion. Otherwise, it's adopted and logged. In the app, any
+   **trusted** member records the outcome (a member the community
+   has fully vouched for — see the member guide); every member's
+   block counts from day one, and a newcomer's affirms start
+   counting the moment they're vouched.
 
 ### Supermajority (fallback)
 

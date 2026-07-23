@@ -28,6 +28,32 @@ include breaking changes.
   trusted takes two trusted voices, not just any two. Everything
   else a new member can do is unchanged: post, claim, exchange,
   message, join events and projects from day one.
+- **Recording a proposal's outcome is now a trusted-member power —
+  and every block still counts from day one.** A proposal's outcome
+  (passed, rejected) can only be recorded by a member the community
+  has fully vouched for, and only affirms from vouched members count
+  toward consensus auto-pass. Deliberately unchanged: everyone can
+  propose, discuss, and vote from day one; a block from ANY member
+  — including brand-new ones — always counts immediately and stops
+  a proposal from passing (blocks protect, so they're never gated);
+  a newcomer can still withdraw their own proposal; and every affirm
+  a newcomer casts is recorded and starts counting automatically the
+  moment they're vouched. The tally shows both numbers honestly
+  ("2 of 3 counting"), and past decisions are untouched.
+- **Communities can add their second founder from inside the app.**
+  Under founder-rooted trust, a community with one founder is stuck:
+  nobody can ever reach fully-vouched, because that takes two
+  trusted voices. Now the founder can run a short in-person
+  ceremony: scan their co-organizer's key from that person's
+  Profile, confirm their name and photo, and send a nomination —
+  the co-organizer accepts on their own device after reading
+  exactly what it means (being a founder is permanent). The server
+  admits the second founder only while there is exactly one, so
+  the ceremony can never be abused to mint extra roots later. Until
+  a community has two founders, the app says so honestly everywhere
+  instead of showing progress bars that can't complete, and the
+  founder sees a clear card explaining that only they can open
+  things up — with the button that does it.
 - **Links shared by not-yet-vouched members aren't tappable yet.**
   Bad links are how spam hurts people, so a link in a post, task
   comment, or event/project description becomes tappable only once

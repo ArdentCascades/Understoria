@@ -180,7 +180,12 @@ One translation to make as you read them, since both open with
   Then continue with the runbook's next step (the interactive
   setup, or the manual build). Everything else — the system key,
   `.env`, founder keys, backups, the "before going public"
-  checklist — applies unchanged.
+  checklist — applies unchanged. One step that IS part of going
+  public: **communities start with two founders.** After claiming
+  your node, invite your co-organizer and run **Add a co-founder**
+  from your Profile's community-node section — until a second
+  founder joins, no member can ever become fully vouched, and the
+  node's boot log will keep reminding you.
 
 **Updating later, without git:** a plain archive has no history, so
 "`git pull` for updates" becomes: download the newer
