@@ -29,6 +29,8 @@ import {
   withdrawAdoptionAsPresent,
 } from "@/db/adoption";
 import { castVote } from "@/db/votes";
+import { TrustGateCard } from "@/components/InviteTrustGateCard";
+import { trustedMemberSet } from "@/lib/vouch";
 import { currentMemberVote, tallyVotes, type Tally } from "@/lib/votes";
 import {
   autoCloseEligibility,
@@ -49,7 +51,8 @@ import type {
 // The Decisions surface. Proposals, votes, and closures are signed
 // federated records since docs/proposal-federation.md G1/G2: ballots
 // are open (attributed, re-castable — the newest version tallies),
-// any member may record the community's outcome, and a passed
+// any TRUSTED member may record the community's outcome (threat-model
+// §7 — a pending proposer may still withdraw their own), and a passed
 // closure whose merged ballot shows standing blocks renders as
 // contested rather than being silently honored. Legacy rows made
 // before federation stay on the device that recorded them, marked
@@ -73,6 +76,8 @@ export default function ProposalsPage() {
     nodeId,
     nodeConfig,
     governanceHiddenKeys,
+    invites,
+    founderRoots,
   } = useApp();
   const { t } = useTranslation();
   const [filter, setFilter] = useState<ProposalStatus | "all">("open");
@@ -177,6 +182,29 @@ export default function ProposalsPage() {
     return map;
   }, [votes]);
 
+  // DECISION trust context (threat-model §7): built from UNFILTERED
+  // db.vouches, same discipline as decisionVotesByProposal — a viewer
+  // who blocks one of a voter's vouchers must not thereby stop that
+  // voter's affirm from counting, or see a different consensus state
+  // than everyone else. Null without a founder capture: the rooted
+  // computation has no anchor, so this device keeps legacy flat
+  // counting and the node enforces closure signing.
+  const decisionVouches = useLiveQuery(() => db.vouches.toArray(), [], []);
+  const trustedKeys = useMemo(
+    () =>
+      trustedMemberSet({ vouches: decisionVouches, invites, founderRoots }),
+    [decisionVouches, invites, founderRoots],
+  );
+
+  // Enactment is a trusted-member power: the consensus close and the
+  // manual record-outcome buttons render only for a trusted viewer
+  // (no capture ⇒ legacy allow — the node enforces). Seeing is not
+  // gated: a pending member reads every proposal, tally, and honest
+  // waiting state.
+  const canEnact =
+    currentMember !== null &&
+    (trustedKeys === null || trustedKeys.has(currentMember.publicKey));
+
   return (
     <div className="px-4 pb-8 pt-4">
       <header className="mb-4 landscape-short:mb-2">
@@ -261,6 +289,7 @@ export default function ProposalsPage() {
               proposal: p,
               votes: decisionVotesByProposal.get(p.id) ?? [],
               config: nodeConfig,
+              trustedKeys,
             });
             // Phase G2 (docs/proposal-federation.md §2): a closure
             // that slipped past a node whose vote set lacked a block
@@ -276,6 +305,8 @@ export default function ProposalsPage() {
                   proposal={p}
                   proposerName={nameByKey.get(p.proposerKey) ?? null}
                   canCloseOpen={Boolean(currentMember)}
+                  canEnact={canEnact}
+                  trustedKeys={trustedKeys}
                   proposalVotes={proposalVotes}
                   currentMemberKey={currentMember?.publicKey ?? null}
                   nodeId={nodeId}
@@ -410,6 +441,8 @@ function ProposalCard({
   proposal,
   proposerName,
   canCloseOpen,
+  canEnact,
+  trustedKeys,
   proposalVotes,
   currentMemberKey,
   nodeId,
@@ -420,6 +453,11 @@ function ProposalCard({
   proposal: Proposal;
   proposerName: string | null;
   canCloseOpen: boolean;
+  /** The viewer may record outcomes (trusted, or no capture). */
+  canEnact: boolean;
+  /** The founder-rooted trusted set (null = no capture) — feeds the
+   *  dual-count tally and the point-of-action vote note. */
+  trustedKeys: ReadonlySet<string> | null;
   proposalVotes: readonly Vote[];
   currentMemberKey: string | null;
   nodeId: string;
@@ -617,6 +655,7 @@ function ProposalCard({
           tally={tally}
           myChoice={myChoice}
           currentMemberKey={currentMemberKey}
+          trustedKeys={trustedKeys}
           nodeId={nodeId}
           nameByKey={nameByKey}
         />
@@ -632,21 +671,31 @@ function ProposalCard({
                 blocks: tally.blocks.length,
               })}
             </p>
-            <button
-              type="button"
-              className="btn-primary text-sm"
-              disabled={pending}
-              aria-busy={pending}
-              onClick={() => void handleConsensusPass()}
-            >
-              {pending
-                ? isAdoption
-                  ? t("adoption.card.executing")
-                  : t("common.working")
-                : isAdoption
-                  ? t("adoption.card.execute")
-                  : t("proposals.closeAsPassed")}
-            </button>
+            {/* Enactment is trusted-only (threat-model §7). A pending
+                viewer at consensus sees the honest state instead of a
+                dead button: nothing is stuck, the close is waiting
+                for a vouched hand. */}
+            {canEnact ? (
+              <button
+                type="button"
+                className="btn-primary text-sm"
+                disabled={pending}
+                aria-busy={pending}
+                onClick={() => void handleConsensusPass()}
+              >
+                {pending
+                  ? isAdoption
+                    ? t("adoption.card.executing")
+                    : t("common.working")
+                  : isAdoption
+                    ? t("adoption.card.execute")
+                    : t("proposals.closeAsPassed")}
+              </button>
+            ) : (
+              <p className="text-xs text-canopy-800 dark:text-canopy-200">
+                {t("proposals.consensusPendingViewer")}
+              </p>
+            )}
           </div>
         )}
 
@@ -669,7 +718,31 @@ function ProposalCard({
 
       {proposal.status === "open" && canCloseOpen && (
         <div className="mt-4 border-t border-moss-100 pt-3 dark:border-moss-800">
-          {closing === null ? (
+          {/* Recording an outcome is a trusted-member power — the
+              shared gate card (no numeric progress: this surface
+              shows other members' content) replaces the buttons for
+              a pending viewer. The Withdrawn affordance survives for
+              the pending PROPOSER only, mirroring the server's one
+              exemption exactly. */}
+          {!canEnact && closing === null ? (
+            <div className="flex flex-col gap-2">
+              <TrustGateCard i18nBase="proposals.gate" />
+              {currentMemberKey === proposal.proposerKey && (
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-xs text-moss-600 dark:text-moss-300">
+                    {t("proposals.gate.withdrawOwnHint")}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn-ghost text-xs"
+                    onClick={() => setClosing("withdrawn")}
+                  >
+                    {t("proposals.outcomeWithdrawn")}
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : closing === null ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-xs text-moss-600 dark:text-moss-300">
                 {t("proposals.recordOutcomeHint")}
@@ -820,6 +893,14 @@ function EligibilityBanner({
     message = t("proposals.eligibility.waitDeliberation", {
       when: formatRelativeTime(eligibility.readyAt),
     });
+  } else if (eligibility.notYetCounted > 0) {
+    // The honest dual-count state: affirms exist that don't count
+    // yet because their voters aren't fully vouched.
+    message = t("proposals.eligibility.waitAffirmsPending", {
+      have: eligibility.have,
+      need: eligibility.need,
+      pending: eligibility.notYetCounted,
+    });
   } else {
     message = t("proposals.eligibility.waitAffirms", {
       have: eligibility.have,
@@ -841,6 +922,7 @@ function VoteSection({
   tally,
   myChoice,
   currentMemberKey,
+  trustedKeys,
   nodeId,
   nameByKey,
 }: {
@@ -848,6 +930,7 @@ function VoteSection({
   tally: Tally;
   myChoice: VoteChoice | null;
   currentMemberKey: string | null;
+  trustedKeys: ReadonlySet<string> | null;
   nodeId: string;
   nameByKey: Map<string, string>;
 }) {
@@ -884,7 +967,22 @@ function VoteSection({
         )}
       </h3>
 
-      <TallyDisplay tally={tally} nameByKey={nameByKey} />
+      <TallyDisplay
+        tally={tally}
+        trustedKeys={trustedKeys}
+        nameByKey={nameByKey}
+      />
+
+      {/* Point-of-action honesty for a pending-trust voter: the vote
+          is recorded and visible now; the affirm counts once they're
+          vouched; a block always counts. */}
+      {currentMemberKey &&
+        trustedKeys !== null &&
+        !trustedKeys.has(currentMemberKey) && (
+          <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
+            {t("proposals.vote.pendingAffirmNote")}
+          </p>
+        )}
 
       {currentMemberKey && (
         <div className="mt-3 flex flex-col gap-2">
@@ -967,9 +1065,11 @@ function VoteSection({
 
 function TallyDisplay({
   tally,
+  trustedKeys,
   nameByKey,
 }: {
   tally: Tally;
+  trustedKeys: ReadonlySet<string> | null;
   nameByKey: Map<string, string>;
 }) {
   const { t } = useTranslation();
@@ -977,13 +1077,26 @@ function TallyDisplay({
     entries
       .map((e) => nameByKey.get(e.voterKey) ?? t("common.memberFallback"))
       .join(", ");
+  // Dual count (threat-model §7): when some affirms don't count yet
+  // (voter not fully vouched), the tally says so instead of showing
+  // a number that consensus math will disagree with. The contested
+  // chip stays BLOCK-based only — this line is the honesty surface
+  // for trust lag, and it never names who is pending.
+  const countedAffirms = trustedKeys
+    ? tally.affirms.filter((a) => trustedKeys.has(a.voterKey)).length
+    : tally.affirms.length;
   return (
     <div className="flex flex-col gap-1 text-xs text-moss-700 dark:text-moss-200">
       <div>
         <span className="font-semibold">
-          {t("proposals.vote.tally.affirms", {
-            count: tally.affirms.length,
-          })}
+          {countedAffirms < tally.affirms.length
+            ? t("proposals.vote.tally.affirmsCounted", {
+                counted: countedAffirms,
+                total: tally.affirms.length,
+              })
+            : t("proposals.vote.tally.affirms", {
+                count: tally.affirms.length,
+              })}
         </span>
         {tally.affirms.length > 0 && (
           <span className="ml-1 text-moss-600 dark:text-moss-300">

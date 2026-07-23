@@ -3069,8 +3069,18 @@
     "emptyOpen": "No hay propuestas abiertas ahora mismo.",
     "emptyFiltered": "Ninguna propuesta coincide con este filtro.",
     "contested": "Registrada como aprobada, pero existe un bloqueo vigente en los votos de toda la comunidad — este resultado está en disputa. Hablenlo; el registro permanece.",
+    "gate": {
+      "title": "Registrar resultados se abre con confianza",
+      "body": "Registrar un resultado pronuncia formalmente la decisión de la comunidad — cierra la propuesta y hace que el resultado surta efecto en todas partes — así que empieza a contar cuando la comunidad ya responde plenamente por ti. Mientras tanto puedes proponer, conversar y votar; un bloqueo tuyo siempre cuenta.",
+      "howTo": "Ayudar a la gente es el camino: los intercambios confirmados son la manera en que tus vecinos te van conociendo, y cualquier persona de confianza puede avalarte desde tu perfil. Tu propio perfil muestra cuánto te falta.",
+      "withdrawOwnHint": "Tu propia propuesta sigue siendo tuya — puedes retirarla cuando quieras."
+    },
+    "consensusPendingViewer": "Las condiciones de consenso ya se cumplen. Esto no está atascado — registrar el resultado se abre con confianza, así que espera la mano de alguien con el aval completo de la comunidad.",
+    "errors": {
+      "closer_not_trusted": "El servidor de la comunidad guarda este resultado hasta que la comunidad responda plenamente por ti — no está rechazado, y se registrará solo cuando eso ocurra. Mientras tanto, cualquier miembro con aval completo puede registrarlo."
+    },
     "localOnly": "Registrado solo en este dispositivo — se creó antes de que las decisiones comunitarias se sincronizaran entre dispositivos, así que otros miembros no pueden verlo.",
-    "footer": "Las votaciones aquí son abiertas: tu voto lleva tu nombre, es visible dentro de la comunidad y se sincroniza con el dispositivo de cada miembro. Puedes cambiarlo mientras la propuesta esté abierta — la versión más reciente es la que cuenta. Cuando la comunidad llega a su decisión, cualquier miembro puede registrar el resultado, y surte efecto en todas partes.",
+    "footer": "Las votaciones aquí son abiertas: tu voto lleva tu nombre, es visible dentro de la comunidad y se sincroniza con el dispositivo de cada miembro. Puedes cambiarlo mientras la propuesta esté abierta — la versión más reciente es la que cuenta. Cuando la comunidad llega a su decisión, cualquier miembro con aval completo puede registrar el resultado, y surte efecto en todas partes.",
     "proposerLabel": "Propuesta por",
     "backfillProposer": "(histórica, persona que reportó desconocida)",
     "proposedLabel": "Iniciada",
@@ -3086,7 +3096,7 @@
       "rejected": "Marcar rechazada",
       "withdrawn": "Retirar"
     },
-    "consensusReached": "Consenso alcanzado: {{affirms}} a favor, {{blocks}} bloqueos. Cualquier persona puede cerrar esta propuesta.",
+    "consensusReached": "Consenso alcanzado: {{affirms}} a favor, {{blocks}} bloqueos. Cualquier miembro con aval completo puede cerrar esta propuesta.",
     "closeAsPassed": "Cerrar como aprobada",
     "closedReason": {
       "consensus": "Cerrada por acción de un miembro después de cumplir las condiciones de consenso."
@@ -3126,6 +3136,7 @@
     "eligibility": {
       "waitDeliberation": "Se aprueba automáticamente {{when}} si no llegan bloqueos antes.",
       "waitAffirms": "Necesita {{need}} votos a favor para aprobarse por consenso; lleva {{have}} hasta ahora.",
+      "waitAffirmsPending": "Necesita {{need}} votos a favor contados para aprobarse por consenso; lleva {{have}} hasta ahora, más {{pending}} registrados que empezarán a contar cuando la comunidad responda plenamente por quien votó.",
       "blocked": "Detenida por {{count}} bloqueo — debe resolverse antes de avanzar."
     },
     "vote": {
@@ -3145,8 +3156,10 @@
         "block": "bloqueo",
         "abstain": "abstención"
       },
+      "pendingAffirmNote": "Tu voto queda registrado y visible de inmediato. Un voto a favor empieza a contar hacia el consenso cuando la comunidad ya responde plenamente por ti — un bloqueo siempre cuenta.",
       "tally": {
         "affirms": "A favor: {{count}}",
+        "affirmsCounted": "A favor: {{counted}} de {{total}} contando hacia el consenso — los votos a favor empiezan a contar cuando la comunidad responde plenamente por quien vota",
         "blocks": "Bloqueo: {{count}}",
         "abstains": "Abstención: {{count}}"
       }

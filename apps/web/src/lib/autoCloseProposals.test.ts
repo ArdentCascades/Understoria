@@ -163,6 +163,82 @@ describe("autoCloseEligibility", () => {
     expect(result.kind).toBe("passes");
   });
 
+  describe("trustedKeys — trusted-affirm counting (threat-model §7)", () => {
+    const ripe = () => proposal({ createdAt: NOW - 5 * DAY });
+
+    it("counts only trusted voters' affirms toward auto-pass", () => {
+      const result = autoCloseEligibility({
+        proposal: ripe(),
+        votes: [vote("trusted-a", "affirm"), vote("pending-b", "affirm")],
+        config: CONFIG,
+        trustedKeys: new Set(["trusted-a"]),
+        now: NOW,
+      });
+      expect(result.kind).toBe("wait_affirms");
+      if (result.kind === "wait_affirms") {
+        expect(result.have).toBe(1);
+        expect(result.need).toBe(2);
+        expect(result.notYetCounted).toBe(1);
+      }
+    });
+
+    it("passes once the counted affirms alone satisfy the minimum", () => {
+      const result = autoCloseEligibility({
+        proposal: ripe(),
+        votes: [
+          vote("trusted-a", "affirm"),
+          vote("trusted-b", "affirm"),
+          vote("pending-c", "affirm"),
+        ],
+        config: CONFIG,
+        trustedKeys: new Set(["trusted-a", "trusted-b"]),
+        now: NOW,
+      });
+      expect(result.kind).toBe("passes");
+    });
+
+    it("a pending voter's BLOCK still blocks — blocks are never trust-filtered and are evaluated first", () => {
+      const result = autoCloseEligibility({
+        proposal: ripe(),
+        votes: [
+          vote("trusted-a", "affirm"),
+          vote("trusted-b", "affirm"),
+          vote("pending-c", "block"),
+        ],
+        config: CONFIG,
+        trustedKeys: new Set(["trusted-a", "trusted-b"]),
+        now: NOW,
+      });
+      expect(result.kind).toBe("blocked");
+    });
+
+    it("null trustedKeys keeps the legacy flat count (no founder capture — the node enforces)", () => {
+      const result = autoCloseEligibility({
+        proposal: ripe(),
+        votes: [vote("a", "affirm"), vote("b", "affirm")],
+        config: CONFIG,
+        trustedKeys: null,
+        now: NOW,
+      });
+      expect(result.kind).toBe("passes");
+    });
+
+    it("notYetCounted is 0 when every recorded affirm counts", () => {
+      const result = autoCloseEligibility({
+        proposal: ripe(),
+        votes: [vote("trusted-a", "affirm")],
+        config: CONFIG,
+        trustedKeys: new Set(["trusted-a", "trusted-b"]),
+        now: NOW,
+      });
+      expect(result.kind).toBe("wait_affirms");
+      if (result.kind === "wait_affirms") {
+        expect(result.have).toBe(1);
+        expect(result.notYetCounted).toBe(0);
+      }
+    });
+  });
+
   describe("project_adoption deliberation floor", () => {
     const affirms = [vote("a", "affirm"), vote("b", "affirm")];
 

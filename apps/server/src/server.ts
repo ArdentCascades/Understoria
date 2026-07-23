@@ -27,6 +27,7 @@ import type { Config } from "./config.js";
 import {
   createAudioBlobStore,
   createAwaitingTransitionStore,
+  createCofounderStore,
   createDeviceLinkStore,
   createEventRsvpStateStore,
   createEventShiftStateStore,
@@ -62,6 +63,7 @@ import { registerHealthRoutes } from "./routes/health.js";
 import { registerExchangeRoutes } from "./routes/exchanges.js";
 import { registerConfigRoutes } from "./routes/config.js";
 import { registerClaimFounderRoutes } from "./routes/claimFounder.js";
+import { registerCofounderRoutes } from "./routes/cofounder.js";
 import { registerPeersRoutes } from "./routes/peers.js";
 import { registerPostRoutes } from "./routes/posts.js";
 import { registerAudioBlobRoutes } from "./routes/audioBlobs.js";
@@ -264,6 +266,7 @@ export async function buildServer({
   const proposalClosureStore = createProposalClosureStore(db);
   const messageStore = createMessageStore(db);
   const audioBlobStore = createAudioBlobStore(db);
+  const cofounderStore = createCofounderStore(db);
 
   // Build the system signer once at boot — secret bytes are then
   // held only inside the closure that captured them. A null signer
@@ -359,16 +362,24 @@ export async function buildServer({
         "READ_AUTH=off with no founder configured: the node runs OPEN (unauthenticated reads and writes). This is the explicit dev/demo opt-out — production communities should run the default READ_AUTH=on and claim the node with the setup code.",
       );
     }
+  } else if (listFounderKeys().length === 1) {
+    // Single-founder visibility (docs/cofounder-ceremony-plan.md):
+    // one root means promotion to trusted can never complete — say so
+    // at boot, next to the unclaimed banner it mirrors. The lazy
+    // in-request sibling lives in trustGate.ts.
+    app.log.warn(
+      "node has exactly ONE founder root: no member can ever reach trusted until a co-founder accedes (POST /founder-nomination → /founder-accession) or NODE_FOUNDER_KEYS gains a second root.",
+    );
   }
   const membershipResolver = createMembershipResolver(db, config.founderKeys);
   // Founder-rooted TRUST (trustGate.ts) — a second, stricter closure
   // over the same roots as the membership resolver: membership says
   // "you are in the community", trust says "you may grow it" (vouch,
-  // invite) and "you may govern it" (removal co-sign). Gates
-  // /vouches, /redemptions, /invite-announcements and the
-  // /member-removals quorum; skipped (with a one-time warning) while
-  // the node has no founder root at all, same tolerant posture as
-  // the unclaimed state above.
+  // invite) and "you may govern it" (removal co-sign, proposal
+  // closure). Gates /vouches, /redemptions, /invite-announcements,
+  // the /member-removals quorum and the /proposal-closures closer;
+  // skipped (with a one-time warning) while the node has no founder
+  // root at all, same tolerant posture as the unclaimed state above.
   const trustResolver = createTrustResolver(db, {
     envFounderKeys: config.founderKeys,
     warn: (msg) => app.log.warn(msg),
@@ -507,7 +518,15 @@ export async function buildServer({
     if (req.method !== "POST") return;
     if (reply.statusCode >= 300) return;
     const path = req.url.split("?")[0];
-    if (path in SURFACES || path === "/claim-founder") {
+    if (
+      path in SURFACES ||
+      path === "/claim-founder" ||
+      // Co-founder ceremony POSTs live OUTSIDE SURFACES (self-gated
+      // far more strictly than membership) — named here explicitly,
+      // like /claim-founder, so accepted writes still nudge.
+      path === "/founder-nomination" ||
+      path === "/founder-accession"
+    ) {
       nudgeBus.broadcast();
     }
   });
@@ -565,6 +584,9 @@ export async function buildServer({
   });
   // Proposal federation G1 (docs/proposal-federation.md): signed
   // proposals / votes / closures — the member-gated write surfaces.
+  // Speaking an outcome is additionally a trusted-closer power
+  // (threat-model §7); closures ride the declared reseed grace
+  // window so a re-seeded history can't wedge on its own closers.
   await registerGovernanceRoutes(app, {
     proposalStore,
     voteStore,
@@ -572,6 +594,8 @@ export async function buildServer({
     resolver: membershipResolver,
     internalHeader: MIRROR_INTERNAL_HEADER,
     internalToken: internalBypassToken,
+    trust: trustResolver,
+    reseedGraceUntil: config.reseedGraceUntil,
   });
   // Device-link mailbox — NOT a federation surface: rows are opaque
   // ciphertext, one-shot, TTL-bounded, never pulled by peers. The
@@ -593,6 +617,22 @@ export async function buildServer({
     db,
     envFounderKeys: config.founderKeys,
     setupToken,
+  });
+  // Co-founder ceremony (docs/cofounder-ceremony-plan.md P2): the
+  // in-band path from one root to two. Registered after migration v32
+  // has run (statements prepare at registration); the nomination gate
+  // counts ROOTS via the same live listFounderKeys closure /config
+  // publishes hashes from, so an accession shows up on the very next
+  // fetch — no cache to invalidate (the resolvers' count stamps
+  // already cover claimed_founders).
+  await registerCofounderRoutes(app, {
+    store: cofounderStore,
+    envFounderKeys: config.founderKeys,
+    listFounderKeys,
+    isClaimed,
+    resolver: membershipResolver,
+    nodeId: config.nodeId,
+    reseedGraceUntil: config.reseedGraceUntil,
   });
   await registerAwaitingTransitionRoutes(app, {
     store: awaitingTransitionStore,

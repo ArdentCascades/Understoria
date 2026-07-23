@@ -3069,8 +3069,18 @@
     "emptyOpen": "No open proposals right now.",
     "emptyFiltered": "No proposals match this filter.",
     "contested": "Recorded as passed, but a standing block exists in the community-wide votes — this outcome is contested. Talk it through; the record stays.",
+    "gate": {
+      "title": "Recording outcomes opens up with trust",
+      "body": "Recording an outcome formally speaks the community's decision — it closes the proposal and makes the result take effect everywhere — so it starts counting once the community has fully vouched for you. You can still propose, discuss, and vote; a block from you always stands.",
+      "howTo": "Helping people is how you get there: confirmed exchanges are how neighbors get to know you, and any trusted member can vouch for you from your profile. Your own profile shows how far along you are.",
+      "withdrawOwnHint": "Your own proposal stays yours — you can withdraw it anytime."
+    },
+    "consensusPendingViewer": "Consensus conditions are met. This isn't stuck — recording the outcome opens up with trust, so it's waiting for a fully vouched member's hand.",
+    "errors": {
+      "closer_not_trusted": "The community server is holding this outcome until the community fully vouches for you — it isn't rejected, and it will record itself once that happens. Any fully vouched member can record it meanwhile."
+    },
     "localOnly": "Recorded on this device only — it was created before community decisions synced between devices, so other members can't see it.",
-    "footer": "Ballots here are open: your vote is attributed, visible inside the community, and syncs to every member's device. You can change it while the proposal is open — the newest version is what counts. When the community reaches its decision, any member can record the outcome, and it takes effect everywhere.",
+    "footer": "Ballots here are open: your vote is attributed, visible inside the community, and syncs to every member's device. You can change it while the proposal is open — the newest version is what counts. When the community reaches its decision, any fully vouched member can record the outcome, and it takes effect everywhere.",
     "proposerLabel": "Proposed by",
     "backfillProposer": "(historical, flagger unknown)",
     "proposedLabel": "Started",
@@ -3086,7 +3096,7 @@
       "rejected": "Mark rejected",
       "withdrawn": "Withdraw"
     },
-    "consensusReached": "Consensus reached: {{affirms}} affirm, {{blocks}} blocks. Any member can close this proposal.",
+    "consensusReached": "Consensus reached: {{affirms}} affirm, {{blocks}} blocks. Any fully vouched member can close this proposal.",
     "closeAsPassed": "Close as passed",
     "closedReason": {
       "consensus": "Closed by member action after consensus conditions were met."
@@ -3126,6 +3136,7 @@
     "eligibility": {
       "waitDeliberation": "Auto-passes {{when}} if no blocks land before then.",
       "waitAffirms": "Needs {{need}} affirms to auto-pass on consensus; has {{have}} so far.",
+      "waitAffirmsPending": "Needs {{need}} counted affirms to auto-pass on consensus; has {{have}} so far, plus {{pending}} recorded that will start counting once the voter is fully vouched.",
       "blocked": "Held by {{count}} block — needs to be resolved before this can move forward."
     },
     "vote": {
@@ -3145,8 +3156,10 @@
         "block": "block",
         "abstain": "abstain"
       },
+      "pendingAffirmNote": "Your vote is recorded and visible right away. An affirm starts counting toward consensus once the community fully vouches for you — a block always counts.",
       "tally": {
         "affirms": "Affirm: {{count}}",
+        "affirmsCounted": "Affirm: {{counted}} of {{total}} counting toward consensus — affirms start counting once the voter is fully vouched",
         "blocks": "Block: {{count}}",
         "abstains": "Abstain: {{count}}"
       }

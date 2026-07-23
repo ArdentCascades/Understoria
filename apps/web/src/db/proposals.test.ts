@@ -10,7 +10,9 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { beforeEach, describe, expect, it } from "vitest";
-import { db } from "./database";
+import { founderKeyHash } from "@understoria/shared/crypto";
+import { db, setSetting, SETTING_KEYS } from "./database";
+import { LAST_SEEN_FOUNDER_HASHES } from "@/lib/founderRoots";
 import { castVote } from "./votes";
 import {
   buildDisputeProposal,
@@ -372,6 +374,98 @@ describe("ensureDisputeProposal", () => {
     const stored = await listProposals({ kind: "dispute" });
     expect(stored).toHaveLength(1);
     expect(stored[0].description).toBe("First");
+  });
+});
+
+describe("closeProposal — trusted-closer guard (defense in depth)", () => {
+  // The node answers 403 closer_not_trusted on the wire, but a passed
+  // config_change applies its NodeConfig LOCALLY before any delivery —
+  // so the same rule runs here, before local effects. Same capture
+  // posture as issueInvite: no capture ⇒ allow, the node enforces.
+  const ME = "me_closer_key";
+  const OTHER = "other_proposer_key";
+  const FOUNDER = "founder_root_key";
+
+  beforeEach(async () => {
+    await Promise.all([
+      db.proposals.clear(),
+      db.proposalClosures.clear(),
+      db.votes.clear(),
+      db.vouches.clear(),
+      db.invites.clear(),
+      db.members.clear(),
+      db.settings.clear(),
+    ]);
+  });
+
+  async function withCapture(rootKeys: string[]) {
+    await setSetting(
+      LAST_SEEN_FOUNDER_HASHES,
+      JSON.stringify({
+        nodeId: NODE,
+        hashes: rootKeys.map((k) => founderKeyHash(NODE, k)),
+      }),
+    );
+  }
+
+  async function openProposal(proposerKey: string) {
+    return createProposal({
+      category: "config_change",
+      reversibilityTier: "easy",
+      title: "T",
+      description: "",
+      payload: "{}",
+      proposerKey,
+      nodeId: NODE,
+    });
+  }
+
+  it("a pending closer cannot record passed or rejected — thrown BEFORE any local effect", async () => {
+    await withCapture([FOUNDER]);
+    await setSetting(SETTING_KEYS.currentMember, ME);
+    const p = await openProposal(OTHER);
+    await expect(closeProposal(p.id, "passed", "")).rejects.toThrow(
+      "closer_not_trusted",
+    );
+    await expect(closeProposal(p.id, "rejected", "")).rejects.toThrow(
+      "closer_not_trusted",
+    );
+    // The row is untouched and no closure record was minted.
+    expect((await db.proposals.get(p.id))?.status).toBe("open");
+    expect(await db.proposalClosures.count()).toBe(0);
+  });
+
+  it("the pending PROPOSER may withdraw their own proposal (the one exemption)", async () => {
+    await withCapture([FOUNDER]);
+    await setSetting(SETTING_KEYS.currentMember, ME);
+    const p = await openProposal(ME);
+    const closed = await closeProposal(p.id, "withdrawn", "changed my mind");
+    expect(closed.status).toBe("withdrawn");
+  });
+
+  it("…but a pending non-proposer cannot withdraw someone else's", async () => {
+    await withCapture([FOUNDER]);
+    await setSetting(SETTING_KEYS.currentMember, ME);
+    const p = await openProposal(OTHER);
+    await expect(closeProposal(p.id, "withdrawn", "")).rejects.toThrow(
+      "closer_not_trusted",
+    );
+  });
+
+  it("a trusted closer records outcomes exactly as before", async () => {
+    // ME resolves as a founder root — trusted by construction.
+    await withCapture([FOUNDER, ME]);
+    await setSetting(SETTING_KEYS.currentMember, ME);
+    const p = await openProposal(OTHER);
+    const closed = await closeProposal(p.id, "passed", "consensus");
+    expect(closed.status).toBe("passed");
+  });
+
+  it("no founder capture: legacy behavior stands (the node enforces)", async () => {
+    await setSetting(SETTING_KEYS.currentMember, ME);
+    const p = await openProposal(OTHER);
+    const closed = await closeProposal(p.id, "passed", "consensus");
+    expect(closed.status).toBe("passed");
   });
 });
 

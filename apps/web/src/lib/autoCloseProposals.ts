@@ -19,7 +19,9 @@ import type { NodeConfig, Proposal, Vote } from "@/types";
 // Auto-pass condition (modified consensus):
 //   - Deliberation period satisfied (now - createdAt >= deliberation)
 //   - No blocks remaining
-//   - At least `proposalMinAffirms` affirm votes
+//   - At least `proposalMinAffirms` COUNTED affirm votes (affirms
+//     from trusted voters when `trustedKeys` is provided — see the
+//     input's doc comment)
 //
 // Auto-reject is intentionally NOT implemented. The roadmap leaves
 // "supermajority fallback" for a future, more contentious mechanism;
@@ -29,7 +31,11 @@ import type { NodeConfig, Proposal, Vote } from "@/types";
 export type AutoCloseEligibility =
   | { kind: "passes" }
   | { kind: "wait_deliberation"; readyAt: number }
-  | { kind: "wait_affirms"; have: number; need: number }
+  /** `have` counts only affirms that COUNT (trusted voters when
+   *  `trustedKeys` is provided); `notYetCounted` is the honest
+   *  remainder — affirms recorded from not-yet-vouched members,
+   *  which start counting the moment their voter is trusted. */
+  | { kind: "wait_affirms"; have: number; need: number; notYetCounted: number }
   | { kind: "blocked"; blockCount: number }
   | { kind: "not_open" };
 
@@ -40,6 +46,18 @@ export interface AutoCloseInput {
     NodeConfig,
     "proposalDeliberationDays" | "proposalMinAffirms"
   >;
+  /**
+   * The founder-rooted trusted set (lib/vouch.ts `trustedMemberSet`,
+   * built from UNFILTERED db.vouches — decision math must never see
+   * a viewer's block filter). When provided, only trusted voters'
+   * affirms count toward auto-pass (threat-model §7); blocks always
+   * count and are evaluated first. Omitted or null = legacy flat
+   * counting (no founder capture — the device can't judge, the node
+   * enforces closure signing regardless). Trust inputs are
+   * append-only, so a lagging device under-counts but never shows a
+   * premature "passes".
+   */
+  trustedKeys?: ReadonlySet<string> | null;
   now?: number;
 }
 
@@ -59,14 +77,21 @@ export function autoCloseEligibility(
 ): AutoCloseEligibility {
   const { proposal, votes, config } = input;
   const now = input.now ?? Date.now();
+  const trusted = input.trustedKeys ?? null;
 
   if (proposal.status !== "open") return { kind: "not_open" };
 
   const tally = tallyVotes(votes.filter((v) => v.proposalId === proposal.id));
 
+  // Blocks first, and NEVER trust-filtered: one standing block stops
+  // passage whoever cast it (modified consensus, GOVERNANCE.md §2).
   if (tally.blocks.length > 0) {
     return { kind: "blocked", blockCount: tally.blocks.length };
   }
+
+  const countedAffirms = trusted
+    ? tally.affirms.filter((a) => trusted.has(a.voterKey))
+    : tally.affirms;
 
   const deliberationDays =
     proposal.category === "project_adoption"
@@ -78,11 +103,12 @@ export function autoCloseEligibility(
     return { kind: "wait_deliberation", readyAt };
   }
 
-  if (tally.affirms.length < config.proposalMinAffirms) {
+  if (countedAffirms.length < config.proposalMinAffirms) {
     return {
       kind: "wait_affirms",
-      have: tally.affirms.length,
+      have: countedAffirms.length,
       need: config.proposalMinAffirms,
+      notYetCounted: tally.affirms.length - countedAffirms.length,
     };
   }
 
