@@ -229,6 +229,20 @@ function trustEdges(ctx: TrustContext): TrustEdge[] {
   return edges;
 }
 
+/**
+ * How many members the founder-rooted fixpoint marks trusted,
+ * founders included. Feeds the removal-availability honesty
+ * ("removal needs {{need}} trusted members, the community has
+ * {{have}}") and any future circle-size surfacing. Null without a
+ * founder capture: the rooted computation has no anchor, so the
+ * device can't compute a circle — callers must then not claim
+ * anything about its size.
+ */
+export function trustedCircleSize(ctx: TrustContext): number | null {
+  if (!ctx.founderRoots || ctx.founderRoots.size === 0) return null;
+  return computeTrustedSet(ctx.founderRoots, trustEdges(ctx)).size;
+}
+
 export interface VoucherRef {
   voucherKey: string;
   /** `invite` when the vouch is implicit (the voucher invited this

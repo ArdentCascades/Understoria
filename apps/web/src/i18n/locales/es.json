@@ -1994,6 +1994,12 @@
     "reinstatedLine": "{{name}} fue readmitido/a por decisión comunitaria {{when}}.",
     "signedBy": "Firmado por {{names}}.",
     "proposeButton": "Proponer la expulsión de la comunidad…",
+    "gate": {
+      "title": "Firmar expulsiones se abre con confianza",
+      "body": "Una firma de expulsión habla formalmente en nombre de toda la comunidad — ayuda a decidir quién pertenece aquí — así que empieza a contar cuando la comunidad ya responde plenamente por ti. Es la misma protección que evita que las cuentas falsas expulsen a vecinos reales.",
+      "howTo": "Ayudar a la gente es el camino: los intercambios confirmados son la manera en que tus vecinos te van conociendo, y cualquier persona de confianza puede avalarte desde tu perfil. Tu propio perfil muestra cuánto te falta."
+    },
+    "circleShort": "Expulsar a un miembro requiere formalmente las firmas de {{need}} miembros de confianza, y esta comunidad tiene {{have}} por ahora — así que la expulsión aún no está disponible. Las comunidades jóvenes resuelven los problemas conversando, bloqueando y eligiendo con cuidado a quién avalan.",
     "interstitial": "Expulsar a {{name}} es lo más grave que esta comunidad puede hacer, y no puede hacerse en solitario — hacen falta varias personas firmando con su nombre un registro público. Antes de seguir: un bloqueo personal ya impide que su contenido te llegue, una disputa puede impugnar un intercambio concreto, y una conversación ha reparado más comunidades que cualquier herramienta de aquí. Si aun así tiene que ser esto, escribe una razón que toda la comunidad leerá.",
     "reinstateIntro": "Readmitir a {{name}} reabre la puerta — recupera la lectura y la escritura, aunque las invitaciones que murieron con la expulsión siguen muertas. Requiere el mismo número de firmas que una expulsión. Puedes añadir una nota que la comunidad leerá.",
     "reasonLabel": "Razón (pública, opcional)",

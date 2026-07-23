@@ -1994,6 +1994,12 @@
     "reinstatedLine": "{{name}} was reinstated by community decision {{when}}.",
     "signedBy": "Signed by {{names}}.",
     "proposeButton": "Propose removal from the community…",
+    "gate": {
+      "title": "Removal signing opens up with trust",
+      "body": "A removal signature formally speaks for the whole community — it helps decide who belongs here — so it starts counting once the community has fully vouched for you. It's the same protection that keeps fake accounts from expelling real neighbors.",
+      "howTo": "Helping people is how you get there: confirmed exchanges are how neighbors get to know you, and any trusted member can vouch for you from your profile. Your own profile shows how far along you are."
+    },
+    "circleShort": "Removing a member formally takes {{need}} trusted members' signatures, and this community has {{have}} so far — so removal isn't available yet. Young communities handle problems by talking, blocking, and choosing carefully who they vouch for.",
     "interstitial": "Removing {{name}} is the heaviest thing this community can do, and it can't be done alone — it takes several members each signing their name to one public record. Before going further: a personal block already stops their content from reaching you, a dispute can contest a specific exchange, and a conversation has mended more communities than any tool here. If it still has to be this, write a reason the whole community will read.",
     "reinstateIntro": "Reinstating {{name}} reopens the door — their reading and writing come back, though invites that died with the removal stay dead. It takes the same number of signatures as a removal. You can add a note the community will read.",
     "reasonLabel": "Reason (public, optional)",

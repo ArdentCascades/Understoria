@@ -49,6 +49,7 @@ import { UnblockConfirmDialog } from "@/components/UnblockConfirmDialog";
 import { addManualVouch, VouchValidationError } from "@/db/vouches";
 import { isBlocked } from "@/db/blocks";
 import { RemovalCeremony } from "@/components/RemovalCeremony";
+import { RemovalGateNotice, useRemovalGate } from "@/components/useRemovalGate";
 import { IdentityKey } from "@/components/IdentityKey";
 import { shortKey } from "@/lib/format";
 import { flushOutboxNow } from "@/lib/outbox";
@@ -70,6 +71,7 @@ export default function MemberDetailPage() {
   const [blockOpen, setBlockOpen] = useState(false);
   const [unblockOpen, setUnblockOpen] = useState(false);
   const [removalOpen, setRemovalOpen] = useState(false);
+  const removalGate = useRemovalGate();
 
   // Reactive blocked-state lookup. Re-runs when either side's
   // pubkey changes OR when the underlying `blocks` table mutates
@@ -377,10 +379,16 @@ export default function MemberDetailPage() {
       {/* Member removal (docs/member-removal.md §4): the heaviest
           tool sits BENEATH the block action — graduated-tools
           ordering — and opens with an interstitial naming the
-          lighter tools before anything can be signed. */}
+          lighter tools before anything can be signed. Proposing is a
+          trusted-member power (useRemovalGate): a pending-trust
+          viewer sees the gate card, a trusted viewer in a
+          smaller-than-quorum circle sees the honest circle-short
+          note — never the start affordance. */}
       {!isSelf && currentMember && publicKey && (
         <section className="card mb-4">
-          {!removalOpen ? (
+          {removalGate.kind !== "allowed" ? (
+            <RemovalGateNotice gate={removalGate} />
+          ) : !removalOpen ? (
             <button
               type="button"
               className="btn-ghost text-xs text-moss-600 dark:text-moss-300"

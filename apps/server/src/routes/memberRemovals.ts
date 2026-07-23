@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyRequest } from "fastify";
 import {
   canonicalMemberRemovalPayload,
   canonicalMemberReinstatementPayload,
@@ -31,6 +31,8 @@ import type {
   MemberReinstatementStore,
 } from "../db.js";
 import type { MembershipResolver } from "../readAuth.js";
+import { MIRROR_INTERNAL_HEADER } from "../mirrorPull.js";
+import type { TrustResolver } from "../trustGate.js";
 
 interface Deps {
   removalStore: MemberRemovalStore;
@@ -38,6 +40,23 @@ interface Deps {
   resolver: MembershipResolver;
   removalQuorum: number;
   founderKeys: readonly string[];
+  /**
+   * Founder-rooted trust gate (trustGate.ts): a co-signature counts
+   * toward quorum only from a TRUSTED member — removal/reinstatement
+   * co-signing is a trusted-member power (operator decision 2026-07).
+   * Optional so existing tests/callers without the resolver keep the
+   * member-only behavior (and a founderless node skips the gate via
+   * `founderlessSkip`).
+   */
+  trust?: TrustResolver;
+  /**
+   * `BuiltServer.internalBypassToken`. A POST carrying it is the
+   * mirror-pull worker replicating a record ANOTHER node already
+   * accepted — trust standing was judged where the record first
+   * entered the community; re-litigating it here would make mirror
+   * convergence diverge. Membership counting is NOT relaxed.
+   */
+  internalToken?: string;
 }
 
 /** Bound the signature array so a hostile body can't buy unbounded
@@ -56,16 +75,29 @@ const MAX_FUTURE_MS = 24 * 60 * 60 * 1000;
  *
  *   ≥ removalQuorum signature entries where the signature verifies
  *   over the canonical payload, the signer is a MEMBER ignoring this
- *   record, the signer is not the subject, and signers are distinct.
+ *   record AND TRUSTED under the founder-rooted closure
+ *   (trustGate.ts), the signer is not the subject, and signers are
+ *   distinct.
+ *
+ * The trusted requirement is the operator decision of 2026-07:
+ * removal co-signing is a trusted-member power. Below 3 trusted
+ * members a community cannot remove — deliberate: at trusted-circle
+ * 2 both are founders and the mechanism can't help. Grandfathering
+ * is automatic: already-stored records hit the idempotent 200 path
+ * below and are never re-judged. Mirror-internal requests keep the
+ * membership count but bypass the trusted requirement (the record
+ * was judged at its origin — see Deps.internalToken), and a
+ * founderless node skips the trust half entirely.
  *
  * Status codes: 201 stored, 200 {stored:false} for a record id
  * already present (idempotent re-submission), 400 malformed, 403
  * last_founder (the closure must keep at least one root), 409
  * quorum_not_met (structurally valid but not enough signers are
- * members HERE YET — retryable: a catching-up mirror may simply not
- * have pulled the signers' receipts; a record the primary accepted
- * converges once receipts land), 422 bad_signatures (structural
- * invalidity — cannot become valid later).
+ * members — or trusted members — HERE YET — retryable: a catching-up
+ * mirror may simply not have pulled the signers' receipts or vouch
+ * edges; a record the primary accepted converges once they land),
+ * 422 bad_signatures (structural invalidity — cannot become valid
+ * later).
  *
  * Cross-community replay: a record signed for another community
  * carries signers who are not members HERE, so it dies on the quorum
@@ -82,7 +114,43 @@ export async function registerMemberRemovalRoutes(
     resolver,
     removalQuorum,
     founderKeys,
+    trust,
+    internalToken,
   } = deps;
+
+  // The trust gate for one request, or null when it does not apply:
+  // no resolver wired, founderless node (no root ⇒ empty trusted set
+  // ⇒ removal would be welded shut before the community exists), or
+  // mirror replication (see Deps.internalToken). Null means the
+  // member-only rule stands alone.
+  const activeTrustGate = (req: FastifyRequest): TrustResolver | null => {
+    if (!trust) return null;
+    if (
+      internalToken !== undefined &&
+      req.headers[MIRROR_INTERNAL_HEADER] === internalToken
+    ) {
+      return null;
+    }
+    if (trust.founderlessSkip()) return null;
+    return trust;
+  };
+
+  // Both quorum halves in one pass so the 409 reason names the check
+  // that actually fell short: membership first (a non-member cannot
+  // be trusted), then trust.
+  const countSigners = (
+    signers: ReadonlySet<string>,
+    gate: TrustResolver | null,
+  ): { memberSigners: number; trustedSigners: number } => {
+    let memberSigners = 0;
+    let trustedSigners = 0;
+    for (const key of signers) {
+      if (!resolver.isMember(key)) continue;
+      memberSigners += 1;
+      if (gate === null || gate.isTrusted(key)) trustedSigners += 1;
+    }
+    return { memberSigners, trustedSigners };
+  };
 
   app.post("/member-removals", async (req, reply) => {
     const parsed = parseMemberRemoval(req.body);
@@ -114,16 +182,21 @@ export async function registerMemberRemovalRoutes(
       reply.code(422);
       return { error: "bad_signatures", reason: "quorum of valid signatures not met" };
     }
-    // Membership half of the rule — "ignoring this record" is the
-    // current closure, since the record is not stored yet. A signer
-    // who is currently removed is not a member and does not count.
-    let memberSigners = 0;
-    for (const key of signers) {
-      if (resolver.isMember(key)) memberSigners += 1;
-    }
+    // Membership + trust halves of the rule — "ignoring this record"
+    // is the current closure, since the record is not stored yet. A
+    // signer who is currently removed is not a member and does not
+    // count; an untrusted member counts only while the gate is off.
+    const { memberSigners, trustedSigners } = countSigners(
+      signers,
+      activeTrustGate(req),
+    );
     if (memberSigners < removalQuorum) {
       reply.code(409);
       return { error: "quorum_not_met", reason: "not enough signers are members of this community" };
+    }
+    if (trustedSigners < removalQuorum) {
+      reply.code(409);
+      return { error: "quorum_not_met", reason: "not enough signers are trusted members of this community" };
     }
 
     // Last-founder guard: the closure must keep at least one root.
@@ -172,13 +245,17 @@ export async function registerMemberRemovalRoutes(
       reply.code(422);
       return { error: "bad_signatures", reason: "quorum of valid signatures not met" };
     }
-    let memberSigners = 0;
-    for (const key of signers) {
-      if (resolver.isMember(key)) memberSigners += 1;
-    }
+    const { memberSigners, trustedSigners } = countSigners(
+      signers,
+      activeTrustGate(req),
+    );
     if (memberSigners < removalQuorum) {
       reply.code(409);
       return { error: "quorum_not_met", reason: "not enough signers are members of this community" };
+    }
+    if (trustedSigners < removalQuorum) {
+      reply.code(409);
+      return { error: "quorum_not_met", reason: "not enough signers are trusted members of this community" };
     }
 
     reinstatementStore.insert(record);

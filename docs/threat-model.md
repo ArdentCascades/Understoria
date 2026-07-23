@@ -2122,9 +2122,43 @@ We are not trying to protect against:
   warning — the same degraded posture as the rest of the
   founder-dependent machinery. Peer-pull ingestion of
   already-accepted records is deliberately exempt so federation
-  convergence never diverges. Not yet gated (tracked, undecided):
-  removal co-signing and proposal auto-pass affirms remain
-  membership-only.
+  convergence never diverges.
+- **Removal co-signing is a trusted-member power (closing the
+  tracked gap above).** Operator-decided follow-up: a signature on
+  a member-removal or reinstatement record now counts toward quorum
+  only if the signer is TRUSTED under the founder-rooted closure,
+  not merely a member. Without this, the removal quorum was the one
+  formal power still reachable by pending accounts — one careless
+  or compromised trusted member could mint three sock-puppet
+  invitees and expel anyone, including founders, and shrinking the
+  trusted circle is itself an attack primitive. The quorum NUMBER
+  stays fixed (default 3) — deliberately NOT adapted downward for
+  small circles. The operator's reasoning, recorded: at a trusted
+  circle of exactly two, both trusted members are necessarily
+  founders (promotion needs two trusted voices, and there was only
+  ever one other), so a trusted predator at that scale means a
+  rotten root no removal mechanism can save, while a pending
+  predator has no structural power at all (cannot invite, vouch, or
+  co-sign) and is handled by blocking and by talking to the trusted
+  member who invited them. Consequence, stated honestly in the UI:
+  a community with fewer than three trusted members cannot formally
+  remove anyone yet. Mechanics: enforcement lives in the node's
+  quorum count (`routes/memberRemovals.ts`, both removal and
+  reinstatement) with the same retryable-409 convergence posture as
+  the membership half — a catching-up mirror that hasn't pulled the
+  signers' vouches yet answers `quorum_not_met` and converges when
+  they land; mirror-internal replication bypasses the trust
+  judgment (the record was judged at its origin); founderless nodes
+  keep the member-only rule (no root, no fixpoint); records already
+  stored are never re-judged (grandfathered — trust is currently
+  monotone, so a co-sign valid when made stays valid). The client
+  ceremony surfaces gate with the shared trust-gate card at the
+  point of action, per the standing clarity ruling. Still tracked,
+  undecided: proposal governance (votes and outcome closures)
+  remains membership-only — note that v1 has no automatic
+  affirm-quorum pass; closures are manual outcome records, so the
+  open question there is whether closure recording itself should
+  require trust.
 - **Desktop shell (Linux AppImage): a new client runtime, named
   costs.** `apps/desktop` wraps the byte-identical web bundle in
   Electron so a member needs no installed browser and — because the
