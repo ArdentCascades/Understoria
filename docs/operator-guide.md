@@ -296,6 +296,14 @@ Two things to know:
 | `AUTO_CONFIRM_REQUIRE_TRANSITION` | *(unset)* | When set to `1`/`true`, `/auto-confirm` refuses any request whose post/task has no stored awaiting-transition artifact — the fully-enforced waiting window. Leave unset until every member runs a build that pushes artifacts (the server enforces the window from artifacts whenever they exist, regardless of this flag) |
 | `TABLE_ROW_CEILING` | `500000` | Disk-fill backstop: max rows per federated table. At the ceiling, POSTs answer 507 (honest clients' outboxes retry; nothing is deleted) until you raise the knob or prune. `0` disables |
 | `PER_KEY_ROW_CEILING` | `10000` | Max rows per signing key per table — a LIFETIME count (record timestamps are client-claimed, so a rolling window would be dodgeable by backdating). Far above any honest member's output; raise it for legitimately high-volume communities. `0` disables |
+| `NEWCOMER_DAILY_CAPS` | *(on)* | Anti-spam: daily creation caps for authors the community hasn't fully vouched for yet, on the node's own clock. Numbers are human-scale (a genuine newcomer never meets them); breaches answer a retryable 429 so honest outboxes deliver after the window; every cap lifts the moment the author becomes trusted. Trusted members, founders, mirror replication, the reseed grace window, and founderless nodes are exempt. Set to `off` to disable the whole guard |
+| `NEWCOMER_DAILY_POSTS` | `10` | Board posts (incl. voice posts) per day for a not-yet-vouched author. `0` disables this surface's cap |
+| `NEWCOMER_DAILY_EVENTS` | `3` | Events per day (same tiering; `0` disables) |
+| `NEWCOMER_DAILY_PROJECT_STATES` | `20` | Project state writes per day (creation + edits; `0` disables) |
+| `NEWCOMER_DAILY_TASK_STATES` | `20` | Task state writes per day (`0` disables) |
+| `NEWCOMER_DAILY_PROPOSALS` | `3` | Proposals per day (`0` disables) |
+| `NEWCOMER_DAILY_AUDIO_BLOBS` | `5` | Voice-board audio uploads per day — the disk-heaviest rows (`0` disables) |
+| `NEWCOMER_DAILY_TASK_COMMENTS` | `40` | Task comments per day (`0` disables) |
 | `LOG_LEVEL` | `info` | One of fatal/error/warn/info/debug/trace |
 | `LOG_REQUEST_PATHS` | `false` | Set to `true` ONLY during triage |
 | `NODE_ID` | `node_local` | Stable identifier for federation |
