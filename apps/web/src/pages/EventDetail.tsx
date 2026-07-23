@@ -405,7 +405,11 @@ export default function EventDetailPage() {
 
       {event.description && (
         <section className="card mb-4">
-          <Markdown text={event.description} className="text-sm" />
+          <Markdown
+            text={event.description}
+            authorKey={event.createdBy}
+            className="text-sm"
+          />
         </section>
       )}
 

@@ -1458,6 +1458,30 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '30')",
     ).run();
   }
+
+  if (current < 31) {
+    // Schema v31 — newcomer daily-cap counters (newcomerCaps.ts).
+    // One row per pending author × capped table, updated IN PLACE:
+    // `window_start` is stamped from the SERVER clock (record
+    // timestamps are client-claimed and backdatable, so the rolling
+    // window can never be derived from stored `createdAt`), and the
+    // first write ≥24 h after it resets the row. Bounded by
+    // construction — no growth beyond authors×tables, no pruning
+    // needed, and rows for authors who later become trusted are
+    // simply never consulted again.
+    db.exec(`
+      CREATE TABLE newcomer_daily_writes (
+        author_key   TEXT NOT NULL,
+        tbl          TEXT NOT NULL,
+        window_start INTEGER NOT NULL,
+        count        INTEGER NOT NULL,
+        PRIMARY KEY (author_key, tbl)
+      );
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '31')",
+    ).run();
+  }
 }
 
 /**

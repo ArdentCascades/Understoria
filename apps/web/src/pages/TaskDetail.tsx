@@ -178,6 +178,7 @@ export default function TaskDetailPage() {
         autoConfirmHours={ctx.autoConfirmHours}
         viewerSkills={currentMember?.skills ?? []}
         templateId={project.templateId}
+        organizerKey={project.organizerKey}
       />
       {/* Completed/archived projects keep their history reachable from
           the task page too. */}

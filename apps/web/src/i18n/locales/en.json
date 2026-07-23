@@ -338,6 +338,13 @@
     "trigger": "(why?)",
     "readMore": "Read more"
   },
+  "markdown": {
+    "pendingLink": {
+      "why": "Links become tappable once the community has vouched for the person who shared them — it's how neighbors keep each other safe from bad links. You can still read the address.",
+      "whyLabel": "Why isn't this link tappable?",
+      "composerNote": "Heads up: links you share won't be tappable for others until the community vouches for you — people will see the address but can't tap it. This lifts automatically once you're vouched."
+    }
+  },
   "identity": {
     "show": "Show identity code",
     "explainer": "This code is {{name}}'s unique identity — two people can share a name, but no one can share this code. The app uses it to check that everything {{name}} posts really came from them.",
@@ -370,6 +377,11 @@
   "vouch": {
     "errors": {
       "voucher_not_trusted": "The community server isn't counting your vouch yet — vouching starts counting once two trusted members have vouched for you. Your signed vouch is safe on this device and will be delivered automatically once that happens."
+    }
+  },
+  "newcomer": {
+    "errors": {
+      "newcomer_daily_limit": "The community server accepts a day's worth of new posts and events from someone the community hasn't fully vouched for yet, and today's amount is full — anything extra is safe on this device and sends automatically tomorrow. Claiming, exchanging, messaging, and joining are unaffected, and the limit lifts entirely once two trusted members vouch for you."
     }
   },
   "vouchNudge": {

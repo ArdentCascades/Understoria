@@ -51,6 +51,14 @@ describe("humanizeError", () => {
     expect(humanizeError({ code: "voucher_not_trusted" })).toBe(friendly);
   });
 
+  it("translates the node's newcomer_daily_limit code", () => {
+    const friendly =
+      "Today's share of new posts from a new member is full — the rest will send automatically tomorrow. The limit lifts once the community fully vouches for you.";
+    expect(humanizeError("newcomer_daily_limit")).toBe(friendly);
+    expect(humanizeError(new Error("newcomer_daily_limit"))).toBe(friendly);
+    expect(humanizeError({ code: "newcomer_daily_limit" })).toBe(friendly);
+  });
+
   it("replaces http_<status> fallbacks", () => {
     expect(humanizeError(new Error("http_422"))).toBe(FALLBACK);
     expect(humanizeError(new Error("http_500"))).toBe(FALLBACK);

@@ -91,6 +91,7 @@ import { registerMemberRemovalRoutes } from "./routes/memberRemovals.js";
 import { registerGovernanceRoutes } from "./routes/proposals.governance.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
 import { registerInsertCapGuard, SURFACES } from "./insertCaps.js";
+import { registerNewcomerCapGuard } from "./newcomerCaps.js";
 import {
   createMembershipResolver,
   registerMemberWriteGuard,
@@ -413,6 +414,19 @@ export async function buildServer({
       tableRowCeiling: config.tableRowCeiling,
       perKeyRowCeiling: config.perKeyRowCeiling,
     },
+  });
+
+  // Newcomer daily creation caps (newcomerCaps.ts) — human-scale
+  // anti-spam for PENDING authors on the creation surfaces (operator
+  // decision 2026-07). Trusted members and founders are never
+  // capped; mirror replication, founderless nodes and an open
+  // re-seed grace window all skip.
+  registerNewcomerCapGuard(app, {
+    db,
+    trust: trustResolver,
+    internalToken: internalBypassToken,
+    caps: config.newcomerDailyCaps,
+    reseedGraceUntil: config.reseedGraceUntil,
   });
 
   // Re-seed recovery surface (docs/community-reseed.md §3): a

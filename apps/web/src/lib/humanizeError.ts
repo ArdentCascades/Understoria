@@ -62,6 +62,12 @@ const CODE_MESSAGES: Record<string, string> = {
   // button, but the node has the final word).
   voucher_not_trusted:
     "The community server isn't counting your vouch yet — vouching starts counting once two trusted members have vouched for you.",
+  // The newcomer anti-spam cap (server newcomerCaps.ts): the node
+  // accepts a day's worth of new content from a not-yet-vouched
+  // author; the outbox retries 429s, so the surplus delivers itself
+  // after the window.
+  newcomer_daily_limit:
+    "Today's share of new posts from a new member is full — the rest will send automatically tomorrow. The limit lifts once the community fully vouches for you.",
 };
 
 /**

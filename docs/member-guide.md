@@ -1164,6 +1164,25 @@ one of these doors is still closed for you, the app says so in place
 and explains the way in — you'll never find a button that silently
 fails.
 
+While you're new, there's also a generous daily amount of *new*
+content the community server accepts from you — enough for any real
+person (ten board posts a day, for instance), there purely to keep
+automated spam out. If you somehow reach it, nothing is lost: the
+extra waits on your device and sends itself tomorrow, and the app
+tells you so in plain words. Claiming, exchanging, messaging, and
+joining things are never limited, and the daily amounts disappear
+entirely once you're vouched for.
+
+One more safety measure in the same spirit: **links you share aren't
+tappable for others until you're vouched.** People still see the
+full address in your post — nothing is removed — they just can't
+tap it, and a small note explains why (bad links are the main way
+strangers hurt communities online, so tappable links are a
+trusted-member thing). The app gives you a heads-up while you're
+writing if your draft contains a link. The moment the community
+vouches for you, every link you've ever shared becomes tappable
+everywhere, on its own.
+
 1. Go to **Profile → Invites you've issued**.
 2. Tap **Generate invite link**.
 3. A **share sheet** opens. It will *not* show the QR code or the

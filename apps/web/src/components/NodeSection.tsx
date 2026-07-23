@@ -404,7 +404,9 @@ function Telemetry({
     ? t("vouch.errors.voucher_not_trusted")
     : lastError?.includes("inviter_not_trusted")
       ? t("invite.errors.inviter_not_trusted")
-      : lastError;
+      : lastError?.includes("newcomer_daily_limit")
+        ? t("newcomer.errors.newcomer_daily_limit")
+        : lastError;
 
   if (!haveSuccess && !haveError) {
     return (

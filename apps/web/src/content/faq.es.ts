@@ -466,6 +466,15 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
             "puede retirar desde la app. Si después te arrepientes, " +
             "el camino es una conversación con tu comunidad, no un " +
             "botón. Avala a personas que de verdad conoces.",
+          "Recibir avales también abre los poderes de confianza de " +
+            "la comunidad: invitar gente nueva, avalar a otras " +
+            "personas, firmar expulsiones — y los enlaces que " +
+            "compartes se vuelven tocables para todo el mundo " +
+            "(hasta entonces la gente ve la dirección completa pero " +
+            "no puede tocarla: una protección contra enlaces " +
+            "maliciosos, no una marca en tu contra). Los generosos " +
+            "límites diarios de publicación de una persona recién " +
+            "llegada desaparecen en ese mismo momento.",
         ],
       },
       {

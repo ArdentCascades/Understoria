@@ -32,6 +32,7 @@ import { tabToParam } from "@/lib/boardTab";
 import { useDraftAutosave } from "@/lib/useDraftAutosave";
 import { DraftBanner } from "@/components/DraftBanner";
 import { MarkdownHint } from "@/components/MarkdownHint";
+import { PendingLinkComposerNote } from "@/components/PendingLinkComposerNote";
 import {
   VoiceRecorder,
   type CapturedClip,
@@ -403,6 +404,7 @@ export default function PostFormPage() {
           />
           <MarkdownHint />
         </label>
+        <PendingLinkComposerNote draft={description} />
 
         {/* Voice board (#474): say it instead of (or as well as)
             typing it. The recorder stays fully on-device; the clip

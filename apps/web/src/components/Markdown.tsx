@@ -26,6 +26,8 @@ import {
   type MdListItem,
   type MdTableAlign,
 } from "@/lib/markdown";
+import { trustStatusWithInvites } from "@/lib/vouch";
+import { useApp } from "@/state/AppContext";
 
 /**
  * Mention resolution — OPT-IN per surface. A surface that renders
@@ -82,6 +84,123 @@ function MentionChip({ mentionKey, label }: { mentionKey: string; label: string 
   );
 }
 
+/**
+ * Pending-author link gate (operator safety ruling): when the CONTENT
+ * AUTHOR's computed trust is still pending, their links render as
+ * non-tappable plain text on every viewer's device. Not a shame
+ * mechanism — the mechanism is explained in place (the why-affordance
+ * below) and lifts by itself once the community vouches for them.
+ * `true` = this Markdown root's author is pending, gate every link.
+ * Default `false` (no authorKey / no trust data / trusted author):
+ * links render exactly as before the gate existed.
+ */
+const PendingAuthorLinkContext = createContext<boolean>(false);
+
+/** Visible text of an inline run — the gated link's label, so
+ *  `[nice-label](evil.com)` can never hide its destination behind
+ *  formatting (we always print the href alongside). */
+function inlineText(nodes: MdInline[]): string {
+  return nodes
+    .map((node) => {
+      switch (node.type) {
+        case "text":
+        case "code":
+          return node.value;
+        case "strong":
+        case "em":
+        case "del":
+        case "link":
+          return inlineText(node.children);
+        case "mention":
+          return `@${node.label}`;
+        case "br":
+          return " ";
+      }
+    })
+    .join("");
+}
+
+/**
+ * A link authored by a not-yet-vouched member: the REAL href as muted,
+ * non-interactive plain text (never the label alone — the destination
+ * must be readable), plus a small tap-for-why affordance following the
+ * WhyTooltip interaction pattern. Deliberately NO <a> element in this
+ * branch, and no hover-underline implying tappability.
+ */
+function PendingAuthorLink({ href, label }: { href: string; label: string }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  // Show "label — href" only when the label adds information; a bare
+  // autolink (label === href) or an empty label prints just the href.
+  const trimmed = label.trim();
+  const showLabel = trimmed !== "" && trimmed !== href;
+  return (
+    <span className="break-words text-moss-600 dark:text-moss-300">
+      {showLabel ? `${trimmed} — ${href}` : href}
+      <button
+        type="button"
+        className="ml-1 text-xs text-moss-400 underline-offset-2 hover:text-moss-600 hover:underline dark:text-moss-300 dark:hover:text-moss-300"
+        aria-label={t("markdown.pendingLink.whyLabel")}
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+      >
+        {t("why.trigger")}
+      </button>
+      {open && (
+        <span
+          className="mt-1 block rounded-lg bg-moss-50 px-3 py-2 text-xs text-moss-700 dark:bg-moss-900/60 dark:text-moss-200"
+          role="note"
+        >
+          {t("markdown.pendingLink.why")}
+        </span>
+      )}
+    </span>
+  );
+}
+
+/**
+ * The link branch — a component (like MentionChip) so it can read the
+ * pending-author gate from context; renderInline is a plain function.
+ */
+function MarkdownLink({ node }: { node: Extract<MdInline, { type: "link" }> }) {
+  const authorPending = useContext(PendingAuthorLinkContext);
+  if (authorPending) {
+    return <PendingAuthorLink href={node.href} label={inlineText(node.children)} />;
+  }
+  // target=_blank so tapping a link in the installed PWA doesn't navigate
+  // the app away; rel=noopener+noreferrer+nofollow because the href came
+  // from untrusted, federated content. The href is already scheme-safe.
+  return (
+    <a
+      href={node.href}
+      target="_blank"
+      rel="noopener noreferrer nofollow"
+      className="break-words text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+    >
+      {node.children.map(renderInline)}
+    </a>
+  );
+}
+
+/**
+ * The viewer's trust data, or null when this Markdown renders outside
+ * an AppProvider (isolated component tests, static harnesses). No
+ * provider means no trust data, and no trust data means the gate stays
+ * off — behavior byte-identical to before the gate existed.
+ */
+function useTrustDataOrNull(): Pick<
+  ReturnType<typeof useApp>,
+  "vouches" | "invites" | "founderRoots"
+> | null {
+  try {
+    // useApp is unconditional here (hook order is stable); only its
+    // missing-provider throw is absorbed.
+    return useApp();
+  } catch {
+    return null;
+  }
+}
+
 // Below this character count a collapsible description renders plainly — no
 // clamp, no toggle. Shared/exported so callers and tests reference one number.
 // This replaces ExpandableText's own (identical) threshold.
@@ -134,20 +253,10 @@ function renderInline(node: MdInline, key: number): ReactNode {
       // context — renderInline itself is a plain function.
       return <MentionChip key={key} mentionKey={node.key} label={node.label} />;
     case "link":
-      // target=_blank so tapping a link in the installed PWA doesn't navigate
-      // the app away; rel=noopener+noreferrer+nofollow because the href came
-      // from untrusted, federated content. The href is already scheme-safe.
-      return (
-        <a
-          key={key}
-          href={node.href}
-          target="_blank"
-          rel="noopener noreferrer nofollow"
-          className="break-words text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
-        >
-          {node.children.map(renderInline)}
-        </a>
-      );
+      // A component (see MarkdownLink) so the pending-author gate can be
+      // read from context: an <a> for a trusted/unknown author, plain
+      // text + why-affordance for a pending one.
+      return <MarkdownLink key={key} node={node} />;
   }
 }
 
@@ -346,19 +455,41 @@ function renderBlock(block: MdBlock, key: number): ReactNode {
  *     visually clamped with a Show more / Show less toggle. The FULL markdown
  *     is always in the DOM (only CSS-clamped), so screen readers and tests
  *     always see the complete text.
+ *   - `authorKey` — the signing key of the content's AUTHOR. When set and
+ *     the viewer's trust computation says that author is still pending
+ *     trust, every link renders as non-tappable plain text (see
+ *     PendingAuthorLinkContext). Omit for non-federated app copy
+ *     (MarkdownHint) — links then stay clickable, exactly as before.
  */
 export function Markdown({
   text,
   className,
   collapsible,
+  authorKey,
 }: {
   text: string;
   className?: string;
   collapsible?: boolean;
+  authorKey?: string;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const blocks = useMemo(() => parseMarkdown(text), [text]);
+  const trust = useTrustDataOrNull();
+  const vouches = trust?.vouches;
+  const invites = trust?.invites;
+  const founderRoots = trust?.founderRoots;
+  // Author trust is computed ONCE per Markdown root and fanned out to
+  // every link through context. The founder-rooted fixpoint walks the
+  // whole vouch graph, but at community scale (tens-to-hundreds of
+  // edges) that is cheap; per-link would still work, per-root is free.
+  const authorPending = useMemo(() => {
+    if (!authorKey || !vouches || !invites) return false;
+    return (
+      trustStatusWithInvites(authorKey, { vouches, invites, founderRoots }) ===
+      "pending_trust"
+    );
+  }, [authorKey, vouches, invites, founderRoots]);
 
   // `[overflow-wrap:anywhere]` lets a long pasted URL wrap mid-string rather
   // than push the surrounding card/layout open (carried over from the linkify
@@ -370,25 +501,31 @@ export function Markdown({
 
   // Non-collapsible, or short enough to never need a toggle: render plainly.
   if (!collapsible || text.length <= COLLAPSE_THRESHOLD) {
-    return <div className={wrapperClass}>{content}</div>;
+    return (
+      <PendingAuthorLinkContext.Provider value={authorPending}>
+        <div className={wrapperClass}>{content}</div>
+      </PendingAuthorLinkContext.Provider>
+    );
   }
 
   // Collapsible + long. The inner wrapper is CSS-clamped (max-h-32
   // overflow-hidden — literal classes) when collapsed; the full content is
   // always present in the DOM. Default state is collapsed.
   return (
-    <div className={wrapperClass}>
-      <div className={expanded ? undefined : "max-h-32 overflow-hidden"}>
-        {content}
+    <PendingAuthorLinkContext.Provider value={authorPending}>
+      <div className={wrapperClass}>
+        <div className={expanded ? undefined : "max-h-32 overflow-hidden"}>
+          {content}
+        </div>
+        <button
+          type="button"
+          className="mt-1 text-xs font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? t("common.showLess") : t("common.showMore")}
+        </button>
       </div>
-      <button
-        type="button"
-        className="mt-1 text-xs font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
-        aria-expanded={expanded}
-        onClick={() => setExpanded((v) => !v)}
-      >
-        {expanded ? t("common.showLess") : t("common.showMore")}
-      </button>
-    </div>
+    </PendingAuthorLinkContext.Provider>
   );
 }

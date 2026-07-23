@@ -440,6 +440,13 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
             "in the app. If you later regret one, the path is a " +
             "conversation with your community, not a button. Vouch " +
             "for people you actually know.",
+          "Being vouched for also opens the community's trust " +
+            "powers: inviting new people, vouching for others, " +
+            "signing member removals — and links you share become " +
+            "tappable for everyone (until then people see the full " +
+            "address but can't tap it, a guard against bad links, " +
+            "not a mark against you). A newcomer's generous daily " +
+            "posting limits disappear at the same moment.",
         ],
       },
       {

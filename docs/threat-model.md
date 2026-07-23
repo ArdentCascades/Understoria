@@ -2154,11 +2154,82 @@ We are not trying to protect against:
   monotone, so a co-sign valid when made stays valid). The client
   ceremony surfaces gate with the shared trust-gate card at the
   point of action, per the standing clarity ruling. Still tracked,
-  undecided: proposal governance (votes and outcome closures)
-  remains membership-only — note that v1 has no automatic
-  affirm-quorum pass; closures are manual outcome records, so the
-  open question there is whether closure recording itself should
-  require trust.
+  undecided: proposal governance remains membership-only, and the
+  exposure there is real — auto-pass EXISTS
+  (`lib/autoCloseProposals.ts`: ≥ `proposalMinAffirms` affirm
+  votes, default 2, no blocks, deliberation window elapsed →
+  passed; an earlier revision of this entry wrongly said it did
+  not), any member may also manually record an outcome closure at
+  any time (the contested chip is the honesty layer, not a gate),
+  and a passed `config_change` applies a full `NodeConfig`
+  payload — including `dailyHelperLimit`, `autoConfirmHours`, and
+  the auto-pass knobs themselves. Pending members' affirms and
+  closures currently count. The open question is whether
+  affirm-counting and closure signing should require trust
+  (block votes should likely stay open to every member — they are
+  protective, and one block halts auto-pass).
+- **Newcomer daily creation caps (anti-spam for pending
+  authors).** Operator-decided ("I do want to prevent spam";
+  credit farming explicitly deprioritized — balances are private
+  under no-leaderboards and hours are not currency, so
+  wash-trading buys nothing socially visible and the existing
+  advisory flags suffice there). The node now caps how much NEW
+  community-visible content a NOT-yet-trusted author can create
+  per rolling day (`apps/server/src/newcomerCaps.ts`): board
+  posts 10, events 3, project/task state writes 20, proposals 3,
+  voice audio blobs 5, task comments 40 — numbers chosen so a
+  genuine newcomer never meets them; each env-overridable and the
+  whole guard can be disabled. Participation is deliberately
+  untouched: claiming, exchanging, RSVPs, shift signups, votes,
+  and messages (already anchored, lifetime-capped, and blockable)
+  have no newcomer cap. Mechanics: counters are persisted and run
+  on the SERVER's clock — record timestamps are client-claimed
+  and backdatable, the same reason the lifetime insert caps
+  refused rolling windows; breaches answer a retryable 429
+  `newcomer_daily_limit`, so an honest member's queued record
+  waits in their outbox and delivers itself after the window
+  (never poisoned), with humane en/es copy on the telemetry
+  surface. The cap lifts the moment the author becomes trusted —
+  the guard re-checks trust per request, so vouches converging
+  mid-day open the gate immediately. Trusted members, founders,
+  mirror-internal replication, reseed-window traffic, and
+  founderless nodes are exempt. What this is NOT: a reputation
+  system, a visible quota, or a message-rate control. Residual,
+  named: a rogue trusted member can still mint pending accounts
+  (each with fresh caps) — bounded by the trusted-only invite
+  gate's accountability chain and the per-inviter announcement
+  trail; a per-inviter invite rate cap is the natural follow-up
+  if pilots show it needed.
+- **Links from not-yet-vouched authors render non-tappable
+  (anti-phishing).** Operator-decided companion to the daily caps
+  ("it should have a blurb… This shouldnt be a shame framework
+  just keeping people safe"): the caps bound spam VOLUME; this
+  bounds damage per item, because links are where spam becomes
+  harm. Mechanism: every federated rich-text surface renders
+  through one component (`components/Markdown.tsx`), and its link
+  branch now checks the AUTHOR's trust on the VIEWER's device —
+  a pending author's link renders as plain text showing the REAL
+  destination address (killing `[nice-label](evil.com)` label
+  deception for exactly the authors most likely to attempt it),
+  visibly non-interactive, with a tap-for-why affordance
+  explaining the rule in mechanism-not-person terms. The poster
+  sees a calm composer note the moment their draft contains a
+  link, so nothing is a surprise at render time. Because the
+  gate is computed at render time from the federated vouch graph,
+  nothing is stripped or stored: the moment the author becomes
+  trusted, every link they ever posted becomes tappable on every
+  device automatically, leaving no trace the restriction existed
+  — the no-shame property is structural, not copy. Deliberately
+  NOT changed: messages (never linkified for anyone), and the
+  address stays readable/copyable — transparency plus one-tap
+  friction, not censorship; a determined reader can still type
+  the URL, which is an informed act rather than an impulse.
+  Residual, named: devices without a founder capture fall back to
+  the flat vouch count (same as every client-side gate), and the
+  protection is only as current as each device's synced vouch
+  graph. A source-guard test pins that every federated Markdown
+  call site passes the author key, so future surfaces cannot
+  silently forget the gate.
 - **Desktop shell (Linux AppImage): a new client runtime, named
   costs.** `apps/desktop` wraps the byte-identical web bundle in
   Electron so a member needs no installed browser and — because the

@@ -40,7 +40,17 @@ export function useRemovalGate(): RemovalGateState {
   const { currentMember, vouches, invites, founderRoots } = useApp();
   const [quorum, setQuorum] = useState(3);
   useEffect(() => {
-    void removalQuorum().then(setQuorum);
+    // Cancellation-guarded (the useVouchDiscoveryNudge pattern): the
+    // promise can resolve after unmount — in tests, after the whole
+    // environment is torn down — and an unguarded setState then is an
+    // unhandled rejection.
+    let cancelled = false;
+    void removalQuorum().then((q) => {
+      if (!cancelled) setQuorum(q);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
   return useMemo<RemovalGateState>(() => {
     // No capture (or no identity yet): the device can't judge — same

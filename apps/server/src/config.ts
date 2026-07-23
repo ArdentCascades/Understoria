@@ -23,6 +23,7 @@
  * never re-read at runtime. Defaults are suitable for local development
  * and a Raspberry-Pi-class single-community pilot.
  */
+import { NEWCOMER_DAILY_CAPS } from "./newcomerCaps.js";
 
 export interface TrustedSystemKey {
   nodeId: string;
@@ -173,6 +174,21 @@ export interface Config {
    */
   tableRowCeiling: number;
   perKeyRowCeiling: number;
+  /**
+   * Daily creation caps for NOT-YET-TRUSTED authors (see
+   * `apps/server/src/newcomerCaps.ts` — operator decision 2026-07,
+   * "I do want to prevent spam"). Map of POST path → per-day budget
+   * for pending signers; trusted members and founders are never
+   * capped, and the limit lifts the moment the author becomes
+   * trusted. Defaults come from `NEWCOMER_DAILY_CAPS` in that
+   * module; each surface is overridable via `NEWCOMER_DAILY_<NAME>`
+   * (e.g. `NEWCOMER_DAILY_POSTS`, `NEWCOMER_DAILY_PROJECT_STATES`),
+   * 0 disables that surface's cap, and the master switch
+   * `NEWCOMER_DAILY_CAPS=off` disables the whole guard (parsed here
+   * as null). Breaches answer 429 so honest outboxes retry rather
+   * than poison.
+   */
+  newcomerDailyCaps: Readonly<Record<string, number>> | null;
   /**
    * Member-authenticated reads (docs/member-authenticated-reads.md).
    * `"off"` (default) leaves the GET feeds open exactly as before —
@@ -366,6 +382,7 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
       env.PER_KEY_ROW_CEILING,
       10_000,
     ),
+    newcomerDailyCaps: parseNewcomerDailyCaps(env),
     readAuth: parseReadAuth(env.READ_AUTH),
     founderKeys: parseFounderKeys(env.NODE_FOUNDER_KEYS),
     setupToken: nonEmpty(env.SETUP_TOKEN),
@@ -541,6 +558,26 @@ function parsePeerReadTokens(
   // Short bearer tokens are guessable; parseTokenMap refuses them at
   // boot rather than let a weak one quietly hold the read door open.
   return parseTokenMap("PEER_READ_TOKENS", raw);
+}
+
+/** Newcomer daily caps (newcomerCaps.ts): the master switch
+ *  `NEWCOMER_DAILY_CAPS=off` yields null (guard fully off); otherwise
+ *  the module defaults, each overridable via `NEWCOMER_DAILY_<NAME>`
+ *  — the path upper-cased with dashes as underscores (`/posts` →
+ *  `NEWCOMER_DAILY_POSTS`, `/project-states` →
+ *  `NEWCOMER_DAILY_PROJECT_STATES`). 0 disables one surface's cap. */
+function parseNewcomerDailyCaps(
+  env: NodeJS.ProcessEnv,
+): Readonly<Record<string, number>> | null {
+  if ((env.NEWCOMER_DAILY_CAPS ?? "").trim().toLowerCase() === "off") {
+    return null;
+  }
+  const caps: Record<string, number> = {};
+  for (const [path, fallback] of Object.entries(NEWCOMER_DAILY_CAPS)) {
+    const name = `NEWCOMER_DAILY_${path.slice(1).toUpperCase().replace(/-/g, "_")}`;
+    caps[path] = asNonNegativeInt(name, env[name], fallback);
+  }
+  return caps;
 }
 
 function asNonNegativeInt(

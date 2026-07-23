@@ -25,6 +25,7 @@ import { clearDraft, loadDraft, type Draft } from "@/db/drafts";
 import { useDraftAutosave } from "@/lib/useDraftAutosave";
 import { DraftBanner } from "@/components/DraftBanner";
 import { MarkdownHint } from "@/components/MarkdownHint";
+import { PendingLinkComposerNote } from "@/components/PendingLinkComposerNote";
 import { TemplatePicker } from "@/components/TemplatePicker";
 import { getProjectTemplates, getTemplate } from "@/content/projectTemplates";
 import { findFaqEntry } from "@/lib/templateContext";
@@ -674,6 +675,7 @@ export default function ProjectNewPage() {
               />
               <MarkdownHint />
             </label>
+            <PendingLinkComposerNote draft={description} />
             <label className="flex flex-col gap-1">
               <span className="text-sm font-medium">
                 {t("projects.create.fieldCategory")}
