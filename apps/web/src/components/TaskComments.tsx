@@ -44,6 +44,7 @@ import {
   type MentionResolver,
 } from "@/components/Markdown";
 import { MarkdownHint } from "@/components/MarkdownHint";
+import { PendingLinkComposerNote } from "@/components/PendingLinkComposerNote";
 
 // Density cap: once a thread has more than this many comments,
 // the older ones collapse behind a "Show older (N)" toggle so a
@@ -336,6 +337,7 @@ export function TaskComments({
                 ) : (
                   <Markdown
                     text={c.body}
+                    authorKey={c.authorKey}
                     className="text-sm text-bark-800 dark:text-moss-100"
                   />
                 )}
@@ -432,6 +434,7 @@ export function TaskComments({
                 </p>
               )}
               <MarkdownHint />
+              <PendingLinkComposerNote draft={body} />
               {error && (
                 <p role="alert" className="text-xs text-rose-700 dark:text-rose-300">
                   {error}

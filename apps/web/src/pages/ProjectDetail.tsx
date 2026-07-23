@@ -652,6 +652,7 @@ export default function ProjectDetailPage() {
               <Markdown
                 collapsible
                 text={project.description}
+                authorKey={project.organizerKey}
                 className="mt-2 text-sm text-moss-700 dark:text-moss-200"
               />
             )}

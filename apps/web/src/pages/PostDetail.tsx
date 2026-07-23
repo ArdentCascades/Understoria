@@ -347,6 +347,7 @@ export default function PostDetailPage() {
         {post.description && (
           <Markdown
             text={post.description}
+            authorKey={post.postedBy}
             className="mt-2 text-sm text-moss-700 dark:text-moss-200"
           />
         )}

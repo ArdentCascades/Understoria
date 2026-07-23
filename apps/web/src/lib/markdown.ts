@@ -869,6 +869,58 @@ function parseParagraphInline(s: string): MdInline[] {
 }
 
 /**
+ * Does this text contain at least one link the renderer would emit?
+ *
+ * Walks the REAL parser's AST for any `link` inline node, so `[label](url)`
+ * and bare autolinks are both caught with exactly the rules the renderer
+ * applies — an unsafe-scheme "link" the parser drops is (correctly) not a
+ * link here either. Feeds the pending-trust composer notice; a second
+ * regex would inevitably drift from what actually renders.
+ */
+export function textContainsLink(text: string): boolean {
+  const inlineHas = (nodes: MdInline[]): boolean =>
+    nodes.some((node) => {
+      switch (node.type) {
+        case "link":
+          return true;
+        case "strong":
+        case "em":
+        case "del":
+          return inlineHas(node.children);
+        default:
+          return false;
+      }
+    });
+
+  const itemsHave = (items: MdListItem[]): boolean =>
+    items.some(
+      (item) => inlineHas(item.content) || item.children.some(blockHas),
+    );
+
+  const blockHas = (block: MdBlock): boolean => {
+    switch (block.type) {
+      case "paragraph":
+      case "heading":
+        return inlineHas(block.children);
+      case "blockquote":
+        return block.children.some(blockHas);
+      case "list":
+        return itemsHave(block.items);
+      case "table":
+        return (
+          block.header.some(inlineHas) ||
+          block.rows.some((row) => row.some(inlineHas))
+        );
+      case "codeBlock":
+      case "hr":
+        return false;
+    }
+  };
+
+  return parseMarkdown(text).some(blockHas);
+}
+
+/**
  * Flatten a parsed document down to a single line of visible text, used for
  * one-line previews (TaskCard / PostCard) so raw `**`, `[label](url)`,
  * headings, fences and other syntax never leak into a clamped preview.

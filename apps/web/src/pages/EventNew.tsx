@@ -32,6 +32,7 @@ import { useDraftAutosave } from "@/lib/useDraftAutosave";
 import { DraftBanner } from "@/components/DraftBanner";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { MarkdownHint } from "@/components/MarkdownHint";
+import { PendingLinkComposerNote } from "@/components/PendingLinkComposerNote";
 import { EventTemplatePicker } from "@/components/EventTemplatePicker";
 import { getEventTemplate } from "@/content/eventTemplates";
 import {
@@ -564,6 +565,7 @@ export default function EventNewPage() {
         />
         <MarkdownHint />
       </label>
+      <PendingLinkComposerNote draft={description} />
 
       {/* Short-field pair: category + the starts-at fieldset share a
           row in short landscape (width is the abundant axis there);

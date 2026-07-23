@@ -338,6 +338,13 @@
     "trigger": "(why?)",
     "readMore": "Read more"
   },
+  "markdown": {
+    "pendingLink": {
+      "why": "Links become tappable once the community has vouched for the person who shared them — it's how neighbors keep each other safe from bad links. You can still read the address.",
+      "whyLabel": "Why isn't this link tappable?",
+      "composerNote": "Heads up: links you share won't be tappable for others until the community vouches for you — people will see the address but can't tap it. This lifts automatically once you're vouched."
+    }
+  },
   "identity": {
     "show": "Show identity code",
     "explainer": "This code is {{name}}'s unique identity — two people can share a name, but no one can share this code. The app uses it to check that everything {{name}} posts really came from them.",

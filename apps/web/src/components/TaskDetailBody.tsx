@@ -71,6 +71,7 @@ export function TaskDetailBody({
   autoConfirmHours,
   viewerSkills,
   templateId,
+  organizerKey,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -101,6 +102,15 @@ export function TaskDetailBody({
    *  the sweep is off, and the claimer narrative omits its safety-net
    *  line entirely. */
   autoConfirmHours: number;
+  /** The project's PRIMARY organizer key, gating link tappability in
+   *  the task description (Markdown `authorKey`). Tasks carry no
+   *  author field — organizer or any co-organizer may have written or
+   *  edited one — so the primary organizer is the conservative proxy:
+   *  they answer for the project's content, and appointing a
+   *  co-organizer is their deliberate, accountable choice. A pending
+   *  organizer's task links render non-tappable like all their
+   *  content. */
+  organizerKey: string;
 }) {
   const { t, i18n } = useTranslation();
   const { showToast } = useToast();
@@ -438,8 +448,14 @@ export function TaskDetailBody({
             </p>
           )}
           {task.description && (
+            // authorKey = primary organizer (see the prop's doc
+            // comment): tasks carry no author field, and the organizer
+            // answers for the project's content — without this proxy a
+            // pending member could route clickable links through task
+            // descriptions, bypassing the gate everywhere else.
             <Markdown
               text={task.description}
+              authorKey={organizerKey}
               className="text-sm text-moss-600 dark:text-moss-300"
             />
           )}

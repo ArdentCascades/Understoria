@@ -338,6 +338,13 @@
     "trigger": "(¿por qué?)",
     "readMore": "Leer más"
   },
+  "markdown": {
+    "pendingLink": {
+      "why": "Los enlaces se vuelven tocables cuando la comunidad ya responde por la persona que los compartió: es la forma en que la vecindad se cuida de los enlaces peligrosos. Igual puedes leer la dirección.",
+      "whyLabel": "¿Por qué no se puede tocar este enlace?",
+      "composerNote": "Ten en cuenta: los enlaces que compartas no serán tocables para otras personas hasta que la comunidad te avale — verán la dirección, pero no podrán tocarla. Esto se levanta automáticamente en cuanto tengas tus avales."
+    }
+  },
   "identity": {
     "show": "Mostrar código de identidad",
     "explainer": "Este código es la identidad única de {{name}} — dos personas pueden compartir un nombre, pero nadie puede compartir este código. La aplicación lo usa para comprobar que todo lo que publica {{name}} realmente viene de esa persona.",
