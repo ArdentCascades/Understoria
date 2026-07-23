@@ -2154,11 +2154,20 @@ We are not trying to protect against:
   monotone, so a co-sign valid when made stays valid). The client
   ceremony surfaces gate with the shared trust-gate card at the
   point of action, per the standing clarity ruling. Still tracked,
-  undecided: proposal governance (votes and outcome closures)
-  remains membership-only — note that v1 has no automatic
-  affirm-quorum pass; closures are manual outcome records, so the
-  open question there is whether closure recording itself should
-  require trust.
+  undecided: proposal governance remains membership-only, and the
+  exposure there is real — auto-pass EXISTS
+  (`lib/autoCloseProposals.ts`: ≥ `proposalMinAffirms` affirm
+  votes, default 2, no blocks, deliberation window elapsed →
+  passed; an earlier revision of this entry wrongly said it did
+  not), any member may also manually record an outcome closure at
+  any time (the contested chip is the honesty layer, not a gate),
+  and a passed `config_change` applies a full `NodeConfig`
+  payload — including `dailyHelperLimit`, `autoConfirmHours`, and
+  the auto-pass knobs themselves. Pending members' affirms and
+  closures currently count. The open question is whether
+  affirm-counting and closure signing should require trust
+  (block votes should likely stay open to every member — they are
+  protective, and one block halts auto-pass).
 - **Desktop shell (Linux AppImage): a new client runtime, named
   costs.** `apps/desktop` wraps the byte-identical web bundle in
   Electron so a member needs no installed browser and — because the
