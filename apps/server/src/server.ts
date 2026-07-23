@@ -363,9 +363,11 @@ export async function buildServer({
   // Founder-rooted TRUST (trustGate.ts) — a second, stricter closure
   // over the same roots as the membership resolver: membership says
   // "you are in the community", trust says "you may grow it" (vouch,
-  // invite). Gates /vouches, /redemptions and /invite-announcements;
-  // skipped (with a one-time warning) while the node has no founder
-  // root at all, same tolerant posture as the unclaimed state above.
+  // invite) and "you may govern it" (removal co-sign). Gates
+  // /vouches, /redemptions, /invite-announcements and the
+  // /member-removals quorum; skipped (with a one-time warning) while
+  // the node has no founder root at all, same tolerant posture as
+  // the unclaimed state above.
   const trustResolver = createTrustResolver(db, {
     envFounderKeys: config.founderKeys,
     warn: (msg) => app.log.warn(msg),
@@ -535,13 +537,17 @@ export async function buildServer({
   // the node emits its own posture; there is no member POST path.
   await registerCapacityPostureRoutes(app, { store: capacityPostureStore });
   // Member removal / reinstatement (docs/member-removal.md M1): the
-  // quorum-signed governance records and their feeds.
+  // quorum-signed governance records and their feeds. Co-signatures
+  // count only from TRUSTED members (operator decision 2026-07) —
+  // same resolver, same mirror-internal exemption as /vouches.
   await registerMemberRemovalRoutes(app, {
     removalStore: memberRemovalStore,
     reinstatementStore: memberReinstatementStore,
     resolver: membershipResolver,
     removalQuorum: config.removalQuorum,
     founderKeys: config.founderKeys,
+    trust: trustResolver,
+    internalToken: internalBypassToken,
   });
   // Proposal federation G1 (docs/proposal-federation.md): signed
   // proposals / votes / closures — the member-gated write surfaces.

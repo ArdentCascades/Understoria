@@ -10,6 +10,7 @@ import { generateKeyPair } from "@understoria/shared/crypto";
 import {
   createVouch,
   trustStatusWithInvites,
+  trustedCircleSize,
   type RedeemedInviteLike,
   type SignedVouch,
 } from "./vouch";
@@ -132,5 +133,42 @@ describe("trustStatusWithInvites (rooted wiring)", () => {
       founderRoots: new Set([founder.publicKey, founder2.publicKey]),
     };
     expect(trustStatusWithInvites(alice.publicKey, ctx)).toBe("trusted");
+  });
+});
+
+describe("trustedCircleSize", () => {
+  // Feeds the removal-availability honesty ("needs N trusted
+  // members, community has M") — the same rooted fixpoint as
+  // trustStatusWithInvites, counted instead of membership-tested.
+  it("is null without founder roots — the device can't claim a circle", () => {
+    const ctx = {
+      vouches: [] as SignedVouch[],
+      invites: [redeemed(founder.publicKey, alice.publicKey)],
+    };
+    expect(trustedCircleSize(ctx)).toBeNull();
+    expect(
+      trustedCircleSize({ ...ctx, founderRoots: new Set<string>() }),
+    ).toBeNull();
+  });
+
+  it("counts founders plus members promoted through the fixpoint", () => {
+    const founder2 = generateKeyPair();
+    const ctx = {
+      // Both founders back alice (invite + manual) → alice promoted;
+      // bob rides founder + the now-trusted alice → promoted too.
+      vouches: [
+        vouch(founder2, alice.publicKey),
+        vouch(alice, bob.publicKey),
+      ],
+      invites: [
+        redeemed(founder.publicKey, alice.publicKey),
+        redeemed(founder.publicKey, bob.publicKey),
+        // A sybil pair under bot A never joins the circle.
+        redeemed(botA.publicKey, botB.publicKey),
+      ],
+      founderRoots: new Set([founder.publicKey, founder2.publicKey]),
+    };
+    // founder + founder2 + alice + bob; neither bot counts.
+    expect(trustedCircleSize(ctx)).toBe(4);
   });
 });

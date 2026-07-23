@@ -168,6 +168,28 @@ describe("MemberDetail — functional surface (kept)", () => {
     expect(buttons.some((b) => /vouch for this member/i.test(b))).toBe(true);
   });
 
+  it("shows the trust gate card — not the Vouch button — to a pending-trust viewer", () => {
+    // Drop one of the viewer's two implicit vouches → pending_trust.
+    mockState.invites = mockState.invites.filter(
+      (inv) =>
+        !(inv.redeemedBy === viewerKey && inv.inviterKey === "inviter-b"),
+    );
+    render(pendingKey);
+    const text = container.textContent ?? "";
+    // The gate announces itself at the point of action (operator
+    // ruling: "very clear as someone is trying to take an action,
+    // they need to be vouched").
+    expect(text).toContain("Vouching opens up with trust");
+    const buttons = Array.from(container.querySelectorAll("button")).map(
+      (b) => b.textContent ?? "",
+    );
+    expect(buttons.some((b) => /vouch for this member/i.test(b))).toBe(false);
+    // No-leaderboards: the gate card on ANOTHER member's page must
+    // not print numeric vouch progress ("1 of 2 vouches") — it would
+    // read as that member's score. Own progress lives on Profile.
+    expect(text).not.toMatch(/\d+\s*(of|de)\s*\d+\s*(vouch|aval)/i);
+  });
+
   it("offers the Block action on another member's page", () => {
     render(trustedKey);
     const buttons = Array.from(container.querySelectorAll("button")).map(

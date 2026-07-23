@@ -28,6 +28,26 @@ include breaking changes.
   trusted takes two trusted voices, not just any two. Everything
   else a new member can do is unchanged: post, claim, exchange,
   message, join events and projects from day one.
+- **Removal co-signing is now a trusted-member power.** A signature
+  on a member-removal (or reinstatement) record only counts toward
+  the quorum of 3 if the signer is fully vouched — pending accounts
+  can no longer supply expulsion signatures, so a single careless
+  or compromised trusted member can't mint sock puppets and remove
+  anyone. The quorum number deliberately stays at 3: a community
+  with fewer than three trusted members can't formally remove
+  anyone yet (the ceremony says so honestly instead of collecting
+  signatures that could never assemble) — at that size, problems
+  are handled by talking, blocking, and choosing carefully who to
+  vouch for. Already-recorded removals are unaffected.
+- **Every trust-gated action now explains itself at the moment you
+  reach for it.** The same gate card (why it's gated, how to get
+  there) appears wherever a not-yet-vouched member would tap a gated
+  control: generating invites (Profile and the invites page, with
+  your vouch progress) and vouching for someone (their member page —
+  progress shown only on your own profile, never as a number on
+  theirs). The server's refusal codes for these gates now surface as
+  plain-language explanations instead of raw error codes, in English
+  and Spanish.
 
 ### Added
 - **Ten new project templates (Set 6).** The template gallery grows

@@ -119,6 +119,24 @@ interface MemberRemoval {
   (c) `signerKey !== removedKey`, (d) signers are distinct.
   Founder keys count as members. Invalid records are 422/skipped,
   never partially honored.
+- **Amendment (2026-07, operator-decided): signers must also be
+  TRUSTED** under the founder-rooted trust closure (`trustGate.ts`,
+  `docs/threat-model.md` §7 "Removal co-signing is a trusted-member
+  power") — a removal signature formally speaks for the community,
+  and the community, as the trust system defines it, is the
+  founder-rooted web. The node enforces this in the same quorum
+  count as (b), with the same retryable-`quorum_not_met` posture (a
+  catching-up mirror converges once the signers' vouches land);
+  mirror-internal replication and founderless nodes keep the
+  member-only rule; already-stored records are grandfathered. The
+  quorum NUMBER is deliberately NOT lowered for small circles: a
+  community with fewer than three trusted members cannot formally
+  remove anyone — at trusted-circle two, both are founders, and the
+  operator's recorded judgment is that a predator at that scale is
+  either structurally powerless (pending: cannot invite, vouch, or
+  co-sign; blocking suffices) or IS one of the two roots, which no
+  removal mechanism can fix. The ceremony UI states this honestly
+  instead of collecting signatures that could never assemble.
 - **`REMOVAL_QUORUM`** is node config (env, default **3**), and — like
   `NODE_FOUNDER_KEYS` — must match across a mirror set. A
   membership-proportional threshold was considered and rejected for

@@ -14,6 +14,7 @@ import {
   canonicalProposalPayload,
   canonicalRedemptionPayload,
   canonicalVotePayload,
+  canonicalVouchPayload,
   generateKeyPair,
   sign,
   verifyProposal,
@@ -145,6 +146,12 @@ function signedClosure(
 describe("federated governance drill — two devices, one decision", () => {
   it("propose → cross-device vote → passed closure → linked removal → gate", async () => {
     const founder = generateKeyPair();
+    // Second root: removal co-signing is a trusted-member power
+    // (trustGate.ts, 2026-07), and trust needs 2 distinct trusted
+    // vouchers — founder's invites plus founder2's manual vouches
+    // below make the two devices trusted, so the drill's ceremony
+    // still lands.
+    const founder2 = generateKeyPair();
     const rosa = generateKeyPair(); // device A
     const gus = generateKeyPair(); // device B
     const mallory = generateKeyPair(); // the subject
@@ -154,7 +161,7 @@ describe("federated governance drill — two devices, one decision", () => {
     READ_AUTH: "off",
       NODE_ID: "node_test",
       RATE_LIMIT_MAX: "10000",
-      NODE_FOUNDER_KEYS: founder.publicKey,
+      NODE_FOUNDER_KEYS: `${founder.publicKey},${founder2.publicKey}`,
       REMOVAL_QUORUM: "2",
     } as NodeJS.ProcessEnv);
     const built = await buildServer({ config, database: db });
@@ -168,6 +175,27 @@ describe("federated governance drill — two devices, one decision", () => {
         payload: makeReceipt(founder, member),
       });
       expect([200, 201]).toContain(res.statusCode);
+    }
+    for (const device of [rosa, gus]) {
+      const vouchPayload = {
+        voucherKey: founder2.publicKey,
+        voucheeKey: device.publicKey,
+        createdAt: Date.now(),
+        kind: "manual" as const,
+      };
+      const vouched = await app.inject({
+        method: "POST",
+        url: "/vouches",
+        payload: {
+          id: `v_${++seq}`,
+          ...vouchPayload,
+          signature: sign(
+            canonicalVouchPayload(vouchPayload),
+            founder2.secretKey,
+          ),
+        },
+      });
+      expect(vouched.statusCode).toBe(201);
     }
 
     // Device A files the deliberation proposal.

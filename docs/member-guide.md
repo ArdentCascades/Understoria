@@ -1153,6 +1153,17 @@ Once you're trusted, two vouches are also what will turn *your*
 invitee into a trusted member: your invite counts as their first;
 someone else vouches after they join.
 
+The same trust bar guards the community's other formal powers:
+**vouching for someone** and **co-signing a member removal** both
+start counting once the community has fully vouched for *you*. (And
+a removal additionally needs three trusted members' signatures in
+total — a very young community with fewer than three trusted people
+can't formally remove anyone yet, on purpose: at that size, problems
+are handled by talking and by blocking, not by tribunals.) Wherever
+one of these doors is still closed for you, the app says so in place
+and explains the way in — you'll never find a button that silently
+fails.
+
 1. Go to **Profile → Invites you've issued**.
 2. Tap **Generate invite link**.
 3. A **share sheet** opens. It will *not* show the QR code or the

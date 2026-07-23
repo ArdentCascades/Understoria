@@ -22,6 +22,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import QRCode from "qrcode";
 import { PairDeviceCapture } from "@/components/PairDeviceCapture";
+import { TrustGateCard } from "@/components/InviteTrustGateCard";
+import { useRemovalGate } from "@/components/useRemovalGate";
 import { shortKey } from "@/lib/format";
 import { useStepFocus } from "@/lib/useStepFocus";
 import {
@@ -57,6 +59,7 @@ export function CosignRemoval({ onDone }: { onDone: () => void }) {
         ? "confirm"
         : "fallback";
   const stepRef = useStepFocus(phase);
+  const gate = useRemovalGate();
 
   useEffect(() => {
     if (!fragmentText) return;
@@ -102,6 +105,26 @@ export function CosignRemoval({ onDone }: { onDone: () => void }) {
     } finally {
       setBusy(false);
     }
+  }
+
+  // Co-signing is a trusted-member power (the node refuses quorums
+  // with untrusted signers): a pending-trust member sees the gate
+  // card — never the capture/sign flow. NO `have` progress: the card
+  // also renders next to removal surfaces about OTHER members, where
+  // numeric vouch progress reads as a score (no-leaderboards).
+  if (gate.kind === "pending_trust") {
+    return (
+      <div className="flex flex-col gap-2">
+        <TrustGateCard i18nBase="removals.gate" />
+        <button
+          type="button"
+          className="btn-secondary self-start text-xs"
+          onClick={onDone}
+        >
+          {t("removals.close")}
+        </button>
+      </div>
+    );
   }
 
   if (capturing) {

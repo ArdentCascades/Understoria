@@ -98,6 +98,29 @@ async function admit(inviter: KeyPair, redeemer: KeyPair, redeemedAt?: number) {
   expect([200, 201]).toContain(res.statusCode);
 }
 
+/** Removal/reinstatement co-signing is a trusted-member power
+ *  (trustGate.ts, operator decision 2026-07), and trust needs 2
+ *  distinct trusted vouchers — a founder's invite plus this second
+ *  founder-signed manual vouch is how fixtures root a co-signer. */
+async function vouch(voucher: KeyPair, vouchee: KeyPair, createdAt = Date.now()) {
+  const payload = {
+    voucherKey: voucher.publicKey,
+    voucheeKey: vouchee.publicKey,
+    createdAt,
+    kind: "manual" as const,
+  };
+  const res = await app!.inject({
+    method: "POST",
+    url: "/vouches",
+    payload: {
+      id: `v_${++seq}`,
+      ...payload,
+      signature: sign(canonicalVouchPayload(payload), voucher.secretKey),
+    },
+  });
+  expect(res.statusCode).toBe(201);
+}
+
 function makeRemoval(
   removedKey: string,
   signers: KeyPair[],
@@ -184,12 +207,18 @@ async function canRead(member: KeyPair): Promise<boolean> {
 describe("member removal M1 — the record and the gates", () => {
   it("a quorum removal lands, closes the pen; reinstatement reopens it", async () => {
     const founder = generateKeyPair();
+    // Second root: co-signers a/b/c must be TRUSTED under the
+    // founder-rooted closure, so founder2's vouches give each their
+    // second trusted voucher. The removal mechanics under test are
+    // unchanged.
+    const founder2 = generateKeyPair();
     const [a, b, c, target] = [1, 2, 3, 4].map(() => generateKeyPair());
     await serverWith({
-      NODE_FOUNDER_KEYS: founder.publicKey,
+      NODE_FOUNDER_KEYS: `${founder.publicKey},${founder2.publicKey}`,
       READ_AUTH: "on",
     });
     for (const m of [a, b, c, target]) await admit(founder, m);
+    for (const m of [a, b, c]) await vouch(founder2, m);
     expect(await canRead(target)).toBe(true);
 
     const removal = makeRemoval(target.publicKey, [founder, a, b]);
@@ -286,24 +315,12 @@ describe("member removal M1 — the record and the gates", () => {
     const now = Date.now();
     await admit(founder, inviter, now - 3_600_000);
     // founder2's manual vouch is inviter's second trusted voucher.
-    const vouchPayload = {
-      voucherKey: founder2.publicKey,
-      voucheeKey: inviter.publicKey,
-      createdAt: now - 3_500_000,
-      kind: "manual" as const,
-    };
-    const vouched = await app!.inject({
-      method: "POST",
-      url: "/vouches",
-      payload: {
-        id: `v_${++seq}`,
-        ...vouchPayload,
-        signature: sign(canonicalVouchPayload(vouchPayload), founder2.secretKey),
-      },
-    });
-    expect(vouched.statusCode).toBe(201);
+    await vouch(founder2, inviter, now - 3_500_000);
     await admit(founder, s1, now - 3_600_000);
     await admit(founder, s2, now - 3_600_000);
+    // s1/s2 co-sign the removal below, so they must be trusted too.
+    await vouch(founder2, s1, now - 3_500_000);
+    await vouch(founder2, s2, now - 3_500_000);
     await admit(inviter, preInvitee, now - 3_000_000);
 
     const removal = makeRemoval(inviter.publicKey, [founder, s1, s2], {
@@ -351,10 +368,16 @@ describe("member removal M1 — the record and the gates", () => {
 
   it("quorum edges: self-signature, duplicates, tampering, and non-member signers", async () => {
     const founder = generateKeyPair();
+    // Second root so co-signers a/b are trusted — the edge cases
+    // under test are about SIGNATURES and membership, not trust.
+    const founder2 = generateKeyPair();
     const [a, b, target] = [1, 2, 3].map(() => generateKeyPair());
     const stranger = generateKeyPair();
-    await serverWith({ NODE_FOUNDER_KEYS: founder.publicKey });
+    await serverWith({
+      NODE_FOUNDER_KEYS: `${founder.publicKey},${founder2.publicKey}`,
+    });
     for (const m of [a, b, target]) await admit(founder, m);
+    for (const m of [a, b]) await vouch(founder2, m);
 
     // The subject's own signature never counts toward quorum.
     const selfSigned = makeRemoval(target.publicKey, [founder, a, target]);
@@ -420,15 +443,35 @@ describe("member removal M1 — the record and the gates", () => {
   });
 
   it("refuses to remove the last non-removed founder", async () => {
-    const founder = generateKeyPair();
+    const f1 = generateKeyPair();
+    // Trusted co-signers need a second root (see `vouch`), but the
+    // guard under test needs f1 to be the LAST live founder — so f2
+    // roots a/b/c and is then itself removed by quorum first. Trust
+    // edges survive that removal (the closure reads stored edges,
+    // and env roots are not membership rows), so a/b/c stay trusted.
+    const f2 = generateKeyPair();
     const [a, b, c] = [1, 2, 3].map(() => generateKeyPair());
-    await serverWith({ NODE_FOUNDER_KEYS: founder.publicKey });
-    for (const m of [a, b, c]) await admit(founder, m);
+    await serverWith({
+      NODE_FOUNDER_KEYS: `${f1.publicKey},${f2.publicKey}`,
+    });
+    for (const m of [a, b, c]) {
+      await admit(f1, m);
+      await vouch(f2, m);
+    }
+    expect(
+      (
+        await app!.inject({
+          method: "POST",
+          url: "/member-removals",
+          payload: makeRemoval(f2.publicKey, [f1, a, b]),
+        })
+      ).statusCode,
+    ).toBe(201);
 
     const res = await app!.inject({
       method: "POST",
       url: "/member-removals",
-      payload: makeRemoval(founder.publicKey, [a, b, c]),
+      payload: makeRemoval(f1.publicKey, [a, b, c]),
     });
     expect(res.statusCode).toBe(403);
     expect(res.json()).toEqual({ error: "last_founder" });
@@ -444,6 +487,9 @@ describe("member removal M1 — the record and the gates", () => {
     });
     await admit(f1, a);
     await admit(f1, b);
+    // a/b co-sign below: f2's vouches (pre-removal) make them trusted.
+    await vouch(f2, a);
+    await vouch(f2, b);
 
     const t = Date.now() - 5000;
     expect(
@@ -472,13 +518,16 @@ describe("member removal M1 — the record and the gates", () => {
 
   it("respects a configured quorum", async () => {
     const founder = generateKeyPair();
+    // Second root so co-signer `a` is trusted (see `vouch`).
+    const founder2 = generateKeyPair();
     const [a, target] = [1, 2].map(() => generateKeyPair());
     await serverWith({
-      NODE_FOUNDER_KEYS: founder.publicKey,
+      NODE_FOUNDER_KEYS: `${founder.publicKey},${founder2.publicKey}`,
       REMOVAL_QUORUM: "2",
     });
     await admit(founder, a);
     await admit(founder, target);
+    await vouch(founder2, a);
 
     // Two member signatures suffice at REMOVAL_QUORUM=2.
     expect(
@@ -494,5 +543,133 @@ describe("member removal M1 — the record and the gates", () => {
     // And /config publishes the number for member devices.
     const cfg = await app!.inject({ method: "GET", url: "/config" });
     expect((cfg.json() as { removalQuorum: number }).removalQuorum).toBe(2);
+  });
+
+  it("untrusted member co-signers fall short of quorum until their trust converges", async () => {
+    const founder = generateKeyPair();
+    const founder2 = generateKeyPair();
+    const [a, b, c, target] = [1, 2, 3, 4].map(() => generateKeyPair());
+    await serverWith({
+      NODE_FOUNDER_KEYS: `${founder.publicKey},${founder2.publicKey}`,
+    });
+    for (const m of [a, b, c, target]) await admit(founder, m);
+
+    // Three MEMBERS sign, but each has a single trusted voucher: the
+    // membership quorum is met, the trusted quorum is not — and the
+    // reason names the half that actually fell short.
+    const removal = makeRemoval(target.publicKey, [a, b, c]);
+    const refused = await app!.inject({
+      method: "POST",
+      url: "/member-removals",
+      payload: removal,
+    });
+    expect(refused.statusCode).toBe(409);
+    expect(refused.json()).toEqual({
+      error: "quorum_not_met",
+      reason: "not enough signers are trusted members of this community",
+    });
+
+    // 409 is retryable by design: trust data converges like
+    // membership data, so the SAME record lands once the signers'
+    // second vouchers arrive — no re-signing needed.
+    for (const m of [a, b, c]) await vouch(founder2, m);
+    const retried = await app!.inject({
+      method: "POST",
+      url: "/member-removals",
+      payload: removal,
+    });
+    expect(retried.statusCode).toBe(201);
+    expect(retried.json()).toEqual({ stored: true, id: removal.id });
+  });
+
+  it("reinstatement co-signers must be trusted members too", async () => {
+    const founder = generateKeyPair();
+    const [a, b, c, target] = [1, 2, 3, 4].map(() => generateKeyPair());
+    await serverWith({ NODE_FOUNDER_KEYS: founder.publicKey });
+    for (const m of [a, b, c]) await admit(founder, m);
+
+    const res = await app!.inject({
+      method: "POST",
+      url: "/member-reinstatements",
+      payload: makeReinstatement(target.publicKey, [a, b, c]),
+    });
+    expect(res.statusCode).toBe(409);
+    expect(res.json()).toEqual({
+      error: "quorum_not_met",
+      reason: "not enough signers are trusted members of this community",
+    });
+  });
+
+  it("founderless node: the trust gate skips and member-only behavior is unchanged", async () => {
+    // No NODE_FOUNDER_KEYS, no claimed founder — the trust half
+    // skips (trustGate.ts founderlessSkip). Membership shares the
+    // same roots, so a founderless node has NO members either:
+    // member-only behavior is (and was, before the trust gate) the
+    // membership shortfall — never the trusted reason.
+    const [a, b, c, target] = [1, 2, 3, 4].map(() => generateKeyPair());
+    await serverWith({});
+    // Receipts land (founderless nodes accept them, trustGate.test)
+    // but grant no membership without a root.
+    for (const m of [b, c, target]) await admit(a, m);
+
+    const res = await app!.inject({
+      method: "POST",
+      url: "/member-removals",
+      payload: makeRemoval(target.publicKey, [a, b, c]),
+    });
+    expect(res.statusCode).toBe(409);
+    expect(res.json()).toEqual({
+      error: "quorum_not_met",
+      reason: "not enough signers are members of this community",
+    });
+  });
+
+  it("mirror-internal replication bypasses the trusted requirement, not membership", async () => {
+    const founder = generateKeyPair();
+    const [a, b, c, target] = [1, 2, 3, 4].map(() => generateKeyPair());
+    await serverWith({ NODE_FOUNDER_KEYS: founder.publicKey });
+    for (const m of [a, b, c, target]) await admit(founder, m);
+
+    // Members-but-untrusted signers: refused on the public path…
+    const removal = makeRemoval(target.publicKey, [a, b, c]);
+    expect(
+      (
+        await app!.inject({
+          method: "POST",
+          url: "/member-removals",
+          payload: removal,
+        })
+      ).statusCode,
+    ).toBe(409);
+
+    // …while the mirror worker's re-POST lands: the record was
+    // judged where it first entered the community. Membership still
+    // counts as before.
+    const mirrored = await app!.inject({
+      method: "POST",
+      url: "/member-removals",
+      payload: removal,
+      headers: { "x-understoria-internal": internalToken },
+    });
+    expect(mirrored.statusCode).toBe(201);
+
+    // Same exemption on the reinstatement surface.
+    const back = makeReinstatement(target.publicKey, [a, b, c]);
+    expect(
+      (
+        await app!.inject({
+          method: "POST",
+          url: "/member-reinstatements",
+          payload: back,
+        })
+      ).statusCode,
+    ).toBe(409);
+    const mirroredBack = await app!.inject({
+      method: "POST",
+      url: "/member-reinstatements",
+      payload: back,
+      headers: { "x-understoria-internal": internalToken },
+    });
+    expect(mirroredBack.statusCode).toBe(201);
   });
 });

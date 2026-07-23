@@ -394,12 +394,15 @@ function Telemetry({
   const haveSuccess = !!lastSuccess && lastSuccess.length > 0;
   const haveError = !!lastError && lastError.length > 0;
   // Known server codes get their humane, translated copy instead of
-  // the bare wire code. Today: the invite trust gate's 403 — the node
-  // refuses invite announcements (and redemptions) from a member the
-  // community hasn't fully vouched for, and the outbox records the
-  // code verbatim as lastError.
-  const errorMessage =
-    lastError && lastError.includes("inviter_not_trusted")
+  // the bare wire code. Today: the trust gate's 403s — the node
+  // refuses invite announcements (and redemptions) from, and vouches
+  // by, a member the community hasn't fully vouched for, and the
+  // outbox records the code verbatim as lastError. voucher_ is
+  // checked first: both codes end in "not_trusted" but never
+  // co-occur in one lastError string.
+  const errorMessage = lastError?.includes("voucher_not_trusted")
+    ? t("vouch.errors.voucher_not_trusted")
+    : lastError?.includes("inviter_not_trusted")
       ? t("invite.errors.inviter_not_trusted")
       : lastError;
 

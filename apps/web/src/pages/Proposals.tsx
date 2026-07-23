@@ -14,6 +14,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/db/database";
 import { CosignRemoval } from "@/components/CosignRemoval";
 import { RemovalCeremony } from "@/components/RemovalCeremony";
+import { RemovalGateNotice, useRemovalGate } from "@/components/useRemovalGate";
 import { deriveRemovedKeys } from "@/lib/memberRemoval";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -128,6 +129,10 @@ export default function ProposalsPage() {
   );
   const [cosigning, setCosigning] = useState(false);
   const [reinstating, setReinstating] = useState<string | null>(null);
+  // Co-signing and reinstating are trusted-member powers (the node
+  // refuses quorums with untrusted signers); the gate announces
+  // itself in place of each affordance below.
+  const removalGate = useRemovalGate();
   const removedNow = useMemo(
     () => deriveRemovedKeys(memberRemovals, memberReinstatements),
     [memberRemovals, memberReinstatements],
@@ -289,7 +294,12 @@ export default function ProposalsPage() {
           this captures it. */}
       {currentMember && (
         <section className="mt-6 card">
-          {!cosigning ? (
+          {/* Trust gate only — a short circle doesn't stop co-signing
+              (the proposer side already can't mint a submittable
+              draft there). CosignRemoval re-checks the gate itself. */}
+          {removalGate.kind === "pending_trust" ? (
+            <RemovalGateNotice gate={removalGate} />
+          ) : !cosigning ? (
             <button
               type="button"
               className="btn-secondary text-xs"
@@ -355,9 +365,16 @@ export default function ProposalsPage() {
                     })}
                   </p>
                   {/* M3: the door can reopen — start a reinstatement
-                      ceremony for a currently-removed member. */}
+                      ceremony for a currently-removed member. Same
+                      trusted-member gate (and circle-short honesty)
+                      as proposing a removal: reinstatement takes the
+                      same quorum of trusted signatures. */}
                   {r.removal && removedNow.has(r.key) && currentMember && (
-                    reinstating === r.key ? (
+                    removalGate.kind !== "allowed" ? (
+                      <div className="mt-2">
+                        <RemovalGateNotice gate={removalGate} />
+                      </div>
+                    ) : reinstating === r.key ? (
                       <div className="mt-2">
                         <RemovalCeremony
                           recordKind="reinstatement"
