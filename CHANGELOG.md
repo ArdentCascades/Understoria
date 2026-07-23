@@ -28,6 +28,29 @@ include breaking changes.
   trusted takes two trusted voices, not just any two. Everything
   else a new member can do is unchanged: post, claim, exchange,
   message, join events and projects from day one.
+- **Links shared by not-yet-vouched members aren't tappable yet.**
+  Bad links are how spam hurts people, so a link in a post, task
+  comment, or event/project description becomes tappable only once
+  the community has vouched for the person who shared it. Until
+  then everyone sees the real address as plain text (a link can't
+  wear a misleading label) with a small "why" explainer, and the
+  person posting sees a friendly heads-up the moment their draft
+  contains a link — nothing is blocked or removed, and every link
+  they've shared becomes tappable everywhere, automatically, the
+  moment they're vouched. Not a mark on anyone: it's how the page
+  renders, not a record.
+- **New members get generous daily limits on creating content,
+  lifted once vouched.** To keep spam out of the shared surfaces,
+  the community server accepts a day's worth of new board posts
+  (10), events (3), project updates (20), proposals (3), voice
+  recordings (5), and task comments (40) from someone the community
+  hasn't fully vouched for yet — numbers a real newcomer never
+  meets, only a flood does. Nothing is lost when a limit is
+  reached: the extra waits on the member's own device and sends
+  itself the next day, with a plain-language explanation. Claiming,
+  exchanging, messaging, RSVPs, and votes are never limited, and
+  every limit disappears the moment two trusted members vouch for
+  you. Operators can tune or disable each number.
 - **Removal co-signing is now a trusted-member power.** A signature
   on a member-removal (or reinstatement) record only counts toward
   the quorum of 3 if the signer is fully vouched — pending accounts
