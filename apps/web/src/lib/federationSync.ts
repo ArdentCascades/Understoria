@@ -84,6 +84,12 @@ import {
 } from "@understoria/shared/crypto";
 import type { RelayedMessage } from "@understoria/shared/types";
 import { blockedFilter } from "@/db/blocks";
+import {
+  clearIncomingNomination,
+  pollPendingNomination,
+  readIncomingNomination,
+  writeIncomingNomination,
+} from "@/lib/cofounder";
 
 const POST_CURSOR_KEY = "federationLastPostPull";
 const CLAIM_CURSOR_KEY = "federationLastClaimPull";
@@ -1850,6 +1856,40 @@ export async function pullFederatedMessages(): Promise<FederationSyncResult | nu
   }
 
   return { inserted, skipped };
+}
+
+/**
+ * Pull the co-founder nomination addressed to the CURRENT member
+ * (docs/cofounder-ceremony-plan.md P3). Same recipient-proof posture
+ * as the messages inbox: `authorizedFetch`'s read signature IS the
+ * proof the route scopes by, so this pull can only ever see a
+ * nomination addressed to a key this device holds.
+ *
+ * Not a cursor feed — the shelf holds at most one row per nominee
+ * (resend = replace). The pulled row lands in the incoming-nomination
+ * settings key that the accept card renders from; an authoritative
+ * empty shelf CLEARS that key (the nomination was accepted, replaced,
+ * or expired off server-side), while transport failures leave local
+ * state alone. Rides the sync loop's SLOW beat: nominations live for
+ * days, and the accept ceremony is deliberate, not real-time.
+ */
+export async function pullFounderNomination(): Promise<FederationSyncResult | null> {
+  const ctx = await resolvePullContext();
+  if (!ctx) return null;
+  const myKey = await getSetting(SETTING_KEYS.currentMember);
+  if (!myKey) return null;
+
+  const res = await pollPendingNomination(ctx.baseUrl, myKey);
+  if (!res.ok) return null;
+  if (res.nomination === null) {
+    await clearIncomingNomination();
+    return { inserted: 0, skipped: 0 };
+  }
+  const existing = await readIncomingNomination();
+  const changed =
+    existing === null || existing.signature !== res.nomination.signature;
+  await writeIncomingNomination(res.nomination);
+  return { inserted: changed ? 1 : 0, skipped: changed ? 0 : 1 };
 }
 
 // (An earlier note here said RSVPs never federate — that predated

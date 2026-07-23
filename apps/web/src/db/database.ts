@@ -51,6 +51,7 @@ import type {
   ShiftSignupRow,
   TaskComment,
   Vote,
+  FounderAccession,
 } from "@/types";
 import { uuid } from "@/lib/id";
 import type { SignedVouch } from "@/lib/vouch";
@@ -571,6 +572,15 @@ export class UnderstoriaDB extends Dexie {
    *  device (the node emits its own); pulled + verified against the
    *  node system key, feeds the §5.2 attention surface (PR 4). */
   capacityPostures!: Table<CapacityPosture, string>;
+  /** Dual-signed founder accessions (docs/cofounder-ceremony-plan.md)
+   *  — the permanent artifact of the co-founder ceremony, stored with
+   *  BOTH signatures so it re-verifies statelessly. Same R0 posture
+   *  as `redemptionReceipts`: the working state it derives (the
+   *  node's `claimed_founders` row, the published founder hash) lives
+   *  elsewhere; THIS row is what a device re-POSTs to a fresh node
+   *  during a reseed grace window. Keyed by the nominee (one
+   *  accession per co-founder, everywhere). */
+  founderAccessions!: Table<FounderAccession, string>;
   /** Quorum removal / reinstatement records (docs/member-removal.md
    *  M1): public, multi-signed governance decisions. Shared
    *  community state — federates, re-seeds, rides the pairing
@@ -1217,6 +1227,16 @@ export class UnderstoriaDB extends Dexie {
       await invites.toCollection().modify((row) => {
         if (row.note === undefined) row.note = "";
       });
+    });
+
+    // v39 — founder accessions (docs/cofounder-ceremony-plan.md P3):
+    // the dual-signed co-founder ceremony artifact, stored verbatim
+    // for reseed re-POST. Dotted keypath (the redemptionReceipts
+    // precedent) so the nominee key is the primary key without a
+    // wrapper row that would break re-POST-verbatim. Pure new table,
+    // no backfill — pre-v39 communities acceded nobody in-band.
+    this.version(39).stores({
+      founderAccessions: "nomination.nomineeKey",
     });
   }
 }

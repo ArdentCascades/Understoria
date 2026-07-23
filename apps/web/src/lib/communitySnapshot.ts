@@ -67,6 +67,10 @@ export const SNAPSHOT_TABLES = [
   // just as capable of re-seeding a fresh node as the source.
   "redemptionReceipts",
   "inviteRevocationRecords",
+  // docs/cofounder-ceremony-plan.md: the dual-signed accession is the
+  // reseed recovery artifact for the community's second founder root
+  // — a linked device must be able to re-derive it too.
+  "founderAccessions",
   // docs/storage-budget.md Phase 2: public archive-role claims — the
   // linked device should see the community's coverage immediately.
   "seedVaultPledges",

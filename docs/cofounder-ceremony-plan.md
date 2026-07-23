@@ -1,6 +1,6 @@
 # Co-founder ceremony + single-founder visibility — implementation plan
 
-> **Status: PLAN** (operator-approved direction; pre-mortem amendments
+> **Status: SHIPPED** (operator-approved direction; pre-mortem amendments
 > binding). Companion to the founder-rooted trust work in
 > `docs/threat-model.md` §7.
 

@@ -173,6 +173,52 @@ describe("runReseed", () => {
     expect(postBodies[0]).not.toBe(delivered1);
   });
 
+  it("replays the founder accession verbatim, right after receipts, with 409 as a clean skip", async () => {
+    await seedReceipt("tok_1");
+    const accession = {
+      nomination: {
+        nominatorKey: "pk_founder",
+        nomineeKey: "pk_cofounder",
+        nodeId: "node_old",
+        nominatedAt: 1,
+        expiresAt: 2,
+        signature: "sig_nom",
+      },
+      acceptedAt: 1,
+      signature: "sig_acc",
+    };
+    await db.founderAccessions.put(accession as never);
+
+    const ok = stubFetch(() => 201);
+    const run1 = await runReseed({
+      targetUrl: TARGET,
+      fetchImpl: ok.impl,
+      paceMs: 0,
+    });
+    expect(run1.complete).toBe(true);
+    // Membership order: receipts, then the accession they root.
+    expect(ok.calls[0].url).toBe(`${TARGET}/redemptions`);
+    expect(ok.calls[1].url).toBe(`${TARGET}/founder-accession`);
+    // Verbatim — both signature layers survive the round trip.
+    expect(ok.calls[1].body).toEqual(accession);
+
+    // 409 (root_count_not_one — the roots are already settled) is a
+    // permanent per-node answer: counted, never a halt.
+    await resetReseedCursors(TARGET);
+    const conflicted = stubFetch((url) =>
+      url.endsWith("/founder-accession") ? 409 : 201,
+    );
+    const run2 = await runReseed({
+      targetUrl: TARGET,
+      fetchImpl: conflicted.impl,
+      paceMs: 0,
+    });
+    const kind = run2.results.find((r) => r.path === "/founder-accession");
+    expect(kind?.skipped).toBe(1);
+    expect(kind?.halted).toBe(false);
+    expect(run2.complete).toBe(true);
+  });
+
   it("a second complete run is a no-op (cursors at end)", async () => {
     await seedReceipt("tok_1");
     const a = stubFetch(() => 201);
@@ -196,6 +242,7 @@ describe("runReseed", () => {
     const tables = new Set(RESEED_KINDS.map((k) => k.table));
     for (const expected of [
       "redemptionReceipts",
+      "founderAccessions",
       "inviteRevocationRecords",
       "events",
       "eventCancellations",

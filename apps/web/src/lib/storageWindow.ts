@@ -86,6 +86,11 @@ export const WINDOW_PINNED_TABLES = [
   "members",
   "redemptionReceipts",
   "inviteRevocationRecords",
+  // The dual-signed co-founder accession (docs/cofounder-ceremony
+  // -plan.md): at most ONE row per community, and it is the artifact
+  // that restores founder #2 in a re-seed — windowing it away would
+  // silently delete the community's root-recovery path.
+  "founderAccessions",
   "exchanges",
   "vouches",
   // The archive-role claims themselves (docs/storage-budget.md Phase

@@ -39,7 +39,12 @@ import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
 import { BackLink } from "@/components/BackLink";
-import { isFounderRoot, trustStatusWithInvites } from "@/lib/vouch";
+import {
+  isFounderRoot,
+  trustStatusWithInvites,
+  trustedCircleSize,
+} from "@/lib/vouch";
+import { singleFounderLocked } from "@/lib/singleFounder";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { FounderChip, TrustChip } from "@/components/TrustChip";
 import { TrustGateCard } from "@/components/InviteTrustGateCard";
@@ -64,6 +69,7 @@ export default function MemberDetailPage() {
     vouches,
     invites,
     founderRoots,
+    founderHashCapture,
   } = useApp();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -111,6 +117,17 @@ export default function MemberDetailPage() {
           })
         : null,
     [currentMember, vouches, invites, founderRoots],
+  );
+  // Single-founder lock (lib/singleFounder.ts): the vouch gate's
+  // "how to get there" story is structurally impossible with one
+  // root, so the gate card renders its honest no-meter variant.
+  const vouchGateLocked = useMemo(
+    () =>
+      singleFounderLocked(
+        founderHashCapture ?? null,
+        trustedCircleSize({ vouches, invites, founderRoots }),
+      ),
+    [founderHashCapture, vouches, invites, founderRoots],
   );
   const alreadyVouchedByMe = useMemo(
     () =>
@@ -298,7 +315,7 @@ export default function MemberDetailPage() {
              "N of 2 vouches" line would read as their score (the
              no-leaderboards tripwire below forbids it). Own progress
              lives on the member's own Profile. */
-          <TrustGateCard i18nBase="member.vouchGate" />
+          <TrustGateCard i18nBase="member.vouchGate" locked={vouchGateLocked} />
         ) : trust === "trusted" ? (
           <p className="text-sm text-moss-600 dark:text-moss-300">
             {t("member.alreadyFullyTrusted")}

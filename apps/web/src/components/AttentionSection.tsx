@@ -12,6 +12,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
 import { computeAttentionItems, KIND_PRIORITY } from "@/lib/attention";
@@ -29,6 +30,8 @@ import { humanizeError } from "@/lib/humanizeError";
 import { usePendingAction } from "@/lib/usePendingAction";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { CofounderAcceptCard } from "@/components/CofounderAcceptCard";
+import { nominationExpired, readIncomingNomination } from "@/lib/cofounder";
 
 // "Needs your attention" — see lib/attention.ts for what counts.
 // Renders null when nothing is waiting, so members never see "you
@@ -94,6 +97,21 @@ export function AttentionSection() {
   const [mobileManualOpen, setMobileManualOpen] = useState<boolean | null>(
     null,
   );
+  // Incoming co-founder nomination (docs/cofounder-ceremony-plan.md
+  // P3). Not a computeAttentionItems kind: it renders from a settings
+  // key the slow-beat pull maintains, not from federated tables.
+  // Live-queried so a pull landing / "Not now" clearing flips the
+  // card without a reload. Expired or misaddressed rows never render
+  // — expiry hiding here (rather than deleting) is what keeps the
+  // "re-poll may re-surface until expiry" behavior honest.
+  const incomingNomination = useLiveQuery(readIncomingNomination, [], null);
+  const cofounderNomination =
+    currentMember &&
+    incomingNomination &&
+    incomingNomination.nomineeKey === currentMember.publicKey &&
+    !nominationExpired(incomingNomination)
+      ? incomingNomination
+      : null;
   const items = useMemo(
     () =>
       computeAttentionItems({
@@ -127,9 +145,14 @@ export function AttentionSection() {
 
   // Empty rail renders NOTHING — no summary row, no "0 things"
   // placeholder. Unchanged from the pre-disclosure behavior.
-  if (items.length === 0) return null;
+  if (items.length === 0 && !cofounderNomination) return null;
 
-  const hasBlockingItem = items.some((item) => KIND_PRIORITY[item.kind] === 0);
+  // A pending co-founder invitation counts as blocking for the
+  // mobile default: a permanent-founding decision must never load
+  // hidden behind a collapsed rail.
+  const hasBlockingItem =
+    items.some((item) => KIND_PRIORITY[item.kind] === 0) ||
+    cofounderNomination !== null;
   const mobileOpen = mobileManualOpen ?? hasBlockingItem;
   // Unique emoji prefixes of the current items, in priority order —
   // the collapsed summary row previews WHAT kinds of things await
@@ -137,7 +160,10 @@ export function AttentionSection() {
   // carry the preview; there is deliberately NO count badge
   // (no-notifications: no badge counts).
   const summaryEmojis = [
-    ...new Set(items.map((item) => ATTENTION_EMOJI[item.kind])),
+    ...new Set([
+      ...(cofounderNomination ? ["🌳"] : []),
+      ...items.map((item) => ATTENTION_EMOJI[item.kind]),
+    ]),
   ];
 
   async function handleAck(taskId: string) {
@@ -287,6 +313,11 @@ export function AttentionSection() {
         aria-live="polite"
         aria-relevant="additions text"
       >
+        {cofounderNomination && (
+          <li key={`cofounder_${cofounderNomination.signature}`}>
+            <CofounderAcceptCard nomination={cofounderNomination} />
+          </li>
+        )}
         {items.map((item) => {
           if (item.kind === "confirm_exchange") {
             return (

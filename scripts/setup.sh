@@ -776,6 +776,12 @@ print_claim_steps() {
   say "    3. Tap ${c_bold}\"Claim this server and open the community\"${c_off} — that's"
   say "       it: you're the founder, and syncing starts immediately."
   say ""
+  say "    4. Communities start with two founders. Until you add a"
+  say "       co-founder, you are the only member who can ever invite or"
+  say "       vouch — so once your first neighbor joins, use"
+  say "       ${c_bold}\"Add a co-founder\"${c_off} (Profile → the founder card) to make"
+  say "       the community able to grow without you."
+  say ""
   say "  Verify afterwards: curl https://$DOMAIN/api/config → \"claimed\":true"
   say "  (Lost the code? docker compose logs understoria | grep -i setup)"
 }

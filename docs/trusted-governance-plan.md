@@ -1,6 +1,6 @@
 # Trusted-only proposal governance — implementation plan
 
-> **Status: PLAN** (operator-decided direction closing the last
+> **Status: SHIPPED** (operator-decided direction closing the last
 > tracked pending-member power; see `docs/threat-model.md` §7).
 > Decision: affirm votes COUNT toward auto-pass only when the voter is
 > trusted under the founder-rooted closure; outcome-closure signing

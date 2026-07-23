@@ -35,6 +35,7 @@ import { flushOutboxNow } from "@/lib/outbox";
 import { claimFounder, fetchClaimStatus } from "@/lib/nodeClaim";
 import { useApp } from "@/state/AppContext";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { SoleFounderCard } from "@/components/SoleFounderCard";
 
 export function NodeSection() {
   const { t } = useTranslation();
@@ -167,6 +168,13 @@ export function NodeSection() {
 
       <FounderClaimCard url={persisted.url || draft.url} />
 
+      {/* Single-founder standing warning + Add-a-co-founder doorway
+          (docs/cofounder-ceremony-plan.md P4) — beside the claim card
+          because this is where founders come back to after claiming. */}
+      <div className="mt-3">
+        <SoleFounderCard />
+      </div>
+
       <OutboxControls />
 
       {/* The /invite paste-recovery entry point stays reachable from
@@ -277,9 +285,23 @@ function FounderClaimCard({ url }: { url: string }) {
       {expanded && (
         <div className="mt-2 rounded-xl border border-bark-200/60 bg-bark-50 p-3 text-sm dark:border-moss-800 dark:bg-moss-900/40">
           {result?.kind === "success" ? (
-            <p className="text-canopy-700 dark:text-canopy-300">
-              {t("profile.node.claim.success")}
-            </p>
+            <>
+              <p className="text-canopy-700 dark:text-canopy-300">
+                {t("profile.node.claim.success")}
+              </p>
+              {/* Communities start with two founders — the claim
+                  moment is where that gets said first, with the
+                  doorway (docs/cofounder-ceremony-plan.md P4). */}
+              <p className="mt-2 text-moss-600 dark:text-moss-300">
+                {t("cofounder.claimSuccess.next")}
+              </p>
+              <Link
+                to="/add-cofounder"
+                className="mt-1 inline-block font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+              >
+                {t("cofounder.claimSuccess.cta")} →
+              </Link>
+            </>
           ) : unclaimed === null ? (
             <p className="text-moss-600 dark:text-moss-300">
               {t("profile.node.claim.statusUnknown")}

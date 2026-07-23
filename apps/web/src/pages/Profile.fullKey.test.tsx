@@ -176,6 +176,28 @@ describe("ProfilePage — full-public-key disclosure", () => {
     expect(container.textContent).not.toContain(meKey);
   });
 
+  it("renders the key as a QR behind the disclosure, with the ceremony hint", async () => {
+    // The co-founder ceremony's capture step scans THIS panel
+    // (docs/cofounder-ceremony-plan.md P3) — the QR and its one-line
+    // hint live behind the same disclosure as the text key.
+    render();
+    act(() => {
+      toggleButton().click();
+    });
+    expect(container.textContent).toContain(
+      "The QR code is the same public key",
+    );
+    // Lazy InviteQRCode: placeholder immediately, the rendered SVG
+    // (role="img", labeled) once the dynamic import settles.
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+    const qr = container.querySelector(
+      '[role="img"][aria-label="Your full public key"]',
+    );
+    expect(qr).not.toBeNull();
+  });
+
   it("copies the exact full key to the clipboard", async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, { clipboard: { writeText } });

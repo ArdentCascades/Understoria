@@ -50,6 +50,7 @@ import { CategoryBadge } from "@/components/CategoryBadge";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ContextualHint } from "@/components/ContextualHint";
 import { InviteShareSheet } from "@/components/InviteShareSheet";
+import { InviteQRCode } from "@/components/InviteQRCode";
 import { copyTextToClipboard } from "@/lib/share";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { IdentityKey } from "@/components/IdentityKey";
@@ -74,8 +75,10 @@ import {
   inviteIssuanceAllowed,
   isFounderRoot,
   trustStatusWithInvites,
+  trustedCircleSize,
   vouchCountFor,
 } from "@/lib/vouch";
+import { singleFounderLocked } from "@/lib/singleFounder";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { FounderChip, TrustChip } from "@/components/TrustChip";
 import { DisputesSection } from "@/components/DisputesSection";
@@ -369,6 +372,12 @@ function ProfileBody({ member }: { member: Member }) {
     currentMember.publicKey,
     founderHashCapture ?? null,
     { vouches, invites, founderRoots },
+  );
+  // Single-founder honesty (lib/singleFounder.ts): with one root the
+  // gate card must not show a vouch meter that can never complete.
+  const inviteGateLocked = singleFounderLocked(
+    founderHashCapture ?? null,
+    trustedCircleSize({ vouches, invites, founderRoots }),
   );
   const myInvites = invites.filter(
     (inv) => inv.inviterKey === currentMember.publicKey,
@@ -681,6 +690,7 @@ function ProfileBody({ member }: { member: Member }) {
               nodeId={nodeId}
               invites={myInvites}
               canIssue={canIssueInvites}
+              gateLocked={inviteGateLocked}
               vouchCount={trustCount}
             />
 
@@ -1587,6 +1597,7 @@ function InvitesSection({
   nodeId,
   invites,
   canIssue,
+  gateLocked,
   vouchCount,
 }: {
   member: Member;
@@ -1596,6 +1607,9 @@ function InvitesSection({
    *  `inviteIssuanceAllowed`): false swaps the Generate flow for the
    *  gate explainer. Viewing existing invites is never gated. */
   canIssue: boolean;
+  /** Single-founder lock (lib/singleFounder.ts): the gate explainer
+   *  renders its no-meter honesty variant. */
+  gateLocked: boolean;
   /** Distinct-voucher count for the gate's have/need progress line. */
   vouchCount: number;
 }) {
@@ -1746,7 +1760,7 @@ function InvitesSection({
            explainer. Everything below — the open-invite box, the
            summary line, the /invites link — stays: only generation
            is gated, never viewing what was already issued. */
-        <InviteTrustGateCard have={vouchCount} />
+        <InviteTrustGateCard have={vouchCount} locked={gateLocked} />
       )}
 
       {activeUrl && (
@@ -1957,6 +1971,21 @@ function FullKeyPanel({ publicKey }: { publicKey: string }) {
           </span>
         )}
       </div>
+      {/* The same key as a QR (lazy — the qrcode chunk loads only
+          when this disclosure opens): what the co-founder ceremony's
+          capture step scans. Payload is a PUBLIC key, so no timed
+          hiding — noted against the threat model's QR-surveillance
+          entry. */}
+      <div className="mt-3">
+        <InviteQRCode
+          value={publicKey}
+          size={192}
+          ariaLabel={t("profile.fullKey.title")}
+        />
+      </div>
+      <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
+        {t("profile.fullKey.qrHint")}
+      </p>
       <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
         {t("profile.fullKey.hint")}
       </p>

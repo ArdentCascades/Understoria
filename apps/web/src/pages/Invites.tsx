@@ -17,7 +17,12 @@ import { shareOrigin } from "@/lib/appOrigin";
 import { humanizeError } from "@/lib/humanizeError";
 import { formatDeadline, formatRelativeTime, shortKey } from "@/lib/format";
 import { revokeInvite, setInviteNote } from "@/db/invites";
-import { inviteIssuanceAllowed, vouchCountFor } from "@/lib/vouch";
+import {
+  inviteIssuanceAllowed,
+  trustedCircleSize,
+  vouchCountFor,
+} from "@/lib/vouch";
+import { singleFounderLocked } from "@/lib/singleFounder";
 import type { InviteRow } from "@/db/database";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
@@ -215,6 +220,11 @@ export default function InvitesPage() {
               vouches,
               invites,
             })}
+            /* Single-founder lock: no meter that can never complete. */
+            locked={singleFounderLocked(
+              founderHashCapture ?? null,
+              trustedCircleSize({ vouches, invites, founderRoots }),
+            )}
           />
         )
       ) : (
