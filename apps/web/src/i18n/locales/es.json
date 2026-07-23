@@ -379,6 +379,11 @@
       "voucher_not_trusted": "El servidor de la comunidad todavía no cuenta tu aval: los avales empiezan a contar cuando dos personas de confianza respondan por ti. Tu aval firmado está a salvo en este dispositivo y se entregará automáticamente cuando eso ocurra."
     }
   },
+  "newcomer": {
+    "errors": {
+      "newcomer_daily_limit": "El servidor de la comunidad acepta una cantidad diaria de publicaciones y eventos nuevos de alguien que aún no cuenta con el aval completo de la comunidad, y la de hoy ya está llena — lo que sobre queda a salvo en este dispositivo y se enviará automáticamente mañana. Reclamar, intercambiar, mensajear y participar siguen igual, y el límite desaparece por completo cuando dos personas de confianza te avalan."
+    }
+  },
   "vouchNudge": {
     "label": "Avalar está abierto para ti",
     "title": "Ya puedes avalar",

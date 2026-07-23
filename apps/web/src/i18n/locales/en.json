@@ -379,6 +379,11 @@
       "voucher_not_trusted": "The community server isn't counting your vouch yet — vouching starts counting once two trusted members have vouched for you. Your signed vouch is safe on this device and will be delivered automatically once that happens."
     }
   },
+  "newcomer": {
+    "errors": {
+      "newcomer_daily_limit": "The community server accepts a day's worth of new posts and events from someone the community hasn't fully vouched for yet, and today's amount is full — anything extra is safe on this device and sends automatically tomorrow. Claiming, exchanging, messaging, and joining are unaffected, and the limit lifts entirely once two trusted members vouch for you."
+    }
+  },
   "vouchNudge": {
     "label": "Vouching is open to you",
     "title": "You can vouch now",
