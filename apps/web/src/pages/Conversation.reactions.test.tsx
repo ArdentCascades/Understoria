@@ -288,9 +288,13 @@ describe("ConversationPage — emoji reactions", () => {
       }),
     ];
     await render();
-    const theirChip = container.querySelector(
-      '[aria-label="Riverbend reacted 🙏"]',
-    );
+    // Found by attribute scan, not a CSS selector: jsdom 29's selector
+    // engine can't match astral-plane characters (this emoji) inside a
+    // quoted attribute value — see test/jsdomSelectorQuirks.test.ts.
+    const theirChip =
+      Array.from(container.querySelectorAll("[aria-label]")).find(
+        (el) => el.getAttribute("aria-label") === "Riverbend reacted 🙏",
+      ) ?? null;
     expect(theirChip).not.toBeNull();
     expect(theirChip!.tagName).not.toBe("BUTTON");
   });

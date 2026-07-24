@@ -1,6 +1,6 @@
 # Dependency upgrade plan — tiers, rationale, cadence
 
-> **Status: Tier 1 SHIPPED; Tiers 2–4 planned.** Surveyed 2026-07-24
+> **Status: Tiers 1–2 SHIPPED; Tiers 3–4 planned.** Surveyed 2026-07-24
 > (`npm outdated` across all workspaces; `npm audit` was already at
 > 0 vulnerabilities after the react-router 7 migration —
 > `docs/react-router-7-plan.md`). Node 22 runtime is LTS through
@@ -28,15 +28,21 @@ desktop tests (ELECTRON_SKIP_BINARY_DOWNLOAD=1 — the binary is
 proxy-blocked in the dev sandbox and unneeded for unit tests), root
 typecheck, eslint, PWA production build, `npm audit` still 0.
 
-## Tier 2 — small deliberate majors (next convenient slot)
+## Tier 2 — small deliberate majors (SHIPPED)
 
-- `@fastify/helmet` 12 → 13, `@fastify/rate-limit` 10 → 11: verify
-  Fastify-5 peer ranges, read both changelogs for option renames
-  (helmet CSP options and rate-limit keyGenerator are the ones we
-  configure), full server suite. Expected: small.
-- `jsdom` 25 → 29: test-environment only; cannot affect production.
-  Full web suite is the entire gate. Watch for stricter DOM APIs
-  surfacing latent test assumptions.
+- `@fastify/helmet` 12 → 13, `@fastify/rate-limit` 10 → 11: peer
+  ranges and our configured options (quoted CSP keywords,
+  allowList/keyGenerator) all carried over unchanged; helmet 8's
+  default HSTS max-age rose 180 → 365 days, now matching the
+  Caddyfile. Full server suite green.
+- `jsdom` 25 → 29: test-environment only; the full web suite was
+  the gate. It surfaced two upstream selector-engine bugs (not
+  latent test assumptions): attribute selectors silently match
+  nothing when the quoted value contains a literal `&` or an
+  astral-plane character (emoji). Two tests now compare
+  getAttribute() instead; `src/test/jsdomSelectorQuirks.test.ts`
+  pins the broken behavior so a future jsdom fix flips the
+  tripwire and the workarounds can be reverted.
 
 ## Tier 3 — real migrations (each gets its own plan doc first,
    react-router-7-plan.md discipline: verified API inventory,
