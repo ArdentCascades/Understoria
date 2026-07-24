@@ -56,6 +56,7 @@ import type { Member } from "@/types";
 const nodeId = "node_test";
 const meKey = "me-key";
 const founderKey = "founder-key";
+const founderKeyB = "founder-key-b";
 
 function member(publicKey: string, displayName: string): Member {
   return {
@@ -131,10 +132,15 @@ beforeEach(() => {
     blockedKeys: new Set<string>(),
     proposals: [],
     setCurrentMember: vi.fn(),
-    // Default: a founder capture exists and the founder is NOT me —
-    // the rooted computation runs and I am pending with 0 vouches.
-    founderRoots: new Set([founderKey]),
-    founderHashCapture: { nodeId, hashes: ["hash-of-founder"] },
+    // Default: a TWO-root capture whose founders are not me — the
+    // rooted computation runs, I am pending with 0 vouches, and the
+    // have/need meter is an honest promise. The one-root variant
+    // (which must NOT show a meter) is tested separately.
+    founderRoots: new Set([founderKey, founderKeyB]),
+    founderHashCapture: {
+      nodeId,
+      hashes: ["hash-of-founder", "hash-of-founder-b"],
+    },
   };
   container = document.createElement("div");
   document.body.appendChild(container);
@@ -194,6 +200,24 @@ describe("Profile invites — pending-trust gate", () => {
     expect(sectionButtons("Reveal link").length).toBe(1);
     expect(sectionButtons("Copy").length).toBe(1);
     expect(sectionButtons("Show QR code").length).toBe(1);
+  });
+
+  it("single-founder community: the locked card, and NO progress-meter digits", () => {
+    // One published hash + a circle of one: two trusted vouchers can
+    // never exist, so the meter would be a promise the community
+    // cannot keep (docs/cofounder-ceremony-plan.md P4).
+    mockState.founderRoots = new Set([founderKey]);
+    mockState.founderHashCapture = { nodeId, hashes: ["hash-of-founder"] };
+    render();
+    const sec = section()!;
+    expect(sec.textContent).toContain(
+      "This community still has a single founder",
+    );
+    expect(sec.textContent).not.toContain("Inviting opens up with trust");
+    expect(sectionButtons("Generate invite link").length).toBe(0);
+    // Digits tripwire — the locked state renders no meter numbers.
+    expect(sec.textContent).not.toMatch(/\d+\s*of\s*\d+/i);
+    expect(sec.textContent).not.toMatch(/\d+\s*(vouch(es)?|avales?)/i);
   });
 
   it("trusted member (founder root): the Generate flow is exactly as before", () => {

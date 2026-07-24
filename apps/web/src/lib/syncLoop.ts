@@ -74,6 +74,7 @@ export type SyncPulls = Pick<
   | "pullFederatedProposals"
   | "pullFederatedVotes"
   | "pullFederatedProposalClosures"
+  | "pullFounderNomination"
 >;
 
 /** Fast tick while foregrounded + active. */
@@ -177,6 +178,11 @@ function runCold(p: SyncPulls): void {
   void p.pullCapacityPostures();
   void p.pullFederatedMemberRemovals();
   void p.pullFederatedMemberReinstatements();
+  // Co-founder nominations live for days; the accept card is a
+  // deliberate ceremony, not live collaboration. The first cycle
+  // always runs the cold set, so a foregrounding device still picks
+  // an incoming nomination up promptly.
+  void p.pullFounderNomination();
   void p.pullFederatedProposals().then(() => {
     void p.pullFederatedVotes();
     void p.pullFederatedProposalClosures();

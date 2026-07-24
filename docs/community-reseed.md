@@ -105,6 +105,25 @@ R0 must ship **well before it is needed**: receipts can only be
 captured while at least one node still serves them. Say this loudly
 in the release notes.
 
+**Co-founder accessions ride the same pattern** (added with the
+co-founder ceremony, `docs/cofounder-ceremony-plan.md`): the
+dual-signed `FounderAccession` is persisted write-through on the
+accepting member's devices (Dexie `founderAccessions`, carried in
+the community snapshot) and re-POSTed to `/founder-accession` during
+re-seed, restoring founder #2 into `claimed_founders`. Ordering:
+membership first, accession right after redemptions. Two caveats,
+stated honestly: (1) at least one of the co-founder's devices (or a
+device paired from one) must participate in the re-seed — the
+accession does not federate in this phase; (2) if founder #1
+recovered with a NEW key, the stored accession's nominator no longer
+matches the sole root and cannot re-verify — the community re-runs
+the in-app ceremony (one nomination + one accept). The node-side DB
+backup (`backup-db.sh`, VACUUM INTO) always carries
+`claimed_founders` whole — a restored-from-backup node needs no
+re-seed for founders at all. Governance closures re-seed under the
+same declared `RESEED_GRACE_UNTIL` window as receipts (the closure
+trust gate is waived in-window, exactly like the redemption gates).
+
 Excluded deliberately: `claims` are not persisted as records
 client-side (only `posts.claimedBy`), are unsigned, and are
 short-lived coordination state. Re-seed skips them; an open claim

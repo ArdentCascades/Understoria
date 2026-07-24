@@ -1868,7 +1868,11 @@
       "title": "Invitar se abre con confianza",
       "body": "Las invitaciones traen gente nueva a la comunidad, así que se abren cuando la comunidad ya responde por ti: es la forma en que la vecindad se protege de las cuentas falsas.",
       "progress": "Llevas {{have}} de {{need}} avales.",
-      "howTo": "Ayudar a la gente es el camino: los intercambios confirmados son la manera en que tus vecinos te van conociendo, y cualquier persona de confianza puede avalarte desde tu perfil."
+      "howTo": "Ayudar a la gente es el camino: los intercambios confirmados son la manera en que tus vecinos te van conociendo, y cualquier persona de confianza puede avalarte desde tu perfil.",
+      "singleFounder": {
+        "title": "Esta comunidad todavía tiene una sola persona fundadora",
+        "body": "Llegar a ser de plena confianza requiere el aval de dos miembros de confianza, y por ahora solo quien fundó la comunidad lo es — así que invitar no puede abrirse para nadie todavía. Cuando se sume una cofundadora o cofundador, la confianza podrá empezar a fluir."
+      }
     }
   },
   "notJoinedCard": {
@@ -2052,7 +2056,8 @@
       "duplicate": "Esa persona ya firmó.",
       "bad_signature": "Esa cofirma no verifica.",
       "not_enough": "Aún no hay firmas suficientes."
-    }
+    },
+    "singleFounder": "Expulsar a un miembro requiere formalmente las firmas de varios miembros de confianza, y por ahora quien fundó la comunidad es su único miembro de confianza — ninguna expulsión es posible hasta que se sume una cofundadora o cofundador. Las comunidades jóvenes resuelven los problemas conversando, bloqueando y eligiendo con cuidado a quién avalan."
   },
   "reseed": {
     "title": "Restaurar esta comunidad en un nodo",
@@ -2523,7 +2528,11 @@
     "vouchGate": {
       "title": "Avalar se abre con confianza",
       "body": "Tu aval le dice a toda la comunidad que esta persona es de las nuestras — así que empieza a contar cuando la comunidad ya responde por ti. Es la misma protección que evita que las cuentas falsas se avalen entre sí.",
-      "howTo": "Ayudar a la gente es el camino: los intercambios confirmados son la manera en que tus vecinos te van conociendo, y cualquier persona de confianza puede avalarte desde tu perfil. Tu propio perfil muestra cuánto te falta."
+      "howTo": "Ayudar a la gente es el camino: los intercambios confirmados son la manera en que tus vecinos te van conociendo, y cualquier persona de confianza puede avalarte desde tu perfil. Tu propio perfil muestra cuánto te falta.",
+      "singleFounder": {
+        "title": "Esta comunidad todavía tiene una sola persona fundadora",
+        "body": "Los avales empiezan a contar cuando dos miembros de confianza pueden responder por alguien, y por ahora solo quien fundó la comunidad es de confianza. Cuando se sume una cofundadora o cofundador, avalar se abrirá para toda la comunidad."
+      }
     },
     "alreadyFullyTrusted": "Esta persona ya es confiable. Otro aval no cambiaría nada.",
     "alreadyVouchedByYou": "Ya has avalado a esta persona.",
@@ -2604,7 +2613,8 @@
       "show": "Mostrar clave completa",
       "hide": "Ocultar clave completa",
       "title": "Tu clave pública completa",
-      "hint": "Esta clave es pública — es seguro compartirla, imprimirla o pegarla donde sea. Así te reconocen los servidores y otros miembros. Si administras el servidor de tu comunidad, este valor exacto es el que va en NODE_FOUNDER_KEYS en su archivo .env."
+      "hint": "Esta clave es pública — es seguro compartirla, imprimirla o pegarla donde sea. Así te reconocen los servidores y otros miembros. Si administras el servidor de tu comunidad, este valor exacto es el que va en NODE_FOUNDER_KEYS en su archivo .env.",
+      "qrHint": "El código QR es la misma clave pública — la ceremonia de cofundación y la configuración del servidor pueden escanearla en lugar de copiar el texto."
     },
     "sidebarAriaLabel": "Resumen del perfil",
     "addDevice": {
@@ -3069,8 +3079,18 @@
     "emptyOpen": "No hay propuestas abiertas ahora mismo.",
     "emptyFiltered": "Ninguna propuesta coincide con este filtro.",
     "contested": "Registrada como aprobada, pero existe un bloqueo vigente en los votos de toda la comunidad — este resultado está en disputa. Hablenlo; el registro permanece.",
+    "gate": {
+      "title": "Registrar resultados se abre con confianza",
+      "body": "Registrar un resultado pronuncia formalmente la decisión de la comunidad — cierra la propuesta y hace que el resultado surta efecto en todas partes — así que empieza a contar cuando la comunidad ya responde plenamente por ti. Mientras tanto puedes proponer, conversar y votar; un bloqueo tuyo siempre cuenta.",
+      "howTo": "Ayudar a la gente es el camino: los intercambios confirmados son la manera en que tus vecinos te van conociendo, y cualquier persona de confianza puede avalarte desde tu perfil. Tu propio perfil muestra cuánto te falta.",
+      "withdrawOwnHint": "Tu propia propuesta sigue siendo tuya — puedes retirarla cuando quieras."
+    },
+    "consensusPendingViewer": "Las condiciones de consenso ya se cumplen. Esto no está atascado — registrar el resultado se abre con confianza, así que espera la mano de alguien con el aval completo de la comunidad.",
+    "errors": {
+      "closer_not_trusted": "El servidor de la comunidad guarda este resultado hasta que la comunidad responda plenamente por ti — no está rechazado, y se registrará solo cuando eso ocurra. Mientras tanto, cualquier miembro con aval completo puede registrarlo."
+    },
     "localOnly": "Registrado solo en este dispositivo — se creó antes de que las decisiones comunitarias se sincronizaran entre dispositivos, así que otros miembros no pueden verlo.",
-    "footer": "Las votaciones aquí son abiertas: tu voto lleva tu nombre, es visible dentro de la comunidad y se sincroniza con el dispositivo de cada miembro. Puedes cambiarlo mientras la propuesta esté abierta — la versión más reciente es la que cuenta. Cuando la comunidad llega a su decisión, cualquier miembro puede registrar el resultado, y surte efecto en todas partes.",
+    "footer": "Las votaciones aquí son abiertas: tu voto lleva tu nombre, es visible dentro de la comunidad y se sincroniza con el dispositivo de cada miembro. Puedes cambiarlo mientras la propuesta esté abierta — la versión más reciente es la que cuenta. Cuando la comunidad llega a su decisión, cualquier miembro con aval completo puede registrar el resultado, y surte efecto en todas partes.",
     "proposerLabel": "Propuesta por",
     "backfillProposer": "(histórica, persona que reportó desconocida)",
     "proposedLabel": "Iniciada",
@@ -3086,7 +3106,7 @@
       "rejected": "Marcar rechazada",
       "withdrawn": "Retirar"
     },
-    "consensusReached": "Consenso alcanzado: {{affirms}} a favor, {{blocks}} bloqueos. Cualquier persona puede cerrar esta propuesta.",
+    "consensusReached": "Consenso alcanzado: {{affirms}} a favor, {{blocks}} bloqueos. Cualquier miembro con aval completo puede cerrar esta propuesta.",
     "closeAsPassed": "Cerrar como aprobada",
     "closedReason": {
       "consensus": "Cerrada por acción de un miembro después de cumplir las condiciones de consenso."
@@ -3126,6 +3146,7 @@
     "eligibility": {
       "waitDeliberation": "Se aprueba automáticamente {{when}} si no llegan bloqueos antes.",
       "waitAffirms": "Necesita {{need}} votos a favor para aprobarse por consenso; lleva {{have}} hasta ahora.",
+      "waitAffirmsPending": "Necesita {{need}} votos a favor contados para aprobarse por consenso; lleva {{have}} hasta ahora, más {{pending}} registrados que empezarán a contar cuando la comunidad responda plenamente por quien votó.",
       "blocked": "Detenida por {{count}} bloqueo — debe resolverse antes de avanzar."
     },
     "vote": {
@@ -3145,8 +3166,10 @@
         "block": "bloqueo",
         "abstain": "abstención"
       },
+      "pendingAffirmNote": "Tu voto queda registrado y visible de inmediato. Un voto a favor empieza a contar hacia el consenso cuando la comunidad ya responde plenamente por ti — un bloqueo siempre cuenta.",
       "tally": {
         "affirms": "A favor: {{count}}",
+        "affirmsCounted": "A favor: {{counted}} de {{total}} contando hacia el consenso — los votos a favor empiezan a contar cuando la comunidad responde plenamente por quien vota",
         "blocks": "Bloqueo: {{count}}",
         "abstains": "Abstención: {{count}}"
       }
@@ -3648,6 +3671,93 @@
         "wifiLine": "WiFi del centro: {{ssid}}",
         "askForWifi": "WiFi del centro: pregunta a un miembro"
       }
+    }
+  },
+  "soleFounder": {
+    "title": "Eres la única persona fundadora de esta comunidad",
+    "body": "Eres el único miembro de confianza de esta comunidad — nadie más podrá invitar ni avalar hasta que agregues a alguien como cofundador.",
+    "invitesWork": "Tus propias invitaciones sí funcionan: trae gente primero y luego elige a alguien como cofundador.",
+    "cta": "Agregar cofundador",
+    "pendingBody": "Tu nominación está esperando a que {{name}} la acepte en su propio dispositivo.",
+    "pendingCta": "Ver la nominación pendiente"
+  },
+  "cofounder": {
+    "title": "Agregar cofundador",
+    "intro": {
+      "title": "Las comunidades empiezan con dos personas fundadoras",
+      "permanence": "Fundar es permanente. Quien cofunda se vuelve una raíz de confianza de esta comunidad para siempre — no hay manera de deshacerlo en la aplicación, nunca.",
+      "body": "Una cofundadora o cofundador es una segunda raíz de confianza: con dos raíces, la vecindad puede avalarse mutuamente y la comunidad puede crecer sin ti. Elige a alguien en quien ya confíes profundamente — capturarás su clave desde su propia pantalla, en persona.",
+      "start": "Elegir cofundador"
+    },
+    "capture": {
+      "title": "Captura su clave pública",
+      "hint": "Pídele que abra Perfil → Mostrar clave completa en su dispositivo y escanea el código QR — o pega el texto de la clave.",
+      "invalid": "Eso no parece la clave pública de un miembro. Pídele que muestre el QR en Perfil → Mostrar clave completa, o copia el texto de la clave exactamente."
+    },
+    "deadEnd": {
+      "title": "Esa clave todavía no pertenece a ningún miembro",
+      "body": "Quien cofunda debe ser ya miembro de esta comunidad. Invítale primero — tus invitaciones funcionan — y cuando se haya unido, vuelve aquí.",
+      "retry": "Capturar otra clave"
+    },
+    "ownKey": {
+      "title": "Esa es tu propia clave",
+      "body": "Ya eres quien fundó esta comunidad. Captura la clave de la persona que quieres a tu lado.",
+      "retry": "Capturar otra clave"
+    },
+    "confirm": {
+      "title": "Confirma a tu cofundador",
+      "line": "Estás haciendo a {{name}} fundador de esta comunidad, de forma permanente.",
+      "fingerprint": "Huella de la clave: {{fingerprint}}",
+      "check": "Verifica el nombre y el avatar con esa persona, cara a cara, antes de firmar.",
+      "sign": "Firmar y enviar la nominación",
+      "signing": "Firmando…"
+    },
+    "pending": {
+      "title": "Nominación enviada",
+      "body": "Ahora {{name}} tiene que aceptar en su propio dispositivo — fundar requiere ambas firmas. Encontrará la invitación en “Necesita tu atención”.",
+      "expires": "Esta nominación vence {{when}}.",
+      "expired": "Esta nominación venció. Envía una nueva cuando ambos estén listos.",
+      "resend": "Enviar una nominación nueva",
+      "withdraw": "Retirar",
+      "withdrawNote": "Retirar limpia el estado pendiente en este dispositivo; la nominación en sí simplemente vence por su cuenta."
+    },
+    "done": {
+      "title": "Tu comunidad tiene dos personas fundadoras",
+      "body": "La confianza ya puede fluir: con dos miembros de confianza, la vecindad puede recibir avales y la comunidad puede seguir creciendo sin ti.",
+      "close": "Listo"
+    },
+    "accept": {
+      "title": "{{name}} te propone cofundar esta comunidad",
+      "permanence": "Volverse fundador es permanente. Serías una raíz de confianza de esta comunidad para siempre — no hay manera de deshacerlo en la aplicación, nunca.",
+      "body": "Como cofundadora o cofundador, tus avales — junto a los de {{name}} — son lo que permite que la vecindad llegue a ser de confianza.",
+      "expires": "Esta invitación vence {{when}}.",
+      "accept": "Aceptar y firmar",
+      "accepting": "Firmando…",
+      "notNow": "Ahora no",
+      "notNowHint": "“Ahora no” limpia esta tarjeta en este dispositivo. La nominación sigue abierta hasta que venza, así que la tarjeta puede volver — dile a {{name}} si prefieres que no.",
+      "acceptedTitle": "Eres fundador de esta comunidad",
+      "acceptedBody": "Ambas firmas quedaron registradas y la comunidad ahora tiene dos raíces de confianza. Tus avales cuentan desde este momento.",
+      "acceptedClose": "Listo"
+    },
+    "claimSuccess": {
+      "next": "Siguiente: las comunidades empiezan con dos personas fundadoras. Cuando tu primer vecino se una, agrega a alguien como cofundador para que la confianza fluya sin ti.",
+      "cta": "Agregar cofundador"
+    },
+    "errors": {
+      "invalid_body": "El nodo no pudo leer la solicitud. Actualiza la aplicación e inténtalo de nuevo.",
+      "invalid_expiry": "La ventana de tiempo de la nominación no tuvo sentido para el nodo. Revisa la fecha y hora de este dispositivo e inténtalo de nuevo.",
+      "wrong_node": "Esta nominación pertenece a otro nodo comunitario.",
+      "stale_nomination": "El reloj de este dispositivo parece desfasado por más de unos minutos — corrige la fecha y hora e inténtalo de nuevo.",
+      "node_unclaimed": "Este nodo aún no tiene miembro fundador — reclámalo primero.",
+      "root_count_not_one": "Las raíces fundadoras de la comunidad cambiaron mientras esto estaba en curso — la ceremonia solo corre mientras hay exactamente una persona fundadora.",
+      "nominator_not_founder": "Solo quien fundó la comunidad puede nominar a un cofundador.",
+      "nominee_not_a_member": "Esa persona todavía no es miembro de esta comunidad. Invítala primero — tus invitaciones funcionan.",
+      "nominee_already_founder": "Esa persona ya es fundadora de esta comunidad.",
+      "bad_signature": "La firma no se pudo crear o no verificó. Desbloquea la aplicación e inténtalo de nuevo.",
+      "acceptance_out_of_window": "El reloj de este dispositivo parece desfasado — la aceptación cayó fuera de la ventana de la nominación. Corrige la fecha y hora e inténtalo de nuevo.",
+      "nomination_expired": "Esta nominación venció. Pide una nueva.",
+      "unreachable": "No se pudo contactar el nodo comunitario. Revisa tu conexión e inténtalo de nuevo.",
+      "rejected": "El nodo se negó. Revisa los registros del servidor para más detalles."
     }
   }
 }

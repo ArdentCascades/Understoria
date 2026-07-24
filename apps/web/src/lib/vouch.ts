@@ -230,17 +230,30 @@ function trustEdges(ctx: TrustContext): TrustEdge[] {
 }
 
 /**
+ * The full founder-rooted trusted set, founders included. Null
+ * without a founder capture: the rooted computation has no anchor,
+ * so the device can't judge anyone — callers must then keep the
+ * legacy (pre-gate) behavior and let the node enforce. Feeds the
+ * trusted-affirm counting in `autoCloseProposals` and the
+ * Proposals-page enactment gate, which both need the whole set, not
+ * one member's status.
+ */
+export function trustedMemberSet(
+  ctx: TrustContext,
+): ReadonlySet<string> | null {
+  if (!ctx.founderRoots || ctx.founderRoots.size === 0) return null;
+  return computeTrustedSet(ctx.founderRoots, trustEdges(ctx));
+}
+
+/**
  * How many members the founder-rooted fixpoint marks trusted,
  * founders included. Feeds the removal-availability honesty
  * ("removal needs {{need}} trusted members, the community has
  * {{have}}") and any future circle-size surfacing. Null without a
- * founder capture: the rooted computation has no anchor, so the
- * device can't compute a circle — callers must then not claim
- * anything about its size.
+ * founder capture, per `trustedMemberSet`.
  */
 export function trustedCircleSize(ctx: TrustContext): number | null {
-  if (!ctx.founderRoots || ctx.founderRoots.size === 0) return null;
-  return computeTrustedSet(ctx.founderRoots, trustEdges(ctx)).size;
+  return trustedMemberSet(ctx)?.size ?? null;
 }
 
 export interface VoucherRef {

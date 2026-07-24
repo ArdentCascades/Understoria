@@ -216,8 +216,12 @@ describe("federated governance drill — two devices, one decision", () => {
     expect(verifyProposal(pulled)).toBe(true);
     expect(pulled).not.toHaveProperty("status");
 
-    // Both devices cast open ballots.
-    for (const voter of [rosa, gus]) {
+    // Both devices cast open ballots — and so does Mallory, still a
+    // PENDING member (founder receipt, no second voucher): affirms
+    // are stored regardless of trust and judged at count time on
+    // every device, so her ballot starts counting the day she is
+    // vouched, with no migration.
+    for (const voter of [rosa, gus, mallory]) {
       const res = await app.inject({
         method: "POST",
         url: "/votes",
@@ -231,11 +235,21 @@ describe("federated governance drill — two devices, one decision", () => {
         url: `/votes?proposalId=${proposal.id}`,
       })
     ).json() as { votes: Vote[] };
-    expect(votes.votes).toHaveLength(2);
+    expect(votes.votes).toHaveLength(3);
     for (const v of votes.votes) expect(verifyVote(v)).toBe(true);
 
-    // Device B closes as passed — accepted because the node's merged
-    // ballot shows no standing blocks.
+    // Speaking the outcome is where trust bites: Mallory's attempt to
+    // record it is held (retryable 403), not accepted.
+    const early = await app.inject({
+      method: "POST",
+      url: "/proposal-closures",
+      payload: signedClosure(mallory, proposal.id, "passed"),
+    });
+    expect(early.statusCode).toBe(403);
+    expect(early.json()).toEqual({ error: "closer_not_trusted" });
+
+    // Device B closes as passed — accepted because the closer is
+    // trusted and the node's merged ballot shows no standing blocks.
     const closure = signedClosure(gus, proposal.id, "passed");
     expect(
       (

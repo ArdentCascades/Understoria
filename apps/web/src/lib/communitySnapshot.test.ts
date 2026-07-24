@@ -74,6 +74,36 @@ describe("SNAPSHOT_TABLES", () => {
   });
 });
 
+describe("founder accessions in the snapshot", () => {
+  // docs/cofounder-ceremony-plan.md: the dual-signed accession is the
+  // reseed recovery artifact for the second root; a linked device
+  // must carry it like the receipts it sits beside.
+  it("rides the snapshot and round-trips verbatim onto a fresh device", async () => {
+    expect(SNAPSHOT_TABLES).toContain("founderAccessions");
+    await db.members.put(member("pkA", "Rosa"));
+    const accession = {
+      nomination: {
+        nominatorKey: "pkA",
+        nomineeKey: "pkB",
+        nodeId: "node-src",
+        nominatedAt: 1,
+        expiresAt: 2,
+        signature: "sig_nom",
+      },
+      acceptedAt: 1,
+      signature: "sig_acc",
+    };
+    await db.founderAccessions.put(accession as never);
+    const snap = await buildCommunitySnapshot();
+    expect(snap?.founderAccessions).toEqual([accession]);
+
+    await Promise.all(db.tables.map((t) => t.clear()));
+    await db.members.put(member("pkB", "Sam")); // the fresh linked device
+    expect(await applyCommunitySnapshot(snap!)).toBe(true);
+    expect(await db.founderAccessions.get("pkB")).toEqual(accession);
+  });
+});
+
 describe("buildCommunitySnapshot", () => {
   it("captures populated tables and omits empty ones", async () => {
     await db.members.bulkPut([member("pkA", "Rosa"), member("pkB", "Sam")]);

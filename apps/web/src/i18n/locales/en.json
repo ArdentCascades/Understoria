@@ -1868,7 +1868,11 @@
       "title": "Inviting opens up with trust",
       "body": "Invites bring new people into the community, so they open up once the community has vouched for you — it's how neighbors protect each other from fake accounts.",
       "progress": "You have {{have}} of {{need}} vouches so far.",
-      "howTo": "Helping people is how you get there: confirmed exchanges are how neighbors get to know you, and any trusted member can vouch for you from your profile."
+      "howTo": "Helping people is how you get there: confirmed exchanges are how neighbors get to know you, and any trusted member can vouch for you from your profile.",
+      "singleFounder": {
+        "title": "This community still has a single founder",
+        "body": "Becoming fully vouched takes two trusted vouchers, and right now only the founder is trusted — so inviting can't open up for anyone yet. Once the founder adds a co-founder, trust can start to flow."
+      }
     }
   },
   "notJoinedCard": {
@@ -2052,7 +2056,8 @@
       "duplicate": "That member already signed.",
       "bad_signature": "That co-signature doesn't verify.",
       "not_enough": "Not enough signatures yet."
-    }
+    },
+    "singleFounder": "Removing a member formally takes several trusted members' signatures, and right now the founder is this community's only trusted member — no removal is possible until a co-founder is added. Young communities handle problems by talking, blocking, and choosing carefully who they vouch for."
   },
   "reseed": {
     "title": "Restore this community onto a node",
@@ -2523,7 +2528,11 @@
     "vouchGate": {
       "title": "Vouching opens up with trust",
       "body": "Your vouch tells the whole community this person is one of us — so it starts counting once the community has fully vouched for you. It's the same protection that keeps fake accounts from vouching each other in.",
-      "howTo": "Helping people is how you get there: confirmed exchanges are how neighbors get to know you, and any trusted member can vouch for you from your profile. Your own profile shows how far along you are."
+      "howTo": "Helping people is how you get there: confirmed exchanges are how neighbors get to know you, and any trusted member can vouch for you from your profile. Your own profile shows how far along you are.",
+      "singleFounder": {
+        "title": "This community still has a single founder",
+        "body": "Vouches start counting once two trusted members can stand behind a person, and right now only the founder is trusted. Once the founder adds a co-founder, vouching opens up for everyone."
+      }
     },
     "alreadyFullyTrusted": "This member is already trusted. Another vouch wouldn't change anything.",
     "alreadyVouchedByYou": "You've already vouched for this member.",
@@ -2604,7 +2613,8 @@
       "show": "Show full key",
       "hide": "Hide full key",
       "title": "Your full public key",
-      "hint": "This key is public — it's safe to share, print, or paste anywhere. It's how servers and other members recognize you. If you operate your community's server, this exact value is what goes in NODE_FOUNDER_KEYS in its .env file."
+      "hint": "This key is public — it's safe to share, print, or paste anywhere. It's how servers and other members recognize you. If you operate your community's server, this exact value is what goes in NODE_FOUNDER_KEYS in its .env file.",
+      "qrHint": "The QR code is the same public key — the co-founder ceremony and operator setup can scan it instead of copying the text."
     },
     "sidebarAriaLabel": "Profile summary",
     "addDevice": {
@@ -3069,8 +3079,18 @@
     "emptyOpen": "No open proposals right now.",
     "emptyFiltered": "No proposals match this filter.",
     "contested": "Recorded as passed, but a standing block exists in the community-wide votes — this outcome is contested. Talk it through; the record stays.",
+    "gate": {
+      "title": "Recording outcomes opens up with trust",
+      "body": "Recording an outcome formally speaks the community's decision — it closes the proposal and makes the result take effect everywhere — so it starts counting once the community has fully vouched for you. You can still propose, discuss, and vote; a block from you always stands.",
+      "howTo": "Helping people is how you get there: confirmed exchanges are how neighbors get to know you, and any trusted member can vouch for you from your profile. Your own profile shows how far along you are.",
+      "withdrawOwnHint": "Your own proposal stays yours — you can withdraw it anytime."
+    },
+    "consensusPendingViewer": "Consensus conditions are met. This isn't stuck — recording the outcome opens up with trust, so it's waiting for a fully vouched member's hand.",
+    "errors": {
+      "closer_not_trusted": "The community server is holding this outcome until the community fully vouches for you — it isn't rejected, and it will record itself once that happens. Any fully vouched member can record it meanwhile."
+    },
     "localOnly": "Recorded on this device only — it was created before community decisions synced between devices, so other members can't see it.",
-    "footer": "Ballots here are open: your vote is attributed, visible inside the community, and syncs to every member's device. You can change it while the proposal is open — the newest version is what counts. When the community reaches its decision, any member can record the outcome, and it takes effect everywhere.",
+    "footer": "Ballots here are open: your vote is attributed, visible inside the community, and syncs to every member's device. You can change it while the proposal is open — the newest version is what counts. When the community reaches its decision, any fully vouched member can record the outcome, and it takes effect everywhere.",
     "proposerLabel": "Proposed by",
     "backfillProposer": "(historical, flagger unknown)",
     "proposedLabel": "Started",
@@ -3086,7 +3106,7 @@
       "rejected": "Mark rejected",
       "withdrawn": "Withdraw"
     },
-    "consensusReached": "Consensus reached: {{affirms}} affirm, {{blocks}} blocks. Any member can close this proposal.",
+    "consensusReached": "Consensus reached: {{affirms}} affirm, {{blocks}} blocks. Any fully vouched member can close this proposal.",
     "closeAsPassed": "Close as passed",
     "closedReason": {
       "consensus": "Closed by member action after consensus conditions were met."
@@ -3126,6 +3146,7 @@
     "eligibility": {
       "waitDeliberation": "Auto-passes {{when}} if no blocks land before then.",
       "waitAffirms": "Needs {{need}} affirms to auto-pass on consensus; has {{have}} so far.",
+      "waitAffirmsPending": "Needs {{need}} counted affirms to auto-pass on consensus; has {{have}} so far, plus {{pending}} recorded that will start counting once the voter is fully vouched.",
       "blocked": "Held by {{count}} block — needs to be resolved before this can move forward."
     },
     "vote": {
@@ -3145,8 +3166,10 @@
         "block": "block",
         "abstain": "abstain"
       },
+      "pendingAffirmNote": "Your vote is recorded and visible right away. An affirm starts counting toward consensus once the community fully vouches for you — a block always counts.",
       "tally": {
         "affirms": "Affirm: {{count}}",
+        "affirmsCounted": "Affirm: {{counted}} of {{total}} counting toward consensus — affirms start counting once the voter is fully vouched",
         "blocks": "Block: {{count}}",
         "abstains": "Abstain: {{count}}"
       }
@@ -3648,6 +3671,93 @@
         "wifiLine": "Hub WiFi: {{ssid}}",
         "askForWifi": "Hub WiFi: ask a member"
       }
+    }
+  },
+  "soleFounder": {
+    "title": "You're this community's only founder",
+    "body": "You are this community's only trusted member — nobody else can ever invite or vouch until you add a co-founder.",
+    "invitesWork": "Your own invites still work: bring people in, then make one of them your co-founder.",
+    "cta": "Add a co-founder",
+    "pendingBody": "Your co-founder nomination is waiting for {{name}} to accept on their own device.",
+    "pendingCta": "See the pending nomination"
+  },
+  "cofounder": {
+    "title": "Add a co-founder",
+    "intro": {
+      "title": "Communities start with two founders",
+      "permanence": "Founding is permanent. A co-founder becomes a trust root of this community forever — there is no way to undo it in the app, ever.",
+      "body": "A co-founder is a second trust root: with two founders, neighbors can vouch each other into trust and the community can grow without you. Choose someone you already trust deeply — you'll capture their key from their own screen, in person.",
+      "start": "Choose a co-founder"
+    },
+    "capture": {
+      "title": "Capture their public key",
+      "hint": "Ask them to open Profile → Show full key on their device, then scan the QR code — or paste the key text.",
+      "invalid": "That doesn't look like a member's public key. Ask them to show the QR under Profile → Show full key, or copy the key text exactly."
+    },
+    "deadEnd": {
+      "title": "That key doesn't belong to a member yet",
+      "body": "A co-founder must already be a member of this community. Invite them first — your invites work — and once they've joined, come back here.",
+      "retry": "Capture a different key"
+    },
+    "ownKey": {
+      "title": "That's your own key",
+      "body": "You're already this community's founder. Capture the key of the person you want beside you.",
+      "retry": "Capture a different key"
+    },
+    "confirm": {
+      "title": "Confirm your co-founder",
+      "line": "You are making {{name}} a founder, permanently.",
+      "fingerprint": "Key fingerprint: {{fingerprint}}",
+      "check": "Check the name and the avatar with them, in person, before you sign.",
+      "sign": "Sign and send the nomination",
+      "signing": "Signing…"
+    },
+    "pending": {
+      "title": "Nomination sent",
+      "body": "{{name}} now has to accept on their own device — founding takes both signatures. They'll find the invitation under “Needs your attention”.",
+      "expires": "This nomination expires {{when}}.",
+      "expired": "This nomination has expired. Send a fresh one when you're both ready.",
+      "resend": "Send a fresh nomination",
+      "withdraw": "Withdraw",
+      "withdrawNote": "Withdrawing clears the pending state on this device; the nomination itself simply expires on its own."
+    },
+    "done": {
+      "title": "Your community has two founders",
+      "body": "Trust can now flow: with two trusted members, neighbors can be vouched into trust and the community can keep growing without you.",
+      "close": "Done"
+    },
+    "accept": {
+      "title": "{{name}} asks you to co-found this community",
+      "permanence": "Becoming a founder is permanent. You would be a trust root of this community forever — there is no way to undo it in the app, ever.",
+      "body": "As co-founder, your vouches — alongside {{name}}'s — are what let neighbors become trusted.",
+      "expires": "This invitation expires {{when}}.",
+      "accept": "Accept and sign",
+      "accepting": "Signing…",
+      "notNow": "Not now",
+      "notNowHint": "“Not now” clears this card on this device. The nomination stays open until it expires, so the card may come back — tell {{name}} if you'd rather not.",
+      "acceptedTitle": "You are a founder of this community",
+      "acceptedBody": "Both signatures are on record and the community now has two trust roots. Your vouches count from this moment.",
+      "acceptedClose": "Done"
+    },
+    "claimSuccess": {
+      "next": "Next: communities start with two founders. Once your first neighbor joins, add a co-founder so trust can flow without you.",
+      "cta": "Add a co-founder"
+    },
+    "errors": {
+      "invalid_body": "The node couldn't read the request. Update the app and try again.",
+      "invalid_expiry": "The nomination's time window didn't make sense to the node. Check this device's date and time and try again.",
+      "wrong_node": "This nomination belongs to a different community node.",
+      "stale_nomination": "This device's clock looks off by more than a few minutes — fix the date and time and try again.",
+      "node_unclaimed": "This node has no founding member yet — claim it first.",
+      "root_count_not_one": "The community's founders changed while this was underway — the ceremony only runs while there is exactly one founder.",
+      "nominator_not_founder": "Only the community's founder can nominate a co-founder.",
+      "nominee_not_a_member": "They're not a member of this community yet. Invite them first — your invites work.",
+      "nominee_already_founder": "They're already a founder of this community.",
+      "bad_signature": "The signature couldn't be made or didn't verify. Unlock the app and try again.",
+      "acceptance_out_of_window": "This device's clock looks off — the acceptance fell outside the nomination's window. Fix the date and time and try again.",
+      "nomination_expired": "This nomination has expired. Ask for a fresh one.",
+      "unreachable": "Couldn't reach the community node. Check your connection and try again.",
+      "rejected": "The node refused. Check the server logs for details."
     }
   }
 }

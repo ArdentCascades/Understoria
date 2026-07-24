@@ -275,14 +275,18 @@ describe("InvitesPage — local-only 'who is this for?' notes", () => {
 
 describe("InvitesPage — pending-trust gate on the empty state", () => {
   const founderKey = "founder-key";
+  const founderKeyB = "founder-key-b";
 
   beforeEach(() => {
-    // A founder capture exists and the founder is NOT me: the rooted
-    // trust computation runs and I am pending with 0 vouches.
-    mockState.founderRoots = new Set([founderKey]);
+    // A TWO-root capture with founders who are not me: the rooted
+    // trust computation runs, I am pending with 0 vouches, and the
+    // have/need meter is an honest promise (two trusted vouchers can
+    // actually exist). The one-root variant is tested separately —
+    // it must NOT show the meter.
+    mockState.founderRoots = new Set([founderKey, founderKeyB]);
     mockState.founderHashCapture = {
       nodeId,
-      hashes: ["hash-of-founder"],
+      hashes: ["hash-of-founder", "hash-of-founder-b"],
     };
   });
 
@@ -296,6 +300,26 @@ describe("InvitesPage — pending-trust gate on the empty state", () => {
     // The empty state's "Go to Profile" CTA points at a Generate
     // control the Profile card has swapped for this same gate.
     expect(container.textContent).not.toContain("Go to Profile");
+  });
+
+  it("single-founder community: the honest locked card — no meter that can never complete", () => {
+    // One published hash, one root, circle of one: the meter's
+    // promise is structurally impossible, so it must not render.
+    mockState.founderRoots = new Set([founderKey]);
+    mockState.founderHashCapture = { nodeId, hashes: ["hash-of-founder"] };
+    mockState.invites = [];
+    render();
+    expect(container.textContent).toContain(
+      "This community still has a single founder",
+    );
+    expect(container.textContent).not.toContain(
+      "Inviting opens up with trust",
+    );
+    // Digits tripwire: no progress-meter numbers in the locked state.
+    expect(container.textContent).not.toMatch(/\d+\s*of\s*\d+/i);
+    expect(container.textContent).not.toMatch(
+      /\d+\s*(vouch(es)?|avales?)/i,
+    );
   });
 
   it("trusted member with no invites: the empty-state CTA is exactly as before", () => {

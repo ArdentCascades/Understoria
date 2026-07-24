@@ -51,6 +51,14 @@ describe("humanizeError", () => {
     expect(humanizeError({ code: "voucher_not_trusted" })).toBe(friendly);
   });
 
+  it("translates the closure gate's closer_not_trusted code (string, message, or .code)", () => {
+    const friendly =
+      "Recording a community outcome opens up once the community fully vouches for you. Nothing is lost — the decision waits for a fully vouched member to record it, and your block always counts.";
+    expect(humanizeError("closer_not_trusted")).toBe(friendly);
+    expect(humanizeError(new Error("closer_not_trusted"))).toBe(friendly);
+    expect(humanizeError({ code: "closer_not_trusted" })).toBe(friendly);
+  });
+
   it("translates the node's newcomer_daily_limit code", () => {
     const friendly =
       "Today's share of new posts from a new member is full — the rest will send automatically tomorrow. The limit lifts once the community fully vouches for you.";

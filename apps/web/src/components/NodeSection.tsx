@@ -35,6 +35,7 @@ import { flushOutboxNow } from "@/lib/outbox";
 import { claimFounder, fetchClaimStatus } from "@/lib/nodeClaim";
 import { useApp } from "@/state/AppContext";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { SoleFounderCard } from "@/components/SoleFounderCard";
 
 export function NodeSection() {
   const { t } = useTranslation();
@@ -167,6 +168,13 @@ export function NodeSection() {
 
       <FounderClaimCard url={persisted.url || draft.url} />
 
+      {/* Single-founder standing warning + Add-a-co-founder doorway
+          (docs/cofounder-ceremony-plan.md P4) — beside the claim card
+          because this is where founders come back to after claiming. */}
+      <div className="mt-3">
+        <SoleFounderCard />
+      </div>
+
       <OutboxControls />
 
       {/* The /invite paste-recovery entry point stays reachable from
@@ -277,9 +285,23 @@ function FounderClaimCard({ url }: { url: string }) {
       {expanded && (
         <div className="mt-2 rounded-xl border border-bark-200/60 bg-bark-50 p-3 text-sm dark:border-moss-800 dark:bg-moss-900/40">
           {result?.kind === "success" ? (
-            <p className="text-canopy-700 dark:text-canopy-300">
-              {t("profile.node.claim.success")}
-            </p>
+            <>
+              <p className="text-canopy-700 dark:text-canopy-300">
+                {t("profile.node.claim.success")}
+              </p>
+              {/* Communities start with two founders — the claim
+                  moment is where that gets said first, with the
+                  doorway (docs/cofounder-ceremony-plan.md P4). */}
+              <p className="mt-2 text-moss-600 dark:text-moss-300">
+                {t("cofounder.claimSuccess.next")}
+              </p>
+              <Link
+                to="/add-cofounder"
+                className="mt-1 inline-block font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+              >
+                {t("cofounder.claimSuccess.cta")} →
+              </Link>
+            </>
           ) : unclaimed === null ? (
             <p className="text-moss-600 dark:text-moss-300">
               {t("profile.node.claim.statusUnknown")}
@@ -394,19 +416,21 @@ function Telemetry({
   const haveSuccess = !!lastSuccess && lastSuccess.length > 0;
   const haveError = !!lastError && lastError.length > 0;
   // Known server codes get their humane, translated copy instead of
-  // the bare wire code. Today: the trust gate's 403s — the node
-  // refuses invite announcements (and redemptions) from, and vouches
-  // by, a member the community hasn't fully vouched for, and the
-  // outbox records the code verbatim as lastError. voucher_ is
-  // checked first: both codes end in "not_trusted" but never
-  // co-occur in one lastError string.
+  // the bare wire code. Today: the trust gates' 403s — the node
+  // refuses invite announcements (and redemptions) from, vouches by,
+  // and proposal closures signed by a member the community hasn't
+  // fully vouched for, and the outbox records the code verbatim as
+  // lastError. The *_not_trusted codes never co-occur in one
+  // lastError string, so first match wins.
   const errorMessage = lastError?.includes("voucher_not_trusted")
     ? t("vouch.errors.voucher_not_trusted")
     : lastError?.includes("inviter_not_trusted")
       ? t("invite.errors.inviter_not_trusted")
-      : lastError?.includes("newcomer_daily_limit")
-        ? t("newcomer.errors.newcomer_daily_limit")
-        : lastError;
+      : lastError?.includes("closer_not_trusted")
+        ? t("proposals.errors.closer_not_trusted")
+        : lastError?.includes("newcomer_daily_limit")
+          ? t("newcomer.errors.newcomer_daily_limit")
+          : lastError;
 
   if (!haveSuccess && !haveError) {
     return (

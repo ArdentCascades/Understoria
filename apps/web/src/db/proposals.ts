@@ -37,6 +37,11 @@ import type {
 } from "@/types";
 import Dexie from "dexie";
 import { db, getSetting, SETTING_KEYS } from "./database";
+import {
+  readFounderHashCapture,
+  resolveFounderRoots,
+} from "@/lib/founderRoots";
+import { trustStatusWithInvites } from "@/lib/vouch";
 
 // Agent 13 task 1 — Proposals MVP. CRUD helpers + status queries.
 // Voting + automatic close are deferred to a follow-up PR; for
@@ -356,6 +361,15 @@ export async function closeProposal(
   outcome: "passed" | "rejected" | "withdrawn",
   reason: string,
 ): Promise<Proposal> {
+  // Trusted-closer guard, BEFORE any local effect: the node's 403 is
+  // defense enough for the wire, but a passed config_change applies a
+  // full NodeConfig locally below without waiting for it — so a
+  // pending closer must be stopped here, not at delivery. Same
+  // capture posture as issueInvite (no capture ⇒ allow, the node
+  // enforces); the proposer withdrawing their own proposal is exempt,
+  // mirroring the server rule exactly. Throws the server's own code
+  // so humanizeError speaks one message for both layers.
+  await assertCloserTrusted(proposalId, outcome);
   const closed = await closeProposalLocally(proposalId, outcome, reason);
   // Phase G2: config convergence — the closing device applies the
   // passed payload immediately; every other device applies it when
@@ -403,6 +417,40 @@ export async function closeProposal(
     /* local close stands; no wire record from this device */
   }
   return closed;
+}
+
+/** The closeProposal trust check (see its call-site comment). Reads
+ *  raw `db.vouches` — the decision discipline: a viewer's block
+ *  filter changes what they SEE, never what anyone can ENACT. */
+async function assertCloserTrusted(
+  proposalId: string,
+  outcome: "passed" | "rejected" | "withdrawn",
+): Promise<void> {
+  const capture = await readFounderHashCapture();
+  if (!capture || capture.hashes.length === 0) return;
+  const me = await getSetting(SETTING_KEYS.currentMember);
+  // No signer on this device: the close stays local-only (legacy
+  // posture) and mints no wire record — nothing to judge.
+  if (!me) return;
+  const proposal = await db.proposals.get(proposalId);
+  if (outcome === "withdrawn" && proposal?.proposerKey === me) return;
+  const [vouches, invites, members] = await Promise.all([
+    db.vouches.toArray(),
+    db.invites.toArray(),
+    db.members.toArray(),
+  ]);
+  // Own key rides along in case the member row hasn't materialized —
+  // widening the founder set can only allow more, never less.
+  const founderRoots = resolveFounderRoots(capture, [
+    ...members.map((m) => m.publicKey),
+    me,
+  ]);
+  if (
+    trustStatusWithInvites(me, { vouches, invites, founderRoots }) !==
+    "trusted"
+  ) {
+    throw new Error("closer_not_trusted");
+  }
 }
 
 async function closeProposalLocally(

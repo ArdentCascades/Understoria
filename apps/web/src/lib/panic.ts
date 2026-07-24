@@ -113,6 +113,12 @@ export const SOFT_PURGE_CLASSIFICATION: Readonly<
   memberRemovals: "preserved", // quorum governance records, signed
   memberReinstatements: "preserved", // same class as removals
   proposalClosures: "preserved", // signed governance outcomes
+  // Dual-signed founding record: public keys, timestamps, signatures
+  // — no free text, and the fact it attests (two roots) is already
+  // published as hashes on GET /config. It is the community's
+  // root-recovery artifact; a soft purge must not cost the community
+  // its second founder.
+  founderAccessions: "preserved",
   coorgInvitations: "preserved", // signed key↔key records; free text
   coorgInvitationResponses: "preserved", // lives in the project rows,
   coorgInvitationRevocations: "preserved", // which ARE scrubbed

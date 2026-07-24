@@ -28,14 +28,36 @@ import { MINIMUM_VOUCHES_FOR_TRUST } from "@/lib/vouch";
 // reads as that member's score (no-leaderboards), and
 // MemberDetail's tripwire test forbids any digits-next-to-"vouches"
 // on the page.
+//
+// `locked` is the single-founder honesty variant
+// (lib/singleFounder.ts): with one founder root, NOBODY can reach
+// trusted — a have/need meter would be a promise the community
+// cannot keep. The variant renders `${base}.singleFounder.title` /
+// `.body` and suppresses the progress meter AND the how-to entirely
+// (the "how" is structurally impossible until a co-founder exists;
+// the mechanism is named, never the person).
 export function TrustGateCard({
   i18nBase,
   have,
+  locked = false,
 }: {
   i18nBase: string;
   have?: number;
+  locked?: boolean;
 }) {
   const { t } = useTranslation();
+  if (locked) {
+    return (
+      <div className="rounded-xl bg-moss-50 p-3 dark:bg-moss-900">
+        <h3 className="text-sm font-semibold text-moss-900 dark:text-moss-50">
+          {t(`${i18nBase}.singleFounder.title`)}
+        </h3>
+        <p className="mt-1 text-sm text-moss-700 dark:text-moss-200">
+          {t(`${i18nBase}.singleFounder.body`)}
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="rounded-xl bg-moss-50 p-3 dark:bg-moss-900">
       <h3 className="text-sm font-semibold text-moss-900 dark:text-moss-50">
@@ -63,6 +85,12 @@ export function TrustGateCard({
  *  Invites card and the /invites empty state (db/invites.ts
  *  `inviteIssuanceAllowed`). Viewing existing/past invites is
  *  deliberately NOT gated; only generation is. */
-export function InviteTrustGateCard({ have }: { have: number }) {
-  return <TrustGateCard i18nBase="invites.gate" have={have} />;
+export function InviteTrustGateCard({
+  have,
+  locked = false,
+}: {
+  have: number;
+  locked?: boolean;
+}) {
+  return <TrustGateCard i18nBase="invites.gate" have={have} locked={locked} />;
 }

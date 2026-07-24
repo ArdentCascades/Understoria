@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { TrustGateCard } from "@/components/InviteTrustGateCard";
 import { removalQuorum } from "@/lib/memberRemoval";
+import { singleFounderLocked } from "@/lib/singleFounder";
 import { trustStatusWithInvites, trustedCircleSize } from "@/lib/vouch";
 
 // Removal/reinstatement co-signing is a trusted-member power: the
@@ -34,10 +35,16 @@ import { trustStatusWithInvites, trustedCircleSize } from "@/lib/vouch";
 export type RemovalGateState =
   | { kind: "allowed" }
   | { kind: "pending_trust" }
+  // Single-founder honesty (lib/singleFounder.ts): with one root the
+  // trusted circle can never reach ANY quorum, so a circle-short
+  // "have/need" meter would be a promise that cannot complete.
+  // Checked before circle_short; renders without numbers.
+  | { kind: "single_founder" }
   | { kind: "circle_short"; have: number; need: number };
 
 export function useRemovalGate(): RemovalGateState {
-  const { currentMember, vouches, invites, founderRoots } = useApp();
+  const { currentMember, vouches, invites, founderRoots, founderHashCapture } =
+    useApp();
   const [quorum, setQuorum] = useState(3);
   useEffect(() => {
     // Cancellation-guarded (the useVouchDiscoveryNudge pattern): the
@@ -62,10 +69,12 @@ export function useRemovalGate(): RemovalGateState {
     if (trustStatusWithInvites(currentMember.publicKey, ctx) !== "trusted")
       return { kind: "pending_trust" };
     const have = trustedCircleSize(ctx);
+    if (singleFounderLocked(founderHashCapture ?? null, have))
+      return { kind: "single_founder" };
     if (have !== null && have < quorum)
       return { kind: "circle_short", have, need: quorum };
     return { kind: "allowed" };
-  }, [currentMember, vouches, invites, founderRoots, quorum]);
+  }, [currentMember, vouches, invites, founderRoots, founderHashCapture, quorum]);
 }
 
 /**
@@ -84,6 +93,14 @@ export function RemovalGateNotice({
   const { t } = useTranslation();
   if (gate.kind === "pending_trust") {
     return <TrustGateCard i18nBase="removals.gate" />;
+  }
+  if (gate.kind === "single_founder") {
+    // Deliberately number-free — see the single_founder state note.
+    return (
+      <p className="rounded-xl bg-moss-50 p-3 text-sm text-moss-700 dark:bg-moss-900 dark:text-moss-200">
+        {t("removals.singleFounder")}
+      </p>
+    );
   }
   return (
     <p className="rounded-xl bg-moss-50 p-3 text-sm text-moss-700 dark:bg-moss-900 dark:text-moss-200">

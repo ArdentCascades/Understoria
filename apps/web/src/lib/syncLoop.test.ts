@@ -40,6 +40,7 @@ function makeMockPulls(): MockPulls {
     "pullCapacityPostures",
     "pullFederatedMemberRemovals",
     "pullFederatedMemberReinstatements",
+    "pullFounderNomination",
     "pullFederatedProposals",
     "pullFederatedVotes",
     "pullFederatedProposalClosures",

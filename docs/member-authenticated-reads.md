@@ -144,7 +144,13 @@ The claim is **one-shot**: it answers `409 already_claimed` the
 moment any trust root exists, and everything after the first founder
 uses the ordinary machinery — invites for members, quorum removal to
 retire anyone (claimed founders included), `NODE_FOUNDER_KEYS` for
-additional roots or recovery. `/claim-founder` is open by
+additional roots or recovery. **The second root has its own in-band
+path**: the co-founder ceremony (`docs/cofounder-ceremony-plan.md`)
+— a founder-signed nomination plus the nominee's own signed
+acceptance, admitted transactionally only while the root count is
+exactly one, landing in the same `claimed_founders` table. Founders
+one and two both arrive without anyone editing env vars; roots
+beyond two remain an operator action. `/claim-founder` is open by
 construction, like `/redemptions`: it is the step that makes
 membership exist. The unclaimed window between boot and claim is
 strictly safer than the old open default — an unclaimed node refuses

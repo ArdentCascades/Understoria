@@ -62,6 +62,14 @@ const CODE_MESSAGES: Record<string, string> = {
   // button, but the node has the final word).
   voucher_not_trusted:
     "The community server isn't counting your vouch yet — vouching starts counting once two trusted members have vouched for you.",
+  // The closure trust gate (server proposals.governance.ts): only a
+  // trusted member may record a proposal's outcome. Thrown by the
+  // db-layer guard at the point of action and recorded verbatim as
+  // outbox lastError on the node's 403 — both are WAITING states
+  // (the 403 is retryable; a queued closure delivers itself once the
+  // closer is vouched), so the copy says waiting, never rejected.
+  closer_not_trusted:
+    "Recording a community outcome opens up once the community fully vouches for you. Nothing is lost — the decision waits for a fully vouched member to record it, and your block always counts.",
   // The newcomer anti-spam cap (server newcomerCaps.ts): the node
   // accepts a day's worth of new content from a not-yet-vouched
   // author; the outbox retries 429s, so the surplus delivers itself

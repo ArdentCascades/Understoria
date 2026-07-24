@@ -113,6 +113,18 @@ export // Deliberately ABSENT: `claims`. There is no client-side claims
 const RESEED_KINDS: readonly ReseedKindSpec[] = [
   // Membership first — receipts are what READ_AUTH derives from.
   { path: "/redemptions", table: "redemptionReceipts", conflict409: "skip" },
+  // docs/cofounder-ceremony-plan.md: the dual-signed accession is the
+  // recovery artifact for the second founder root — replayed inside
+  // the reseed grace window (live expiry waived; record-internal
+  // bounds still enforced), right after the receipts its nominee's
+  // membership derives from. 409 here is the route's clean
+  // root_count_not_one refusal (roots already ≠ {nominator}) — a
+  // permanent state for this node, never a referent race.
+  {
+    path: "/founder-accession",
+    table: "founderAccessions",
+    conflict409: "skip",
+  },
   {
     path: "/invite-revocations",
     table: "inviteRevocationRecords",

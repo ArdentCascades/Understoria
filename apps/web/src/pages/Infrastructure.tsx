@@ -23,6 +23,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
+import { SoleFounderCard } from "@/components/SoleFounderCard";
 import { shareOrigin } from "@/lib/appOrigin";
 import { db, getSetting, setSetting, SETTING_KEYS } from "@/db/database";
 import {
@@ -172,6 +173,12 @@ export default function InfrastructurePage() {
           {t("infra.tagline")}
         </p>
       </header>
+
+      {/* Single-founder posture (docs/cofounder-ceremony-plan.md P4):
+          on the page about what keeps the community standing, one
+          trust root is the first thing worth seeing. Renders only for
+          the sole founder. */}
+      <SoleFounderCard />
 
       <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-4">
         {/* Servers */}

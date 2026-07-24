@@ -1154,8 +1154,14 @@ invitee into a trusted member: your invite counts as their first;
 someone else vouches after they join.
 
 The same trust bar guards the community's other formal powers:
-**vouching for someone** and **co-signing a member removal** both
-start counting once the community has fully vouched for *you*. (And
+**vouching for someone**, **co-signing a member removal**, and
+**recording a proposal's outcome** all start counting once the
+community has fully vouched for *you*. In governance you still do
+everything from day one — propose, discuss, vote — and a **block
+from you always counts immediately** (one block stops any proposal
+from passing); your affirm votes are recorded and visible right
+away, and they start counting toward consensus the moment you're
+vouched. Nothing you do before then is wasted. (And
 a removal additionally needs three trusted members' signatures in
 total — a very young community with fewer than three trusted people
 can't formally remove anyone yet, on purpose: at that size, problems
@@ -1172,6 +1178,19 @@ extra waits on your device and sends itself tomorrow, and the app
 tells you so in plain words. Claiming, exchanging, messaging, and
 joining things are never limited, and the daily amounts disappear
 entirely once you're vouched for.
+
+One honest edge case: **if your community still has only one
+founder**, nobody can become fully vouched yet — reaching trusted
+takes two vouches from people who are themselves trusted, and there's
+only one such person so far. The app won't show you progress meters
+that can't complete; instead it says so plainly, and the founder can
+open everything up in one step by adding a co-founder (their device
+walks them through it — you'd scan or send them your full key from
+your Profile, then accept on your own device; accepting means
+permanently becoming a founding trust root yourself, so it's
+explained carefully before you sign). Nothing you do while you wait
+is wasted — every exchange and every recorded vouch starts counting
+the moment there are two founders.
 
 One more safety measure in the same spirit: **links you share aren't
 tappable for others until you're vouched.** People still see the

@@ -2153,21 +2153,60 @@ We are not trying to protect against:
   stored are never re-judged (grandfathered — trust is currently
   monotone, so a co-sign valid when made stays valid). The client
   ceremony surfaces gate with the shared trust-gate card at the
-  point of action, per the standing clarity ruling. Still tracked,
-  undecided: proposal governance remains membership-only, and the
-  exposure there is real — auto-pass EXISTS
-  (`lib/autoCloseProposals.ts`: ≥ `proposalMinAffirms` affirm
-  votes, default 2, no blocks, deliberation window elapsed →
-  passed; an earlier revision of this entry wrongly said it did
-  not), any member may also manually record an outcome closure at
-  any time (the contested chip is the honesty layer, not a gate),
-  and a passed `config_change` applies a full `NodeConfig`
-  payload — including `dailyHelperLimit`, `autoConfirmHours`, and
-  the auto-pass knobs themselves. Pending members' affirms and
-  closures currently count. The open question is whether
-  affirm-counting and closure signing should require trust
-  (block votes should likely stay open to every member — they are
-  protective, and one block halts auto-pass).
+  point of action, per the standing clarity ruling.
+- **Proposal governance is trust-gated (closing the last tracked
+  pending-member power).** Operator-decided
+  (`docs/trusted-governance-plan.md` is the full design record):
+  affirm votes COUNT toward auto-pass only when the voter is
+  trusted under the founder-rooted closure, and recording an
+  outcome closure requires trusted status — while BLOCK votes stay
+  open to every member (purely protective: one block halts
+  auto-pass, and the node's parameter-free standing-block guard
+  already honors blocks from anyone). Pending members keep
+  proposing, voting, and deliberating; their stored affirms start
+  counting the moment they become trusted (evaluation is stateless
+  re-computation over append-only inputs — no migration). Server
+  surface: 403 `closer_not_trusted` on `POST /proposal-closures`
+  for untrusted closers, placed AFTER the first-writer-wins
+  idempotent 200 (structural grandfathering: stored and pre-gate
+  closures are never re-judged), with one exemption — a proposer
+  may withdraw their OWN proposal while pending (withdrawal enacts
+  nothing and is self-scoped; a newcomer's mistaken proposal must
+  not be stuck open for the whole deliberation window; withdrawing
+  anyone else's stays gated, and `rejected` is gated because
+  first-writer-wins would make it a proposal-killing race
+  primitive). Exemptions as ever: mirror-internal replication,
+  founderless nodes, the declared reseed grace window (the reseed
+  walker re-POSTs closures before the vouches that qualify their
+  closers). Client surface: eligibility counts trusted affirms
+  (computed from UNFILTERED vouches — a viewer's blocks change
+  what they see, never what anyone can enact); the consensus
+  banner's enact button appears only for trusted viewers, with an
+  honest "waiting for a vouched hand" state otherwise; the manual
+  record-outcome buttons gate behind the shared trust-gate card;
+  the tally shows a dual count ("N of M counting") when pending
+  affirms exist; a defense-in-depth db-layer throw stops a pending
+  device from applying `config_change` effects locally before the
+  wire. The contested chip stays block-based only — a
+  trusted-affirm-shortfall state would flap during normal
+  vouch-sync lag and retroactively brand grandfathered closures;
+  the dual-count tally is the honesty surface. Convergence rests
+  on trust monotonicity (append-only edges and roots): a lagging
+  device can show "wait" early but never a premature "passes", and
+  enactment disagreements heal through the retryable-403 outbox in
+  both directions. Named residuals, honestly: (1) a modified
+  client held by a TRUSTED member can close over pending-only
+  affirms — the server cannot hold community config
+  (`proposalMinAffirms` is client-side `NodeConfig`), so this is
+  accepted, signature-attributed, and surfaced by the dual count;
+  (2) captureless devices keep legacy counting until their first
+  `/config` capture (transient); (3) Phase-2 vouch withdrawal
+  (`docs/invite-revocation.md` §9, unratified) would break the
+  monotonicity this analysis rests on — closures stand regardless
+  (grandfathered), but open-proposal eligibility would need the
+  withdrawal semantics decided there; (4) in a small circle only
+  founders can enact — the same deliberate shape as the removal
+  quorum, and the gate copy says so.
 - **Newcomer daily creation caps (anti-spam for pending
   authors).** Operator-decided ("I do want to prevent spam";
   credit farming explicitly deprioritized — balances are private
@@ -2230,6 +2269,52 @@ We are not trying to protect against:
   graph. A source-guard test pins that every federated Markdown
   call site passes the author key, so future surfaces cannot
   silently forget the gate.
+- **The co-founder ceremony: adding a second trust root without
+  touching the server.** Operator-approved
+  (`docs/cofounder-ceremony-plan.md` is the full design record,
+  pre-mortem included). A single-founder community is structurally
+  deadlocked — promotion needs two distinct TRUSTED vouchers, and
+  there is only one trusted person — so the sole founder can
+  nominate ONE co-founder in-app: capture the co-founder's public
+  key by scanning their Profile full-key QR in person or pasting it
+  (never a roster picker — the "no member-list browsing surface"
+  principle holds; the key travels by its owner deliberately
+  showing or sending it, which is consent-shaped from the first
+  step), confirm against the resolved member's NAME AND AVATAR
+  (wrong-key social engineering dies at the confirm step: "you are
+  making {{name}} a founder, permanently"), and sign a nomination
+  with a 72-hour signed expiry. The NOMINEE must accept with their
+  own signature on their own device — the accept card states
+  plainly that founding is permanent (no founder-removal mechanism
+  exists; removing a root could cascade-demote everyone whose
+  trust chains through it) — and delivery is recipient-proof
+  scoped: a member can only ever fetch a nomination addressed to a
+  key they cryptographically prove, so the relay is not an
+  enumeration oracle. The node verifies BOTH signature layers and
+  admits the second root inside one transaction that re-counts the
+  founder roots and refuses unless the count is exactly one and
+  the nominator is that root (`root_count_not_one`): two racing
+  accessions — first wins, second gets a clean refusal, and the
+  gate is on root COUNT, never trusted-circle size, because the
+  circle can shrink (the pre-mortem's reopening attack) while the
+  root count cannot. Replaying a byte-identical accession is
+  harmless idempotent convergence (200), which is also the reseed
+  story: the dual-signed accession is the recovery artifact,
+  persisted on the accepting member's devices and re-POSTable
+  under the declared reseed grace window (record-internal time
+  bounds always enforced; live expiry waived only in-window).
+  Known gap, named: if founder #1 recovers from disaster with a
+  NEW key, the stored accession's nominator no longer matches the
+  sole root and cannot re-verify — the community re-runs the
+  ceremony. Until a community has two roots, the app says so
+  honestly everywhere it matters: the invite/vouch/removal gate
+  cards drop their progress meters for the truthful "no one can
+  become fully vouched until a second founder joins — nothing you
+  do is wasted" state, the sole founder sees a warning card with
+  the Add-a-co-founder doorway (and the fact that their own
+  invites still work), and the node logs a one-time single-founder
+  warning at boot and on resolver rebuild. Founderless nodes get
+  none of this — no root, nothing to warn about, no ceremony.
 - **Desktop shell (Linux AppImage): a new client runtime, named
   costs.** `apps/desktop` wraps the byte-identical web bundle in
   Electron so a member needs no installed browser and — because the
