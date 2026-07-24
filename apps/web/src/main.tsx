@@ -52,7 +52,13 @@ if (isDesktopShell()) {
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <BrowserRouter>
+      {/* v7 future flags (docs/react-router-7-plan.md Phase 1):
+          run the v7 behaviors on v6 so any startTransition
+          regression bisects to this dependency-free commit.
+          Removed again in Phase 2 — v7 rejects v7_* flags. */}
+      <BrowserRouter
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
         <AppProvider>
           <ToastProvider>
             <App />
