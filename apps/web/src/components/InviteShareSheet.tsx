@@ -288,8 +288,8 @@ function MenuView({
   onShowRequested: () => void;
   onShareWithoutShowing: () => void;
   onCancel: () => void;
-  cancelRef: React.RefObject<HTMLButtonElement>;
-  shareWithoutShowingRef: React.RefObject<HTMLButtonElement>;
+  cancelRef: React.RefObject<HTMLButtonElement | null>;
+  shareWithoutShowingRef: React.RefObject<HTMLButtonElement | null>;
   t: (key: string) => string;
 }) {
   return (
@@ -367,7 +367,7 @@ function CameraCheckView({
   status: string | null;
   onConfirm: () => void;
   onCancel: () => void;
-  cancelRef: React.RefObject<HTMLButtonElement>;
+  cancelRef: React.RefObject<HTMLButtonElement | null>;
   t: (key: string) => string;
 }) {
   return (
@@ -441,7 +441,7 @@ function RevealedView({
   onCopy: () => void;
   onShare: () => void;
   onClose: () => void;
-  doneRef: React.RefObject<HTMLButtonElement>;
+  doneRef: React.RefObject<HTMLButtonElement | null>;
   t: (key: string) => string;
 }) {
   return (

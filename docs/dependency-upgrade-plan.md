@@ -48,13 +48,12 @@ typecheck, eslint, PWA production build, `npm audit` still 0.
    react-router-7-plan.md discipline: verified API inventory,
    hard-constraint analysis, phased commits, rollback story)
 
-1. **React 19** (+ @types 19) — the strategic one: prerequisite for
-   react-router 8 and the ecosystem's settled target. The app is
-   function-components/hooks throughout; the survey work is the
-   deprecated-API sweep (defaultProps on function components,
-   ReactDOM.render — none expected), the @types/react churn, and
-   re-verifying the Conversation scroll constraint under React 19's
-   render timing. Do NOT bundle with anything else.
+1. **React 19** (+ @types 19) — SHIPPED (docs/react-19-plan.md).
+   The sweep confirmed the app was already clean (zero removed-API
+   usage, zero forwardRef, harness already 19-shaped); total source
+   churn was 5 lines in 2 files. Conversation scroll constraint
+   verified untouched. react-router 8.3.0 (peer react >=19.2.7) is
+   now unblocked — its own plan doc first, per this tier's rule.
 2. **Tailwind 4** — the biggest lift: CSS-first configuration
    replaces tailwind.config across apps/web AND apps/site; the
    a11y-sensitive moss/canopy palette and dark-mode variants must
