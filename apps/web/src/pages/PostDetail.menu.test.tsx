@@ -310,9 +310,13 @@ describe("PostDetailPage — cancelled post offers the owner a path forward", ()
     mockState.posts = [post({ status: "cancelled" })];
     mockState.currentMember = member(posterKey, "Pat Poster");
     render();
-    const link = container.querySelector<HTMLAnchorElement>(
-      'a[href="/post/new?repost=post-1&again=1"]',
-    );
+    // Found by attribute scan, not a CSS selector: jsdom 29's selector
+    // engine can't match a literal & inside a quoted attribute value —
+    // see test/jsdomSelectorQuirks.test.ts.
+    const link =
+      Array.from(container.querySelectorAll<HTMLAnchorElement>("a")).find(
+        (a) => a.getAttribute("href") === "/post/new?repost=post-1&again=1",
+      ) ?? null;
     expect(link).not.toBeNull();
     expect(link!.textContent).toContain("Repost with changes");
     // The hint says the fresh-post truth: new post, this one stays
