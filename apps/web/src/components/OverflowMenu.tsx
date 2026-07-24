@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 // Reusable overflow (kebab) menu. Behavior is ported verbatim from the
 // header menu that was inlined in pages/Conversation.tsx so every
@@ -55,7 +55,7 @@ export function OverflowMenu({
   label: string;
   /** Which edge the popover aligns to. Defaults to "right". */
   align?: "left" | "right";
-}): JSX.Element | null {
+}): React.JSX.Element | null {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);

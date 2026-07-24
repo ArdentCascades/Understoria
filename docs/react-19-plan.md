@@ -95,8 +95,12 @@ claim below is from that file, cross-checked against our greps:
   receive refs created as `useRef<HTMLButtonElement>(null)` → type
   error under 19. **Fix: add `| null`** (exactly what
   ReorderTasksDialog.tsx:318/353 and useFocusTrap/useSlashFocus
-  already do). The `| null` form typechecks under BOTH 18 and 19
-  types (18's RefObject has readonly covariant `current`).
+  already do). Execution correction (found by running tsc, recorded
+  honestly): the `| null` form does NOT typecheck under the 18
+  types — in the JSX `ref=` position 18's `Ref<T>` rejects
+  `RefObject<T | null>` on interface variance, even though the two
+  are structurally identical there. So this fix rides Phase 2 (the
+  version bump), not Phase 1.
 - **`MutableRefObject` is deprecated but still present** (verified
   `@deprecated Use RefObject instead` at index.d.ts:1670). Our 3
   sites (`lib/useStepFocus.ts` ×2, the documented cast in
@@ -205,18 +209,15 @@ typecheck`, `npm test`, `npm run build`; record `npm audit` (0
 vulns) and the web suite count. Confirms green before any change.
 
 **Phase 1 — commit "types-forward fixes compatible with React 18
-and 19"** — 2 files, 5 lines, no dependency change:
+and 19"** — 1 file, no dependency change:
 1. `apps/web/src/components/OverflowMenu.tsx:58`
-   `JSX.Element` → `React.JSX.Element` (adjust the React import to
-   include the namespace if needed — file currently has no default
-   React import).
-2. `apps/web/src/components/InviteShareSheet.tsx:291,292,370,444`
-   `React.RefObject<HTMLButtonElement>` →
-   `React.RefObject<HTMLButtonElement | null>`.
-Gates: `npm --workspace @understoria/web run typecheck`, full web
-suite from apps/web (`npm --workspace @understoria/web test`),
-`npm --workspace @understoria/web run lint`. Rollback: revert the
-commit — it is semantically inert under 18.
+   `JSX.Element` → `React.JSX.Element` (plus the React namespace
+   import — the file had no default React import).
+The InviteShareSheet `| null` fix originally planned here moved to
+Phase 2: it does not compile under the 18 types (see §2).
+Gates: `npm --workspace @understoria/web run typecheck`, targeted
+suites, `npm --workspace @understoria/web run lint`. Rollback:
+revert the commit — it is semantically inert under 18.
 
 **Phase 2 — commit "react 18.3.1 → 19.2.8"** — 2 files
 (apps/web/package.json + root package-lock.json), executed from
@@ -227,6 +228,8 @@ npm install --workspace @understoria/web \
 npm install --workspace @understoria/web --save-dev \
   @types/react@^19.2.17 @types/react-dom@^19.2.3
 ```
+Plus the 4-line InviteShareSheet `| null` fix moved here from
+Phase 1 (§2).
 Lockfile expectation: react/react-dom 19.2.8, scheduler 0.27.x,
 @types/react 19.2.17, @types/react-dom 19.2.3, loose-envify +
 js-tokens gone, **no duplicate react** (`npm ls react @types/react`
