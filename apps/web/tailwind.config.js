@@ -83,6 +83,63 @@ export default {
           800: "#3a3225",
           900: "#241f18",
         },
+        // Stock families pinned to their Tailwind 3 hex values. Under
+        // v3 these equal the defaults (no-op); under v4 they defeat
+        // the oklch default palette so rendered colors stay equal to
+        // the hexes lib/a11y/palette-contrast.test.ts certifies. See
+        // docs/tailwind-4-plan.md.
+        amber: {
+          50: "#fffbeb",
+          100: "#fef3c7",
+          200: "#fde68a",
+          300: "#fcd34d",
+          400: "#fbbf24",
+          500: "#f59e0b",
+          600: "#d97706",
+          700: "#b45309",
+          800: "#92400e",
+          900: "#78350f",
+          950: "#451a03",
+        },
+        rose: {
+          50: "#fff1f2",
+          100: "#ffe4e6",
+          200: "#fecdd3",
+          300: "#fda4af",
+          400: "#fb7185",
+          500: "#f43f5e",
+          600: "#e11d48",
+          700: "#be123c",
+          800: "#9f1239",
+          900: "#881337",
+          950: "#4c0519",
+        },
+        red: {
+          50: "#fef2f2",
+          100: "#fee2e2",
+          200: "#fecaca",
+          300: "#fca5a5",
+          400: "#f87171",
+          500: "#ef4444",
+          600: "#dc2626",
+          700: "#b91c1c",
+          800: "#991b1b",
+          900: "#7f1d1d",
+          950: "#450a0a",
+        },
+        indigo: {
+          50: "#eef2ff",
+          100: "#e0e7ff",
+          200: "#c7d2fe",
+          300: "#a5b4fc",
+          400: "#818cf8",
+          500: "#6366f1",
+          600: "#4f46e5",
+          700: "#4338ca",
+          800: "#3730a3",
+          900: "#312e81",
+          950: "#1e1b4b",
+        },
       },
       fontFamily: {
         sans: [
@@ -125,6 +182,15 @@ export default {
         // Soft dual-layer shadow tinted with canopy green. Use for
         // cards instead of shadow-sm; blends with the woodland palette.
         leaf: "0 1px 2px rgb(20 83 45 / 0.04), 0 4px 12px rgb(20 83 45 / 0.05)",
+        // shadow-sm pinned to its Tailwind 3 value (v4 renames the
+        // scale so sm would mean the old DEFAULT). No-op under v3.
+        // See docs/tailwind-4-plan.md.
+        sm: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+      },
+      // rounded-sm pinned to its Tailwind 3 value (v4 shifts it to
+      // 0.25rem). No-op under v3. See docs/tailwind-4-plan.md.
+      borderRadius: {
+        sm: "0.125rem",
       },
       animation: {
         "milestone-pop": "milestone-pop 600ms cubic-bezier(0.2, 0.8, 0.2, 1)",
