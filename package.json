@@ -15,5 +15,10 @@
     "test": "npm run shared:build && npm --workspaces --if-present run test",
     "typecheck": "npm run shared:build && npm --workspaces --if-present run typecheck",
     "postinstall": "npm run shared:build"
+  },
+  "overrides": {
+    "eslint-plugin-jsx-a11y": {
+      "eslint": "^10.8.0"
+    }
   }
 }
