@@ -11,7 +11,7 @@
  */
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { MemoryRouter, Routes, Route } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Voice notes in the conversation page: the composer's mic button

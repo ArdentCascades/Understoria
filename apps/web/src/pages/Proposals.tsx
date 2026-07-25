@@ -16,7 +16,7 @@ import { CosignRemoval } from "@/components/CosignRemoval";
 import { RemovalCeremony } from "@/components/RemovalCeremony";
 import { RemovalGateNotice, useRemovalGate } from "@/components/useRemovalGate";
 import { deriveRemovedKeys } from "@/lib/memberRemoval";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { BackLink } from "@/components/BackLink";

@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { Outlet } from "react-router-dom";
+import { Outlet } from "react-router";
 import { useTranslation } from "react-i18next";
 import { AppHeader } from "./AppHeader";
 import { BottomNav } from "./BottomNav";

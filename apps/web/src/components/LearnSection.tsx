@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { Fragment, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import { DESIGN_PRINCIPLES } from "@/content/design-principles";
 import { MEMBER_GUIDE } from "@/content/member-guide";

@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 
 // The app's one back-link primitive, extracted from TaskDetail's
 // "← Back to {project}" affordance so detail pages stop reinventing

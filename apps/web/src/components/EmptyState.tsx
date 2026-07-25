@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { Illustration, type IllustrationName } from "@/components/visual";
 
 // Shared empty-state surface. Two layout variants:

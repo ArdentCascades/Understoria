@@ -16,7 +16,7 @@ import {
   useState,
   type ComponentType,
 } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import { FAQ_SECTIONS, type FaqEntry, type FaqSection } from "@/content/faq";
 import { FAQ_SECTIONS_ES } from "@/content/faq.es";

@@ -25,7 +25,7 @@ import {
   useMatch,
   useNavigate,
   useSearchParams,
-} from "react-router-dom";
+} from "react-router";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { trustStatusWithInvites, type TrustStatus } from "@/lib/vouch";
