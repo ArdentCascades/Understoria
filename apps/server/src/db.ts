@@ -1528,6 +1528,20 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '32')",
     ).run();
   }
+
+  // Schema v33 — retention sweep support (docs/node-seizure-plan.md
+  // §3.4). The settled-only transition sweep proves an exchange exists
+  // for the artifact's post via EXISTS on `exchanges.post_id`, which
+  // had no index (v1 indexes cover completed_at/helper_key/helped_key
+  // only). Index it so the sweep stays O(log n) per candidate row.
+  if (current < 33) {
+    db.exec(`
+      CREATE INDEX exchanges_post_id_idx ON exchanges (post_id);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '33')",
+    ).run();
+  }
 }
 
 /**

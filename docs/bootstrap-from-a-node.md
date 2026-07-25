@@ -221,4 +221,7 @@ Two habits keep the chain strong:
 
 Questions the runbooks don't answer live where all the others do:
 [`operator-guide.md`](./operator-guide.md) — §7a is the section
-about exactly this machinery.
+about exactly this machinery. The short doctrine behind it (the
+three continuity layers, why the tree travels without git history,
+and the drill that proves a downloaded pack really builds) is
+[`node-as-seed.md`](./node-as-seed.md).

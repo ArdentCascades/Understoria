@@ -525,6 +525,13 @@ disputes; a launch posture also needs:
 - **Moderator coverage.** Disputes route to `/disputes` in-app and
   to whoever owns the moderator role per [`GOVERNANCE.md`](
   ../GOVERNANCE.md). Someone has to be ready to respond.
+- **A censorship-resistant backup address (optional).** The stack
+  can publish an opt-in Tor **onion service** — a second front door
+  that keeps working if the clearnet domain is ever DNS-blocked or
+  seized: `docker compose --profile onion up -d --build`, then
+  follow [`tor-onion.md`](./tor-onion.md) (read the address, back
+  up the onion identity key, put the address on the printed backup
+  surfaces). Default deployments without the profile are unaffected.
 - **Incident plan.** Eight pre-written announcement templates ship
   in [`incident-templates.md`](./incident-templates.md): system-key
   rotation, member-data breach, federation depeering, extended

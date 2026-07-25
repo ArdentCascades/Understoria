@@ -274,6 +274,36 @@ export interface Config {
    *  runs. */
   capacitySampleKeepN: number;
   /**
+   * Retention-sweep worker cadence (`RETENTION_SWEEP_INTERVAL_MS`,
+   * default 6 h; 0 disables the worker) — docs/node-seizure-plan.md
+   * §3. The sweep deletes metadata a seized node should not yield
+   * forever: dead claims, expired invite announcements, SETTLED
+   * auto-confirm artifacts, and stale newcomer counters. It never
+   * touches trust sources (redemptions/vouches/claimed_founders/
+   * founder_accessions/invite_revocations) — those are append-only by
+   * invariant and the trust caches depend on it.
+   */
+  retentionSweepIntervalMs: number;
+  /** Days a claim row outlives `claimed_at` (`CLAIM_RETENTION_DAYS`,
+   *  default 90; 0 disables). Claims are loss-tolerant coordination
+   *  state by prior ruling — reseed skips them entirely. */
+  claimRetentionDays: number;
+  /** Days an invite announcement outlives its own `expires_at`
+   *  (`ANNOUNCEMENT_RETENTION_DAYS`, default 60; 0 disables). The
+   *  redemption receipt is the permanent membership authority; an
+   *  expired announcement is metadata about a dead credential. */
+  announcementRetentionDays: number;
+  /** Days a SETTLED awaiting-transition artifact outlives its
+   *  `received_at` (`TRANSITION_RETENTION_DAYS`, default 60; 0
+   *  disables; the floor is 3 — the operator GO/NO-GO query joins the
+   *  last 48 h, and pending artifacts are never pruned at all). */
+  transitionRetentionDays: number;
+  /** Days a newcomer daily-write counter outlives its `window_start`
+   *  (`NEWCOMER_COUNTER_RETENTION_DAYS`, default 7; 0 disables; floor
+   *  2 — the counting window itself is 24 h, and a stale row is
+   *  already treated as a fresh window by the cap guard). */
+  newcomerCounterRetentionDays: number;
+  /**
    * Re-seed window end (`RESEED_GRACE_UNTIL`, RFC3339 or epoch ms) —
    * docs/community-reseed.md §3. Until this moment, `POST
    * /redemptions` skips its delivery-grace bound and preserves a
@@ -412,6 +442,33 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
       "CAPACITY_SAMPLE_KEEP_N",
       env.CAPACITY_SAMPLE_KEEP_N,
       2000,
+    ),
+    retentionSweepIntervalMs: asNonNegativeInt(
+      "RETENTION_SWEEP_INTERVAL_MS",
+      env.RETENTION_SWEEP_INTERVAL_MS,
+      6 * 60 * 60 * 1000,
+    ),
+    claimRetentionDays: asNonNegativeInt(
+      "CLAIM_RETENTION_DAYS",
+      env.CLAIM_RETENTION_DAYS,
+      90,
+    ),
+    announcementRetentionDays: asNonNegativeInt(
+      "ANNOUNCEMENT_RETENTION_DAYS",
+      env.ANNOUNCEMENT_RETENTION_DAYS,
+      60,
+    ),
+    transitionRetentionDays: asFlooredRetentionDays(
+      "TRANSITION_RETENTION_DAYS",
+      env.TRANSITION_RETENTION_DAYS,
+      60,
+      3,
+    ),
+    newcomerCounterRetentionDays: asFlooredRetentionDays(
+      "NEWCOMER_COUNTER_RETENTION_DAYS",
+      env.NEWCOMER_COUNTER_RETENTION_DAYS,
+      7,
+      2,
     ),
     reseedGraceUntil: parseReseedGraceUntil(env.RESEED_GRACE_UNTIL),
     trustedSystemKeys: parseTrustedSystemKeys(env.TRUSTED_SYSTEM_KEYS),
@@ -590,6 +647,29 @@ function asNonNegativeInt(
   if (!Number.isFinite(n) || n < 0) {
     throw new Error(
       `${name} must be a non-negative integer, got ${JSON.stringify(raw)}`,
+    );
+  }
+  return n;
+}
+
+/**
+ * A retention window that is either OFF (0) or at least `floor` days.
+ * Values strictly between 0 and the floor are refused at boot: a
+ * too-short window would delete rows a live consumer still needs
+ * (docs/node-seizure-plan.md §3.2 names each floor's reason), and a
+ * misconfiguration that silently destroys data is exactly the failure
+ * mode a boot error prevents.
+ */
+function asFlooredRetentionDays(
+  name: string,
+  raw: string | undefined,
+  fallback: number,
+  floor: number,
+): number {
+  const n = asNonNegativeInt(name, raw, fallback);
+  if (n !== 0 && n < floor) {
+    throw new Error(
+      `${name} must be 0 (off) or at least ${floor} days, got ${n}`,
     );
   }
   return n;

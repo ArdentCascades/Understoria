@@ -1,0 +1,15 @@
+# Tor configuration for the Understoria onion sidecar
+# (docs/tor-onion.md). Service-only: SocksPort 0 means this tor is
+# NOT a client proxy — it exists solely to publish the onion service
+# and relay its traffic to Caddy's onion vhost.
+RunAsDaemon 0
+SocksPort 0
+Log notice stdout
+
+# The onion identity lives here (named volume `tor-keys`).
+# hs_ed25519_secret_key in this directory IS the community's
+# censorship-resistant address — back it up like DATABASE_KEY
+# (escrowed, away from the database backups), and see the rotation
+# procedure in docs/tor-onion.md before deleting anything.
+HiddenServiceDir /var/lib/tor/understoria/
+HiddenServicePort 80 caddy:8080

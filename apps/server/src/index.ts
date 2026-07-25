@@ -38,6 +38,7 @@ import {
 import { startPeerPullWorker } from "./peerPull.js";
 import { startMirrorPullWorker } from "./mirrorPull.js";
 import { startCapacitySampler } from "./capacitySampler.js";
+import { startRetentionSweep } from "./retentionSweep.js";
 import { createCapacityEmitter } from "./capacityEmitter.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
 
@@ -173,12 +174,23 @@ async function main(): Promise<void> {
       : undefined,
   });
 
+  const retentionSweep = startRetentionSweep({
+    db: database,
+    intervalMs: config.retentionSweepIntervalMs,
+    claimRetentionDays: config.claimRetentionDays,
+    announcementRetentionDays: config.announcementRetentionDays,
+    transitionRetentionDays: config.transitionRetentionDays,
+    newcomerCounterRetentionDays: config.newcomerCounterRetentionDays,
+    log: app.log,
+  });
+
   const stop = async (signal: string) => {
     app.log.info(`received ${signal}, closing`);
     try {
       worker.stop();
       mirrorWorker.stop();
       capacitySampler.stop();
+      retentionSweep.stop();
       await app.close();
     } catch (err) {
       app.log.error({ err }, "error during close");
