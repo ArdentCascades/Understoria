@@ -64,10 +64,11 @@ import {
 /** The drills, in the order the docs recommend running them.
  *  Step TEXT lives in i18n (infra.drills.<id>.step1..N); the docs
  *  named in each card remain the source of truth. */
-const DRILLS = [
+export const DRILLS = [
   { id: "stormHub", steps: 6, docRef: "docs/offline-resilience.md §4" },
   { id: "reseed", steps: 6, docRef: "docs/community-reseed.md" },
   { id: "flashDrive", steps: 5, docRef: "docs/flash-drive-install.md §6" },
+  { id: "seizure", steps: 7, docRef: "docs/operator-guide.md §6 (seizure runbook)" },
 ] as const;
 
 export default function InfrastructurePage() {

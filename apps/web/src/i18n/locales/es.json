@@ -3584,6 +3584,17 @@
         "step3": "Conecta dos teléfonos a la red del nuevo nodo: publica desde uno y míralo aparecer en el otro.",
         "step4": "En la computadora de otra persona, ejecuta verify.sh desde la memoria — revisa cada archivo contra MANIFEST.txt (revisa también la firma, si la memoria está firmada).",
         "step5": "Lleva una actualización: docker load con las imágenes de la memoria en un nodo activo, docker compose up -d, y confirma que la historia sigue intacta."
+      },
+      "seizure": {
+        "title": "Simulacro de incautación",
+        "body": "Comprueba que la comunidad puede alejarse de un servidor incautado — incluso uno que sigue funcionando en manos hostiles — sin perder nada.",
+        "step1": "Anuncia el ensayo por el canal alternativo que la comunidad acordó — el canal mismo es lo que se está poniendo a prueba.",
+        "step2": "Repasa el inventario en la mesa: lee en voz alta, desde el modelo de amenazas, lo que guarda un servidor incautado. Sin sorpresas el día real.",
+        "step3": "Levanta un nodo de práctica en una dirección NUEVA: las mismas claves fundadoras, una DATABASE_KEY nueva, RESEED_GRACE_UNTIL configurado, y la clave de sistema antigua en TRUSTED_SYSTEM_KEYS desde el registro de clave que esta app capturó.",
+        "step4": "Comparte la nueva dirección solo por el canal alternativo — cada miembro apunta Ajustes → Nodo comunitario hacia ella.",
+        "step5": "Un miembro ejecuta \"Restaurar esta comunidad en un nodo\" y el círculo lee junto el resumen por tipo: cada tipo restaurado o ya presente, cada omisión explicada.",
+        "step6": "Desde el dispositivo de un segundo miembro: sincroniza, revisa la historia, luego vuelve a activar READ_AUTH=on y confirma que los miembros siguen entrando solo con sus recibos.",
+        "step7": "Rota como si fuera real: nueva clave de sistema registrada, ajustes de recuperación retirados, tokens de pares y espejos renovados en ambos lados — y marca el simulacro como hecho."
       }
     }
   },

@@ -3584,6 +3584,17 @@
         "step3": "Join two phones to the new node’s network: post from one, see it on the other.",
         "step4": "On someone else’s computer, run the drive’s verify.sh — it checks every file against MANIFEST.txt (check the signature too, if the drive is signed).",
         "step5": "Carry an update: docker load the drive’s images onto a running node, docker compose up -d, and confirm the history is intact."
+      },
+      "seizure": {
+        "title": "Seizure drill",
+        "body": "Proves the community can walk away from a taken server — even one still running in hostile hands — without losing anything.",
+        "step1": "Announce the rehearsal on the community's agreed out-of-band channel — the channel itself is the thing being tested.",
+        "step2": "Tabletop the inventory: read aloud, from the threat model, what a seized server holds. No surprises on the real day.",
+        "step3": "Stand up a scratch node at a NEW address: same founder keys, a fresh DATABASE_KEY, RESEED_GRACE_UNTIL set, and the old system key in TRUSTED_SYSTEM_KEYS from the key record this app captured.",
+        "step4": "Share the new address through the out-of-band channel only — members point Settings → Community node at it.",
+        "step5": "One member runs \"Restore this community onto a node\" and the circle reads the per-kind summary together: every kind restored or already present, every skip explained.",
+        "step6": "From a second member's device: sync, check the history, then flip READ_AUTH=on and confirm members still get in on their receipts alone.",
+        "step7": "Rotate as if it were real: new system key registered, recovery settings removed, peer and mirror tokens refreshed on both sides — then mark the drill done."
       }
     }
   },
