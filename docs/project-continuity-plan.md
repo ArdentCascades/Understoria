@@ -1,6 +1,10 @@
 # Project continuity hardening — implementation plan
 
-> **Status: PLANNED** (code-verified 2026-07-25 against the working
+> **Status: C1 SHIPPED** (`.github/workflows/source-pack-restore.yml`
+> weekly restore drill + `docs/node-as-seed.md` doctrine doc + §7a /
+> bootstrap cross-links). C2 (release signing) and C3 (forge mirror
+> + threat-model entry) remain PLANNED.
+> Original status: PLANNED (code-verified 2026-07-25 against the working
 > tree at commit 27312e6, the two CI workflows, the pack-source
 > script, the web Dockerfile, docker-compose.yml, the Infrastructure
 > source card, and the docs set). Discipline model:

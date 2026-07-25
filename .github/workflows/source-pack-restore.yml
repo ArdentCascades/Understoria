@@ -1,0 +1,128 @@
+# Proves the seed germinates (docs/project-continuity-plan.md §2 C1):
+# the Corresponding Source pack every node serves at /source/ must
+# actually RESTORE — unpack, npm ci, typecheck, build — or the
+# node-as-seed doctrine (docs/node-as-seed.md) is a story, not a
+# guarantee. Runs weekly (packs rot silently: a new tracked file
+# missing from tar mode's excludes, a lockfile drift, a build script
+# that grew an untracked dependency), on demand, and on PRs that touch
+# the packing machinery itself.
+#
+# Both pack modes are exercised:
+#   git mode  full clone → git archive + history bundle
+#   tar mode  a .git-less copy (the Docker build-context shape) →
+#             tarball only, defense-in-depth excludes
+name: Source pack restore drill
+
+on:
+  schedule:
+    # Weekly, Monday 05:30 UTC — off-peak, away from on-push CI.
+    - cron: '30 5 * * 1'
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/pack-source.sh'
+      - 'apps/web/Dockerfile'
+      - '.dockerignore'
+      - '.github/workflows/source-pack-restore.yml'
+
+concurrency:
+  group: source-pack-restore-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  restore:
+    name: Pack, verify, unpack, build (both modes)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Full history so git mode is exercised completely: a shallow
+          # clone would silently skip the bundle and this drill would
+          # prove less than it claims.
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential python3
+
+      - name: Pack (git mode)
+        run: bash scripts/pack-source.sh /tmp/pack-git
+
+      - name: Assert git-mode artifacts + checksums
+        run: |
+          set -euo pipefail
+          cd /tmp/pack-git
+          for f in understoria-source.tar.gz understoria.bundle SHA256SUMS manifest.json; do
+            [ -s "$f" ] || { echo "::error::missing or empty artifact: $f"; exit 1; }
+          done
+          sha256sum -c SHA256SUMS
+          node -e '
+            const m = require("/tmp/pack-git/manifest.json");
+            if (!m.version || m.version === "unknown") throw new Error("manifest version unknown");
+            if (!m.commit || m.commit === "unknown") throw new Error("manifest commit unknown (git mode should stamp it)");
+            if (!Array.isArray(m.files) || m.files.length < 2) throw new Error("manifest files incomplete");
+          '
+
+      - name: Prove the history bundle restores
+        run: |
+          set -euo pipefail
+          git clone /tmp/pack-git/understoria.bundle /tmp/bundle-clone
+          git -C /tmp/bundle-clone log --oneline -1
+          # The bundle must carry the same tip this run packed.
+          [ "$(git -C /tmp/bundle-clone rev-parse --short HEAD)" = "$(git rev-parse --short HEAD)" ]
+
+      - name: Restore from the git-mode tarball and build
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+        run: |
+          set -euo pipefail
+          mkdir /tmp/restore-git
+          tar -xzf /tmp/pack-git/understoria-source.tar.gz -C /tmp/restore-git
+          cd /tmp/restore-git
+          npm ci
+          npm run typecheck
+          npm run build:server
+          npm run build
+
+      - name: Pack (tar mode — the Docker build-context shape)
+        run: |
+          set -euo pipefail
+          # A .git-less copy of the tracked tree stands in for the
+          # Docker build context (.dockerignore strips .git; in CI the
+          # checkout is clean, so tracked-files == context).
+          mkdir /tmp/ctx
+          git archive HEAD | tar -x -C /tmp/ctx
+          bash /tmp/ctx/scripts/pack-source.sh /tmp/pack-tar
+
+      - name: Assert tar-mode artifacts + checksums
+        run: |
+          set -euo pipefail
+          cd /tmp/pack-tar
+          for f in understoria-source.tar.gz SHA256SUMS manifest.json; do
+            [ -s "$f" ] || { echo "::error::missing or empty artifact: $f"; exit 1; }
+          done
+          # No .git in the context → no history bundle, by design.
+          [ ! -e understoria.bundle ] || { echo "::error::tar mode unexpectedly produced a bundle"; exit 1; }
+          sha256sum -c SHA256SUMS
+
+      - name: Restore from the tar-mode tarball and build
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+        run: |
+          set -euo pipefail
+          mkdir /tmp/restore-tar
+          tar -xzf /tmp/pack-tar/understoria-source.tar.gz -C /tmp/restore-tar
+          cd /tmp/restore-tar
+          npm ci
+          npm run typecheck
+          npm run build:server
+          npm run build

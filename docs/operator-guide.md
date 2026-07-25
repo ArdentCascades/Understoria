@@ -685,7 +685,10 @@ The member-facing walkthrough of the whole loop — download from a
 node, verify, try, deploy, become a seed — is
 [`bootstrap-from-a-node.md`](./bootstrap-from-a-node.md). Point
 people there when they ask "how would I start one for my
-neighborhood?"
+neighborhood?" The doctrine behind all of this — why the tree
+suffices without history, and the restore drill that proves your
+node's pack actually builds (CI runs it weekly; you can run it by
+hand) — is [`node-as-seed.md`](./node-as-seed.md).
 
 ## 8. Things that are NOT yet built (and what to do about it)
 
