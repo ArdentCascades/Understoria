@@ -395,6 +395,87 @@ What does not come back, honestly: open claims (short-lived
 coordination state) and pending auto-confirm timers (they restart on
 re-delivery). Everything signed comes back.
 
+### Runbook: node seizure or compelled operator
+
+The above runbook covers a node that is *gone*. This one covers the
+harder case: a node that is **taken** — machine seized, hosting
+account confiscated, or you compelled to hand over access — because
+a taken node can keep *running*: same domain, same data, same system
+key, indistinguishable from the real thing to every member device
+still pointed at it. The mechanical recovery is the re-seed runbook
+above; this is the timeline wrapped around it.
+(`docs/node-seizure-plan.md` is the full analysis.)
+
+**Before — in good times.** Everything here is preparation you
+should already have from the rest of this guide: the seizure drill
+has been run at least once (Community infrastructure page); every
+member is reachable through a non-Understoria channel (§9); the
+`DATABASE_KEY` is set and escrowed AWAY from the backups; retention
+sweeps are on their defaults; backups are offsite; and member
+devices have captured the node's system key automatically (the
+restore card shows it) — you will need it from *their* devices,
+never from memory.
+
+**Hour 0 — assume the node is hostile.**
+
+1. Communicate ONLY through the out-of-band channel. Not through
+   the app: a seized node can still serve it, and whoever holds the
+   node reads whatever crosses it from that moment.
+2. If you still control the DNS account, point the domain away.
+3. Notify every peer and mirror operator immediately — the seized
+   `.env` contains `PEER_READ_TOKENS`/`MIRROR_READ_TOKENS`, and
+   those keep working against *their* nodes until they rotate them.
+4. Tell members the one sentence the whole architecture exists to
+   make true: **your devices hold the entire community — nothing
+   is lost.**
+
+**What they have.** Be honest with the community, from the threat
+model's inventory: on an unencrypted deployment (or one seized
+running, or with the `.env`), the full database — the vouch graph,
+membership genealogy, the ledger, boards including voice posts,
+event rosters, ballots, up to `MESSAGE_RETENTION_DAYS` of
+who-messaged-whom routing metadata (never contents) — plus up to
+~30 MB of container logs (method-only lines; no IPs as of the
+current Caddyfile) and the `.env` credentials. What retention
+sweeps already removed: claims older than 90 days, dead invite
+announcements, settled transition artifacts, stale newcomer
+counters. `DATABASE_KEY` protects a powered-off disk only.
+
+**What they can DO with it — and the bound on each.** They cannot
+forge any member-signed record (member keys never touch the node).
+They CAN sign auto-confirmations with the seized system key — but
+an auto-confirmed exchange still requires a real member
+helper-signature, so laundering credit needs a colluding member
+key, not just the server. They CAN read peers/mirrors with the
+seized tokens until those are rotated (hour-0 step 3). They CAN
+keep serving members still pointed at the old address — observation
+and selective serving, not forgery; the app's sync-staleness
+surfacing is the backstop.
+
+**Stand up fresh infrastructure.** Follow the re-seed runbook above
+verbatim, with the seizure deltas:
+
+- New domain (or the onion address, `tor-onion.md`) if the old one
+  is seized with the node.
+- Fresh `DATABASE_KEY`; SAME `NODE_FOUNDER_KEYS` — founder keys do
+  not rotate, nothing on the node can mint them.
+- New `NODE_SYSTEM_SECRET_KEY`; the OLD system key goes into
+  `TRUSTED_SYSTEM_KEYS` **copied from a member device's captured
+  /config record** so historical auto-confirms re-verify.
+- Reuse the old `NODE_ID` if you know it; otherwise devices
+  adopt-and-alias the new one on connect.
+
+**Reach the members who only had the old address.** Out-of-band
+channel first; the printed backup surfaces carry the fallback
+addresses; the co-founder and mirror operators re-announce. Expect
+this to be the slowest step — it is a social step, and it is why
+the drill rehearses the channel, not the servers.
+
+**After.** Flip `READ_AUTH=on`; unset the grace envs; rotate
+peer/mirror tokens on BOTH sides; register the forward system key
+per `system-key-rotation.md`; write down what the community
+learned; re-run the drill within a month while it's fresh.
+
 ### Runbook: pairing two nodes as mirrors
 
 Mirrors make "one server disappears, nobody notices, nothing is

@@ -102,12 +102,16 @@ We are not trying to protect against:
 - **Signed exchange transactions.** Every exchange is signed by both
   parties; any node can verify independently. No central ledger. (Agent 2)
 - **Minimal server logging.** No IP addresses, no member identifiers,
-  no request bodies. Retention is bounded by size, not time: the
-  shipped compose file caps each container at three rotating 10 MB
-  log files (~30 MB max), which a busy node cycles through in hours
-  but a quiet node can retain for well over a week; deployments
-  outside the provided compose file get no cap unless the operator
-  configures one. (Agent 4, task 4)
+  no request bodies. This now holds at BOTH layers: the node's own
+  pino lines are method-only, and the bundled Caddyfile discards
+  reverse-proxy access logs by default (they previously recorded
+  member IPs/paths/user-agents — closed by the node-seizure work,
+  `docs/node-seizure-plan.md` F-1). Retention is bounded by size, not
+  time: the shipped compose file caps each container at three
+  rotating 10 MB log files (~30 MB max), which a busy node cycles
+  through in hours but a quiet node can retain for well over a week;
+  deployments outside the provided compose file get no cap unless
+  the operator configures one. (Agent 4, task 4)
 - **Federation via opt-in peering.** A node can disconnect at any time
   and keep functioning. No mandatory third parties. (Agent 3)
 - **Compartmentalization.** Mutual aid data, organizing data, and admin
@@ -128,6 +132,29 @@ We are not trying to protect against:
 
 ## 7. Known gaps (tracked work)
 
+- **Node seizure — what a seized node yields: MINIMIZED + DRILLED.**
+  The irreducible yield of a seized (or compelled) node, stated
+  honestly: the vouch graph, the membership genealogy (redemption
+  receipts), the exchange ledger, boards including voice posts,
+  event rosters, ballots, and up to `MESSAGE_RETENTION_DAYS`
+  (default 30 d) of who-messaged-whom routing metadata — never
+  message contents, never member keys. Seized credentials are each
+  bounded: the system key can sign auto-confirmations but an
+  auto-confirmed exchange still requires a real member
+  helper-signature (laundering needs a colluding member key);
+  seized `PEER_READ_TOKENS`/`MIRROR_READ_TOKENS` read peers only
+  until those operators rotate them (hour-0 notification is in the
+  runbook); `DATABASE_KEY` protects a powered-off disk only — a
+  node seized *running* is open. The hardest scenario — the seized
+  node KEEPS RUNNING as a honeypot, indistinguishable server-side —
+  is why the mitigation of record is organizational: the community's
+  out-of-band channel, rehearsed by the standing seizure drill
+  (Community infrastructure page; runbook in operator-guide §6).
+  What the minimization work removed from the yield: claims older
+  than 90 d, invite announcements past expiry, settled transition
+  artifacts, stale newcomer counters (retention sweeps, floors
+  boot-enforced), and reverse-proxy IP logs (discarded by default).
+  Design + deletion-safety proofs: `docs/node-seizure-plan.md`.
 - **Private-key storage: IMPLEMENTED.** Secret keys on a device can be
   wrapped with a passphrase-derived master key (PBKDF2-HMAC-SHA256 at
   600,000 iterations + NaCl secretbox / XSalsa20-Poly1305). The master

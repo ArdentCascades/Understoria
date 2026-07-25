@@ -1339,6 +1339,32 @@ tools; community care is the response.
 
 Both happen entirely on this device. Neither contacts a server.
 
+## 15a. If the community's server is ever taken
+
+Rare, but worth knowing ahead of time:
+
+- **Your device holds the whole community.** Every exchange, every
+  vouch, every post you can see is stored on your own phone or
+  computer, signed by the people who made it. If the server is
+  seized, breaks, or disappears, nothing is lost.
+- **Expect word through the channel your community agreed on** — a
+  phone tree, a meeting, a neighbor — NOT through the app. A taken
+  server can keep running and looking normal, so the community
+  deliberately switches to its out-of-band channel the moment
+  something seems wrong. Don't post or message about the situation
+  in-app until the all-clear.
+- **When the new address arrives**, open Settings → Community node
+  and point the app at it. One member runs "Restore this community
+  onto a node" from their Settings and everything comes back for
+  everyone. You'll watch the history reappear.
+- **What a taken server does and does not reveal.** It never holds
+  your messages' contents (they're sealed between devices) or your
+  keys (they never leave your device). It does hold what the
+  community shares openly with itself: the board, who vouched for
+  whom, the exchange ledger, event rosters. The community's threat
+  model document spells this out in full — ask whoever runs your
+  node for it.
+
 ## 16. FAQ
 
 **What if nobody responds to my post?** Bump it. Repost with more
