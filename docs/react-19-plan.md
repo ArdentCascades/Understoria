@@ -1,6 +1,7 @@
 # React 18.3.1 → 19 migration — implementation plan
 
-> **Status: PLAN** (code-verified 2026-07-24 against the working
+> **Status: SHIPPED** (react 19.2.8 landed in PR #531; plan was
+> code-verified 2026-07-24 against the working
 > tree, root lockfile, installed node_modules, and the live npm
 > registry). Discipline model: docs/react-router-7-plan.md.
 > Philosophy: minimal diff — the app must keep working with the

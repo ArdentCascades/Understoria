@@ -1,6 +1,9 @@
 # Tailwind CSS 3.4.19 → 4.3.3 migration — implementation plan
 
-> **Status: PLAN** (code-verified 2026-07-24 against the working
+> **Status: PINS SHIPPED (Commit 1, PR #532); THE BUMP IS HELD on
+> the operator browser-floor gate (§6) — Tailwind remains 3.4.19
+> until the operator says go. Plan was code-verified 2026-07-24
+> against the working
 > tree, root lockfile, installed node_modules, the live npm
 > registry, and the tailwindcss v4.3.3 sources/docs fetched from
 > the tagged GitHub tree). Discipline model:
@@ -79,8 +82,10 @@ compat, palette identity) resolved to GO with evidence below.
   scripts apps/desktop` = 0; no npm script in any workspace
   invokes `tailwindcss`. CI (ci.yml) gates: workspace typecheck,
   web lint, server build, root `npm test`, PWA build, `npm audit
-  --audit-level=high` (informational). **Current `npm audit`: 0
-  vulnerabilities — must stay 0.** Site's `npm run shots`
+  --audit-level=high` (informational). **Audit baseline at execution
+  time: see docs/maintenance.md — the standing brace-expansion
+  advisory (GHSA-mh99-v99m-4gvg, dev/build tooling) is expected;
+  the gate is "no NEW advisories", not zero.** Site's `npm run shots`
   (playwright) screenshots the **web dev server**, not the site
   build — unaffected. Desktop (Electron 43, Chromium far above
   the v4 floor) wraps the *built* web dist via `prepare:web` —
@@ -360,7 +365,8 @@ pipeline change.
 **Phase 0 — baseline + snapshots (no commit).** From repo root:
 `npm run typecheck`, `npm test` (record web count, expect 3441),
 `npm run build`, `npm --workspace @understoria/site run build`,
-`npm audit` (0). Then snapshot, from `apps/web` (and again from
+`npm audit` (record the standing baseline — see
+docs/maintenance.md). Then snapshot, from `apps/web` (and again from
 `apps/site` with the same one-liner):
 
 ```sh
@@ -476,7 +482,8 @@ Gates, in order (repo root unless noted):
 3. `npm --workspace @understoria/web run lint`
 4. PWA build: `npm --workspace @understoria/web run build`
 5. **CSS-equivalence harness (§8)** against the Phase-0 snapshot
-6. Root `npm test`; `npm audit` → **0**
+6. Root `npm test`; `npm audit` → unchanged from the Phase-0
+   baseline (no new advisories)
 7. Manual smoke (§9 matrix)
 Rollback: `git revert` (single commit; restores v3 deps,
 postcss.config.js, directives).
@@ -494,7 +501,7 @@ uses `focus-visible:outline-none` — covered by the same
 against the site snapshot; **`npm ls tailwindcss` → exactly one
 copy, 4.3.3, v3 chain (postcss-import/postcss-js/
 postcss-load-config) and autoprefixer/browserslist fully gone
-from the lockfile**; root `npm test`; `npm audit` 0; open
+from the lockfile**; root `npm test`; `npm audit` unchanged from baseline; open
 `apps/site/dist/index.html` light+dark; `npm run shots` machinery
 unaffected (it targets the web dev server).
 
@@ -609,7 +616,7 @@ update prompt; site: hero gradient, theme toggle, skip link.
    Low.
 10. **Audit:** new packages (`@tailwindcss/*`, oxide binaries)
     currently carry no advisories; gate re-runs `npm audit` (must
-    stay 0) on both commits.
+    introduce no new advisories) on both commits.
 11. **Rollback:** every commit is an independent `git revert`;
     no data/storage/URL-format migration exists anywhere in this
     change; Commit 1 is forward-compatible and may stay under
@@ -643,4 +650,6 @@ node_modules/vite/dist/node/chunks/node.js`; test coupling via
 `rg -ln 'readFileSync.*(css|tailwind)' apps/web/src` (exactly
 pageHeaderCompact) and `rg -l 'moss|canopy|contrast'` over test
 files (10 files, each classified in §5); `npm audit` → "found 0
-vulnerabilities".
+vulnerabilities" (a dated observation from plan time — the
+brace-expansion advisory later changed the baseline; see
+docs/maintenance.md).

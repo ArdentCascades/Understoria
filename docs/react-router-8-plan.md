@@ -1,6 +1,8 @@
 # React Router 7 → 8 migration — implementation plan
 
-> **Status: PLAN** (code-verified 2026-07-24 against the working
+> **Status: SHIPPED** (react-router 8.3.0 landed in PR #533,
+> clearing GHSA-qwww-vcr4-c8h2; plan was code-verified 2026-07-24
+> against the working
 > tree, root lockfile, installed node_modules, and the live npm
 > registry + advisory endpoints). Motivation:
 > **GHSA-qwww-vcr4-c8h2** (high, CVSS 7.1, no CVE) against
@@ -254,6 +256,10 @@ from repo root unless noted:
    invite-flow e2e)
 7. `npm audit --audit-level=high` → **0 vulnerabilities** (the
    point of the exercise); `npm audit` → 0 total
+   *(outcome note: the react-router findings did clear, but a
+   brand-new unrelated advisory — brace-expansion, published
+   mid-migration — kept the total above zero; see
+   docs/maintenance.md § Open)*
 8. `npm ls react-router` → single 8.3.0 copy;
    `npm ls react-router-dom` → empty
 9. Manual smoke (§7)

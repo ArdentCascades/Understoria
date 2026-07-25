@@ -60,13 +60,13 @@ it (`.github/workflows/appimage.yml` does that part).
 
 | Layer | Choice | Why |
 |------|--------|-----|
-| UI | React 18 + TypeScript strict | Familiar, no magic, types catch a lot |
+| UI | React 19 + TypeScript strict | Familiar, no magic, types catch a lot |
 | Styling | Tailwind + a small design-token palette (`canopy`/`moss`) | Zero runtime cost, works offline |
 | Storage | Dexie.js over IndexedDB | Offline-first, live queries, transactions |
 | PWA | `vite-plugin-pwa` (Workbox) | Service worker for offline + installability |
 | Crypto | `tweetnacl` (Ed25519 + NaCl secretbox) | Audited, small, sync API |
 | KDF | Web Crypto PBKDF2-HMAC-SHA256 @ 600k | Browser-native, current NIST guidance |
-| Routing | `react-router-dom` v6 | Standard |
+| Routing | `react-router` v8 | Standard |
 | Tests | `vitest` + `fake-indexeddb` + `jsdom` | Fast, same transformer as the app |
 
 The PWA is local-first: everything a member does runs in the

@@ -26,7 +26,23 @@ items below — never bundled into unrelated work.
 
 ## Open
 
-(nothing currently deferred)
+- **GHSA-mh99-v99m-4gvg — brace-expansion ≤5.0.7 DoS (published
+  2026-07-23), the repo's standing `npm audit` findings.** All
+  current high findings trace to this single advisory cascading
+  through legacy `minimatch@3` consumers in **dev/build tooling
+  only** (eslint-plugin-jsx-a11y, the electron-builder packaging
+  chain, jake→ejs under workbox-build/vite-plugin-pwa, glob/
+  rimraf). Nothing in the shipped PWA bundle or server runtime is
+  affected. The only patched release is brace-expansion 5.0.8,
+  whose CJS export shape is incompatible with `minimatch@3`'s call
+  site — overrides were tested and break at require time (interop
+  proofs in `docs/eslint-10-plan.md` §3), and npm's
+  `audit fix --force` suggestion is a downgrade trap. **Deferred
+  until upstream backports a 1.x patch or the pinning consumers
+  modernize; then a plain `npm audit fix` clears everything.**
+  Until then the informational CI audit job stays red — a red
+  audit job alone is not news; check whether the findings differ
+  from this entry.
 
 ## Resolved
 
