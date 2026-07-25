@@ -132,6 +132,12 @@ escaping — an unescaped `;` in a password would silently truncate
 the payload). Entry points: the Infrastructure drills section and a
 new paragraph in the internet-outage FAQ answer (both locales). The
 threat-model §7 print entry gained the printed-credential analysis.
+Later addition (tor-onion-plan C3): a **backup addresses** block —
+accepted mirrors prefill a screen-only textarea
+(`parseBackupAddresses`: trim, http(s)-only, dedupe, cap 3) and the
+operator can add the community's `.onion`; up to three addresses
+print on the poster (text + small QR each) and as one line on the
+wallet cards, absent honestly when empty.
 
 **What:** the offline-resilience runbook, physicalized — for the
 moment when screens are dead and the runbook can't be read in the

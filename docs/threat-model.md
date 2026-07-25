@@ -102,12 +102,16 @@ We are not trying to protect against:
 - **Signed exchange transactions.** Every exchange is signed by both
   parties; any node can verify independently. No central ledger. (Agent 2)
 - **Minimal server logging.** No IP addresses, no member identifiers,
-  no request bodies. Retention is bounded by size, not time: the
-  shipped compose file caps each container at three rotating 10 MB
-  log files (~30 MB max), which a busy node cycles through in hours
-  but a quiet node can retain for well over a week; deployments
-  outside the provided compose file get no cap unless the operator
-  configures one. (Agent 4, task 4)
+  no request bodies. This now holds at BOTH layers: the node's own
+  pino lines are method-only, and the bundled Caddyfile discards
+  reverse-proxy access logs by default (they previously recorded
+  member IPs/paths/user-agents — closed by the node-seizure work,
+  `docs/node-seizure-plan.md` F-1). Retention is bounded by size, not
+  time: the shipped compose file caps each container at three
+  rotating 10 MB log files (~30 MB max), which a busy node cycles
+  through in hours but a quiet node can retain for well over a week;
+  deployments outside the provided compose file get no cap unless
+  the operator configures one. (Agent 4, task 4)
 - **Federation via opt-in peering.** A node can disconnect at any time
   and keep functioning. No mandatory third parties. (Agent 3)
 - **Compartmentalization.** Mutual aid data, organizing data, and admin
@@ -128,6 +132,69 @@ We are not trying to protect against:
 
 ## 7. Known gaps (tracked work)
 
+- **Onion-service front door: OPT-IN, SHIPPED.** A node can publish
+  a Tor onion service as a second front door (`docs/tor-onion.md`).
+  What it gives: reachability under DNS/IP blocking or domain
+  seizure; transport encryption and endpoint authentication from
+  Tor itself (the address IS the key — no CA); no exit nodes
+  involved for onion traffic; no inbound firewall exposure (onion
+  services connect outward). What it does NOT give, honestly: the
+  node still sees exactly what it saw before (Tor changes the
+  transport, not the trust model); a member's Tor use is itself
+  observable and conspicuous to their network operator and flagged
+  in some jurisdictions (`docs/opsec-guide.md` "On hostile
+  networks"); traffic-analysis *reduction*, not immunity; all Tor
+  visitors share one rate bucket (the dedicated onion lane bounds
+  the blast radius but cannot distinguish individual Tor users —
+  that indistinguishability is Tor's point); the onion secret key
+  is an impersonation-grade credential (backup/rotation ceremony in
+  the runbook, escrowed like `DATABASE_KEY`); and printed paper
+  carrying the onion address outlives rotation — the "paper doesn't
+  sync or purge" entry extends to backup addresses.
+- **Channel pressure on the project itself: MITIGATED (three
+  layers).** The adversary rows in §3 applied to the PROJECT rather
+  than a community: platform takedown pressure or account compromise
+  against the code hosting, the releases, or the website. The asset
+  at stake is §2's "trust of the community in the software itself —
+  losing this is terminal." Mitigation is three redundant layers
+  (`docs/project-continuity-plan.md`, operational runbooks:
+  `docs/forge-mirror-runbook.md`, `docs/release-signing.md`,
+  `docs/node-as-seed.md`), and what each scenario actually loses:
+
+  | Scenario | Lost | Survives |
+  |---|---|---|
+  | GitHub repo takedown / account termination | Issues, PRs, Discussions, CI history, the canonical URL | Codeberg mirror (full history + tags), every node's source pack, every downloaded release, git-mode nodes' history bundles, every contributor clone |
+  | GitHub account compromise (malicious commits/releases) | Trust in unverified main | Signed release manifests (attacker lacks the offline signing key → forged releases fail verification against the published pubkey); honest history on the mirror and in clones |
+  | Website domain seizure (understoria showcase) | The front door | Everything — the site is marketing; docs + Help travel in every source pack; nodes are on their own domains |
+  | Both forges + website lost | All hosted channels | The node layer: `curl https://<any-node>/source/understoria-source.tar.gz` → unpack → deploy (`docs/bootstrap-from-a-node.md`, unchanged); a bare-metal node's `understoria.bundle` restores full history via `git clone understoria.bundle` |
+  | Release-signing key compromised | Authenticity of future releases until rotation | Integrity layer (checksums), cross-node comparison; rotation = new key + revocation note in-repo on both forges (`docs/release-signing.md`) |
+
+  NOT mitigated, honestly: reproducible builds (a served bundle
+  cannot yet be bit-for-bit tied to a source commit) — named as
+  future work in the continuity plan §8.
+- **Node seizure — what a seized node yields: MINIMIZED + DRILLED.**
+  The irreducible yield of a seized (or compelled) node, stated
+  honestly: the vouch graph, the membership genealogy (redemption
+  receipts), the exchange ledger, boards including voice posts,
+  event rosters, ballots, and up to `MESSAGE_RETENTION_DAYS`
+  (default 30 d) of who-messaged-whom routing metadata — never
+  message contents, never member keys. Seized credentials are each
+  bounded: the system key can sign auto-confirmations but an
+  auto-confirmed exchange still requires a real member
+  helper-signature (laundering needs a colluding member key);
+  seized `PEER_READ_TOKENS`/`MIRROR_READ_TOKENS` read peers only
+  until those operators rotate them (hour-0 notification is in the
+  runbook); `DATABASE_KEY` protects a powered-off disk only — a
+  node seized *running* is open. The hardest scenario — the seized
+  node KEEPS RUNNING as a honeypot, indistinguishable server-side —
+  is why the mitigation of record is organizational: the community's
+  out-of-band channel, rehearsed by the standing seizure drill
+  (Community infrastructure page; runbook in operator-guide §6).
+  What the minimization work removed from the yield: claims older
+  than 90 d, invite announcements past expiry, settled transition
+  artifacts, stale newcomer counters (retention sweeps, floors
+  boot-enforced), and reverse-proxy IP logs (discarded by default).
+  Design + deletion-safety proofs: `docs/node-seizure-plan.md`.
 - **Private-key storage: IMPLEMENTED.** Secret keys on a device can be
   wrapped with a passphrase-derived master key (PBKDF2-HMAC-SHA256 at
   600,000 iterations + NaCl secretbox / XSalsa20-Poly1305). The master

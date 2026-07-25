@@ -284,9 +284,24 @@ the start — there is no "add Spanish later" lane.
 ## Releases
 
 Maintainers tag a release when a coherent slice of work lands. Tags
-follow `v<major>.<minor>.<patch>` starting from `v0.1.0`. Pre-1.0
-we treat everything as potentially breaking and document migrations
-in the release notes.
+follow `v<major>.<minor>.<patch>`; the first tagged release is
+`v0.3.0`. Pre-1.0 we treat everything as potentially breaking and
+document migrations in the release notes. Pushing a `v*` tag runs
+the release workflow (full gates → source pack → GitHub Release);
+the maintainer then signs the artifacts offline — the whole
+procedure, including key discipline, is
+[`docs/release-signing.md`](docs/release-signing.md).
+
+## Where the code lives
+
+The canonical repository is wherever the community says it is —
+currently GitHub (`ArdentCascades/Understoria`). A push mirror on a
+second forge keeps a complete copy of `main` and every tag
+(`.github/workflows/mirror.yml`; the mirror URL is announced once
+configured — see `docs/forge-mirror-runbook.md`, which also covers
+promoting the mirror to primary if it ever comes to that). Beyond
+forges entirely, every deployed node serves the complete source at
+`/source/` (`docs/node-as-seed.md`).
 
 ## Getting help
 

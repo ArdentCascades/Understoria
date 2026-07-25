@@ -89,6 +89,13 @@ services:
       ANNOUNCEMENT_RETENTION_DAYS: "${ANNOUNCEMENT_RETENTION_DAYS:-60}"
       TRANSITION_RETENTION_DAYS: "${TRANSITION_RETENTION_DAYS:-60}"
       NEWCOMER_COUNTER_RETENTION_DAYS: "${NEWCOMER_COUNTER_RETENTION_DAYS:-7}"
+      # Onion rate-limit lane (docs/tor-onion.md): requests stamped
+      # with the mark secret by the Caddy onion vhost get their own
+      # per-minute budget instead of collapsing all Tor members into
+      # one IP bucket. Both must be set for the lane to exist; the
+      # secret must match the caddy service's ONION_MARK_SECRET.
+      ONION_RATE_LIMIT_MAX: "${ONION_RATE_LIMIT_MAX:-0}"
+      ONION_MARK_SECRET: "${ONION_MARK_SECRET:-}"
       # Comma-separated list of peer node URLs (each MUST include the
       # /api prefix if the peer follows the same single-domain layout).
       # Leave empty for a solo launch.

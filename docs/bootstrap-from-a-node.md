@@ -120,9 +120,13 @@ curl -fsS https://other-node.example.net/source/SHA256SUMS
 ```
 
 Same version (check each node's `manifest.json`), same checksum, on
-nodes run by different people → you can be confident. The project's
-public repository and its signed tags remain a third reference
-point whenever it's reachable.
+nodes run by different people → you can be confident. And for
+tagged releases there is a third, stronger check: releases carry a
+signature made with an offline key whose public half travels inside
+this very download — one command,
+`node scripts/verify-release.mjs <dir>`, proves the artifacts were
+signed by the project's key holder and not by whoever controls a
+website ([`release-signing.md`](./release-signing.md)).
 
 Then unpack (the archive extracts *into the current folder*, so
 make one first):

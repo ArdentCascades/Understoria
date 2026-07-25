@@ -18,10 +18,11 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { shareOrigin } from "@/lib/appOrigin";
-import { wifiQrValue } from "@/lib/offlineKit";
+import { deriveAppOriginFromNodeUrl, shareOrigin } from "@/lib/appOrigin";
+import { parseBackupAddresses, wifiQrValue } from "@/lib/offlineKit";
+import { readAcceptedMirrors } from "@/lib/nodeEndpoints";
 import { InviteQRCode } from "@/components/InviteQRCode";
 import { PrintFooter, PrintToolbar } from "@/components/PrintChrome";
 
@@ -52,10 +53,33 @@ export default function PrintOfflineKitPage() {
   const { t } = useTranslation();
   const [ssid, setSsid] = useState("");
   const [password, setPassword] = useState("");
+  // Backup addresses (tor-onion-plan C3): where the community lives
+  // if the main address is blocked or seized — accepted mirrors
+  // prefill automatically; the onion address (which the app cannot
+  // know) is typed by the operator. Screen-only editing; what's in
+  // the box is exactly what prints, absent honestly when empty.
+  const [backupsRaw, setBackupsRaw] = useState("");
 
   const wifiQr = wifiQrValue({ ssid, password });
   const origin = shareOrigin();
   const host = new URL(origin).host;
+  const backups = parseBackupAddresses(backupsRaw);
+
+  useEffect(() => {
+    let cancelled = false;
+    void readAcceptedMirrors().then((mirrors) => {
+      if (cancelled) return;
+      const origins = mirrors
+        .map((m) => deriveAppOriginFromNodeUrl(m))
+        .filter((o): o is string => o !== null && o !== shareOrigin());
+      if (origins.length > 0) {
+        setBackupsRaw((prev) => (prev ? prev : origins.join("\n")));
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="px-4 pb-8 pt-6 print:bg-white print:px-0 print:pb-0 print:pt-0 print:text-black">
@@ -89,6 +113,19 @@ export default function PrintOfflineKitPage() {
             placeholder={t("print.kit.setup.passwordPlaceholder")}
           />
         </label>
+        <label className="mt-2 block text-xs font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+          {t("print.kit.setup.backups")}
+          <textarea
+            className="input mt-1 font-mono text-xs"
+            rows={3}
+            value={backupsRaw}
+            onChange={(e) => setBackupsRaw(e.target.value)}
+            placeholder={t("print.kit.setup.backupsPlaceholder")}
+          />
+        </label>
+        <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
+          {t("print.kit.setup.backupsHelp")}
+        </p>
       </div>
 
       {/* ---- The wall poster ---- */}
@@ -154,6 +191,35 @@ export default function PrintOfflineKitPage() {
           </li>
         </ol>
 
+        {/* Backup addresses (tor-onion-plan C3): where the community
+            lives if the main address is blocked or seized. Printed
+            only when the member provided some — absent honestly
+            otherwise. */}
+        {backups.length > 0 && (
+          <div className="mx-auto mt-8 max-w-md text-left">
+            <p className="text-base font-semibold print:text-black">
+              {t("print.kit.poster.backupsTitle")}
+            </p>
+            <p className="mt-1 text-sm text-moss-700 dark:text-moss-200 print:text-black">
+              {t("print.kit.poster.backupsBody")}
+            </p>
+            <ul className="mt-3 flex flex-col gap-3">
+              {backups.map((address) => (
+                <li key={address} className="flex items-center gap-3">
+                  <InviteQRCode
+                    value={address}
+                    size={72}
+                    ariaLabel={t("print.kit.poster.backupQrAria")}
+                  />
+                  <p className="break-all text-sm font-medium text-moss-700 dark:text-moss-200 print:text-black">
+                    {address}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {ssid.trim() && (
           <p className="mx-auto mt-6 max-w-md text-xs text-moss-600 dark:text-moss-300 print:text-black">
             {t("print.kit.poster.sharesWifi")}
@@ -186,6 +252,13 @@ export default function PrintOfflineKitPage() {
                   ? t("print.kit.cards.wifiLine", { ssid: ssid.trim() })
                   : t("print.kit.cards.askForWifi")}
               </p>
+              {backups.length > 0 && (
+                <p className="mt-1 break-all text-xs text-moss-700 dark:text-moss-200 print:text-black">
+                  {t("print.kit.cards.backupsLine", {
+                    addresses: backups.join("  ·  "),
+                  })}
+                </p>
+              )}
             </div>
           ))}
         </div>

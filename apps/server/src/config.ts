@@ -45,6 +45,26 @@ export interface Config {
   /** Per-IP requests per minute. */
   rateLimitMax: number;
   /**
+   * Dedicated per-minute budget for requests arriving through the
+   * onion front door (docs/tor-onion.md, docs/tor-onion-plan.md §2
+   * C2). Every Tor visitor reaches the node from the tor sidecar's
+   * address, so without a lane they all share ONE default bucket —
+   * a single active member could exhaust it for everyone. 0 (the
+   * default) disables the lane: the onion mark header is ignored
+   * and Tor traffic shares the normal bucket, exactly the C1
+   * posture.
+   */
+  onionRateLimitMax: number;
+  /**
+   * Shared secret stamped by the Caddy onion vhost as
+   * `X-Understoria-Onion` on proxied onion requests. Spoof-proof by
+   * construction: only the reverse proxy can set it on that path,
+   * and clearnet clients can't guess it — a wrong or missing value
+   * simply lands in the normal bucket (never an error). The lane
+   * activates only when BOTH this and ONION_RATE_LIMIT_MAX are set.
+   */
+  onionMarkSecret: string | null;
+  /**
    * Value passed to Fastify's `trustProxy` (Round-4 review). Empty
    * string / undefined → `false` (direct exposure). Under the bundled
    * compose stack set `TRUST_PROXY=true` — Caddy reaches the server
@@ -369,6 +389,12 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
     databasePath: env.DATABASE_PATH ?? "./understoria.db",
     corsOrigin: env.CORS_ORIGIN ?? "*",
     rateLimitMax: asInt("RATE_LIMIT_MAX", env.RATE_LIMIT_MAX, 60),
+    onionRateLimitMax: asNonNegativeInt(
+      "ONION_RATE_LIMIT_MAX",
+      env.ONION_RATE_LIMIT_MAX,
+      0,
+    ),
+    onionMarkSecret: nonEmpty(env.ONION_MARK_SECRET),
     trustProxy: parseTrustProxy(env.TRUST_PROXY),
     nodeId: env.NODE_ID ?? "node_local",
     logLevel: logLevelRaw as Config["logLevel"],

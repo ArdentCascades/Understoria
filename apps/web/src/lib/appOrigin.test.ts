@@ -71,3 +71,10 @@ describe("shareOrigin", () => {
     expect(shareOrigin()).toBe(window.location.origin);
   });
 });
+
+describe("onion node URLs (docs/tor-onion-plan.md C2 lock)", () => {
+  it("derives the http onion origin from an onion node URL — invite links must carry it", () => {
+    const onion = `http://${"a".repeat(56)}.onion`;
+    expect(deriveAppOriginFromNodeUrl(`${onion}/api`)).toBe(onion);
+  });
+});

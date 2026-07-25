@@ -1,9 +1,15 @@
 # Node-seizure drill + server data-minimization — implementation plan
 
-> **Status: C1 SHIPPED** (retention sweeps + migration v33 + Caddy
-> access-log discard + compose/operator-guide env rows — see §6 C1).
-> C2 (runbook/docs) and C3 (drill card + coverage locks) remain
-> PROPOSED.
+> **Status: COMPLETE — C1 + C2 + C3 SHIPPED** (C1: retention sweeps +
+> migration v33 + Caddy access-log discard + compose/operator-guide
+> env rows. C2: operator-guide seizure runbook, member-guide §15a,
+> threat-model §7 entry + §6 logging-bullet update; the §4.4 paper
+> line slipped to the Tor plan's C3 per D5. C3: fourth drill card
+> `seizure` + en/es steps + drill-copy coverage lock, the §5.2
+> mirror-vs-reseed cross-inventory lock (`reseedCoverage.test.ts`),
+> and the §5.3 automated drill (`seizureDrill.test.ts`) — a
+> populated node killed and restored onto a fresh one over the real
+> routes, membership re-derived from receipts alone).
 > Original status: PROPOSED (code-verified 2026-07-25 against the working
 > tree at schema v32, RESEED_KINDS as shipped, the bundled deploy
 > files, and the docs named below). Discipline model:

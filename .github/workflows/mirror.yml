@@ -1,0 +1,49 @@
+# Forge mirror push (docs/forge-mirror-runbook.md,
+# docs/project-continuity-plan.md §2 C3): every push to main and
+# every tag is force-with-lease-pushed to a second forge, so a
+# GitHub takedown or account loss leaves a complete, current copy
+# elsewhere. Honest failure analysis lives in the runbook: this
+# workflow dies WITH the GitHub account — but by then the mirror
+# already holds everything up to the moment of death, which is
+# exactly the artifact continuity needs. The true backstop remains
+# the node layer (docs/node-as-seed.md).
+#
+# Setup is two operator steps (runbook §2): create the mirror repo,
+# then set the CODEBERG_TOKEN secret and the CODEBERG_REPO variable
+# (e.g. "codeberg.org/<org>/Understoria"). Until both exist the job
+# skips loudly-but-green, so forks and the pre-setup repo stay green.
+name: Mirror to second forge
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+concurrency:
+  group: mirror
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    name: Push main + tags to the mirror
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Push to mirror (skips green when unconfigured)
+        env:
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+          CODEBERG_REPO: ${{ vars.CODEBERG_REPO }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CODEBERG_TOKEN}" ] || [ -z "${CODEBERG_REPO}" ]; then
+            echo "::notice::Mirror not configured (CODEBERG_TOKEN secret and/or CODEBERG_REPO variable missing) — skipping. Setup: docs/forge-mirror-runbook.md §2."
+            exit 0
+          fi
+          git push "https://oauth2:${CODEBERG_TOKEN}@${CODEBERG_REPO}.git" \
+            main --tags --force-with-lease
+          echo "Mirrored main + tags to ${CODEBERG_REPO}."

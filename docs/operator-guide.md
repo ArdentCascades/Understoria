@@ -321,6 +321,8 @@ Two things to know:
 | `ANNOUNCEMENT_RETENTION_DAYS` | `60` | Sweep window for invite announcements past their own expiry — the invite is unusable either way; the redemption receipt (never swept) is the membership authority. `0` disables this rule |
 | `TRANSITION_RETENTION_DAYS` | `60` | Sweep window for SETTLED awaiting-transition artifacts (a stored exchange exists for the post). Pending artifacts are never swept at any age. `0` disables; values 1–2 are refused at boot (floor 3, safety margin over the auto-confirm window) |
 | `NEWCOMER_COUNTER_RETENTION_DAYS` | `7` | Sweep window for stale newcomer daily-write counter rows (the cap guard already treats >24 h-stale rows as fresh windows). `0` disables; value 1 is refused at boot (floor 2, so a live window is never swept) |
+| `ONION_RATE_LIMIT_MAX` | `0` (lane off) | Dedicated per-minute budget for requests arriving via the Tor onion front door (`tor-onion.md`). All Tor visitors share this ONE bucket (they are indistinguishable by design) — guidance: `80 × expected concurrent Tor members`, floor 240. `0` keeps the pre-lane posture: Tor traffic shares the normal bucket |
+| `ONION_MARK_SECRET` | unset | Shared secret the Caddy onion vhost stamps as `X-Understoria-Onion`; the lane activates only when this AND `ONION_RATE_LIMIT_MAX` are set, and must match the caddy service's value. Wrong/missing header just lands in the normal bucket — never an error |
 | `DATABASE_KEY` | unset | Encryption-at-rest key for the SQLite file (SQLCipher scheme). Set it and the database on disk is unreadable without it — a stolen backup or seized disk yields nothing. Unset keeps plaintext (upgrades don't break). **Keep a copy of the key somewhere that is NOT next to the database backups** — a backup without its key is a brick, which is the point. Migrating an existing plaintext DB: see the runbook below |
 | `READ_AUTH` | `on` | Member-authenticated reads AND member-gated writes (`docs/member-authenticated-reads.md`). `on` (the default) = every federation GET must carry a member's read signature (or a peer token) and every attributable POST must come from a member; a node with no founder yet boots **unclaimed** and prints a one-time setup code. `off` = the explicit dev/demo opt-out (feeds and writes open) |
 | `NODE_FOUNDER_KEYS` | unset | Comma-separated base64 public keys of the founding member(s) — the trust roots the invite chain grows from. Optional since the founder-claim flow: a fresh node is normally claimed in-band with the boot-log setup code (Profile → Community node → Founder setup); set this for mirrors, recovery, or extra roots. Each member's public key is on their Profile page. **Communities start with two founders**: after claiming, the founder invites their co-organizer and runs the in-app **Add a co-founder** ceremony (no env edit) — until then no member can ever become fully vouched, and the node logs a one-time single-founder warning |
@@ -394,6 +396,87 @@ and any member can upload it back (`docs/community-reseed.md`):
 What does not come back, honestly: open claims (short-lived
 coordination state) and pending auto-confirm timers (they restart on
 re-delivery). Everything signed comes back.
+
+### Runbook: node seizure or compelled operator
+
+The above runbook covers a node that is *gone*. This one covers the
+harder case: a node that is **taken** — machine seized, hosting
+account confiscated, or you compelled to hand over access — because
+a taken node can keep *running*: same domain, same data, same system
+key, indistinguishable from the real thing to every member device
+still pointed at it. The mechanical recovery is the re-seed runbook
+above; this is the timeline wrapped around it.
+(`docs/node-seizure-plan.md` is the full analysis.)
+
+**Before — in good times.** Everything here is preparation you
+should already have from the rest of this guide: the seizure drill
+has been run at least once (Community infrastructure page); every
+member is reachable through a non-Understoria channel (§9); the
+`DATABASE_KEY` is set and escrowed AWAY from the backups; retention
+sweeps are on their defaults; backups are offsite; and member
+devices have captured the node's system key automatically (the
+restore card shows it) — you will need it from *their* devices,
+never from memory.
+
+**Hour 0 — assume the node is hostile.**
+
+1. Communicate ONLY through the out-of-band channel. Not through
+   the app: a seized node can still serve it, and whoever holds the
+   node reads whatever crosses it from that moment.
+2. If you still control the DNS account, point the domain away.
+3. Notify every peer and mirror operator immediately — the seized
+   `.env` contains `PEER_READ_TOKENS`/`MIRROR_READ_TOKENS`, and
+   those keep working against *their* nodes until they rotate them.
+4. Tell members the one sentence the whole architecture exists to
+   make true: **your devices hold the entire community — nothing
+   is lost.**
+
+**What they have.** Be honest with the community, from the threat
+model's inventory: on an unencrypted deployment (or one seized
+running, or with the `.env`), the full database — the vouch graph,
+membership genealogy, the ledger, boards including voice posts,
+event rosters, ballots, up to `MESSAGE_RETENTION_DAYS` of
+who-messaged-whom routing metadata (never contents) — plus up to
+~30 MB of container logs (method-only lines; no IPs as of the
+current Caddyfile) and the `.env` credentials. What retention
+sweeps already removed: claims older than 90 days, dead invite
+announcements, settled transition artifacts, stale newcomer
+counters. `DATABASE_KEY` protects a powered-off disk only.
+
+**What they can DO with it — and the bound on each.** They cannot
+forge any member-signed record (member keys never touch the node).
+They CAN sign auto-confirmations with the seized system key — but
+an auto-confirmed exchange still requires a real member
+helper-signature, so laundering credit needs a colluding member
+key, not just the server. They CAN read peers/mirrors with the
+seized tokens until those are rotated (hour-0 step 3). They CAN
+keep serving members still pointed at the old address — observation
+and selective serving, not forgery; the app's sync-staleness
+surfacing is the backstop.
+
+**Stand up fresh infrastructure.** Follow the re-seed runbook above
+verbatim, with the seizure deltas:
+
+- New domain (or the onion address, `tor-onion.md`) if the old one
+  is seized with the node.
+- Fresh `DATABASE_KEY`; SAME `NODE_FOUNDER_KEYS` — founder keys do
+  not rotate, nothing on the node can mint them.
+- New `NODE_SYSTEM_SECRET_KEY`; the OLD system key goes into
+  `TRUSTED_SYSTEM_KEYS` **copied from a member device's captured
+  /config record** so historical auto-confirms re-verify.
+- Reuse the old `NODE_ID` if you know it; otherwise devices
+  adopt-and-alias the new one on connect.
+
+**Reach the members who only had the old address.** Out-of-band
+channel first; the printed backup surfaces carry the fallback
+addresses; the co-founder and mirror operators re-announce. Expect
+this to be the slowest step — it is a social step, and it is why
+the drill rehearses the channel, not the servers.
+
+**After.** Flip `READ_AUTH=on`; unset the grace envs; rotate
+peer/mirror tokens on BOTH sides; register the forward system key
+per `system-key-rotation.md`; write down what the community
+learned; re-run the drill within a month while it's fresh.
 
 ### Runbook: pairing two nodes as mirrors
 
@@ -667,8 +750,11 @@ Two honesty notes to pass on to members who ask:
   corrupted), not **authenticity** — you, the operator, could serve
   a modified tree. That adds no new trust: you already serve them
   the running app. Anyone wanting independent verification should
-  compare against another node's bundle, a mirror, or the project's
-  signed tags. The infrastructure card says this in the UI too.
+  compare against another node's bundle, a mirror, or a **signed
+  release**: tagged releases carry an offline-key signature anyone
+  can check with `node scripts/verify-release.mjs`
+  ([`release-signing.md`](./release-signing.md)). The
+  infrastructure card says the integrity caution in the UI too.
 - The tarball is built from the source tree only. Git-tracked files
   in Docker builds are scrubbed by `.dockerignore` (which excludes
   `backups/`, `.env`, and database files), and the git-mode archive
@@ -676,10 +762,14 @@ Two honesty notes to pass on to members who ask:
   it. Keep it that way: never commit secrets, and keep local
   backups under `backups/` (the excluded path).
 
-Development-side redundancy is a separate, cheap step: keep a push
-mirror of the repository on a second forge (Codeberg, a self-hosted
-Forgejo) so the project itself never has a single hosting point of
-failure either.
+Development-side redundancy is now operationalized: a push mirror
+workflow ships in-repo (`.github/workflows/mirror.yml`, setup in
+[`forge-mirror-runbook.md`](./forge-mirror-runbook.md)) so the
+project itself never has a single hosting point of failure. And
+understand your own role in that: **operators are archivists.**
+Your node IS a project archive — every deployment serving
+`/source/` is one more place the software survives, independent of
+every forge. Keep it serving; that's the whole ask.
 
 The member-facing walkthrough of the whole loop — download from a
 node, verify, try, deploy, become a seed — is

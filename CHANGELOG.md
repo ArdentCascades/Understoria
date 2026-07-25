@@ -9,6 +9,15 @@ include breaking changes.
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [0.3.0] — 2026-07-25
+
+First tagged release. Everything below — the entire pre-release
+history — ships in v0.3.0; earlier entries in this file were never
+tagged. Release artifacts and the offline-key signature scheme:
+`docs/release-signing.md`.
+
 ### Changed
 - **Trust is now founder-rooted, and inviting is a trusted-member
   power.** Two protections against fake-account chains, decided by
