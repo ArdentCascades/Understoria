@@ -23,11 +23,18 @@ import en from "@/i18n/locales/en.json";
 import es from "@/i18n/locales/es.json";
 import { DRILLS } from "./Infrastructure";
 
-type DrillCopy = Record<string, Record<string, string>>;
+// The drills block mixes flat strings (title, intro, …) with the
+// per-drill objects this test walks — hence the through-unknown cast
+// and the object filter below.
+type DrillCopy = Record<string, Record<string, string> | string>;
+
+function drillsOf(locale: unknown): DrillCopy {
+  return (locale as { infra: { drills: DrillCopy } }).infra.drills;
+}
 
 const locales: Array<[string, DrillCopy]> = [
-  ["en", (en as { infra: { drills: DrillCopy } }).infra.drills],
-  ["es", (es as { infra: { drills: DrillCopy } }).infra.drills],
+  ["en", drillsOf(en)],
+  ["es", drillsOf(es)],
 ];
 
 describe("Infrastructure drills", () => {
@@ -46,8 +53,10 @@ describe("Infrastructure drills", () => {
     "every drill card has complete %s copy for every step it renders",
     (_locale, drills) => {
       for (const drill of DRILLS) {
-        const copy = drills[drill.id];
+        const copy = drills[drill.id] as Record<string, string> | undefined;
         expect(copy, `missing drills.${drill.id} block`).toBeDefined();
+        expect(typeof copy).toBe("object");
+        if (!copy || typeof copy !== "object") continue;
         expect(copy.title).toBeTruthy();
         expect(copy.body).toBeTruthy();
         for (let i = 1; i <= drill.steps; i++) {
