@@ -284,9 +284,13 @@ the start — there is no "add Spanish later" lane.
 ## Releases
 
 Maintainers tag a release when a coherent slice of work lands. Tags
-follow `v<major>.<minor>.<patch>` starting from `v0.1.0`. Pre-1.0
-we treat everything as potentially breaking and document migrations
-in the release notes.
+follow `v<major>.<minor>.<patch>`; the first tagged release is
+`v0.3.0`. Pre-1.0 we treat everything as potentially breaking and
+document migrations in the release notes. Pushing a `v*` tag runs
+the release workflow (full gates → source pack → GitHub Release);
+the maintainer then signs the artifacts offline — the whole
+procedure, including key discipline, is
+[`docs/release-signing.md`](docs/release-signing.md).
 
 ## Getting help
 

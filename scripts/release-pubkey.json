@@ -1,0 +1,4 @@
+{
+  "comment": "Public halves of the release-signing keys (docs/release-signing.md). Append-only: rotations ADD a key with a new id and 'since'; never remove old keys (old releases verify against them). An empty list means no release has ever been signed — verify-release.mjs refuses loudly until a maintainer generates a key offline (scripts/generate-release-key.mjs) and commits its public half here.",
+  "keys": []
+}

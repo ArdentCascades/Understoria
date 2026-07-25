@@ -24,9 +24,10 @@
 # The checksums prove INTEGRITY (the download wasn't corrupted), not
 # AUTHENTICITY (an operator could serve a modified tree — they already
 # serve you the running app, so this adds no new trust). To check
-# authenticity, compare against another node's bundle, a mirror, or
-# the project's signed tags. docs/operator-guide.md says the same to
-# members' faces.
+# authenticity, compare against another node's bundle, a mirror, or a
+# signed release (scripts/verify-release.mjs against the offline-key
+# manifest — docs/release-signing.md). docs/operator-guide.md says
+# the same to members' faces.
 
 set -euo pipefail
 

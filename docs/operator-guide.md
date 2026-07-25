@@ -748,8 +748,11 @@ Two honesty notes to pass on to members who ask:
   corrupted), not **authenticity** — you, the operator, could serve
   a modified tree. That adds no new trust: you already serve them
   the running app. Anyone wanting independent verification should
-  compare against another node's bundle, a mirror, or the project's
-  signed tags. The infrastructure card says this in the UI too.
+  compare against another node's bundle, a mirror, or a **signed
+  release**: tagged releases carry an offline-key signature anyone
+  can check with `node scripts/verify-release.mjs`
+  ([`release-signing.md`](./release-signing.md)). The
+  infrastructure card says the integrity caution in the UI too.
 - The tarball is built from the source tree only. Git-tracked files
   in Docker builds are scrubbed by `.dockerignore` (which excludes
   `backups/`, `.env`, and database files), and the git-mode archive

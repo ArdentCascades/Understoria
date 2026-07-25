@@ -1,0 +1,94 @@
+# Release build (docs/release-signing.md, docs/project-continuity-plan.md
+# §2 C2). Trigger: pushing a `v*` tag (or workflow_dispatch as a
+# dry-run that builds and verifies but publishes nothing).
+#
+# Trust posture, deliberately: CI VERIFIES, it never signs. The
+# release-signing secret lives offline on a maintainer machine —
+# a captured GitHub account can push a malicious tag but cannot mint
+# a valid release-manifest.sig for it. The maintainer signs the
+# artifacts offline (scripts/sign-release.mjs) and uploads
+# release-manifest.json + .sig to the GitHub Release afterwards;
+# anyone verifies with scripts/verify-release.mjs.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Gates, pack, publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Full history: git-mode pack-source includes the history
+          # bundle, which is part of the release artifact set.
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential python3
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+
+      # The full CI gate sequence — a release must never ship weaker
+      # than a PR merge.
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint --workspace=@understoria/web
+      - name: Build server
+        run: npm run build:server
+      - name: Tests
+        run: npm test
+      - name: Build PWA
+        run: npm run build
+
+      - name: Pack release artifacts (git mode)
+        run: bash scripts/pack-source.sh /tmp/release-artifacts
+
+      - name: Verify committed signature (if the maintainer signed this tag)
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          if [ -f "releases/${TAG}/release-manifest.json" ]; then
+            cp "releases/${TAG}/release-manifest.json" \
+               "releases/${TAG}/release-manifest.sig" /tmp/release-artifacts/
+            node scripts/verify-release.mjs /tmp/release-artifacts
+          else
+            echo "No committed manifest for ${TAG} — signing happens offline;" \
+                 "the maintainer attaches release-manifest.json/.sig to the" \
+                 "GitHub Release afterwards (docs/release-signing.md)."
+          fi
+
+      - name: Create GitHub Release with artifacts
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          gh release create "$TAG" \
+            --title "Understoria $TAG" \
+            --notes "See CHANGELOG.md for this release's changes. Verify downloads with scripts/verify-release.mjs (docs/release-signing.md) once the signed manifest is attached." \
+            /tmp/release-artifacts/*

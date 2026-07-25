@@ -1,9 +1,15 @@
 # Project continuity hardening — implementation plan
 
-> **Status: C1 SHIPPED** (`.github/workflows/source-pack-restore.yml`
-> weekly restore drill + `docs/node-as-seed.md` doctrine doc + §7a /
-> bootstrap cross-links). C2 (release signing) and C3 (forge mirror
-> + threat-model entry) remain PLANNED.
+> **Status: C1 + C2 SHIPPED** (C1: `source-pack-restore.yml` weekly
+> restore drill + `docs/node-as-seed.md`. C2: generate/sign/verify
+> release scripts + `release-pubkey.json` (empty until a maintainer
+> generates the key OFFLINE) + `release.yml` tag workflow +
+> `releaseSigning.test.ts` tamper suite + `docs/release-signing.md`
+> + CHANGELOG cut to 0.3.0 + doc updates making "signed tags" stop
+> over-promising. **Maintainer actions outstanding:** generate the
+> release key offline, commit its public half, then
+> `git tag -a v0.3.0 && git push origin v0.3.0` per the runbook.)
+> C3 (forge mirror + threat-model entry) remains PLANNED.
 > Original status: PLANNED (code-verified 2026-07-25 against the working
 > tree at commit 27312e6, the two CI workflows, the pack-source
 > script, the web Dockerfile, docker-compose.yml, the Infrastructure
