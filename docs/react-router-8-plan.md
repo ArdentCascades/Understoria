@@ -1,6 +1,8 @@
 # React Router 7 → 8 migration — implementation plan
 
-> **Status: PLAN** (code-verified 2026-07-24 against the working
+> **Status: SHIPPED** (react-router 8.3.0 landed in PR #533,
+> clearing GHSA-qwww-vcr4-c8h2; plan was code-verified 2026-07-24
+> against the working
 > tree, root lockfile, installed node_modules, and the live npm
 > registry + advisory endpoints). Motivation:
 > **GHSA-qwww-vcr4-c8h2** (high, CVSS 7.1, no CVE) against

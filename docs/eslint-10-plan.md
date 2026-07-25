@@ -1,6 +1,7 @@
 # eslint 9 → 10 + globals 15 → 17 — implementation plan (Tier 3.4)
 
-> **Status: PLAN** (code-verified 2026-07-25 against the working
+> **Status: SHIPPED** (eslint 10.8.0 + globals 17.7.0 landed in
+> PR #534; plan was code-verified 2026-07-25 against the working
 > tree, root lockfile, installed node_modules, the live npm
 > registry, and the official migrate-to-10 doc read from the
 > eslint/eslint repo). Discipline model: docs/react-19-plan.md /

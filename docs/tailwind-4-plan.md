@@ -1,6 +1,9 @@
 # Tailwind CSS 3.4.19 → 4.3.3 migration — implementation plan
 
-> **Status: PLAN** (code-verified 2026-07-24 against the working
+> **Status: PINS SHIPPED (Commit 1, PR #532); THE BUMP IS HELD on
+> the operator browser-floor gate (§6) — Tailwind remains 3.4.19
+> until the operator says go. Plan was code-verified 2026-07-24
+> against the working
 > tree, root lockfile, installed node_modules, the live npm
 > registry, and the tailwindcss v4.3.3 sources/docs fetched from
 > the tagged GitHub tree). Discipline model:

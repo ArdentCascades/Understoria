@@ -1,6 +1,8 @@
 # Dependency upgrade plan — tiers, rationale, cadence
 
-> **Status: Tiers 1–2 SHIPPED; Tiers 3–4 planned.** Surveyed 2026-07-24
+> **Status: Tiers 1–3 SHIPPED (Tailwind bump held on an operator
+> gate; react-router 8 added unplanned); Tier 4 held.** Surveyed
+> 2026-07-24
 > (`npm outdated` across all workspaces; `npm audit` was already at
 > 0 vulnerabilities after the react-router 7 migration —
 > `docs/react-router-7-plan.md`). Node 22 runtime is LTS through
@@ -48,22 +50,33 @@ typecheck, eslint, PWA production build, `npm audit` still 0.
    react-router-7-plan.md discipline: verified API inventory,
    hard-constraint analysis, phased commits, rollback story)
 
-1. **React 19** (+ @types 19) — SHIPPED (docs/react-19-plan.md).
-   The sweep confirmed the app was already clean (zero removed-API
-   usage, zero forwardRef, harness already 19-shaped); total source
-   churn was 5 lines in 2 files. Conversation scroll constraint
-   verified untouched. react-router 8.3.0 (peer react >=19.2.7) is
-   now unblocked — its own plan doc first, per this tier's rule.
-2. **Tailwind 4** — the biggest lift: CSS-first configuration
-   replaces tailwind.config across apps/web AND apps/site; the
-   a11y-sensitive moss/canopy palette and dark-mode variants must
-   survive byte-identically (the contrast guard tests are the
-   tripwire). No security dimension; purely when convenient.
-3. **i18next 26 + react-i18next 17** — moderate; plumbing-level
-   (init options, types), locale JSON untouched. The i18n parity
-   suites are the gate.
-4. **eslint 10 + globals 17** — config-level; the repo is already
-   flat-config, so this is mostly plugin-compat verification.
+1. **React 19** (+ @types 19) — SHIPPED (docs/react-19-plan.md,
+   PR #531). The sweep confirmed the app was already clean (zero
+   removed-API usage, zero forwardRef, harness already 19-shaped);
+   total source churn was 5 lines in 2 files. Conversation scroll
+   constraint verified untouched.
+2. **Tailwind 4** — PLANNED + PINS SHIPPED, BUMP HELD
+   (docs/tailwind-4-plan.md; pins in PR #532). The no-op v3 pins
+   (stock-palette hex families, shadow-sm/rounded-sm) are on main;
+   the actual bump awaits the operator's browser-floor decision
+   (Safari 16.4+/Chrome 111+/Firefox 128+ — the frozen-ESR-115
+   cohort on old Windows/Mac laptops is the honest sticking
+   point). Tailwind remains 3.4.19 (v3-lts) until then.
+3. **i18next 26 + react-i18next 17** — SHIPPED
+   (docs/i18next-plan.md, PR #533). Verified trivial: zero
+   applicable breaking changes across all five intervening majors;
+   zero source lines changed.
+4. **eslint 10 + globals 17** — SHIPPED (docs/eslint-10-plan.md,
+   PR #534). Zero source/config changes; a root `overrides` entry
+   carries eslint-plugin-jsx-a11y past its stale peer cap until
+   upstream ships eslint-10 support (delete the override then).
+
+Unplanned addition to this tier, forced by an advisory:
+**react-router 7.18.1 → 8.3.0** — SHIPPED
+(docs/react-router-8-plan.md, PR #533), clearing
+GHSA-qwww-vcr4-c8h2 (no patched 7.x existed). The
+`react-router-dom` package was removed upstream in v8; all 202
+import sites now import from `react-router` directly.
 
 ## Tier 4 — deliberately held, with reasons
 

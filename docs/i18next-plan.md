@@ -1,6 +1,7 @@
 # i18next 23 → 26 + react-i18next 15 → 17 — implementation plan
 
-> **Status: PLAN** (code-verified 2026-07-24 against the working
+> **Status: SHIPPED** (i18next 26.3.6 + react-i18next 17.0.11
+> landed in PR #533; plan was code-verified 2026-07-24 against the working
 > tree, root lockfile, installed node_modules, the live npm
 > registry, and both upstream CHANGELOGs read from GitHub).
 > Discipline model: docs/react-19-plan.md /

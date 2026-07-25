@@ -1,6 +1,10 @@
 # React Router 6 → 7 migration — implementation plan
 
-> **Status: PLAN** (code-verified 2026-07-24 against the working
+> **Status: SHIPPED, then SUPERSEDED** (executed in PR #528;
+> react-router is now 8.3.0 via docs/react-router-8-plan.md, and
+> the react-router-dom package no longer exists in the tree. Kept
+> as the historical record. Plan was code-verified 2026-07-24
+> against the working
 > tree, lockfile, installed node_modules, and the live npm
 > registry/audit endpoint). Motivation: three moderate advisories
 > against react-router v6 with fixes only in 7.18.x.
