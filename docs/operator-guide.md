@@ -316,6 +316,11 @@ Two things to know:
 | `NODE_SYSTEM_KEY_HISTORY` | unset | JSON array of retired system public keys (`[{"pubkey":"…","retiredAt":…}]`). Append-only across rotations — peers verify old auto-confirmed records against it. The server refuses to boot on a malformed entry |
 | `AUTO_CONFIRM_MIN_HOURS` | `168` (7 days) | Server-side floor under the community's `autoConfirmHours` setting. Set `0` to disable auto-confirm via this node regardless of community config — also the safe way to turn it off without unpublishing key history |
 | `MESSAGE_RETENTION_DAYS` | `30` | How long sealed direct-message envelopes wait on the relay shelf before being pruned (`docs/message-relay.md` §4.3). The node never sees message contents — this bounds how much WHO-messaged-WHOM routing metadata accumulates on your disk. A window rather than delete-on-delivery so a member's several devices can each pull. `0` disables pruning (not recommended) |
+| `RETENTION_SWEEP_INTERVAL_MS` | `21600000` (6 h) | Cadence of the metadata retention sweep (`docs/node-seizure-plan.md` §3) — bounds how far back a seized node's coordination metadata reaches. `0` disables the worker entirely (not recommended) |
+| `CLAIM_RETENTION_DAYS` | `90` | Sweep window for dead `claims` coordination rows — the durable outcome (the exchange) is permanent and untouched. `0` disables this rule |
+| `ANNOUNCEMENT_RETENTION_DAYS` | `60` | Sweep window for invite announcements past their own expiry — the invite is unusable either way; the redemption receipt (never swept) is the membership authority. `0` disables this rule |
+| `TRANSITION_RETENTION_DAYS` | `60` | Sweep window for SETTLED awaiting-transition artifacts (a stored exchange exists for the post). Pending artifacts are never swept at any age. `0` disables; values 1–2 are refused at boot (floor 3, safety margin over the auto-confirm window) |
+| `NEWCOMER_COUNTER_RETENTION_DAYS` | `7` | Sweep window for stale newcomer daily-write counter rows (the cap guard already treats >24 h-stale rows as fresh windows). `0` disables; value 1 is refused at boot (floor 2, so a live window is never swept) |
 | `DATABASE_KEY` | unset | Encryption-at-rest key for the SQLite file (SQLCipher scheme). Set it and the database on disk is unreadable without it — a stolen backup or seized disk yields nothing. Unset keeps plaintext (upgrades don't break). **Keep a copy of the key somewhere that is NOT next to the database backups** — a backup without its key is a brick, which is the point. Migrating an existing plaintext DB: see the runbook below |
 | `READ_AUTH` | `on` | Member-authenticated reads AND member-gated writes (`docs/member-authenticated-reads.md`). `on` (the default) = every federation GET must carry a member's read signature (or a peer token) and every attributable POST must come from a member; a node with no founder yet boots **unclaimed** and prints a one-time setup code. `off` = the explicit dev/demo opt-out (feeds and writes open) |
 | `NODE_FOUNDER_KEYS` | unset | Comma-separated base64 public keys of the founding member(s) — the trust roots the invite chain grows from. Optional since the founder-claim flow: a fresh node is normally claimed in-band with the boot-log setup code (Profile → Community node → Founder setup); set this for mirrors, recovery, or extra roots. Each member's public key is on their Profile page. **Communities start with two founders**: after claiming, the founder invites their co-organizer and runs the in-app **Add a co-founder** ceremony (no env edit) — until then no member can ever become fully vouched, and the node logs a one-time single-founder warning |
@@ -714,9 +719,13 @@ Run through this once a month, at least. More often during pilot.
 - [ ] No high+ advisories in runtime dependencies
       (`npm audit --omit=dev`). Dev/build-tooling advisories are
       tracked in `docs/maintenance.md` and don't block serving.
-- [ ] Caddy access log retention is 7 days or less (set in `log { ... }`).
-- [ ] IPs are not recorded (configure `log { output discard }` if needed,
-      at least for paths that leak member activity).
+- [ ] Caddy access logs are still discarded (`log { output discard }` —
+      the bundled `deploy/Caddyfile` default). If you swapped in the
+      stdout triage stanza for debugging, put the discard back: access
+      logs carry every member's IP, path, and user agent.
+- [ ] Retention sweeps are running (`RETENTION_SWEEP_INTERVAL_MS` not
+      `0`; the boot log lists the active windows) so a seized disk's
+      coordination metadata is bounded, not eternal.
 - [ ] The deployed build matches a tagged release, not a random main
       checkout.
 - [ ] You can reach every active pilot member through a non-Understoria

@@ -81,10 +81,18 @@
 		file_server
 	}
 
-	# Pino logs to stdout; Caddy logs to stdout. `docker compose logs`
-	# captures both.
+	# Access logs are DISCARDED by default: they would carry every
+	# member's IP, request path, and user agent into `docker compose
+	# logs` on the host — exactly what a seized machine should not
+	# yield, and what the operator guide (§9) and threat model (§6)
+	# promise it does not. The node's own pino lines (method-only,
+	# no IPs) still reach stdout. For short-lived triage, swap in the
+	# stanza below, then put the discard back.
 	log {
-		output stdout
-		format console
+		output discard
 	}
+	# log {
+	# 	output stdout
+	# 	format console
+	# }
 }

@@ -81,6 +81,14 @@ services:
       # How long sealed DM envelopes wait on the relay shelf before
       # pruning (docs/message-relay.md §4.3). Days; 0 disables.
       MESSAGE_RETENTION_DAYS: "${MESSAGE_RETENTION_DAYS:-30}"
+      # Retention sweeps (docs/node-seizure-plan.md §3): bound how long
+      # a seized node's metadata reaches back. Each window in days;
+      # 0 disables that rule. The interval is ms; 0 disables the worker.
+      RETENTION_SWEEP_INTERVAL_MS: "${RETENTION_SWEEP_INTERVAL_MS:-21600000}"
+      CLAIM_RETENTION_DAYS: "${CLAIM_RETENTION_DAYS:-90}"
+      ANNOUNCEMENT_RETENTION_DAYS: "${ANNOUNCEMENT_RETENTION_DAYS:-60}"
+      TRANSITION_RETENTION_DAYS: "${TRANSITION_RETENTION_DAYS:-60}"
+      NEWCOMER_COUNTER_RETENTION_DAYS: "${NEWCOMER_COUNTER_RETENTION_DAYS:-7}"
       # Comma-separated list of peer node URLs (each MUST include the
       # /api prefix if the peer follows the same single-domain layout).
       # Leave empty for a solo launch.
