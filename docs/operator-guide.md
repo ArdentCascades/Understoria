@@ -729,6 +729,11 @@ Run through this once a month, at least. More often during pilot.
 - [ ] Retention sweeps are running (`RETENTION_SWEEP_INTERVAL_MS` not
       `0`; the boot log lists the active windows) so a seized disk's
       coordination metadata is bounded, not eternal.
+- [ ] If you run the optional Tor onion front door
+      ([`tor-onion.md`](./tor-onion.md)): the onion identity key is
+      backed up (escrowed like `DATABASE_KEY`, away from db
+      backups) and the printed backup surfaces carry the current
+      address, not a rotated-away one.
 - [ ] The deployed build matches a tagged release, not a random main
       checkout.
 - [ ] You can reach every active pilot member through a non-Understoria

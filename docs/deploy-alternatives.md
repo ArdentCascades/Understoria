@@ -307,6 +307,15 @@ sha256 hash for the inline bootstrap script in `index.html`, and the
 rule applies to every proxy, not just the container one. Prefer
 nginx or something else? Implement §4 instead.
 
+**Optional onion front door.** Bare metal can publish the same Tor
+onion service the Docker stack offers: `sudo apt-get install tor`,
+point a `HiddenServiceDir`/`HiddenServicePort 80 127.0.0.1:8081`
+stanza at a loopback-bound copy of the shipped onion vhost
+(`http://:8081` + `bind 127.0.0.1`, mirroring the `http://:8080`
+block in `deploy/Caddyfile`), then `systemctl enable --now tor`.
+The full procedure — address readout, identity-key backup ceremony,
+rotation, member caveats — is [`tor-onion.md`](./tor-onion.md).
+
 ### 3.6 Backups without Docker
 
 Same principle as `scripts/backup-db.sh` (which is written against

@@ -1,6 +1,13 @@
 # Tor onion-service reachability + paper mirror/onion addresses — implementation plan
 
-> **Status: PROPOSED** (code-verified 2026-07-25 against the working tree at
+> **Status: C1 SHIPPED** (`deploy/tor/Dockerfile` + `deploy/torrc` + Caddy
+> onion vhost + compose `tor` service/profile/`tor-keys` volume/caddy
+> `ONION_MARK_SECRET` env + `docs/tor-onion.md` runbook + pointer paragraphs
+> in operator-guide §9, deploy-linode, deploy-alternatives §3.5). C2 (onion
+> rate-limit lane + web origin-lock tests) and C3 (paper surfaces +
+> threat-model/guides) remain PROPOSED; §4 D1 applied as recommended for
+> now — paper/runbook-only visibility.
+> Original status: PROPOSED (code-verified 2026-07-25 against the working tree at
 > `27312e6`). First item of the operator-approved authoritarian-resilience
 > initiative. Discipline model: `docs/react-19-plan.md` (verified ground truth →
 > design decisions with rationale → phased commits with gates → named

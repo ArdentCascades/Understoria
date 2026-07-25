@@ -96,3 +96,57 @@
 	# 	format console
 	# }
 }
+
+# Onion front door (docs/tor-onion.md) — reachable ONLY from the tor
+# sidecar: compose never publishes port 8080, so without the "onion"
+# profile this listener is dead config. Plain HTTP by design — Tor
+# itself provides transport encryption and endpoint authentication
+# (the .onion address IS the key), so there's no ACME and no HSTS
+# here; HSTS from the app server is actively stripped below because
+# a Strict-Transport-Security header on an http:// onion origin is
+# at best noise and at worst breaks Tor Browser variants that honor
+# it. Same CSP as the clearnet vhost, verbatim.
+#
+# Access logs stay on stdout here (unlike the clearnet discard):
+# every visitor arrives from the tor sidecar's address, so there are
+# no member IPs to leak — and the line log is the only way to see
+# the onion path is alive at all.
+http://:8080 {
+	encode gzip zstd
+
+	header {
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(), camera=(), microphone=(self), payment=()"
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-mVpOu/C1dIKbTCswgkrVcbSGV23SQYCVB6nk5bCeuno='; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; media-src 'self' blob:; worker-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+		-Server
+	}
+
+	handle_path /api/* {
+		reverse_proxy understoria:8787 {
+			health_uri /health
+			health_interval 30s
+			health_timeout 5s
+			# The app server (helmet) sets HSTS on every response;
+			# fine on the clearnet vhost, wrong on an http onion.
+			header_down -Strict-Transport-Security
+			# Marks onion-lane requests for the server's dedicated
+			# rate-limit bucket (shipped in a later phase; the header
+			# is inert until ONION_RATE_LIMIT_MAX is configured).
+			# Spoof-proof: only Caddy can set it on this path, and
+			# clearnet clients can't guess the secret.
+			header_up X-Understoria-Onion {$ONION_MARK_SECRET}
+		}
+	}
+
+	handle {
+		root * /usr/share/caddy
+		try_files {path} /index.html
+		file_server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

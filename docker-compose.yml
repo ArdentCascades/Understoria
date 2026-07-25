@@ -193,6 +193,11 @@ services:
     environment:
       DOMAIN: "${DOMAIN}"
       ACME_EMAIL: "${ACME_EMAIL}"
+      # Secret that marks requests arriving via the onion front door
+      # (deploy/Caddyfile onion vhost → X-Understoria-Onion header).
+      # Generate any long random string. Inert until the server-side
+      # onion rate-limit lane ships/enables; docs/tor-onion.md.
+      ONION_MARK_SECRET: "${ONION_MARK_SECRET:-}"
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
       - web-dist:/usr/share/caddy:ro
@@ -209,8 +214,37 @@ services:
       understoria:
         condition: service_healthy
 
+  # Opt-in Tor onion front door (docs/tor-onion.md). Enabled ONLY
+  # with the profile: `docker compose --profile onion up -d --build`.
+  # Default deployments never start it and are byte-identical to a
+  # stack without this block. The service makes outbound connections
+  # only — no ports, no firewall changes, works behind NAT.
+  tor:
+    build:
+      context: .
+      dockerfile: deploy/tor/Dockerfile
+    image: understoria/tor:${UNDERSTORIA_VERSION:-0.3.0}
+    container_name: understoria-tor
+    restart: unless-stopped
+    profiles: ["onion"]
+    volumes:
+      - ./deploy/torrc:/etc/tor/torrc:ro
+      # The onion identity (hs_ed25519_secret_key) lives here — it
+      # IS the community's censorship-resistant address. Back it up
+      # like DATABASE_KEY: escrowed, away from the db backups.
+      - tor-keys:/var/lib/tor
+    depends_on:
+      caddy:
+        condition: service_started
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   understoria-data:
   web-dist:
   caddy-data:
   caddy-config:
+  tor-keys:
