@@ -711,7 +711,9 @@ Run through this once a month, at least. More often during pilot.
 
 - [ ] Host OS updates applied.
 - [ ] TLS certificate renews automatically (Caddy does this; double-check logs).
-- [ ] `npm audit` clean on the build you're serving.
+- [ ] No high+ advisories in runtime dependencies
+      (`npm audit --omit=dev`). Dev/build-tooling advisories are
+      tracked in `docs/maintenance.md` and don't block serving.
 - [ ] Caddy access log retention is 7 days or less (set in `log { ... }`).
 - [ ] IPs are not recorded (configure `log { output discard }` if needed,
       at least for paths that leak member activity).

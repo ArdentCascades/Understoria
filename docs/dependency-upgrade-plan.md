@@ -2,11 +2,11 @@
 
 > **Status: Tiers 1–3 SHIPPED (Tailwind bump held on an operator
 > gate; react-router 8 added unplanned); Tier 4 held.** Surveyed
-> 2026-07-24
-> (`npm outdated` across all workspaces; `npm audit` was already at
-> 0 vulnerabilities after the react-router 7 migration —
-> `docs/react-router-7-plan.md`). Node 22 runtime is LTS through
-> 2027; CI actions are current.
+> 2026-07-24; Tier 3.4 landed 2026-07-25
+> (`npm outdated` across all workspaces). Current audit posture:
+> NOT zero — a standing brace-expansion advisory in dev/build
+> tooling, tracked in `docs/maintenance.md` § Open. Node 22
+> runtime is LTS through 2027; CI actions are current.
 
 ## Tier 1 — semver-compatible + deliberate small bumps (SHIPPED)
 
@@ -97,5 +97,8 @@ import sites now import from `react-router` directly.
 `npm audit` runs in CI on every PR (informational job, gate at
 high). The recurring pattern this repo has lived: advisories tend
 to publish mid-PR and look like "our" failures — check the advisory
-date before assuming. Electron patch bumps should ride any
+date before assuming. Standing findings live in
+`docs/maintenance.md` § Open (currently: the brace-expansion
+advisory, unfixable until upstream backports — a red audit job
+alone is not news). Electron patch bumps should ride any
 convenient PR at least monthly (Chromium CVE cadence).
