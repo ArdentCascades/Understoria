@@ -181,3 +181,16 @@ describe("node-suggest dismissal (per-device, permanent)", () => {
     expect(await isNodeSuggestDismissed()).toBe(true);
   });
 });
+
+describe("onion origins (docs/tor-onion-plan.md C2 lock)", () => {
+  // A plausible v3 onion address: 56 base32 chars.
+  const ONION = `http://${"a".repeat(56)}.onion`;
+
+  it("an onion origin is NOT excluded — the onion front door must suggest its own node", () => {
+    expect(isExcludedOrigin(ONION)).toBe(false);
+  });
+
+  it("derives the /api candidate from an onion origin", () => {
+    expect(deriveCandidateNodeUrl(ONION)).toBe(`${ONION}/api`);
+  });
+});

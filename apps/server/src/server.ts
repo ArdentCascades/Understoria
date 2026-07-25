@@ -103,6 +103,15 @@ import {
 import { MIRROR_INTERNAL_HEADER } from "./mirrorPull.js";
 import { createTrustResolver } from "./trustGate.js";
 
+/**
+ * Header the Caddy onion vhost stamps (with ONION_MARK_SECRET as its
+ * value) on requests arriving through the Tor front door
+ * (deploy/Caddyfile, docs/tor-onion.md). When the onion rate-limit
+ * lane is enabled, matching requests share a dedicated bucket
+ * instead of collapsing every Tor member into the sidecar-IP bucket.
+ */
+export const ONION_MARK_HEADER = "x-understoria-onion";
+
 export interface BuildOptions {
   config: Config;
   /**
@@ -188,14 +197,26 @@ export async function buildServer({
   });
 
   const internalBypassToken = randomBytes(32).toString("base64url");
+  // The onion lane exists only when BOTH knobs are set; otherwise the
+  // mark header is inert and Tor traffic shares the normal buckets
+  // (the C1 posture — see the config doc comments).
+  const onionLane =
+    config.onionRateLimitMax > 0 && config.onionMarkSecret !== null;
   await app.register(rateLimit, {
-    max: config.rateLimitMax,
+    max: (_req, key) =>
+      key === "bucket_onion" ? config.onionRateLimitMax : config.rateLimitMax,
     timeWindow: "1 minute",
     // Hash the IP so it never reaches storage even in memory key form.
     // The default key fn would put req.ip into an internal map; we replace
     // it with a non-reversible bucket id derived from the IP only at
-    // throttle time.
-    keyGenerator: (req) => hashIpToBucket(req.ip),
+    // throttle time. Onion-marked requests (spoof-proof: only Caddy
+    // can stamp the secret on that path) share one dedicated bucket —
+    // all Tor visitors are indistinguishable by design, so a shared
+    // lane is the best granularity that exists.
+    keyGenerator: (req) =>
+      onionLane && req.headers[ONION_MARK_HEADER] === config.onionMarkSecret
+        ? "bucket_onion"
+        : hashIpToBucket(req.ip),
     // The mirror-pull worker's self-injected POSTs carry the per-boot
     // token (see BuiltServer.internalBypassToken) — a mirror catch-up
     // batch must not consume the loopback bucket that real local
