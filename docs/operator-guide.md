@@ -760,10 +760,14 @@ Two honesty notes to pass on to members who ask:
   it. Keep it that way: never commit secrets, and keep local
   backups under `backups/` (the excluded path).
 
-Development-side redundancy is a separate, cheap step: keep a push
-mirror of the repository on a second forge (Codeberg, a self-hosted
-Forgejo) so the project itself never has a single hosting point of
-failure either.
+Development-side redundancy is now operationalized: a push mirror
+workflow ships in-repo (`.github/workflows/mirror.yml`, setup in
+[`forge-mirror-runbook.md`](./forge-mirror-runbook.md)) so the
+project itself never has a single hosting point of failure. And
+understand your own role in that: **operators are archivists.**
+Your node IS a project archive — every deployment serving
+`/source/` is one more place the software survives, independent of
+every forge. Keep it serving; that's the whole ask.
 
 The member-facing walkthrough of the whole loop — download from a
 node, verify, try, deploy, become a seed — is

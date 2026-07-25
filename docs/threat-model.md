@@ -132,6 +132,27 @@ We are not trying to protect against:
 
 ## 7. Known gaps (tracked work)
 
+- **Channel pressure on the project itself: MITIGATED (three
+  layers).** The adversary rows in §3 applied to the PROJECT rather
+  than a community: platform takedown pressure or account compromise
+  against the code hosting, the releases, or the website. The asset
+  at stake is §2's "trust of the community in the software itself —
+  losing this is terminal." Mitigation is three redundant layers
+  (`docs/project-continuity-plan.md`, operational runbooks:
+  `docs/forge-mirror-runbook.md`, `docs/release-signing.md`,
+  `docs/node-as-seed.md`), and what each scenario actually loses:
+
+  | Scenario | Lost | Survives |
+  |---|---|---|
+  | GitHub repo takedown / account termination | Issues, PRs, Discussions, CI history, the canonical URL | Codeberg mirror (full history + tags), every node's source pack, every downloaded release, git-mode nodes' history bundles, every contributor clone |
+  | GitHub account compromise (malicious commits/releases) | Trust in unverified main | Signed release manifests (attacker lacks the offline signing key → forged releases fail verification against the published pubkey); honest history on the mirror and in clones |
+  | Website domain seizure (understoria showcase) | The front door | Everything — the site is marketing; docs + Help travel in every source pack; nodes are on their own domains |
+  | Both forges + website lost | All hosted channels | The node layer: `curl https://<any-node>/source/understoria-source.tar.gz` → unpack → deploy (`docs/bootstrap-from-a-node.md`, unchanged); a bare-metal node's `understoria.bundle` restores full history via `git clone understoria.bundle` |
+  | Release-signing key compromised | Authenticity of future releases until rotation | Integrity layer (checksums), cross-node comparison; rotation = new key + revocation note in-repo on both forges (`docs/release-signing.md`) |
+
+  NOT mitigated, honestly: reproducible builds (a served bundle
+  cannot yet be bit-for-bit tied to a source commit) — named as
+  future work in the continuity plan §8.
 - **Node seizure — what a seized node yields: MINIMIZED + DRILLED.**
   The irreducible yield of a seized (or compelled) node, stated
   honestly: the vouch graph, the membership genealogy (redemption

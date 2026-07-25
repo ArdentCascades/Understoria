@@ -9,7 +9,15 @@
 > over-promising. **Maintainer actions outstanding:** generate the
 > release key offline, commit its public half, then
 > `git tag -a v0.3.0 && git push origin v0.3.0` per the runbook.)
-> C3 (forge mirror + threat-model entry) remains PLANNED.
+> **C3 SHIPPED** (mirror.yml push workflow — skips green until the
+> operator sets CODEBERG_TOKEN/CODEBERG_REPO —
+> `docs/forge-mirror-runbook.md` with the honest failure analysis +
+> promotion runbook, threat-model §7 "Channel pressure on the
+> project itself" entry with the survives-table, operator-guide §7a
+> archivists paragraph, CONTRIBUTING "Where the code lives".
+> **Operator actions outstanding:** Codeberg org/repo + token +
+> secret/variable, then one workflow_dispatch.) The plan is
+> COMPLETE aside from the named maintainer/operator actions.
 > Original status: PLANNED (code-verified 2026-07-25 against the working
 > tree at commit 27312e6, the two CI workflows, the pack-source
 > script, the web Dockerfile, docker-compose.yml, the Infrastructure
