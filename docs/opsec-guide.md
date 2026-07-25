@@ -92,6 +92,28 @@ changes.
   panic-button confirmations, exchange details. Glance up before
   you look down.
 
+## On hostile networks
+
+- **If the community's usual address is blocked where you are**, the
+  printed backup card may carry a mirror address or a `.onion`
+  address. Mirrors work in any browser; a `.onion` needs
+  [Tor Browser](https://www.torproject.org/) (or Onion Browser on
+  iOS). Same community, same people, same history.
+- **Tor Browser forgets on exit** — by design. The app's entire
+  local store is wiped when you close it, so an onion session is a
+  fresh device every time. Use it for reading and coordinating in
+  the moment; keep your durable identity on your installed app, and
+  keep your recovery kit safe — it's how identity comes back
+  anywhere.
+- **Using Tor is itself visible.** Your network operator can't see
+  WHAT you do through Tor, but they can usually see THAT you're
+  using it, and in some places that alone draws attention. Weigh
+  that against your situation; sometimes an ordinary mirror address
+  is the quieter choice.
+- **Android + Orbot, or Chrome over a Tor VPN, degrade some app
+  features** (notifications, installability). The onion front door
+  is a fallback, not the daily driver.
+
 ## On your social footprint
 
 - **Keep your Understoria display name separate from your work

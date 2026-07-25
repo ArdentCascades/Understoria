@@ -132,6 +132,25 @@ We are not trying to protect against:
 
 ## 7. Known gaps (tracked work)
 
+- **Onion-service front door: OPT-IN, SHIPPED.** A node can publish
+  a Tor onion service as a second front door (`docs/tor-onion.md`).
+  What it gives: reachability under DNS/IP blocking or domain
+  seizure; transport encryption and endpoint authentication from
+  Tor itself (the address IS the key — no CA); no exit nodes
+  involved for onion traffic; no inbound firewall exposure (onion
+  services connect outward). What it does NOT give, honestly: the
+  node still sees exactly what it saw before (Tor changes the
+  transport, not the trust model); a member's Tor use is itself
+  observable and conspicuous to their network operator and flagged
+  in some jurisdictions (`docs/opsec-guide.md` "On hostile
+  networks"); traffic-analysis *reduction*, not immunity; all Tor
+  visitors share one rate bucket (the dedicated onion lane bounds
+  the blast radius but cannot distinguish individual Tor users —
+  that indistinguishability is Tor's point); the onion secret key
+  is an impersonation-grade credential (backup/rotation ceremony in
+  the runbook, escrowed like `DATABASE_KEY`); and printed paper
+  carrying the onion address outlives rotation — the "paper doesn't
+  sync or purge" entry extends to backup addresses.
 - **Channel pressure on the project itself: MITIGATED (three
   layers).** The adversary rows in §3 applied to the PROJECT rather
   than a community: platform takedown pressure or account compromise

@@ -1364,6 +1364,12 @@ Rare, but worth knowing ahead of time:
   whom, the exchange ledger, event rosters. The community's threat
   model document spells this out in full — ask whoever runs your
   node for it.
+- **If the address just stops working** (blocked, expired, broken —
+  not necessarily taken): check the printed backup card from the
+  offline kit. It may list mirror addresses (open in any browser)
+  or a `.onion` address (open in Tor Browser). They all reach the
+  same community. Ask for a card at a gathering before you ever
+  need one — that's the whole trick.
 
 ## 16. FAQ
 

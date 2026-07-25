@@ -3660,7 +3660,10 @@
         "ssid": "Nombre del WiFi del centro (SSID)",
         "ssidPlaceholder": "p. ej. Centro-Ribera",
         "password": "Contraseña del WiFi (se imprime en el cartel)",
-        "passwordPlaceholder": "déjalo vacío si la red es abierta"
+        "passwordPlaceholder": "déjalo vacío si la red es abierta",
+        "backups": "Direcciones de respaldo (se imprimen en cartel y tarjetas)",
+        "backupsPlaceholder": "https://espejo.ejemplo.org\nhttp://….onion",
+        "backupsHelp": "Una por línea, hasta tres: servidores espejo (rellenadas desde los que este dispositivo ya confía) y la dirección Tor .onion de la comunidad si la tiene — las direcciones solo ayudan si la gente las tiene ANTES de necesitarlas. Las líneas que no son direcciones se ignoran; si lo dejas vacío no se imprime nada."
       },
       "poster": {
         "headline": "¿Sin internet? Nuestra comunidad sigue funcionando.",
@@ -3673,6 +3676,9 @@
         "sameAddress": "Sin app nueva, sin configuración. En el WiFi del centro, la dirección de siempre simplemente funciona.",
         "step3": "3. Estás en la isla comunitaria",
         "step3Body": "Publica necesidades, ofrece ayuda, confirma intercambios, da la bienvenida. Todo se sincroniza con la red cuando vuelve el internet.",
+        "backupsTitle": "Si la dirección principal deja de funcionar",
+        "backupsBody": "Estas direcciones llegan a la misma comunidad — la misma gente, la misma historia. Pruébalas en orden; una dirección .onion necesita el Navegador Tor.",
+        "backupQrAria": "Código QR de dirección de respaldo",
         "sharesWifi": "Este cartel comparte el WiFi del centro con cualquiera que lo vea — pégalo donde eso sea justamente el punto."
       },
       "cards": {
@@ -3680,6 +3686,7 @@
         "cut": "recorta por las líneas discontinuas — una para tu cartera, otra para una vecina",
         "body": "Si el internet se corta: busca el WiFi comunitario, únete, y abre esta misma dirección. La app sigue funcionando.",
         "wifiLine": "WiFi del centro: {{ssid}}",
+        "backupsLine": "Respaldos: {{addresses}}",
         "askForWifi": "WiFi del centro: pregunta a un miembro"
       }
     }

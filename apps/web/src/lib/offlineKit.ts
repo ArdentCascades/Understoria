@@ -36,6 +36,25 @@ export function escapeWifiField(value: string): string {
   return value.replace(/([\\;,":])/g, "\\$1");
 }
 
+/**
+ * Backup addresses for the printed surfaces (tor-onion-plan C3):
+ * one address per line — mirror origins and/or the community's
+ * `.onion` — trimmed, non-http(s) lines dropped, deduped, capped at
+ * three (paper real estate; more addresses dilute trust in all of
+ * them). The member sees exactly what will print.
+ */
+export function parseBackupAddresses(raw: string): string[] {
+  const out: string[] = [];
+  for (const line of raw.split("\n")) {
+    const v = line.trim().replace(/\/+$/, "");
+    if (!v || !/^https?:\/\/\S+$/i.test(v)) continue;
+    if (out.includes(v)) continue;
+    out.push(v);
+    if (out.length === 3) break;
+  }
+  return out;
+}
+
 export function wifiQrValue(input: {
   ssid: string;
   password: string;

@@ -30,6 +30,14 @@ vi.mock("@/components/InviteQRCode", () => ({
   ),
 }));
 
+// The backup-address prefill reads accepted mirrors from Dexie via
+// nodeEndpoints; the mock keeps these tests db-free and lets the
+// prefill lock inject a mirror list.
+const readAcceptedMirrorsMock = vi.fn(async (): Promise<string[]> => []);
+vi.mock("@/lib/nodeEndpoints", () => ({
+  readAcceptedMirrors: () => readAcceptedMirrorsMock(),
+}));
+
 import "@/i18n";
 import PrintOfflineKitPage from "./PrintOfflineKit";
 
@@ -42,6 +50,8 @@ let root: Root;
 beforeEach(() => {
   container = document.createElement("div");
   document.body.appendChild(container);
+  readAcceptedMirrorsMock.mockReset();
+  readAcceptedMirrorsMock.mockResolvedValue([]);
 });
 
 afterEach(() => {
@@ -111,5 +121,70 @@ describe("PrintOfflineKitPage", () => {
       el.className.includes("border-dashed"),
     );
     expect(cards.length).toBe(2);
+  });
+});
+
+// Backup addresses (docs/tor-onion-plan.md C3): mirrors + the
+// community's onion on the poster and cards, absent honestly when
+// there are none.
+describe("backup addresses", () => {
+  const ONION = `http://${"a".repeat(56)}.onion`;
+
+  async function renderAndSettle() {
+    render();
+    // Let the accepted-mirrors prefill effect resolve.
+    await act(async () => {
+      await Promise.resolve();
+    });
+  }
+
+  function backupsTextarea() {
+    return container.querySelector("textarea") as HTMLTextAreaElement;
+  }
+
+  function setTextareaValue(value: string) {
+    const setter = Object.getOwnPropertyDescriptor(
+      window.HTMLTextAreaElement.prototype,
+      "value",
+    )!.set!;
+    act(() => {
+      setter.call(backupsTextarea(), value);
+      backupsTextarea().dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  }
+
+  it("prefills from the mirrors this device already accepted", async () => {
+    readAcceptedMirrorsMock.mockResolvedValue([
+      "https://mirror.example.org/api",
+    ]);
+    await renderAndSettle();
+    expect(backupsTextarea().value).toBe("https://mirror.example.org");
+    expect(container.textContent).toContain(
+      "If the main address stops working",
+    );
+    expect(qrValues()).toContain("https://mirror.example.org");
+  });
+
+  it("a typed onion address prints on the poster (with QR) and the wallet cards", async () => {
+    await renderAndSettle();
+    setTextareaValue(ONION);
+    expect(container.textContent).toContain(
+      "If the main address stops working",
+    );
+    expect(qrValues()).toContain(ONION);
+    // Both wallet cards carry the backups line.
+    const cardLines = (container.textContent?.match(/Backups: /g) ?? [])
+      .length;
+    expect(cardLines).toBe(2);
+    expect(container.textContent).toContain(ONION);
+  });
+
+  it("absent honestly when there are no addresses: no block, no QR, no card line", async () => {
+    await renderAndSettle();
+    expect(container.textContent).not.toContain(
+      "If the main address stops working",
+    );
+    expect(container.textContent).not.toContain("Backups: ");
+    expect(qrValues()).toEqual([window.location.origin]);
   });
 });

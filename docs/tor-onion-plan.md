@@ -9,9 +9,15 @@
 > `server.onionLane.test.ts` 5 locks incl. mirror-bypass unaffected,
 > compose passthroughs + operator-guide §6 rows, web onion-origin
 > locks in nodeOriginSuggest/appOrigin suites; the §2-C2 Tor Browser
-> runtime-verification gate remains a manual operator step). C3
-> (paper surfaces + threat-model/guides) remains PROPOSED; §4 D1
-> applied as recommended for now — paper/runbook-only visibility.
+> runtime-verification gate remains a manual operator step).
+> **C3 SHIPPED** (offline-kit backup addresses: `parseBackupAddresses`
+> + mirror prefill + poster block with QRs + wallet-card line +
+> en/es i18n + 3 PrintOfflineKit locks; threat-model §7
+> "Onion-service front door" entry; opsec-guide "On hostile
+> networks"; member-guide §15a passage; paper-systems P4 as-built
+> note). The plan is COMPLETE aside from the manual Tor Browser
+> verification and the operator enable/backup ceremony. §4 D1
+> applied as recommended — paper/runbook-only visibility.
 > Original status: PROPOSED (code-verified 2026-07-25 against the working tree at
 > `27312e6`). First item of the operator-approved authoritarian-resilience
 > initiative. Discipline model: `docs/react-19-plan.md` (verified ground truth →
