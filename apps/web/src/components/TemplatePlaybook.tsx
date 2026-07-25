@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { getTemplate } from "@/content/projectTemplates";
 import { findFaqEntry } from "@/lib/templateContext";

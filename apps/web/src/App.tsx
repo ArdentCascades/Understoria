@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router";
 import { Layout } from "@/components/Layout";
 import BoardPage from "@/pages/Board";
 import CalendarPage from "@/pages/Calendar";

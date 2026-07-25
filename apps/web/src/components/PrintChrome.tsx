@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { formatAbsoluteDate } from "@/lib/format";
 import { InviteQRCode } from "@/components/InviteQRCode";

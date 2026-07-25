@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { START_COMMUNITY } from "@/content/startCommunity";
 import { START_COMMUNITY_ES } from "@/content/startCommunity.es";

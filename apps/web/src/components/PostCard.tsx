@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import type { AvailabilityChip, Post } from "@/types";
 import { formatHours, formatRelativeTime } from "@/lib/format";

@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/state/ToastContext";
 import { humanizeError } from "@/lib/humanizeError";

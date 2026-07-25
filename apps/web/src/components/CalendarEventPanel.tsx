@@ -19,7 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useCallback } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { DockedPanel } from "@/components/DockedPanel";
 import EventDetailPage from "@/pages/EventDetail";

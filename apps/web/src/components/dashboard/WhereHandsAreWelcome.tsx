@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { projectNeedsMoreHands } from "@/lib/projectFilter";
