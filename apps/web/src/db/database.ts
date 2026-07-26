@@ -1342,6 +1342,12 @@ export const SETTING_KEYS = {
    *  Mirrored to localStorage so the inline script in index.html
    *  applies the right class before first paint. See lib/density.ts. */
   density: "density",
+  /** "canopy" | "riverbed" | "harvest" | "fieldnotes". Absent or
+   *  invalid reads as "canopy" (today's palette). Mirrored to
+   *  localStorage so the inline script in index.html applies the
+   *  right `data-palette` attribute before first paint. See
+   *  lib/palette.ts. */
+  palette: "palette",
   /** Cursor for `pullFederatedExchanges` — the highest `completedAt`
    *  observed so far. Mirrors the post / claim / task-comment cursors
    *  in `federationSync.ts`. Absent on a fresh install means "pull

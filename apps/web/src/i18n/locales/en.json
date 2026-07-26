@@ -2830,6 +2830,14 @@
       "density": {
         "default": "Comfortable",
         "compact": "Compact"
+      },
+      "paletteTitle": "Colors",
+      "paletteIntro": "Four palettes, each with its own light and dark. Canopy is the green you know.",
+      "palette": {
+        "canopy": "Canopy",
+        "riverbed": "Riverbed",
+        "harvest": "Harvest",
+        "fieldnotes": "Field notes"
       }
     },
     "node": {

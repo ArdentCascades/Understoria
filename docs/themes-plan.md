@@ -1,6 +1,12 @@
 # Member-selectable themes — implementation plan
 
-> **Status: T1 SHIPPED** (variable layer: brand families →
+> **Status: T1 + T2 SHIPPED** (T2: [data-palette] blocks for the
+> three themes, pre-paint bootstrap attr + refreshed CSP hash on
+> both Caddyfile vhosts, lib/palette.ts + Dexie/AppContext/Settings
+> picker with swatch previews, runtime theme-color meta (D3), and
+> the contrast suite parametrized to 201 assertions incl. the
+> index.css drift lock). T3 (Morning mist) remains PROPOSED.
+> T1: variable layer: brand families →
 > `rgb(var() / <alpha-value>)` resolving from the `:root` triplet
 > block in index.css; shadow-leaf follows the palette; InstallGuide
 > pill AA fix; TW4-plan §1 contract amended; zero-visual-change

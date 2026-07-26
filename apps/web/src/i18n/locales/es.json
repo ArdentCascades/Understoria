@@ -2830,6 +2830,14 @@
       "density": {
         "default": "Cómodo",
         "compact": "Compacto"
+      },
+      "paletteTitle": "Colores",
+      "paletteIntro": "Cuatro paletas, cada una con su modo claro y oscuro. Canopy es el verde de siempre.",
+      "palette": {
+        "canopy": "Canopy",
+        "riverbed": "Río",
+        "harvest": "Cosecha",
+        "fieldnotes": "Cuaderno de campo"
       }
     },
     "node": {

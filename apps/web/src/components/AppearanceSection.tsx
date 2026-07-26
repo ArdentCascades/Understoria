@@ -30,6 +30,10 @@ import {
   DENSITY_PREFERENCES,
   type DensityPreference,
 } from "@/lib/density";
+import {
+  PALETTE_PREFERENCES,
+  type PalettePreference,
+} from "@/lib/palette";
 
 // Each text-size label renders at the size it represents so the
 // choice is self-demonstrating. Auto borrows the currently-resolved
@@ -42,6 +46,17 @@ const RESOLVED_LABEL_CLASS: Record<TextSize, string> = {
   largest: "text-xl",
 };
 
+// Preview literals per docs/themes-plan.md T2: each palette's
+// canopy-600 / moss-300 / ember-500 / bark-400, deliberately NOT the
+// live CSS variables so every option previews its own palette while
+// another one is active.
+const PALETTE_SWATCHES: Record<PalettePreference, readonly string[]> = {
+  canopy: ["#16a34a", "#adc09e", "#c97f1e", "#9a886b"],
+  riverbed: ["#2197d1", "#afbcc8", "#df7229", "#838b98"],
+  harvest: ["#729a21", "#bdbba5", "#b6881b", "#a2856e"],
+  fieldnotes: ["#3a8d6a", "#c9c9c6", "#ba8641", "#8f8a7f"],
+};
+
 export function AppearanceSection() {
   const { t } = useTranslation();
   const {
@@ -52,6 +67,8 @@ export function AppearanceSection() {
     setTextSizePreference,
     densityPreference,
     setDensityPreference,
+    palettePreference,
+    setPalettePreference,
   } = useApp();
   return (
     <section className="card mb-4" aria-labelledby="appearance-section-title">
@@ -175,6 +192,57 @@ export function AppearanceSection() {
               className={selected ? "btn-primary" : "btn-secondary"}
             >
               {t(`profile.appearance.density.${pref}`)}
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        className="my-4 border-t border-bark-200/60 dark:border-moss-800"
+        aria-hidden="true"
+      />
+
+      <h3
+        id="appearance-palette-title"
+        className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
+      >
+        {t("profile.appearance.paletteTitle")}
+      </h3>
+      <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
+        {t("profile.appearance.paletteIntro")}
+      </p>
+      <div
+        role="radiogroup"
+        aria-labelledby="appearance-palette-title"
+        className="flex flex-wrap gap-2"
+      >
+        {PALETTE_PREFERENCES.map((pref: PalettePreference) => {
+          const selected = palettePreference === pref;
+          return (
+            <button
+              key={pref}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => {
+                void setPalettePreference(pref);
+              }}
+              className={selected ? "btn-primary" : "btn-secondary"}
+            >
+              {/* Decorative four-dot preview; the label text carries
+                  the meaning. */}
+              <span className="inline-flex items-center gap-1" aria-hidden="true">
+                {PALETTE_SWATCHES[pref].map((hex) => (
+                  <span
+                    key={hex}
+                    className="h-2.5 w-2.5 rounded-full"
+                    // Inline style on purpose: preview literals per
+                    // docs/themes-plan.md T2, not the live variables.
+                    style={{ backgroundColor: hex }}
+                  />
+                ))}
+              </span>
+              {t(`profile.appearance.palette.${pref}`)}
             </button>
           );
         })}
