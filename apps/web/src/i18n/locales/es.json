@@ -2838,6 +2838,12 @@
         "riverbed": "Río",
         "harvest": "Cosecha",
         "fieldnotes": "Cuaderno de campo"
+      },
+      "mistTitle": "Niebla matinal",
+      "mistIntro": "Un acabado esmerilado suave en la cabecera, las bandas de pestañas y los paneles laterales — el contenido parece deslizarse por debajo. Funciona con cualquier tema de color. Se atenúa solo en dispositivos que piden transparencia reducida.",
+      "mist": {
+        "off": "Apagada",
+        "on": "Encendida"
       }
     },
     "node": {

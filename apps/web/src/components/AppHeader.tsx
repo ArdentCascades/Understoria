@@ -52,7 +52,7 @@ export function AppHeader() {
 
   return (
     <header
-      className="z-30 shrink-0 border-b border-moss-200 bg-white/95 pt-[env(safe-area-inset-top)]
+      className="chrome-mist z-30 shrink-0 border-b border-moss-200 bg-white/95 pt-[env(safe-area-inset-top)]
                  backdrop-blur supports-[backdrop-filter]:bg-white/70
                  dark:border-moss-800 dark:bg-moss-950/95 print:hidden"
     >

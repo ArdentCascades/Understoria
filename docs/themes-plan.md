@@ -1,6 +1,14 @@
 # Member-selectable themes — implementation plan
 
-> **Status: T1 + T2 SHIPPED** (T2: [data-palette] blocks for the
+> **Status: COMPLETE — T1 + T2 + T3 SHIPPED** (T3: opt-in "Morning
+> mist" — html.mist + .chrome-mist on the six chrome surfaces
+> (AppHeader, BottomNav, Board/Proposals/Messages sticky bands,
+> DockedPanel), blur(12px) saturate(1.1) with the certified tint
+> floors moss-50/0.92 light + moss-950/0.85 dark, solid fallbacks
+> under prefers-reduced-transparency and missing backdrop-filter,
+> Settings toggle + Dexie/bootstrap plumbing + refreshed CSP hash
+> on both Caddyfile vhosts.)
+> **T1 + T2 SHIPPED** (T2: [data-palette] blocks for the
 > three themes, pre-paint bootstrap attr + refreshed CSP hash on
 > both Caddyfile vhosts, lib/palette.ts + Dexie/AppContext/Settings
 > picker with swatch previews, runtime theme-color meta (D3), and
