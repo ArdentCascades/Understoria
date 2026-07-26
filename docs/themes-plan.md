@@ -1,13 +1,24 @@
 # Member-selectable themes — implementation plan
 
 > **Status: COMPLETE — T1 + T2 + T3 SHIPPED** (T3: opt-in "Morning
-> mist" — html.mist + .chrome-mist on the six chrome surfaces
-> (AppHeader, BottomNav, Board/Proposals/Messages sticky bands,
-> DockedPanel), blur(12px) saturate(1.1) with the certified tint
-> floors moss-50/0.92 light + moss-950/0.85 dark, solid fallbacks
-> under prefers-reduced-transparency and missing backdrop-filter,
-> Settings toggle + Dexie/bootstrap plumbing + refreshed CSP hash
-> on both Caddyfile vhosts.)
+> mist" — html.mist + .chrome-mist on the five chrome surfaces
+> (AppHeader, BottomNav, Board/Proposals/Messages sticky bands),
+> blur(20px) saturate(1.2) at moss-50/0.65 light + moss-950/0.60
+> dark, solid fallbacks under prefers-reduced-transparency and
+> missing backdrop-filter, Settings toggle + Dexie/bootstrap
+> plumbing + refreshed CSP hash on both Caddyfile vhosts.
+> **§1.4 amendment, post-pilot-report:** the statically-certified
+> tint floors (0.92/0.85) shipped first and proved INVISIBLE — more
+> opaque than the default /70-with-blur chrome those same surfaces
+> already carry, so the toggle changed nothing perceptible. Mist
+> now deliberately sits on the shipped default treatment's
+> acceptance basis instead — chrome-text-only surfaces over
+> blur-averaged real content, opt-in, fully solid fallbacks — and
+> DockedPanel was dropped from the treatment per this plan's own
+> reading-surfaces-stay-opaque rule. The §1.4 floor math remains
+> correct as the static-certification bound; it is simply not the
+> operative constraint for an opt-in effect on surfaces whose
+> default is already less conservative.)
 > **T1 + T2 SHIPPED** (T2: [data-palette] blocks for the
 > three themes, pre-paint bootstrap attr + refreshed CSP hash on
 > both Caddyfile vhosts, lib/palette.ts + Dexie/AppContext/Settings
