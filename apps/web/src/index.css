@@ -56,6 +56,149 @@
   --bark-900: 36 31 24;
   }
 
+  /* Member-selectable palettes (docs/themes-plan.md T2): each
+   * block swaps ALL four brand families' triplets — same names,
+   * same steps — under the data-palette attribute the bootstrap
+   * script / lib/palette.ts set on <html>. Every palette is
+   * contrast-certified against the same 48 pairings as Canopy in
+   * lib/a11y/palette-contrast.test.ts; edit values only together
+   * with that suite. Stock status colors (amber/rose/red/indigo)
+   * deliberately do not retheme. */
+  [data-palette="riverbed"] {
+    --canopy-50: 245 251 253;
+    --canopy-100: 234 247 253;
+    --canopy-200: 214 237 249;
+    --canopy-300: 183 223 244;
+    --canopy-400: 146 204 233;
+    --canopy-500: 97 182 224;
+    --canopy-600: 33 151 209;
+    --canopy-700: 31 119 162;
+    --canopy-800: 30 94 125;
+    --canopy-900: 27 77 103;
+    --canopy-950: 8 43 60;
+    --moss-50: 245 247 248;
+    --moss-100: 231 236 240;
+    --moss-200: 208 216 224;
+    --moss-300: 175 188 200;
+    --moss-400: 139 156 172;
+    --moss-500: 105 128 151;
+    --moss-600: 82 101 121;
+    --moss-700: 66 80 95;
+    --moss-800: 54 65 77;
+    --moss-900: 47 55 64;
+    --moss-950: 23 29 36;
+    --ember-50: 253 246 240;
+    --ember-100: 251 231 217;
+    --ember-200: 247 208 183;
+    --ember-300: 237 181 144;
+    --ember-400: 225 152 104;
+    --ember-500: 223 114 41;
+    --ember-600: 187 91 26;
+    --ember-700: 152 72 20;
+    --ember-800: 108 51 13;
+    --ember-900: 83 39 9;
+    --bark-50: 243 244 246;
+    --bark-100: 228 232 236;
+    --bark-200: 204 209 215;
+    --bark-300: 171 178 189;
+    --bark-400: 131 139 152;
+    --bark-500: 100 109 122;
+    --bark-600: 76 83 92;
+    --bark-700: 59 63 70;
+    --bark-800: 47 52 58;
+    --bark-900: 29 32 36;
+  }
+
+  [data-palette="harvest"] {
+    --canopy-50: 247 251 238;
+    --canopy-100: 238 248 216;
+    --canopy-200: 221 241 182;
+    --canopy-300: 198 229 134;
+    --canopy-400: 168 210 84;
+    --canopy-500: 140 186 47;
+    --canopy-600: 114 154 33;
+    --canopy-700: 90 120 29;
+    --canopy-800: 73 96 28;
+    --canopy-900: 61 78 25;
+    --canopy-950: 32 43 8;
+    --moss-50: 247 247 244;
+    --moss-100: 236 236 228;
+    --moss-200: 217 215 200;
+    --moss-300: 189 187 165;
+    --moss-400: 158 155 125;
+    --moss-500: 130 127 94;
+    --moss-600: 103 100 73;
+    --moss-700: 82 80 59;
+    --moss-800: 67 65 49;
+    --moss-900: 56 54 42;
+    --moss-950: 30 29 21;
+    --ember-50: 253 247 232;
+    --ember-100: 249 233 197;
+    --ember-200: 242 213 144;
+    --ember-300: 229 188 92;
+    --ember-400: 211 161 42;
+    --ember-500: 182 136 27;
+    --ember-600: 150 112 21;
+    --ember-700: 121 90 16;
+    --ember-800: 86 63 10;
+    --ember-900: 65 48 7;
+    --bark-50: 248 243 240;
+    --bark-100: 240 229 222;
+    --bark-200: 222 206 193;
+    --bark-300: 198 174 155;
+    --bark-400: 162 133 110;
+    --bark-500: 130 102 82;
+    --bark-600: 99 78 63;
+    --bark-700: 74 60 48;
+    --bark-800: 63 49 37;
+    --bark-900: 39 30 24;
+  }
+
+  [data-palette="fieldnotes"] {
+    --canopy-50: 249 252 251;
+    --canopy-100: 243 251 247;
+    --canopy-200: 231 246 239;
+    --canopy-300: 200 233 219;
+    --canopy-400: 151 209 185;
+    --canopy-500: 102 188 152;
+    --canopy-600: 58 141 106;
+    --canopy-700: 48 110 84;
+    --canopy-800: 39 82 64;
+    --canopy-900: 33 67 53;
+    --canopy-950: 14 36 26;
+    --moss-50: 250 250 249;
+    --moss-100: 243 243 243;
+    --moss-200: 232 232 231;
+    --moss-300: 201 201 198;
+    --moss-400: 155 154 150;
+    --moss-500: 127 125 121;
+    --moss-600: 90 89 85;
+    --moss-700: 70 70 67;
+    --moss-800: 54 53 52;
+    --moss-900: 45 45 43;
+    --moss-950: 23 22 22;
+    --ember-50: 252 249 246;
+    --ember-100: 249 242 234;
+    --ember-200: 243 231 216;
+    --ember-300: 226 203 173;
+    --ember-400: 200 162 114;
+    --ember-500: 186 134 65;
+    --ember-600: 136 98 47;
+    --ember-700: 110 78 37;
+    --ember-800: 73 52 24;
+    --ember-900: 55 39 17;
+    --bark-50: 249 249 247;
+    --bark-100: 243 241 239;
+    --bark-200: 230 229 225;
+    --bark-300: 198 194 188;
+    --bark-400: 143 138 127;
+    --bark-500: 112 108 98;
+    --bark-600: 76 73 66;
+    --bark-700: 57 55 50;
+    --bark-800: 44 42 37;
+    --bark-900: 27 26 23;
+  }
+
   html {
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;

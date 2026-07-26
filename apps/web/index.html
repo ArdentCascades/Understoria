@@ -122,6 +122,15 @@
           var density = localStorage.getItem("understoria.density");
           if (density === "compact")
             document.documentElement.classList.add("density-compact");
+          // Member-selectable palette (docs/themes-plan.md T2).
+          // Allowlist only — missing / unknown means Canopy (no attr).
+          var palette = localStorage.getItem("understoria.palette");
+          if (
+            palette === "riverbed" ||
+            palette === "harvest" ||
+            palette === "fieldnotes"
+          )
+            document.documentElement.setAttribute("data-palette", palette);
         } catch (e) {
           /* private-mode / quota-exceeded — fall back to defaults */
         }
