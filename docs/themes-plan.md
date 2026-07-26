@@ -1,6 +1,14 @@
 # Member-selectable themes — implementation plan
 
-> **Status: PROPOSED** (code-verified 2026-07-26 against main at
+> **Status: T1 SHIPPED** (variable layer: brand families →
+> `rgb(var() / <alpha-value>)` resolving from the `:root` triplet
+> block in index.css; shadow-leaf follows the palette; InstallGuide
+> pill AA fix; TW4-plan §1 contract amended; zero-visual-change
+> proven by emitted-CSS inspection — all 42 triplets equal the
+> baseline hexes, zero brand hexes remain in built CSS). T2
+> (picker + three themes) and T3 (Morning mist) remain PROPOSED;
+> D1–D7 approved as recommended.
+> Original status: PROPOSED (code-verified 2026-07-26 against main at
 > `c90526a` by two audit passes: a full variable-ization risk sweep
 > of apps/web and a palette-design pass that computed WCAG contrast
 > for every certified pairing under every proposed theme).

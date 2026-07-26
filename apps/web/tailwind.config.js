@@ -28,60 +28,60 @@ export default {
     extend: {
       colors: {
         canopy: {
-          50: "#f0fdf4",
-          100: "#dcfce7",
-          200: "#bbf7d0",
-          300: "#86efac",
-          400: "#4ade80",
-          500: "#22c55e",
-          600: "#16a34a",
-          700: "#15803d",
-          800: "#166534",
-          900: "#14532d",
-          950: "#052e16",
+          50: "rgb(var(--canopy-50) / <alpha-value>)",
+          100: "rgb(var(--canopy-100) / <alpha-value>)",
+          200: "rgb(var(--canopy-200) / <alpha-value>)",
+          300: "rgb(var(--canopy-300) / <alpha-value>)",
+          400: "rgb(var(--canopy-400) / <alpha-value>)",
+          500: "rgb(var(--canopy-500) / <alpha-value>)",
+          600: "rgb(var(--canopy-600) / <alpha-value>)",
+          700: "rgb(var(--canopy-700) / <alpha-value>)",
+          800: "rgb(var(--canopy-800) / <alpha-value>)",
+          900: "rgb(var(--canopy-900) / <alpha-value>)",
+          950: "rgb(var(--canopy-950) / <alpha-value>)",
         },
         moss: {
-          50: "#f5f7f3",
-          100: "#e7ede1",
-          200: "#cfdbc4",
-          300: "#adc09e",
-          400: "#87a275",
-          500: "#688657",
-          600: "#506b43",
-          700: "#3f5537",
-          800: "#34452e",
-          900: "#2c3a28",
-          950: "#161f13",
+          50: "rgb(var(--moss-50) / <alpha-value>)",
+          100: "rgb(var(--moss-100) / <alpha-value>)",
+          200: "rgb(var(--moss-200) / <alpha-value>)",
+          300: "rgb(var(--moss-300) / <alpha-value>)",
+          400: "rgb(var(--moss-400) / <alpha-value>)",
+          500: "rgb(var(--moss-500) / <alpha-value>)",
+          600: "rgb(var(--moss-600) / <alpha-value>)",
+          700: "rgb(var(--moss-700) / <alpha-value>)",
+          800: "rgb(var(--moss-800) / <alpha-value>)",
+          900: "rgb(var(--moss-900) / <alpha-value>)",
+          950: "rgb(var(--moss-950) / <alpha-value>)",
         },
         // Warm accent. Reserved for reciprocity moments only — a
         // thank-you, a fulfilled need, an exchange confirmation.
         // Never used for status, rank, urgency, or judgment.
         ember: {
-          50: "#fdf6ec",
-          100: "#fae8cf",
-          200: "#f4d3a1",
-          300: "#e9b977",
-          400: "#dc9c4d",
-          500: "#c97f1e",
-          600: "#a96618",
-          700: "#8a5212",
-          800: "#65380c",
-          900: "#4a2c08",
+          50: "rgb(var(--ember-50) / <alpha-value>)",
+          100: "rgb(var(--ember-100) / <alpha-value>)",
+          200: "rgb(var(--ember-200) / <alpha-value>)",
+          300: "rgb(var(--ember-300) / <alpha-value>)",
+          400: "rgb(var(--ember-400) / <alpha-value>)",
+          500: "rgb(var(--ember-500) / <alpha-value>)",
+          600: "rgb(var(--ember-600) / <alpha-value>)",
+          700: "rgb(var(--ember-700) / <alpha-value>)",
+          800: "rgb(var(--ember-800) / <alpha-value>)",
+          900: "rgb(var(--ember-900) / <alpha-value>)",
         },
         // Warm neutral. Pairs with moss/canopy for body text and
         // soft borders — keeps the all-green palette from reading
         // clinical without introducing a second hue.
         bark: {
-          50: "#f7f4ef",
-          100: "#ede7dc",
-          200: "#d9cfbe",
-          300: "#bfb097",
-          400: "#9a886b",
-          500: "#7a6a52",
-          600: "#5e5040",
-          700: "#473d31",
-          800: "#3a3225",
-          900: "#241f18",
+          50: "rgb(var(--bark-50) / <alpha-value>)",
+          100: "rgb(var(--bark-100) / <alpha-value>)",
+          200: "rgb(var(--bark-200) / <alpha-value>)",
+          300: "rgb(var(--bark-300) / <alpha-value>)",
+          400: "rgb(var(--bark-400) / <alpha-value>)",
+          500: "rgb(var(--bark-500) / <alpha-value>)",
+          600: "rgb(var(--bark-600) / <alpha-value>)",
+          700: "rgb(var(--bark-700) / <alpha-value>)",
+          800: "rgb(var(--bark-800) / <alpha-value>)",
+          900: "rgb(var(--bark-900) / <alpha-value>)",
         },
         // Stock families pinned to their Tailwind 3 hex values. Under
         // v3 these equal the defaults (no-op); under v4 they defeat
@@ -181,7 +181,7 @@ export default {
       boxShadow: {
         // Soft dual-layer shadow tinted with canopy green. Use for
         // cards instead of shadow-sm; blends with the woodland palette.
-        leaf: "0 1px 2px rgb(20 83 45 / 0.04), 0 4px 12px rgb(20 83 45 / 0.05)",
+        leaf: "0 1px 2px rgb(var(--canopy-900) / 0.04), 0 4px 12px rgb(var(--canopy-900) / 0.05)",
         // shadow-sm pinned to its Tailwind 3 value (v4 renames the
         // scale so sm would mean the old DEFAULT). No-op under v3.
         // See docs/tailwind-4-plan.md.

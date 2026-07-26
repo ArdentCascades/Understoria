@@ -287,7 +287,9 @@ function DevicePicker({
               onClick={() => onChange(device)}
               className={
                 active
-                  ? "rounded-full bg-canopy-600 px-3 py-1 font-medium text-white dark:bg-canopy-500"
+                  // canopy-700: white small text needs AA 4.5:1, which
+                  // 600 (3.30:1) and the old dark 500 missed.
+                  ? "rounded-full bg-canopy-700 px-3 py-1 font-medium text-white"
                   : "rounded-full border border-canopy-200 px-3 py-1 text-canopy-800 hover:bg-canopy-100 dark:border-canopy-800 dark:text-canopy-200 dark:hover:bg-canopy-900/40"
               }
             >
