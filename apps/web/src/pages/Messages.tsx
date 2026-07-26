@@ -231,7 +231,7 @@ export default function MessagesShell() {
               (lg:overflow-y-auto on the pane wrapper). Either way the
               input pins to the top so members can search from
               anywhere in a long conversation list. */}
-          <div className="sticky top-0 z-10 -mx-4 mb-3 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70">
+          <div className="chrome-mist sticky top-0 z-10 -mx-4 mb-3 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70">
             <label className="block">
               <span className="sr-only">{t("messages.search.placeholder")}</span>
               <input

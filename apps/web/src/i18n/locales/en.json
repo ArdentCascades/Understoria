@@ -2830,6 +2830,20 @@
       "density": {
         "default": "Comfortable",
         "compact": "Compact"
+      },
+      "paletteTitle": "Colors",
+      "paletteIntro": "Four palettes, each with its own light and dark. Canopy is the green you know.",
+      "palette": {
+        "canopy": "Canopy",
+        "riverbed": "Riverbed",
+        "harvest": "Harvest",
+        "fieldnotes": "Field notes"
+      },
+      "mistTitle": "Morning mist",
+      "mistIntro": "A soft frosted look on the header, tab bands, and side panels — content seems to drift beneath them. Works with every color theme. Turns itself down on devices that ask for reduced transparency.",
+      "mist": {
+        "off": "Off",
+        "on": "On"
       }
     },
     "node": {

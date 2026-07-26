@@ -1,6 +1,28 @@
 # Member-selectable themes — implementation plan
 
-> **Status: PROPOSED** (code-verified 2026-07-26 against main at
+> **Status: COMPLETE — T1 + T2 + T3 SHIPPED** (T3: opt-in "Morning
+> mist" — html.mist + .chrome-mist on the six chrome surfaces
+> (AppHeader, BottomNav, Board/Proposals/Messages sticky bands,
+> DockedPanel), blur(12px) saturate(1.1) with the certified tint
+> floors moss-50/0.92 light + moss-950/0.85 dark, solid fallbacks
+> under prefers-reduced-transparency and missing backdrop-filter,
+> Settings toggle + Dexie/bootstrap plumbing + refreshed CSP hash
+> on both Caddyfile vhosts.)
+> **T1 + T2 SHIPPED** (T2: [data-palette] blocks for the
+> three themes, pre-paint bootstrap attr + refreshed CSP hash on
+> both Caddyfile vhosts, lib/palette.ts + Dexie/AppContext/Settings
+> picker with swatch previews, runtime theme-color meta (D3), and
+> the contrast suite parametrized to 201 assertions incl. the
+> index.css drift lock). T3 (Morning mist) remains PROPOSED.
+> T1: variable layer: brand families →
+> `rgb(var() / <alpha-value>)` resolving from the `:root` triplet
+> block in index.css; shadow-leaf follows the palette; InstallGuide
+> pill AA fix; TW4-plan §1 contract amended; zero-visual-change
+> proven by emitted-CSS inspection — all 42 triplets equal the
+> baseline hexes, zero brand hexes remain in built CSS). T2
+> (picker + three themes) and T3 (Morning mist) remain PROPOSED;
+> D1–D7 approved as recommended.
+> Original status: PROPOSED (code-verified 2026-07-26 against main at
 > `c90526a` by two audit passes: a full variable-ization risk sweep
 > of apps/web and a palette-design pass that computed WCAG contrast
 > for every certified pairing under every proposed theme).

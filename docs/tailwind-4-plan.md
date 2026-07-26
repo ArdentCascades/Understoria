@@ -147,6 +147,21 @@ compat, palette identity) resolved to GO with evidence below.
    engine-independent (hardcoded hex), so the emitted-CSS diff in
    §8 is the *real* gate — the tests alone cannot see engine
    drift.
+   **Amended by the themes work (docs/themes-plan.md T1, shipped
+   after this plan was written):** the four brand families in the
+   config are no longer literal hexes — they are
+   `rgb(var(--family-step) / <alpha-value>)` references resolving
+   from the `:root` triplet block in `src/index.css`. The §8
+   harness contract is therefore restated: the byte-wise check
+   applies to the *stock* families (amber/rose/red/indigo, still
+   literal hexes pinned in the config), while the brand families
+   are checked as **resolved values** — the `:root` (and any
+   `[data-palette]`) RGB triplets in the built CSS must match the
+   certified palettes in `lib/a11y/palette-contrast.test.ts`, and
+   the emitted utilities must reference the variables (not
+   re-inlined hexes). The v3-vs-v4 baseline diff for brand
+   utilities compares these variable references, which v4 passes
+   through untouched exactly like custom hex values.
 2. **Conversation.tsx frozen.** Verified exposure (read-only
    grep): `outline-none` ×8, `shadow-sm` ×1 (line 1146),
    `hover:` ×~14 including the **load-bearing

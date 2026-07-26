@@ -124,7 +124,7 @@ export function DockedPanel({
       ref={panelRef}
       tabIndex={-1}
       aria-label={ariaLabel}
-      className={`overflow-y-auto bg-white dark:bg-moss-950 ${
+      className={`chrome-mist overflow-y-auto bg-white dark:bg-moss-950 ${
         splitCapable
           ? // Sideways dock: ~45% of the row with a tap-target floor,
             // sticky and viewport-capped like the lg column (top-2:

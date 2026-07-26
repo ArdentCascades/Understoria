@@ -104,6 +104,19 @@ import {
   isDensityPreference,
   type DensityPreference,
 } from "@/lib/density";
+import {
+  applyPalette,
+  applyThemeColorMeta,
+  cachePalette,
+  isPalettePreference,
+  type PalettePreference,
+} from "@/lib/palette";
+import {
+  applyMist,
+  cacheMist,
+  isMistPreference,
+  type MistPreference,
+} from "@/lib/mist";
 
 export interface AppContextValue {
   ready: boolean;
@@ -222,6 +235,10 @@ export interface AppContextValue {
   setTextSizePreference: (pref: TextSizePreference) => Promise<void>;
   densityPreference: DensityPreference;
   setDensityPreference: (pref: DensityPreference) => Promise<void>;
+  palettePreference: PalettePreference;
+  setPalettePreference: (pref: PalettePreference) => Promise<void>;
+  mistPreference: MistPreference;
+  setMistPreference: (pref: MistPreference) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -242,6 +259,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [textSize, setTextSizeState] = useState<TextSize>("default");
   const [densityPreference, setDensityPreferenceState] =
     useState<DensityPreference>("default");
+  const [palettePreference, setPalettePreferenceState] =
+    useState<PalettePreference>("canopy");
+  const [mistPreference, setMistPreferenceState] =
+    useState<MistPreference>("off");
   const cleanupRef = useRef<(() => void) | null>(null);
 
   const refreshLockState = useCallback(async () => {
@@ -319,6 +340,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setDensityPreferenceState(densPref);
       applyDensity(densPref);
       cacheDensity(densPref);
+      // Palette preference. Same pattern: Dexie is source of truth,
+      // localStorage is the no-FOUC cache. Default "canopy" is
+      // today's palette — an absent row renders identically to
+      // pre-themes builds. Also re-point the browser-chrome
+      // theme-color meta (D3) at the palette's hex for the resolved
+      // mode; the static index.html value is only the pre-boot
+      // fallback.
+      const rawPalette = await getSetting(SETTING_KEYS.palette);
+      const palPref: PalettePreference = isPalettePreference(rawPalette)
+        ? rawPalette
+        : "canopy";
+      if (cancelled) return;
+      setPalettePreferenceState(palPref);
+      applyPalette(palPref);
+      cachePalette(palPref);
+      applyThemeColorMeta(palPref, resolveTheme(pref, systemPrefersDark()));
+      // Morning mist toggle. Same pattern; default off — an absent
+      // row renders identically to pre-mist builds.
+      const rawMist = await getSetting(SETTING_KEYS.mist);
+      const mistPref: MistPreference = isMistPreference(rawMist)
+        ? rawMist
+        : "off";
+      if (cancelled) return;
+      setMistPreferenceState(mistPref);
+      applyMist(mistPref);
+      cacheMist(mistPref);
       // Demo-community seed runs in DEV builds (operator ruling R1)
       // and in the client-only DEMO build (VITE_DEMO=1, which is what
       // the seed exists to showcase): both get a demo community to
@@ -444,15 +491,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (themePreference !== "system") return;
     return subscribeSystemTheme((dark) => {
       applyTheme(dark ? "dark" : "light");
+      // The chrome bar follows dark/light flips too. Reading
+      // palettePreference from the effect closure is safe because
+      // it's in the deps — a palette change resubscribes with the
+      // fresh value (cheap; no stale-closure ref needed).
+      applyThemeColorMeta(palettePreference, dark ? "dark" : "light");
     });
-  }, [themePreference]);
+  }, [themePreference, palettePreference]);
 
-  const setThemePreference = useCallback(async (pref: ThemePreference) => {
-    await setSetting(SETTING_KEYS.themePreference, pref);
-    setThemePreferenceState(pref);
-    applyTheme(resolveTheme(pref, systemPrefersDark()));
-    cacheResolvedTheme(pref);
-  }, []);
+  const setThemePreference = useCallback(
+    async (pref: ThemePreference) => {
+      await setSetting(SETTING_KEYS.themePreference, pref);
+      setThemePreferenceState(pref);
+      const resolved = resolveTheme(pref, systemPrefersDark());
+      applyTheme(resolved);
+      cacheResolvedTheme(pref);
+      // Keep the browser-chrome bar on the palette's hex for the
+      // newly resolved mode (palettePreference is a dep, so this
+      // closure always sees the current palette).
+      applyThemeColorMeta(palettePreference, resolved);
+    },
+    [palettePreference],
+  );
 
   // When the preference is "auto", repaint on viewport-width
   // change. The three explicit sizes ignore viewport, so skipping
@@ -487,6 +547,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [],
   );
+
+  const setPalettePreference = useCallback(
+    async (pref: PalettePreference) => {
+      await setSetting(SETTING_KEYS.palette, pref);
+      setPalettePreferenceState(pref);
+      applyPalette(pref);
+      cachePalette(pref);
+      // The chrome bar follows the palette (D3) — recompute against
+      // the currently resolved mode.
+      applyThemeColorMeta(pref, resolveTheme(themePreference, systemPrefersDark()));
+    },
+    [themePreference],
+  );
+
+  const setMistPreference = useCallback(async (pref: MistPreference) => {
+    await setSetting(SETTING_KEYS.mist, pref);
+    setMistPreferenceState(pref);
+    applyMist(pref);
+    cacheMist(pref);
+  }, []);
 
   const unlock = useCallback(
     async (passphrase: string) => {
@@ -854,6 +934,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setTextSizePreference,
       densityPreference,
       setDensityPreference,
+      palettePreference,
+      setPalettePreference,
+      mistPreference,
+      setMistPreference,
     }),
     [
       ready,
@@ -900,6 +984,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setTextSizePreference,
       densityPreference,
       setDensityPreference,
+      palettePreference,
+      setPalettePreference,
+      mistPreference,
+      setMistPreference,
     ],
   );
 
