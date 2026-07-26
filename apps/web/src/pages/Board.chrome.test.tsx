@@ -109,7 +109,11 @@ describe("Board command band", () => {
     expect(band.className).not.toContain("lg:contents");
     expect(band.className).toContain("lg:flex");
     expect(band.className).toContain("landscape-short:flex");
-    expect(band.className).toContain("lg:top-4");
+    // top-0 at every width: the band must seal against the header —
+    // an lg offset (the side rails' breathing-gap idiom) leaves an
+    // uncovered strip content scrolls through on desktop.
+    expect(band.className).toContain("top-0");
+    expect(band.className).not.toContain("lg:top-4");
     // The search row is the band's other child — no independent
     // sticky treatment of its own anymore.
     const search = container.querySelector('input[type="search"]')!;
