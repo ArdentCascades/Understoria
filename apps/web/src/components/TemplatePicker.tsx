@@ -28,6 +28,7 @@ import {
 } from "@/content/projectTemplates";
 import {
   matchesTemplate,
+  partitionTemplates,
   type SetupBucket,
 } from "@/lib/templateFilter";
 import type { Project, ProjectCategory } from "@/types";
@@ -56,8 +57,12 @@ interface TemplatePickerProps {
  * friendly defaults, not prescriptions — every field is editable
  * before the project is created.
  *
- * The filter row (search + category + setup-time) narrows the gallery
- * in-place. State is session-only — defaults are empty filters, so the
+ * When usage data shows at least one template already in use, a
+ * two-tab split ("New ideas" / "In your community") groups the gallery;
+ * without usage (or without data) the tabs stay hidden and the gallery
+ * renders whole. The filter row (search + category + setup-time)
+ * narrows the gallery — or the active tab — in-place. State is
+ * session-only — defaults are empty filters, so the
  * gallery looks unchanged until a member starts narrowing. The
  * "Start from scratch" affordance renders FIRST — a compact row above
  * the filters — so it is reachable with zero scrolling no matter how
@@ -83,6 +88,18 @@ export function TemplatePicker({
   const [category, setCategory] = useState<ProjectCategory | "">("");
   const [setupBucket, setSetupBucket] = useState<SetupBucket | "">("");
 
+  // Session-only tab state. Tabs split the gallery into templates no
+  // active community project uses ("fresh") and ones already in use;
+  // they only render when the split is non-trivial (some usage AND
+  // usage data was supplied), so contexts without project data — and
+  // zero-usage communities — see the gallery exactly as before.
+  const [tab, setTab] = useState<"fresh" | "inUse">("fresh");
+  const { fresh, inUse } = useMemo(
+    () => partitionTemplates(templates, activeProjectsByTemplate),
+    [templates, activeProjectsByTemplate],
+  );
+  const showTabs = inUse.length > 0;
+
   // ~200 ms debounce on the search input — matches the Board's pattern
   // (small enough to feel live, long enough to skip mid-word refilters).
   // No reusable hook exists in the codebase, so this stays inline.
@@ -105,16 +122,21 @@ export function TemplatePicker({
     );
   }, [templates, lang, t]);
 
+  // Tabs and filters compose by AND: the active tab picks the list,
+  // the filters narrow it. Filters deliberately do NOT reset on tab
+  // switch — a member comparing "quick food projects" across both
+  // groups keeps their narrowing.
+  const tabTemplates = showTabs ? (tab === "fresh" ? fresh : inUse) : templates;
   const visibleTemplates = useMemo(
     () =>
-      templates.filter((tpl) =>
+      tabTemplates.filter((tpl) =>
         matchesTemplate(tpl, {
           query: debouncedQuery.trim(),
           category,
           setupBucket,
         }),
       ),
-    [templates, debouncedQuery, category, setupBucket],
+    [tabTemplates, debouncedQuery, category, setupBucket],
   );
 
   return (
@@ -131,6 +153,37 @@ export function TemplatePicker({
           onSelect={() => onSelect(null)}
         />
       </div>
+      {showTabs ? (
+        // Mirrors the Board's tablist pattern (segmented pill track;
+        // full-width halves on phones, content-sized at sm+). Sits
+        // BELOW the ScratchCard — the zero-scroll guarantee on the
+        // blank option predates the tabs and must survive them.
+        <div
+          role="tablist"
+          aria-label={t("projects.templates.tabs.ariaLabel")}
+          className="mb-3 grid grid-cols-2 rounded-full bg-moss-100 p-1 dark:bg-moss-900 sm:flex sm:w-fit"
+        >
+          {(["fresh", "inUse"] as const).map((tt) => (
+            <button
+              key={tt}
+              role="tab"
+              aria-selected={tab === tt}
+              onClick={() => setTab(tt)}
+              className={`touch-target rounded-full text-sm font-semibold transition-colors px-4 ${
+                tab === tt
+                  ? "bg-white text-canopy-800 shadow-sm dark:bg-moss-950 dark:text-canopy-200"
+                  : "text-moss-700 dark:text-moss-300"
+              }`}
+            >
+              {tt === "fresh"
+                ? t("projects.templates.tabs.fresh")
+                : t("projects.templates.tabs.inCommunity", {
+                    count: inUse.length,
+                  })}
+            </button>
+          ))}
+        </div>
+      ) : null}
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <input
           type="search"
@@ -140,44 +193,51 @@ export function TemplatePicker({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <select
-          className="input sm:w-auto"
-          value={category}
-          onChange={(e) =>
-            setCategory(e.target.value as ProjectCategory | "")
-          }
-          aria-label={t("projects.templates.filters.category.ariaLabel")}
-        >
-          <option value="">
-            {t("projects.templates.filters.category.all")}
-          </option>
-          {availableCategories.map((c) => (
-            <option key={c} value={c}>
-              {categoryLabel(t, c)}
+        {/* The two selects always share one line: a 2-col grid on
+            phones (w-full pushes them below the search, halving the
+            row instead of stacking two full-width selects), joining
+            the flex row inline at sm+. min-w-0 lets long option text
+            truncate instead of forcing a wrap. */}
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+          <select
+            className="input min-w-0 sm:w-auto"
+            value={category}
+            onChange={(e) =>
+              setCategory(e.target.value as ProjectCategory | "")
+            }
+            aria-label={t("projects.templates.filters.category.ariaLabel")}
+          >
+            <option value="">
+              {t("projects.templates.filters.category.all")}
             </option>
-          ))}
-        </select>
-        <select
-          className="input sm:w-auto"
-          value={setupBucket}
-          onChange={(e) =>
-            setSetupBucket(e.target.value as SetupBucket | "")
-          }
-          aria-label={t("projects.templates.filters.setupTime.ariaLabel")}
-        >
-          <option value="">
-            {t("projects.templates.filters.setupTime.all")}
-          </option>
-          <option value="quick">
-            {t("projects.templates.filters.setupTime.quick")}
-          </option>
-          <option value="medium">
-            {t("projects.templates.filters.setupTime.medium")}
-          </option>
-          <option value="bigger">
-            {t("projects.templates.filters.setupTime.bigger")}
-          </option>
-        </select>
+            {availableCategories.map((c) => (
+              <option key={c} value={c}>
+                {categoryLabel(t, c)}
+              </option>
+            ))}
+          </select>
+          <select
+            className="input min-w-0 sm:w-auto"
+            value={setupBucket}
+            onChange={(e) =>
+              setSetupBucket(e.target.value as SetupBucket | "")
+            }
+            aria-label={t("projects.templates.filters.setupTime.ariaLabel")}
+          >
+            <option value="">
+              {t("projects.templates.filters.setupTime.all")}
+            </option>
+            <option value="quick">
+              {t("projects.templates.filters.setupTime.quick")}
+            </option>
+            <option value="medium">
+              {t("projects.templates.filters.setupTime.medium")}
+            </option>
+            <option value="bigger">
+              {t("projects.templates.filters.setupTime.bigger")}
+            </option>
+          </select>
+        </div>
       </div>
       <ul
         className={`grid gap-3 ${

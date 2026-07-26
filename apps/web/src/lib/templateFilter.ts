@@ -29,7 +29,7 @@
 
 import type { ProjectTemplate } from "@/content/projectTemplates";
 import { matchesQuery } from "@/lib/messageSearch";
-import type { ProjectCategory } from "@/types";
+import type { Project, ProjectCategory } from "@/types";
 
 /** Three buckets keyed to the templates' rough up-front setup cost in
  *  hours. Boundaries: quick ≤ 10, medium 11–25, bigger 26+. The breaks
@@ -74,4 +74,34 @@ export function matchesTemplate(
     if (!matchesQuery(haystack, filters.query)) return false;
   }
   return true;
+}
+
+/** Splits the gallery into the picker's two tabs: `fresh` templates (no
+ *  live community project uses them) and `inUse` templates (at least one
+ *  does, per a non-empty entry in `activeProjectsByTemplate` — see
+ *  `getActiveProjectsForTemplate` in templateUsage.ts). A missing map
+ *  entry or an empty array both mean "fresh"; an `undefined` map means
+ *  the caller has no project data at all, so every template lands in
+ *  `fresh` and the picker renders tabless. `fresh` keeps the curated
+ *  gallery order; `inUse` is sorted by its newest matching project's
+ *  `createdAt` descending (each map array is already newest-first, so
+ *  index 0 is the sort key), keeping input order on ties. Does not
+ *  mutate its inputs. */
+export function partitionTemplates(
+  templates: readonly ProjectTemplate[],
+  activeProjectsByTemplate: Map<string, Project[]> | undefined,
+): { fresh: ProjectTemplate[]; inUse: ProjectTemplate[] } {
+  const fresh: ProjectTemplate[] = [];
+  const used: { tpl: ProjectTemplate; newestCreatedAt: number }[] = [];
+  for (const tpl of templates) {
+    const live = activeProjectsByTemplate?.get(tpl.id);
+    if (live !== undefined && live.length > 0) {
+      used.push({ tpl, newestCreatedAt: live[0].createdAt });
+    } else {
+      fresh.push(tpl);
+    }
+  }
+  // Array.prototype.sort is stable, so ties keep the gallery order.
+  used.sort((a, b) => b.newestCreatedAt - a.newestCreatedAt);
+  return { fresh, inUse: used.map((entry) => entry.tpl) };
 }
