@@ -138,7 +138,12 @@ describe("PrintShiftRosterPage", () => {
       { id: "g1", shiftId: "s-morning", eventId: "e1", memberKey: "a", signedUpAt: 1 },
       { id: "g2", shiftId: "s-full", eventId: "e1", memberKey: "b", signedUpAt: 2 },
     ]);
-    await renderAt("e1", "Morning crew");
+    // Wait on SIGNUP-dependent text, not the shift label: shifts and
+    // signups resolve through separate live queries, and on a slow
+    // runner the label paints a beat before the counts — polling for
+    // "Morning crew" alone let assertions race the second query
+    // (seen as "0 of 4" on CI).
+    await renderAt("e1", "1 of 4 signed up");
 
     expect(container.textContent).toContain("Morning crew");
     expect(container.textContent).toContain("1 of 4 signed up in the app");
