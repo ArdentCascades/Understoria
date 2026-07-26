@@ -20,7 +20,12 @@
  */
 import { describe, expect, it } from "vitest";
 import type { ProjectTemplate } from "@/content/projectTemplates";
-import { getSetupBucket, matchesTemplate } from "@/lib/templateFilter";
+import {
+  getSetupBucket,
+  matchesTemplate,
+  partitionTemplates,
+} from "@/lib/templateFilter";
+import type { Project } from "@/types";
 
 function makeTemplate(overrides: Partial<ProjectTemplate> = {}): ProjectTemplate {
   return {
@@ -184,5 +189,124 @@ describe("matchesTemplate", () => {
         setupBucket: "medium",
       }),
     ).toBe(true);
+  });
+});
+
+describe("partitionTemplates", () => {
+  function makeProject(overrides: Partial<Project> = {}): Project {
+    return {
+      id: "proj_1",
+      title: "Test project",
+      description: "",
+      category: "infrastructure",
+      organizerKey: "org_key",
+      coOrganizerKeys: [],
+      status: "active",
+      targetHours: 10,
+      contributedHours: 0,
+      deadline: null,
+      createdAt: 0,
+      completedAt: null,
+      pauseNote: null,
+      locationZone: "",
+      tags: [],
+      nodeId: "node_test",
+      templateId: "community-fridge",
+      ...overrides,
+    };
+  }
+
+  const templates = [
+    makeTemplate({ id: "fridge" }),
+    makeTemplate({ id: "tool-library" }),
+    makeTemplate({ id: "skill-share" }),
+  ];
+
+  it("puts every template in fresh when the map is undefined", () => {
+    const { fresh, inUse } = partitionTemplates(templates, undefined);
+    expect(fresh.map((t) => t.id)).toEqual([
+      "fridge",
+      "tool-library",
+      "skill-share",
+    ]);
+    expect(inUse).toEqual([]);
+  });
+
+  it("treats an empty-array map entry as fresh", () => {
+    const map = new Map<string, Project[]>([["fridge", []]]);
+    const { fresh, inUse } = partitionTemplates(templates, map);
+    expect(fresh.map((t) => t.id)).toEqual([
+      "fridge",
+      "tool-library",
+      "skill-share",
+    ]);
+    expect(inUse).toEqual([]);
+  });
+
+  it("puts templates with a non-empty map entry in inUse", () => {
+    const map = new Map<string, Project[]>([
+      ["tool-library", [makeProject({ id: "p1", createdAt: 1000 })]],
+    ]);
+    const { fresh, inUse } = partitionTemplates(templates, map);
+    expect(inUse.map((t) => t.id)).toEqual(["tool-library"]);
+    expect(fresh.map((t) => t.id)).toEqual(["fridge", "skill-share"]);
+  });
+
+  it("keeps the curated gallery order in fresh", () => {
+    const map = new Map<string, Project[]>([
+      ["tool-library", [makeProject({ id: "p1", createdAt: 1000 })]],
+    ]);
+    const { fresh } = partitionTemplates(templates, map);
+    // "fridge" before "skill-share", exactly as in the input.
+    expect(fresh.map((t) => t.id)).toEqual(["fridge", "skill-share"]);
+  });
+
+  it("sorts inUse by the newest matching project's createdAt, descending", () => {
+    // Map arrays are newest-first (see getActiveProjectsForTemplate), so
+    // index 0 carries the sort key even with older siblings behind it.
+    const map = new Map<string, Project[]>([
+      [
+        "fridge",
+        [
+          makeProject({ id: "f-new", createdAt: 2000 }),
+          makeProject({ id: "f-old", createdAt: 500 }),
+        ],
+      ],
+      ["tool-library", [makeProject({ id: "t1", createdAt: 3000 })]],
+      ["skill-share", [makeProject({ id: "s1", createdAt: 1000 })]],
+    ]);
+    const { fresh, inUse } = partitionTemplates(templates, map);
+    expect(inUse.map((t) => t.id)).toEqual([
+      "tool-library",
+      "fridge",
+      "skill-share",
+    ]);
+    expect(fresh).toEqual([]);
+  });
+
+  it("keeps input order for inUse ties on createdAt", () => {
+    const map = new Map<string, Project[]>([
+      ["fridge", [makeProject({ id: "p1", createdAt: 1000 })]],
+      ["skill-share", [makeProject({ id: "p2", createdAt: 1000 })]],
+    ]);
+    const { inUse } = partitionTemplates(templates, map);
+    expect(inUse.map((t) => t.id)).toEqual(["fridge", "skill-share"]);
+  });
+
+  it("does not mutate the templates array or the map", () => {
+    const map = new Map<string, Project[]>([
+      ["fridge", [makeProject({ id: "p1", createdAt: 1000 })]],
+      ["tool-library", [makeProject({ id: "p2", createdAt: 2000 })]],
+    ]);
+    const templateIds = templates.map((t) => t.id);
+    const mapSnapshot = new Map(
+      [...map.entries()].map(([key, value]) => [key, [...value]]),
+    );
+    partitionTemplates(templates, map);
+    expect(templates.map((t) => t.id)).toEqual(templateIds);
+    expect(map.size).toBe(mapSnapshot.size);
+    for (const [key, value] of mapSnapshot) {
+      expect(map.get(key)).toEqual(value);
+    }
   });
 });

@@ -1001,16 +1001,21 @@
         },
         "category": {
           "ariaLabel": "Filtrar plantillas por categoría",
-          "all": "Todas las categorías"
+          "all": "Categoría"
         },
         "setupTime": {
           "ariaLabel": "Filtrar plantillas por tiempo de preparación",
-          "all": "Cualquier tiempo de preparación",
+          "all": "Tiempo de preparación",
           "quick": "Rápida (≤10 h)",
           "medium": "Media (10–25 h)",
           "bigger": "Mayor (25 h+)"
         },
         "empty": "Ninguna plantilla coincide. Prueba quitar un filtro o empieza desde cero a continuación."
+      },
+      "tabs": {
+        "ariaLabel": "Grupos de plantillas",
+        "fresh": "Ideas nuevas",
+        "inCommunity": "En tu comunidad ({{count}})"
       },
       "stagedHeading": "Tareas que creará esta plantilla",
       "stagedHint": "Las plantillas son un punto de partida, no una receta — desmarca lo que tu comunidad ya tiene y ajusta las horas a tu realidad.",
