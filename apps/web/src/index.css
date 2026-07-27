@@ -461,34 +461,36 @@
 @layer components {
   /* "Morning mist" (docs/themes-plan.md §1.4, T3; html.mist via
    * Settings → Appearance). Chrome surfaces that content scrolls
-   * under — sticky header, page bands, bottom nav, docked panels —
-   * carry .chrome-mist and get a deeper frost: stronger blur, a
-   * slight saturation lift, and the THEME's page tint instead of
-   * the default white/moss band treatment.
+   * under — sticky header, page bands, bottom nav — carry
+   * .chrome-mist and get a genuinely frosted treatment: deep blur,
+   * a saturation lift, and the THEME's page tint at a translucency
+   * a notch past the default chrome's own /70.
    *
-   * The tint alphas are the certified floors from the plan: blur is
-   * a convex average of underlying pixels, so the worst blurred
-   * backdrop is bounded by the worst solid underlay, and moss-50 at
-   * 0.92 (light) / moss-950 at 0.85 (dark) over that bound still
-   * clears AA 4.5:1 for the weakest certified chrome text in every
-   * palette. Do not lower these without re-running the math in
-   * docs/themes-plan.md §1.4. Content cards never get this class —
-   * their certified pairings assume solid backgrounds.
+   * Contrast posture, stated honestly (plan §1.4 amendment): the
+   * statically-certified floors (0.92/0.85 over a worst-case
+   * underlay) proved indistinguishable from the default treatment
+   * — MORE opaque than the /70-with-blur chrome every member
+   * already sees — so opt-in mist instead matches the acceptance
+   * basis of that long-shipped default: chrome-text-only surfaces,
+   * real-content backdrops averaged by heavy blur, solid fallbacks
+   * below. Reading surfaces (cards, docked panels) never get this
+   * class — their certified pairings assume solid backgrounds.
    *
    * html.mist .chrome-mist (0,2,1) deliberately out-specifies the
    * surfaces' own bg utilities (0,1,0), so no call-site utility
    * removal is needed; with mist off the class is inert. */
   html.mist .chrome-mist {
-    background-color: rgb(var(--moss-50) / 0.92);
-    -webkit-backdrop-filter: blur(12px) saturate(1.1);
-    backdrop-filter: blur(12px) saturate(1.1);
+    background-color: rgb(var(--moss-50) / 0.5);
+    -webkit-backdrop-filter: blur(24px) saturate(1.35);
+    backdrop-filter: blur(24px) saturate(1.35);
   }
   html.mist.dark .chrome-mist {
-    background-color: rgb(var(--moss-950) / 0.85);
+    background-color: rgb(var(--moss-950) / 0.45);
   }
-  /* Solid fallbacks — visually near-identical at these alphas, so
-   * low-end devices and members asking for reduced transparency get
-   * the same calm chrome without the GPU cost. */
+  /* Solid fallbacks — no backdrop-filter support means the low
+   * tint alphas above would put chrome text over raw content, so
+   * both fallbacks go fully solid. Same under an explicit
+   * reduced-transparency request. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     html.mist .chrome-mist {
       background-color: rgb(var(--moss-50));

@@ -677,7 +677,11 @@ export default function BoardPage() {
             search, matching visual order at every breakpoint
             (WCAG 2.4.3). z-10 keeps the band under the FAB (z-20)
             and modal layers. */}
-        <div className="chrome-mist sticky top-0 z-10 -mx-4 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70 band-hairline landscape-short:flex landscape-short:items-center landscape-short:gap-3 landscape-short:py-1.5 lg:top-4 lg:mx-0 lg:flex lg:flex-wrap lg:items-center lg:gap-x-5 lg:gap-y-2 lg:px-0">
+        {/* top-0 at EVERY width: a full-width band must seal against
+            the header — the old lg:top-4 (borrowed from the side
+            rails' breathing-gap idiom) left a 1rem uncovered strip
+            content scrolled through (desktop pilot report). */}
+        <div className="chrome-mist sticky top-0 z-10 -mx-4 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70 band-hairline landscape-short:flex landscape-short:items-center landscape-short:gap-3 landscape-short:py-1.5 lg:mx-0 lg:flex lg:flex-wrap lg:items-center lg:gap-x-5 lg:gap-y-2 lg:px-0">
         <div
           role="tablist"
           aria-label={t("board.tabs.ariaLabel")}

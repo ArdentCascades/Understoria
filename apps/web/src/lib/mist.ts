@@ -20,17 +20,19 @@
  */
 
 // "Morning mist" chrome treatment (docs/themes-plan.md §1.4, T3):
-// a deeper frosted-glass effect on the floating chrome surfaces
-// (sticky header, page bands, bottom nav, docked panels) — stronger
-// blur, slight saturation lift, and a theme-following tint instead
-// of the default near-solid white/moss. Opt-in only; default off.
+// a genuinely frosted look on the floating chrome surfaces (sticky
+// header, page bands, bottom nav) — deep blur, a saturation lift,
+// and a theme-following tint a notch more translucent than the
+// default chrome's own /70 treatment. Opt-in only; default off.
 //
-// The tint alphas (0.92 light / 0.85 dark, index.css) sit at the
-// certified floors computed in the plan: over a worst-case underlay
-// the weakest certified chrome text still clears AA 4.5:1, which is
-// what makes a blurred backdrop statically certifiable at all.
-// Content cards never get this treatment — they are the reading
-// surface whose contrast pairings assume solid backgrounds.
+// Contrast posture (plan §1.4 amendment): the statically-certified
+// tint floors proved MORE opaque than the default /70-with-blur
+// chrome and therefore invisible; mist instead shares the shipped
+// default's acceptance basis — chrome-text-only surfaces over
+// blur-averaged real content, with fully solid fallbacks when
+// backdrop-filter is unavailable or transparency is reduced.
+// Reading surfaces (cards, docked panels) never get this treatment
+// — their contrast pairings assume solid backgrounds.
 //
 // Class-based mechanism (see index.css): toggles `html.mist`. The
 // inline script in index.html applies the same class synchronously
