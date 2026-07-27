@@ -29,7 +29,7 @@ import { initInstallCapture } from "@/lib/installGuide";
 import { isDesktopShell } from "@/lib/desktop";
 import { primeShareOrigin } from "@/lib/appOrigin";
 import { readSubmitConfig } from "@/lib/nodeSubmit";
-import "./i18n";
+import { i18nReady } from "./i18n";
 // Variable serif used for page-level titles only. Browsers load
 // only the unicode-range subsets they need via @font-face rules
 // shipped by @fontsource-variable.
@@ -49,16 +49,27 @@ if (isDesktopShell()) {
   void readSubmitConfig().then((cfg) => primeShareOrigin(cfg.url));
 }
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <BrowserRouter>
-        <AppProvider>
-          <ToastProvider>
-            <App />
-          </ToastProvider>
-        </AppProvider>
-      </BrowserRouter>
-    </ErrorBoundary>
-  </React.StrictMode>,
-);
+// First render waits for the detected language's resources (English
+// is bundled and instant; any other locale is one same-origin,
+// SW-cached chunk) so a returning Spanish speaker never sees an
+// English flash. If that fetch fails — first visit, offline — we
+// render anyway and i18next falls back to English honestly.
+void i18nReady
+  .catch(() => {
+    /* fall back to the bundled English rather than never mounting */
+  })
+  .then(() => {
+    ReactDOM.createRoot(document.getElementById("root")!).render(
+      <React.StrictMode>
+        <ErrorBoundary>
+          <BrowserRouter>
+            <AppProvider>
+              <ToastProvider>
+                <App />
+              </ToastProvider>
+            </AppProvider>
+          </BrowserRouter>
+        </ErrorBoundary>
+      </React.StrictMode>,
+    );
+  });

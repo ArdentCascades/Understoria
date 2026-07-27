@@ -28,6 +28,7 @@ import {
 } from "react";
 import { Link, useParams, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
+import { speakLangFor } from "@/i18n";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
 import {
@@ -307,7 +308,7 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
       stopSpeaking();
     }
   }, [reactFor]);
-  const speakLang = i18n.language?.startsWith("es") ? "es" : "en";
+  const speakLang = speakLangFor(i18n.resolvedLanguage);
   // Day-separator label: Today / Yesterday in the app's language,
   // otherwise a spelled-out date (with the year only when it isn't
   // this year's).

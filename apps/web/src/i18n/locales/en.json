@@ -2810,7 +2810,8 @@
     },
     "language": {
       "title": "Language",
-      "intro": "Choose how Understoria speaks to you on this device. More languages and translations of the rest of the app are coming as the i18n migration proceeds."
+      "intro": "Choose how Understoria speaks to you on this device. More languages and translations of the rest of the app are coming as the i18n migration proceeds.",
+      "newTranslationNote": "This translation is new — written with AI assistance and reviewed by people, but not yet checked end to end by native speakers. If something reads wrong, tell us: corrections are welcome and easy to make."
     },
     "appearance": {
       "title": "Appearance",

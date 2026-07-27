@@ -111,6 +111,7 @@ import {
   isPalettePreference,
   type PalettePreference,
 } from "@/lib/palette";
+import { speakLangFor } from "@/i18n";
 
 export interface AppContextValue {
   ready: boolean;
@@ -434,8 +435,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let stopReadAloud: (() => void) | undefined;
     void import("@/lib/readAloud").then(({ initReadAloud }) => {
       if (cancelled) return;
+      // speakLangFor fixes a long-standing miss: nothing ever SET
+      // <html lang> before the language registry (i18n/index.ts now
+      // does), so this callback always answered "en" — read-aloud
+      // spoke Spanish text with an English voice hint.
       stopReadAloud = initReadAloud(() =>
-        document.documentElement.lang?.startsWith("es") ? "es" : "en",
+        speakLangFor(document.documentElement.lang),
       );
     });
     return () => {

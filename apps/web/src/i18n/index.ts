@@ -19,30 +19,77 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import i18n from "i18next";
+import type { BackendModule, ReadCallback } from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 
 import en from "./locales/en.json";
-import es from "./locales/es.json";
+import { languageInfo, SUPPORTED_LANGUAGES } from "./languages";
 
-export const SUPPORTED_LANGUAGES = ["en", "es"] as const;
-export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
+export {
+  LANGUAGES,
+  languageInfo,
+  speakLangFor,
+  SUPPORTED_LANGUAGES,
+  type LanguageInfo,
+  type SupportedLanguage,
+} from "./languages";
 
-export const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
-  en: "English",
-  es: "Español",
+// English ships in the main bundle: it is the fallback, and a device
+// that has never picked a language must render without a network
+// round-trip. Every OTHER locale is a dynamic import — its own chunk,
+// fetched the first time i18next needs the language and cached by the
+// service worker's locale route from then on (vite.config.ts). First
+// load stays flat no matter how many languages the registry grows
+// (docs/i18n-expansion.md Phase 0).
+const LOCALE_LOADERS: Record<
+  string,
+  () => Promise<{ default: Record<string, unknown> }>
+> = {
+  en: () => Promise.resolve({ default: en }),
+  es: () => import("./locales/es.json"),
+};
+
+// Minimal i18next backend over the loader map. `supportedLngs` below
+// keeps i18next from ever requesting a language outside the registry,
+// but read() still answers unknown codes with an empty bundle (never
+// an error) so a stray request degrades to the en fallback silently.
+const lazyLocaleBackend: BackendModule = {
+  type: "backend",
+  init() {
+    /* nothing to configure */
+  },
+  read(lng: string, _ns: string, callback: ReadCallback) {
+    const load = LOCALE_LOADERS[lng];
+    if (!load) {
+      callback(null, {});
+      return;
+    }
+    load().then(
+      (m) => callback(null, m.default),
+      (err) => callback(err as Error, null),
+    );
+  },
 };
 
 const STORAGE_KEY = "understoria.language";
 
-void i18n
+/**
+ * Resolves once i18next is initialized AND the detected language's
+ * resources are loaded. main.tsx gates the first render on this so a
+ * returning Spanish-speaking member never sees an English flash while
+ * the locale chunk arrives (it is one same-origin, SW-cached fetch).
+ */
+export const i18nReady: Promise<unknown> = i18n
+  .use(lazyLocaleBackend)
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources: {
       en: { translation: en },
-      es: { translation: es },
     },
+    // en above is bundled; everything else arrives via the backend.
+    partialBundledLanguages: true,
     fallbackLng: "en",
     supportedLngs: SUPPORTED_LANGUAGES as readonly string[],
     interpolation: {
@@ -57,7 +104,22 @@ void i18n
     returnNull: false,
   });
 
-export function setLanguage(lang: SupportedLanguage): void {
+// <html lang> / <html dir> follow the active language. lang feeds
+// screen readers and the read-aloud voice pick; dir is the RTL
+// program's future hook (every registry entry is ltr until the
+// Phase 3 logical-property sweep lands — see languages.ts).
+function applyDocumentLanguage(lng: string | undefined): void {
+  if (typeof document === "undefined") return;
+  const info = languageInfo(lng);
+  document.documentElement.lang = info.code;
+  document.documentElement.dir = info.dir;
+}
+i18n.on("languageChanged", applyDocumentLanguage);
+void i18nReady.then(() => applyDocumentLanguage(i18n.resolvedLanguage));
+
+export function setLanguage(lang: string): void {
+  // changeLanguage pulls the locale chunk through the backend if this
+  // device has never used the language before.
   void i18n.changeLanguage(lang);
   try {
     window.localStorage.setItem(STORAGE_KEY, lang);
