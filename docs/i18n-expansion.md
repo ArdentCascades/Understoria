@@ -1,19 +1,25 @@
 # Translating Understoria into the most widely spoken languages
 
-Status: PLAN (operator-requested). Nothing here is built yet; each
-phase below is sized to land as one or a few reviewable PRs.
+Status: PHASE 0 SHIPPED (infrastructure — lazy locale loading, the
+language registry in `src/i18n/languages.ts`, generalized parity/
+interpolation/plural gates, `<html lang>`/`<html dir>` wiring,
+`speakLangFor()`, and the translation-status note mechanism). Phases
+1+ are not started; each is sized to land as one or a few reviewable
+PRs. Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from
 
-- **2,767 UI strings** in `apps/web/src/i18n/locales/en.json` (~209KB),
-  hard-lockstep with `es.json`, enforced by the i18n parity, duplicate-
-  key, and `esPlurals` tests. Both locales load **eagerly** in the main
-  bundle.
-- **Authored content is the iceberg**: `projectTemplates.ts` (424KB),
-  `taskSteps.ts` (248KB), `taskTips.ts` (158KB) carry English + Spanish
-  **inline** — every device downloads both languages today. `faq` and
-  `startCommunity` use the better pattern: a separate `.es.ts` module
-  with a parity test.
+- **~2,900 UI strings** in `apps/web/src/i18n/locales/en.json`
+  (~220KB), hard-lockstep with `es.json`, enforced by the i18n
+  parity, interpolation-variable, duplicate-key, and plural-
+  completeness tests (`src/i18n/*.test.ts`). English ships eagerly
+  (it is the fallback); every other locale is a lazy chunk loaded on
+  demand and runtime-cached by the service worker (Phase 0).
+- **Authored content is the iceberg**: `projectTemplates.ts` (~514KB),
+  `taskSteps.ts` (~287KB), `taskTips.ts` (~189KB) carry English +
+  Spanish **inline** — every device downloads both languages today.
+  `faq` and `startCommunity` use the better pattern: a separate
+  `.es.ts` module with a parity test.
 - Dates/numbers already flow through `Intl` with the active language;
   `lib/speak.ts` (read-aloud, spoken panic confirm) already takes a
   language tag and honestly reports missing voices.
@@ -36,33 +42,51 @@ into a broken layout.
 | **3 (after RTL phase)** | Arabic `ar`, Urdu `ur` | top-ten languages that REQUIRE the RTL work first |
 | demand-driven | Tagalog, Haitian Creole, Korean, Bengali, Indonesian, Swahili… | once Phase 0 lands, adding a language is cheap — communities can request or contribute their own |
 
-## Phase 0 — Infrastructure (one PR, prerequisite for everything)
+## Phase 0 — Infrastructure (SHIPPED)
+
+As built (one PR, as planned):
 
 1. **Lazy locale loading.** English stays eagerly bundled (it is the
-   fallback); every other locale becomes a dynamic import registered
-   with i18next on demand (`partialBundledLanguages`). The service
-   worker caches a locale chunk after first use so offline keeps
-   working. First-load cost stays flat no matter how many languages we
-   ship.
-2. **Data-driven language registry.** `SUPPORTED_LANGUAGES` grows from
-   a string pair into records: `{ code, endonym, dir, speakLang,
-   pluralForms }`. `LanguageSection`'s two buttons become a list that
-   renders endonyms ("中文", "Français") — a language should name
-   itself in itself.
-3. **Generalized quality gates.** The en/es parity test becomes
-   en↔every-shipped-locale; add an interpolation-variable parity check
-   (`{{count}}`, `{{name}}` must survive translation verbatim);
-   generalize `esPlurals.test.ts` into a per-language CLDR plural-
-   suffix completeness test (Russian needs `_one/_few/_many`, Chinese
-   collapses to `_other`).
-4. **Read-aloud + spoken-panic mapping.** The registry's `speakLang`
-   feeds `speak()`; the existing zero-voices watchdog already handles
+   fallback); every other locale is a dynamic import served through a
+   minimal i18next backend over a loader map
+   (`partialBundledLanguages`), emitted as its own `locale-<code>`
+   chunk (vite.config.ts codeSplitting group). Locale chunks are
+   excluded from the service worker's install-time precache and
+   runtime-cached (`CacheFirst`, hashed immutable URLs) after first
+   use, so offline keeps working for chosen languages and first-load
+   cost stays flat no matter how many languages we ship. `main.tsx`
+   gates the first render on `i18nReady` so a returning non-English
+   member never sees an English flash.
+2. **Data-driven language registry.** `src/i18n/languages.ts`:
+   `LANGUAGES` records `{ code, endonym, dir, speakLang,
+   reviewStatus? }` (plural categories are DERIVED from
+   `Intl.PluralRules` in the gates rather than declared — the
+   registry can't drift from the engine). `LanguageSection` renders
+   the registry as an endonym list ("Español", "中文") with
+   `lang=` attributes — a language names itself in itself.
+3. **Generalized quality gates.** `parity.test.ts` now runs
+   en↔every-shipped-locale (with a registry-coverage guard so a new
+   registry entry MUST be wired into the test table), plus an
+   interpolation-variable parity check (`{{count}}`, `{{name}}`
+   survive translation verbatim). `plurals.test.ts` replaces
+   `esPlurals.test.ts`: per-language CLDR plural-suffix completeness
+   (families = keys with an `_other` form; required categories from
+   `Intl.PluralRules` over counts 0–200 — Russian will need
+   `_one/_few/_many`, Chinese collapses to `_other`), keeping the
+   original Spanish agreement regressions.
+4. **Read-aloud + spoken-panic mapping.** `speakLangFor()` feeds
+   `speak()` everywhere (Conversation, Profile panic confirm,
+   ReadAloudSection, AppContext); the registry now also drives
+   `<html lang>`/`<html dir>` on language change — fixing a real bug
+   where nothing set `<html lang>` and the read-aloud callback always
+   answered "en". The existing zero-voices watchdog already handles
    devices without a voice for the language honestly.
-5. **Translation-status honesty.** A new locale ships with a one-line
-   note in `LanguageSection`: this translation is new, AI-assisted and
-   human-reviewed, corrections welcome — the same posture as the beta
-   disclosure. Removed per-language once a native-speaker review cycle
-   completes.
+5. **Translation-status honesty.** `reviewStatus: "new"` on a registry
+   entry renders a one-line note in `LanguageSection`
+   (`profile.language.newTranslationNote`, en/es shipped): this
+   translation is new, AI-assisted and human-reviewed, corrections
+   welcome — the same posture as the beta disclosure. Removed
+   per-language once a native-speaker review cycle completes.
 
 ## Phase 1 — UI strings, wave by wave (~2,800 strings per language)
 
@@ -91,7 +115,7 @@ repo's disclosed AI-assisted posture:
    feature PR must add its keys to all of them (agents make this
    cheap; the parity test makes it mandatory).
 
-## Phase 2 — Authored content (the 830KB corpus)
+## Phase 2 — Authored content (the ~990KB corpus)
 
 1. **Restructure first (no new languages yet):** move the inline
    `{ en, es }` fields of `projectTemplates` / `taskSteps` / `taskTips`
@@ -142,7 +166,7 @@ member-guide/opsec content modules, the print/paper surfaces (already
 
 | Unit | Size | Notes |
 |---|---|---|
-| Phase 0 | one focused PR | lazy loading + registry + tests |
-| UI strings, per language | ~2,800 strings | agent bulk + review + layout smoke |
+| Phase 0 | one focused PR (SHIPPED) | lazy loading + registry + tests |
+| UI strings, per language | ~2,900 strings | agent bulk + review + layout smoke |
 | Content, per language | ~1MB source | dominated by the 64 templates; ship UI-first |
 | RTL program | one audit + sweep PR series | precondition for ar/ur only |

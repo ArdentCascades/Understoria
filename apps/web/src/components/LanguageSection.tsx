@@ -19,16 +19,11 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useTranslation } from "react-i18next";
-import {
-  LANGUAGE_LABELS,
-  setLanguage,
-  SUPPORTED_LANGUAGES,
-  type SupportedLanguage,
-} from "@/i18n";
+import { LANGUAGES, languageInfo, setLanguage } from "@/i18n";
 
 export function LanguageSection() {
   const { t, i18n } = useTranslation();
-  const current = (i18n.resolvedLanguage ?? "en") as SupportedLanguage;
+  const current = languageInfo(i18n.resolvedLanguage);
   return (
     <section className="card mb-4" aria-labelledby="language-section-title">
       <h2
@@ -45,26 +40,35 @@ export function LanguageSection() {
         aria-labelledby="language-section-title"
         className="flex flex-wrap gap-2"
       >
-        {SUPPORTED_LANGUAGES.map((lang) => {
-          const selected = current === lang;
+        {LANGUAGES.map((lang) => {
+          const selected = current.code === lang.code;
           return (
             <button
-              key={lang}
+              key={lang.code}
               type="button"
               role="radio"
               aria-checked={selected}
-              onClick={() => setLanguage(lang)}
-              className={
-                selected
-                  ? "btn-primary"
-                  : "btn-secondary"
-              }
+              // A language names itself in itself — a member looking
+              // for theirs shouldn't need its English exonym.
+              lang={lang.code}
+              onClick={() => setLanguage(lang.code)}
+              className={selected ? "btn-primary" : "btn-secondary"}
             >
-              {LANGUAGE_LABELS[lang]}
+              {lang.endonym}
             </button>
           );
         })}
       </div>
+      {current.reviewStatus === "new" && (
+        // Translation-status honesty (docs/i18n-expansion.md Phase 0):
+        // a freshly shipped locale says so — AI-assisted, human-
+        // reviewed, corrections welcome — until a native-speaker
+        // review cycle clears the registry flag. Same posture as the
+        // beta disclosure.
+        <p className="mt-3 text-xs text-moss-600 dark:text-moss-300">
+          {t("profile.language.newTranslationNote")}
+        </p>
+      )}
     </section>
   );
 }

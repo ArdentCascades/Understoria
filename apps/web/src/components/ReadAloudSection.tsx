@@ -25,6 +25,7 @@ import {
   setReadAloudEnabled,
 } from "@/lib/readAloud";
 import { speak } from "@/lib/speak";
+import { speakLangFor } from "@/i18n";
 
 /** Settings card for read-aloud mode (#473). The toggle itself
  *  speaks its new state — the one control a non-reader must be able
@@ -33,7 +34,7 @@ export function ReadAloudSection() {
   const { t, i18n } = useTranslation();
   const [enabled, setEnabled] = useState(isReadAloudEnabled);
   const supported = typeof window.speechSynthesis !== "undefined";
-  const lang = i18n.language?.startsWith("es") ? "es" : "en";
+  const lang = speakLangFor(i18n.resolvedLanguage);
 
   return (
     <section className="card mb-4" aria-labelledby="read-aloud-title">

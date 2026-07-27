@@ -1,24 +1,29 @@
 # Member-selectable themes — implementation plan
 
-> **Status: COMPLETE — T1 + T2 + T3 SHIPPED** (T3: opt-in "Morning
-> mist" — html.mist + .chrome-mist on the five chrome surfaces
-> (AppHeader, BottomNav, Board/Proposals/Messages sticky bands),
-> blur(20px) saturate(1.2) at moss-50/0.65 light + moss-950/0.60
-> dark, solid fallbacks under prefers-reduced-transparency and
-> missing backdrop-filter, Settings toggle + Dexie/bootstrap
-> plumbing + refreshed CSP hash on both Caddyfile vhosts.
-> **§1.4 amendment, post-pilot-report:** the statically-certified
-> tint floors (0.92/0.85) shipped first and proved INVISIBLE — more
-> opaque than the default /70-with-blur chrome those same surfaces
-> already carry, so the toggle changed nothing perceptible. Mist
-> now deliberately sits on the shipped default treatment's
-> acceptance basis instead — chrome-text-only surfaces over
-> blur-averaged real content, opt-in, fully solid fallbacks — and
-> DockedPanel was dropped from the treatment per this plan's own
-> reading-surfaces-stay-opaque rule. The §1.4 floor math remains
-> correct as the static-certification bound; it is simply not the
-> operative constraint for an opt-in effect on surfaces whose
-> default is already less conservative.)
+> **Status: T1 + T2 SHIPPED; T3 ("Morning mist") REMOVED by
+> operator decision.** T3 shipped, then went through two visibility
+> reworks, and was removed entirely: the operator judged the effect
+> too subtle to justify a Settings toggle ("having it in the
+> settings just causes confusion"). The §1.4 findings are kept here
+> so the lesson isn't relearned: (1) the statically-certified tint
+> floors (0.92/0.85) were MORE opaque than the default
+> /70-with-blur chrome those surfaces already carry — invisible.
+> (2) An alpha-only retune (moss-50/0.5 light, moss-950/0.45 dark)
+> was ALSO imperceptible measured end-to-end in the built app
+> (2–3/255 peak pixel delta in dark mode): a same-lightness tint at
+> a different alpha converges to the same rendered color over this
+> app's own content, and saturate() has nothing to lift in
+> desaturated darks. (3) A luminance-shifted tint (moss-100 light /
+> moss-700 dark — fog is milkier than what it covers) DID measure
+> ≥22/255 peak chrome delta, but the operator still found the
+> result too subtle in practice to keep. Any future frosted-chrome
+> attempt must budget for a treatment bold enough to be
+> unmistakable — or not ship a toggle at all. All T3 machinery
+> (html.mist, .chrome-mist, lib/mist.ts, the Settings radiogroup,
+> SETTING_KEYS.mist, the bootstrap localStorage read, and the
+> Caddyfile CSP hash that covered it) is gone; stale
+> `understoria.mist` localStorage values and Dexie `mist` settings
+> rows on member devices are simply ignored.
 > **T1 + T2 SHIPPED** (T2: [data-palette] blocks for the
 > three themes, pre-paint bootstrap attr + refreshed CSP hash on
 > both Caddyfile vhosts, lib/palette.ts + Dexie/AppContext/Settings

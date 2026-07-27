@@ -131,9 +131,6 @@
             palette === "fieldnotes"
           )
             document.documentElement.setAttribute("data-palette", palette);
-          // Morning mist chrome (docs/themes-plan.md T3). Opt-in only.
-          if (localStorage.getItem("understoria.mist") === "on")
-            document.documentElement.classList.add("mist");
         } catch (e) {
           /* private-mode / quota-exceeded — fall back to defaults */
         }

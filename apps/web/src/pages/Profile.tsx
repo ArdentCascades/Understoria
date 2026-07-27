@@ -21,6 +21,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
+import { speakLangFor } from "@/i18n";
 import { useApp } from "@/state/AppContext";
 import { shareOrigin } from "@/lib/appOrigin";
 import { IconSettings } from "@/components/visual";
@@ -1134,7 +1135,7 @@ function EmergencySection() {
         confirming === "soft"
           ? t("profile.emergency.spokenSoft")
           : t("profile.emergency.spokenHard"),
-        i18n.language?.startsWith("es") ? "es" : "en",
+        speakLangFor(i18n.resolvedLanguage),
       );
     });
     return () => {

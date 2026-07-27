@@ -116,12 +116,29 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        // Lazy locale chunks stay OUT of the install-time precache —
+        // that is the point of lazy loading (docs/i18n-expansion.md
+        // Phase 0): a member downloads only the language they use.
+        // The runtime route below caches a chunk on first use, so
+        // offline keeps working for the language(s) actually chosen.
+        globIgnores: ["**/locale-*.js"],
         navigateFallback: "/index.html",
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.destination === "document",
             handler: "NetworkFirst",
             options: { cacheName: "understoria-pages" },
+          },
+          {
+            // Hashed, immutable locale chunks: cache-first forever;
+            // a new deploy emits new hashes and the old entries age
+            // out via maxEntries.
+            urlPattern: /\/assets\/locale-[\w-]+\.js$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "understoria-locales",
+              expiration: { maxEntries: 12 },
+            },
           },
         ],
       },
@@ -133,6 +150,15 @@ export default defineConfig({
       output: {
         codeSplitting: {
           groups: [
+            // Each lazy locale gets a stable "locale-<code>" chunk so
+            // the service-worker config above can exclude locales from
+            // precache and runtime-cache them by name. en is bundled
+            // eagerly in i18n/index.ts and never matches here. Add a
+            // group per new language alongside its loader entry.
+            {
+              name: "locale-es",
+              test: /src[\\/]i18n[\\/]locales[\\/]es\.json/,
+            },
             // Authored content (templates, tips, starter steps) is pure
             // data and grew the main chunk past workbox's 2 MiB per-file
             // precache limit. Its own chunk keeps every file precachable
