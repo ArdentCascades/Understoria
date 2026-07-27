@@ -3,9 +3,13 @@
 Status: PHASE 0 SHIPPED (infrastructure — lazy locale loading, the
 language registry in `src/i18n/languages.ts`, generalized parity/
 interpolation/plural gates, `<html lang>`/`<html dir>` wiring,
-`speakLangFor()`, and the translation-status note mechanism). Phases
-1+ are not started; each is sized to land as one or a few reviewable
-PRs. Baseline numbers below refreshed 2026-07-27.
+`speakLangFor()`, and the translation-status note mechanism).
+PHASE 1 IN PROGRESS: **French (fr) SHIPPED** (UI strings complete —
+glossary at `docs/i18n-glossary/fr.md`, 6-agent bulk pass + splice
+validation + cross-chunk consistency reconciliation, layout smoke
+clean; registry carries `reviewStatus: "new"` + `content: "ui-only"`
+with both honesty notes rendering in Settings). Wave 1 remaining:
+zh-Hans, pt. Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from
 

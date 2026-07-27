@@ -2811,7 +2811,8 @@
     "language": {
       "title": "Language",
       "intro": "Choose how Understoria speaks to you on this device. More languages and translations of the rest of the app are coming as the i18n migration proceeds.",
-      "newTranslationNote": "This translation is new — written with AI assistance and reviewed by people, but not yet checked end to end by native speakers. If something reads wrong, tell us: corrections are welcome and easy to make."
+      "newTranslationNote": "This translation is new — written with AI assistance and reviewed by people, but not yet checked end to end by native speakers. If something reads wrong, tell us: corrections are welcome and easy to make.",
+      "contentEnglishNote": "Longer guides — the FAQ, project templates, and task tips — are still in English in this language. They are being translated next."
     },
     "appearance": {
       "title": "Appearance",

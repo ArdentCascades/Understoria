@@ -159,6 +159,10 @@ export default defineConfig({
               name: "locale-es",
               test: /src[\\/]i18n[\\/]locales[\\/]es\.json/,
             },
+            {
+              name: "locale-fr",
+              test: /src[\\/]i18n[\\/]locales[\\/]fr\.json/,
+            },
             // Authored content (templates, tips, starter steps) is pure
             // data and grew the main chunk past workbox's 2 MiB per-file
             // precache limit. Its own chunk keeps every file precachable
