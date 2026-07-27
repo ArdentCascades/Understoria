@@ -1,0 +1,3796 @@
+{
+  "app": {
+    "update": {
+      "available": "有新版本了。",
+      "reload": "刷新",
+      "later": "稍后",
+      "offlineReady": "已经可以离线使用了。"
+    }
+  },
+  "addDevice": {
+    "title": "再关联一台设备",
+    "subtitle": "在第二台设备上使用同一个身份。传输全程端到端封存——任何服务器都读不到。",
+    "listen": {
+      "starting": "正在寻找你的社区节点（你的社区共同运行的那台服务器）…",
+      "emptyTitle": "还没有设备请求关联。",
+      "emptyBody": "在新设备上打开 Understoria，选择“把我的身份带过来”。它会自己出现在这里——保持这个页面打开就好。",
+      "listening": "正在听着…",
+      "multiWarning": "有不止一台设备在请求。只批准表情符号和你眼前屏幕一致的那台。如果都不一致，一台也别批准。",
+      "requestTitle": "有一台设备请求关联",
+      "requestBody": "关联会把你的完整身份交给那台设备——它将能以你的名义行事。核对上方的表情符号，要和新设备屏幕上的一致。",
+      "askedJustNow": "刚刚发来请求",
+      "askedMinutesAgo_one": "{{count}}分钟前发来请求",
+      "askedMinutesAgo_other": "{{count}}分钟前发来请求",
+      "staleHint": "如果你的应用显示的表情符号不一样，在那边点“再请求一次”，以最新的为准",
+      "linkIt": "关联它",
+      "safetyLine": "只关联你手里拿着的设备。现在没打算关联什么？那就别点——网络里可能有人在碰运气。",
+      "badgeAriaLabel": "此关联请求的识别表情符号",
+      "noNode": "这台设备连不上你的社区节点（你的社区共同运行的那台服务器），所以现在没法一点即关联。二维码方式不需要任何服务器。",
+      "useQr": "改用二维码",
+      "whatMoves": "哪些会转到新设备（哪些不会）",
+      "vpnHint": "还是没动静？VPN 或 iCloud 专用代理可能让你的两个应用看起来在不同的网络上，请求就永远到不了这里。暂停它一分钟，让新设备再请求一次——或者用下面的“其他关联方式”。"
+    },
+    "otherWays": {
+      "link": "其他关联方式",
+      "title": "其他关联方式",
+      "wordsTitle": "要关联的设备在别的地方？",
+      "wordsBody": "获取一个由6个单词组成的口令，念出来就行——拿着新设备的人在那边输入。需要经过你的社区节点（共同的服务器）来传递口令。",
+      "qrTitle": "没有社区服务器，或者不想经过它？",
+      "qrBody": "出示一个二维码给新设备扫。什么都不会被存到任何地方——两台设备必须在同一个房间里。"
+    },
+    "sent": {
+      "title": "发出去了。",
+      "body": "回到应用那边——它会自己登录。你可以离开这个页面了。"
+    },
+    "comparison": {
+      "transfersTitle": "哪些会跟着你到新设备",
+      "transfers": {
+        "identity": "你的身份",
+        "identityDetail": "两台设备以同一位成员的身份签名。",
+        "profile": "你的个人资料",
+        "profileDetail": "昵称、技能、空闲时间、所在区域。",
+        "balance": "你的时数和历史",
+        "balanceDetail": "两台设备上都看得到——它们记在社区的共同账本里，不在你的设备上。",
+        "connection": "你与社区的连接",
+        "connectionDetail": "新设备会知道该和哪台社区服务器同步，并立刻把启事、项目、活动和成员都补齐。"
+      },
+      "staysTitle": "哪些留在这台设备上",
+      "stays": {
+        "dms": "私信",
+        "dmsDetail": "私信是端到端加密到这台设备的——只有它能读，连服务器也不行——所以没法复制过去。新设备从头开始。",
+        "drafts": "未完成的草稿",
+        "draftsDetail": "特意只存在本机。先把不想丢的写完或复制出来。",
+        "themeDensity": "主题和密度",
+        "themeDensityDetail": "特意按设备各自保存——这关乎你的眼睛，不是你的身份。",
+        "achievements": "成就",
+        "achievementsDetail": "新设备和社区同步之后，这些会自动重建。"
+      },
+      "continue": "继续"
+    },
+    "gate": {
+      "title": "注意：接下来5分钟里，这个二维码就是你的身份。",
+      "body1": "监控摄像头、门铃摄像头和网络摄像头隔着房间也能读取二维码。它一出现在屏幕上，镜头范围内的任何人都能把它存下来，并在接下来的5分钟内重放——哪怕你已经关掉了这个页面。",
+      "body2": "再配上口令，就等于把一切交给了对方：你的名字、你的历史，以及以你的名义签名的能力。",
+      "commitment": "在你能掌控的房间里做这件事。拿不准的话，就取消。",
+      "showQR": "显示二维码"
+    },
+    "display": {
+      "countdown": "剩余时间：{{mmss}}",
+      "passphraseAriaLabel": "传输口令",
+      "spokenInstructions": "把这六个单词念出来，或在新设备上逐个输入。顺序很重要。别用粘贴——剪贴板应用会记住东西。",
+      "qrAriaLabel": "设备关联二维码",
+      "copyHatchToggle": "没法扫码——是在同一部手机上装应用，或者是在电脑上？那就复制代码",
+      "copyHatchStep1": "先把上面的6个单词抄在纸上。如果离开这个页面后它重新加载，就会生成新代码，旧单词随即失效。",
+      "copyHatchStep2": "点下面的“复制关联码”。",
+      "copyHatchStep3": "打开应用（或另一台设备的录入页面），粘贴进去。然后照着纸上输入那6个单词。",
+      "copyHatchWarning": "复制会把关联码放进剪贴板，它可能在你的设备之间同步，或被剪贴板管理器留在历史里。这个码只在接下来的几分钟内有效，而且没有那六个单词就毫无用处——把单词念出来、手动输入，或留在纸上；千万别和码一起发送。计时结束时，我们会尽量清空剪贴板。",
+      "copyButton": "复制关联码",
+      "copied": "已复制。在新设备的录入页面上选择粘贴。",
+      "copyFailed": "复制不了——浏览器拦下了剪贴板权限。点一下下面的代码，全选，再复制。",
+      "copySelectLabel": "如果按钮不管用：点一下下面的代码，全选，再复制",
+      "afterImport": "等另一台设备说完成了，就点“完成”。计时到零时，二维码也会自动消失。",
+      "done": "完成",
+      "fingerprintLabel": "在另一台设备上确认",
+      "fingerprintAriaLabel": "身份指纹——一段简短的安全代码，用来和另一台设备上的比对"
+    },
+    "link": {
+      "intro": "在新设备上打开 Understoria，选择“已经有身份”的那个选项。然后在那边按顺序输入这6个单词：",
+      "warning": "接下来15分钟里，这几个单词就是全部的钥匙——谁先输入，谁就得到你的身份。别在旁人面前念它们，也永远别在聊天里发送。",
+      "afterImport": "等新设备说已经进来了，就点“完成”。计时结束时代码会自动作废，而且它只能用一次。",
+      "qrInstead": "新设备没网，或者不想让任何东西留在节点（你社区的服务器）上？改用二维码",
+      "fallbackNotice": "刚才连不上你的社区节点（它的共同服务器）——改用二维码方式。"
+    },
+    "expired": {
+      "title": "时间到了。",
+      "body": "五分钟过去了。二维码没有了，口令也一样。还想关联另一台设备的话，重新开始——会生成一个新口令。",
+      "bodyLink": "十五分钟过去了，单词已经失效，加密传输也已从节点上删除。还想关联另一台设备的话，重新开始——你会拿到一组新单词。",
+      "startOver": "重新开始",
+      "close": "关闭"
+    },
+    "errors": {
+      "title": "没能开始关联",
+      "generic": "出了点问题。再试一次吧。",
+      "locked": "先解锁你的会话再关联——在那之前，你的身份密钥（证明你是你的那个秘密）会一直封存着。",
+      "retry": "再试一次"
+    },
+    "labelSource": {
+      "title": "好了。要不要加个备注，方便以后认出来？",
+      "body": "一条简短的备注——比如“姨妈的笔记本”或“工作手机”——能帮你以后在个人资料里认出这条记录。备注只留在这台设备上。",
+      "inputLabel": "备注（可选）",
+      "save": "带备注保存",
+      "skip": "跳过——不加备注保存",
+      "dontSave": "不保存——关联失败了"
+    }
+  },
+  "avatar": {
+    "label": "成员 {{shortKey}} 的头像"
+  },
+  "pairDevice": {
+    "title": "关联这台设备",
+    "subtitle": "把你的身份从存有它的那台设备搬过来。",
+    "subtitleSamePhone": "把你的身份从这部手机的浏览器搬过来。",
+    "wait": {
+      "starting": "正在准备…",
+      "badgeCaption": "你的核对表情",
+      "badgeAriaLabel": "这台设备关联请求的识别表情",
+      "title": "在你已登录的那台设备上确认",
+      "step1": "在存有你身份的那台设备上，打开 Understoria。",
+      "samePhoneStep1": "在浏览器里打开 Understoria——就是你已登录的那一个。",
+      "step2": "进入个人资料 → “添加另一台设备”。",
+      "step3": "看到 {{badge}} 时，点“关联”。",
+      "waitingLine": "正在等你确认…这次请求会在{{mmss}}后过期。",
+      "expired": "这次请求已过期。",
+      "askAgain": "再请求一次",
+      "noNode": "这台设备连不上社区节点——社区共同运行的那台服务器——所以没法一点就关联。二维码方式不需要节点也能用。",
+      "useQr": "改用二维码方式",
+      "busyNode": "你的网络里已经有好几台设备在请求关联。等一分钟让它们过期，然后再试。",
+      "nodeError": "你社区的服务器没有应答。检查一下网络连接，再试一次。",
+      "interfered": "有东西干扰了这次传输——收到的内容不是来自你的确认，或者已经损坏。你的身份没有泄露。再请求一次，会拿到一组全新的表情。",
+      "vpnHint": "等了很久？如果这部手机开着 VPN 或 iCloud 专用代理，两个应用可能看起来像在不同的网络上，请求就永远到不了另一块屏幕。把它暂停一分钟，点“再请求一次”——或者用下面的“其他关联方式”。"
+    },
+    "linkIn": {
+      "title": "你以{{name}}的身份进来了。",
+      "notMe": "这不是我",
+      "notMeConfirmBody": "如果那个名字不是你，这台设备刚刚收到了别人的身份——多半是网络里有人在捣乱。抹除会把这台设备清理干净（上面本来也还没有你的东西），你可以重新开始。",
+      "wipeButton": "抹除这台设备，重新开始"
+    },
+    "otherWays": {
+      "link": "其他关联方式",
+      "title": "其他关联方式",
+      "wordsTitle": "另一台设备不在身边？",
+      "wordsBody": "在那台设备上选“其他关联方式”，拿到一个6个词的代码——然后把那些词输入到这里。",
+      "qrTitle": "没有社区服务器，或者不信任它？",
+      "qrBody": "直接从另一台设备的屏幕上扫二维码。整个过程不经过任何服务器。"
+    },
+    "link": {
+      "directionsTitle": "从存有你身份的那台设备上拿到那6个词。",
+      "step1": "在那台设备上打开个人资料，选“添加另一台设备”，然后点继续。",
+      "step2": "它会显示6个词。按顺序在下面输入——15分钟内有效。",
+      "samePhoneStep1": "在这部手机的浏览器里打开 Understoria，进入个人资料 → “添加另一台设备”，然后点继续。",
+      "samePhoneStep2": "它会显示6个词。切回这里，在下面输入——这些词15分钟内一直有效，所以来回切换应用没关系。",
+      "submit": "关联这台设备",
+      "notFound": "这些词下面没有等待中的请求。逐个检查每个词和顺序——也确认另一块屏幕还在显示它们。代码15分钟后过期，而且每个代码只能用一次。",
+      "noNode": "这台设备连不上社区节点（你社区的共同服务器），所以这里没法用词语关联。改用下面的二维码方式吧。",
+      "scanInstead": "没有社区节点（共同服务器），或者另一台设备连不上？改扫二维码"
+    },
+    "capture": {
+      "directions": {
+        "title": "需要二维码？到你的另一台设备上生成一个。",
+        "step1": "在另一台设备上打开个人资料，然后选“添加另一台设备”。",
+        "step2": "跟着提示走——二维码会出现，下方还有一个6个词的代码。",
+        "step3": "把另一台设备的屏幕举到这个摄像头前，它会自动扫描。如果摄像头看不清，也可以把二维码内容粘贴到下面的框里。"
+      },
+      "requestingCamera": "正在请求摄像头权限…",
+      "cameraInstructions": "对准另一台设备上的二维码，会自动识别。",
+      "cameraUnavailable": "摄像头不可用。",
+      "cameraUnavailableHelp": "你的浏览器没有内置二维码识别，或者你没有允许使用摄像头。如果另一台设备提供了二维码内容，也可以直接粘贴。",
+      "videoAriaLabel": "摄像头实时画面，正在寻找二维码",
+      "pasteLabel": "或者粘贴二维码内容",
+      "pastePlaceholder": "把关联码粘贴到这里…",
+      "continue": "继续",
+      "invalidCode": "这看起来不像关联码。从另一块屏幕再复制一次——记得复制完整。",
+      "samePhone": {
+        "title": "把你的身份从这部手机的浏览器搬过来",
+        "step1": "在浏览器里打开 Understoria——就是你已登录的那一个。进入个人资料，然后选“添加另一台设备”。",
+        "step2": "把显示的6个词抄下来。稍后要在这里输入——回去再看一眼可能会生成新代码，所以纸笔比记性靠谱。",
+        "step3": "点“改为复制代码”，再点“复制关联码”。",
+        "step4": "回到这里，点下面的粘贴按钮。",
+        "pasteButton": "粘贴关联码",
+        "clipboardFailed": "读不了剪贴板。长按下面的框，直接粘贴进去。",
+        "switchToScan": "身份在另一台设备上？改扫它的二维码",
+        "switchToSamePhone": "身份就在这部手机的浏览器里？改按同一部手机的步骤来"
+      }
+    },
+    "passphrase": {
+      "instructions": "按顺序输入另一台设备上的那{{count}}个词。输入时会自动补全。",
+      "wordLabel": "第{{number}}个词",
+      "unwrap": "解开"
+    },
+    "fingerprintConfirm": {
+      "title": "和另一台设备上的一致吗？",
+      "body": "另一台设备应该在“在另一台设备上确认”下方显示同样的8位代码。如果对不上，先停下——扫描出了问题。",
+      "fingerprintAriaLabel": "你所扫描设备的身份指纹",
+      "confirm": "一致",
+      "mismatch": "不一致——重新开始",
+      "mismatchHint": "“重新开始”会在这台设备上重新扫描。也让另一台设备重新开始。"
+    },
+    "session": {
+      "title": "用口令锁住这台设备",
+      "intro": "设一个口令来保护这台设备上的身份。应用要求解锁时，输入它就行。留空则不在这台设备上加锁——只有确定没有别人碰得到它，才这么做。",
+      "passphraseLabel": "新口令",
+      "confirmLabel": "再输一次口令",
+      "skipHint": "两栏都留空就是跳过——你的身份密钥会在这台设备上保持解锁，谁拿起它，谁就是你。",
+      "mismatch": "两次输入的口令不一致。",
+      "finish": "完成"
+    },
+    "bootstrap": {
+      "title": "进来了。",
+      "intro": "这台设备一开始没有的几样东西：",
+      "bullets": {
+        "noDms": "没有私信记录——消息是端到端加密的，只有收到它的那台设备能读（连服务器也读不了），所以没法复制过来。",
+        "noDrafts": "没有草稿——另一台设备上可能有还没保存的启事，它们不会跟过来。",
+        "noPrefs": "没有主题和密度偏好——想保持一致的话，到个人资料 → 设置里再设一遍。"
+      },
+      "outro": "成就会随着这台设备与社区同步而自己重建起来。",
+      "continue": "去公告栏"
+    },
+    "errors": {
+      "lostEnvelope": "二维码数据丢了。再扫一次。",
+      "malformed": "这看起来不像关联二维码。再扫一次。",
+      "wrongPassphrase": "这些词对不上。逐个检查——顺序很重要。如果另一块屏幕被重新打开或刷新过，它已经生成了新代码和新词：从它现在显示的屏幕上，把两样都重新复制。",
+      "expired": "这次传输超过了5分钟的时限。让另一台设备重新开始。",
+      "versionMismatch": "两台设备的版本不同。都更新之后再试。",
+      "publickeyMismatch": "二维码的身份校验对不上。让另一台设备重新开始。",
+      "generic": "出了点问题。再试一次。"
+    },
+    "labelDestination": {
+      "title": "要给这台设备做个备注吗？",
+      "body": "一条简短的备注——比如“我的笔记本”或“出门用的手机”——会显示在你的个人资料里，让你看清哪些设备已关联。备注只留在这台设备上。",
+      "inputLabel": "备注（可选）",
+      "save": "保存并加备注",
+      "skip": "跳过——不加备注直接保存"
+    }
+  },
+  "availability": {
+    "weekday_days": "工作日白天",
+    "weekday_evenings": "工作日晚上",
+    "weekend_days": "周末白天",
+    "weekend_evenings": "周末晚上",
+    "ask_me": "随时找我",
+    "summaryLabel": "空闲时间"
+  },
+  "demo": {
+    "banner": "你正在体验在线演示。你做的一切都留在这个浏览器里——只有你能看到，什么都不会被发出去。",
+    "nodeSection": "这个演示完全在你的浏览器里运行——连接社区服务器的功能已关闭，所以你在这里做的任何事都不会被发到任何地方。在真正的应用里，这一部分会把你的设备连上社区的节点——你的社区共同运行的那台服务器。",
+    "reset": {
+      "cta": "重置演示",
+      "confirm": "用全新的示例数据重新开始？",
+      "yes": "重置",
+      "no": "继续逛逛",
+      "working": "正在重置…"
+    }
+  },
+  "mentions": {
+    "suggestionsLabel": "提到一位成员",
+    "willSeeOne": "{{name}}下次打开 Understoria 时就会看到——提及永远不会吵到任何人。",
+    "willSeeMany": "被提到的成员下次打开 Understoria 时就会看到——提及永远不会吵到任何人。"
+  },
+  "offline": {
+    "banner": "你现在离线。这里的一切照样能在你的设备上使用。",
+    "guideLink": "断网时还能做什么",
+    "pendingCount_one": "{{count}}条改动会在重新连上时发送。",
+    "pendingCount_other": "{{count}}条改动会在重新连上时发送。",
+    "backOnline": "重新连上了。正在发送排队的改动…"
+  },
+  "toast": {
+    "dismiss": "关闭",
+    "needPosted": "贴出来了。你的需求已经上了公告栏。",
+    "offerPosted": "贴出来了。你的提供已经上了公告栏。",
+    "projectCreated": "项目已创建。加些任务，准备好了就启动它。",
+    "exchangeConfirmedPending": "已确认。等对方也确认就好。",
+    "exchangeConfirmedComplete": "已确认。时数已在你们之间流动。",
+    "autoConfirmed": "已在{{hours}}小时后自动确认。时数已流动。",
+    "claimedInMyCare": "会在“我照看的”里找到它。",
+    "icsDaySaved": "已保存 {{file}}，打开它就能把这一天放进手机日历。",
+    "icsSaved": "已保存 {{file}}，打开它就能把这场活动放进手机日历。",
+    "icsShiftSaved": "已保存 {{file}}，打开它就能把这个时段放进手机日历。"
+  },
+  "a11y": {
+    "skipToMain": "跳到主要内容"
+  },
+  "errors": {
+    "generic": {
+      "notAvailable": "这个功能眼下用不了。"
+    }
+  },
+  "common": {
+    "loading": "正在培育你的社区…",
+    "you": "你",
+    "back": "← 返回",
+    "cancel": "取消",
+    "confirm": "确认",
+    "close": "关闭",
+    "save": "保存",
+    "saving": "正在保存…",
+    "savedAt": "已保存（{{when}}）",
+    "working": "正在处理…",
+    "tryAgain": "再试一次",
+    "copy": "复制",
+    "copied": "已复制。用 Signal、当面，或写在纸上分享给别人吧。",
+    "copyFailed": "没能访问剪贴板——选中上面的链接，手动复制一下。",
+    "copyLink": "复制链接",
+    "linkCopied": "链接已复制。",
+    "memberFallback": "一位成员",
+    "anyMember": "成员",
+    "gotIt": "知道了",
+    "learnMore": "了解更多",
+    "showMore": "显示更多",
+    "showLess": "收起",
+    "markdownHint": "格式：**粗体**、_斜体_、- 列表，还有链接",
+    "filters": {
+      "toggle": "筛选",
+      "toggleActive": "筛选 · {{count}}项生效",
+      "removeFilter": "移除筛选：{{label}}",
+      "done": "完成"
+    }
+  },
+  "why": {
+    "trigger": "（为什么？）",
+    "readMore": "了解更多"
+  },
+  "markdown": {
+    "pendingLink": {
+      "why": "链接要等社区为分享它的人作了担保才能点开——这是邻里之间互相挡住坏链接的办法。地址本身照样能看。",
+      "whyLabel": "为什么这个链接点不了？",
+      "composerNote": "提醒一下：在社区为你担保之前，你分享的链接别人还点不开——看得到地址，点不了。等你获得担保，这会自动解除。"
+    }
+  },
+  "identity": {
+    "show": "显示身份码",
+    "explainer": "这串码是{{name}}独一无二的身份——两个人可以同名，但没有人能共用这串码。应用用它来核对{{name}}发出的每样东西确实来自本人。",
+    "explainerYou": "这串码是你独一无二的身份——两个人可以同名，但没有人能共用这串码。它随着你贴出的每样东西一起走，别人就能核对那真的是你。"
+  },
+  "notFound": {
+    "title": "这个页面不在这里",
+    "message": "链接可能太旧了，或者打错了。不是你这边的问题。",
+    "cta": "回到公告栏"
+  },
+  "drafts": {
+    "bannerLabel": "未保存的草稿",
+    "bannerMessage": "你{{when}}开始写过一条。接着写，还是重新来？",
+    "restore": "接着写",
+    "discard": "重新来"
+  },
+  "profileNudge": {
+    "label": "完善资料",
+    "message": "补上街区，或写一两项技能，成员们就更容易找到你当面搭把手。都是选填，但确实有用。",
+    "cta": "补充一些信息",
+    "dismiss": "先不",
+    "technical": "会在你的启事和成员详情里显示的资料字段：技能（自由文本，用逗号分隔——没有固定列表可选）、区域（粗化到街区——绝不会是具体地址——地理信息不会泄露超出你明确填写的范围）、空闲时间备注（自由文本）、空闲时间标签（粗粒度时段——工作日白天、工作日晚上、周末白天、周末晚上、随时找我）。填写其中任意一项，或明确点掉，这条提示就会消失。点掉只记在本设备——只在这里记住，绝不会分享给其他社区（不参与联合同步）——并会随彻底抹除一起清除。"
+  },
+  "firstActionNudge": {
+    "label": "从这里开始",
+    "message": "两条路都行：点开任何一条你感兴趣的启事，看看交换是怎么回事；或者把你需要的、能帮上的贴出来。不必急着先贴——只逛逛也很欢迎。",
+    "dismiss": "知道了",
+    "technical": "在你完成第一个动作之前——认领一条启事、贴出自己的需求或提供，或明确关掉它——这条提示会一直留在公告栏。任何一项发生后，它就在这台设备上保持关闭。硬重置（个人资料 → 紧急情况 → 彻底抹除）或全新安装会让提示重新出现；这个状态保存在本地 IndexedDB（浏览器自带的存储）里，不在社区节点（你社区的服务器）上。"
+  },
+  "vouch": {
+    "errors": {
+      "voucher_not_trusted": "社区服务器还没开始计入你的担保——等两位已获信任的成员为你担保之后，你的担保才开始算数。你签署的这份担保安全地存在这台设备上，到时候会自动送达。"
+    }
+  },
+  "newcomer": {
+    "errors": {
+      "newcomer_daily_limit": "对还没获得社区完全信任的成员，社区服务器每天接收一定数量的新启事和活动，今天的份额已经满了——多出来的会安全地留在这台设备上，明天自动发出。认领、交换、发消息和参加都不受影响；等两位已获信任的成员为你担保，这个限制就完全解除。"
+    }
+  },
+  "vouchNudge": {
+    "label": "你可以担保了",
+    "title": "你现在可以担保了",
+    "body": "社区里有人为你作了担保。你也可以为你信任的人这么做——这是扩大社区所信任范围的一种方式。每当你的担保能帮上一位成员时，就会在对方页面上看到“担保”一栏。",
+    "learnMore": "担保是怎么回事",
+    "dismiss": "知道了"
+  },
+  "keepAccessNudge": {
+    "label": "保管好你的账户",
+    "title": "给账户留一份备用",
+    "body": "你的账户就住在这台设备上——这正是它保持私密的原因。如果你有第二台设备，把它关联上：手机和笔记本可以持有同一个账户，丢了一台也不会被锁在门外。只要一分钟，把两台设备放在面前一起操作就行。",
+    "cta": "再加一台设备",
+    "dismiss": "以后再说",
+    "learnMore": "没有可以重置的密码，也没有哪家公司能帮你找回账户——这是没人能把你锁在门外、也没人能把你交出去的代价。再关联一台设备，是设备丢失后保住账户的最好办法；恢复包（设置 → 恢复包）则是只有一台设备时的纸质备份。（保存数据导出或设置口令保护的是别的东西，都不能在新设备上找回你的账户。）",
+    "why": "为什么？"
+  },
+  "install": {
+    "card": {
+      "label": "把 Understoria 装进手机",
+      "titleMobile": "把 Understoria 加到主屏幕",
+      "titleDesktop": "把 Understoria 安装成应用",
+      "why": "全屏打开、离线可用，不需要应用商店。",
+      "dismiss": "先不用",
+      "iosHint": "点“分享”，再点“添加到主屏幕”。",
+      "androidHint": "打开浏览器菜单，再点“添加到主屏幕”。",
+      "desktopHint": "点这里所示的安装图标，就在地址栏右端（Chrome 和 Edge 有；Firefox 在电脑上不支持安装）。",
+      "firefoxDesktopHint": "电脑上的 Firefox 装不了网页应用——Understoria 在这个标签页里照样一切正常。想装成应用的话，用 Chrome 或 Edge 打开这个地址。",
+      "safariDesktopHint": "在 Safari 里：“文件”菜单 →“添加到程序坞”（macOS Sonoma 或更新）。",
+      "moreHelp": "更多帮助"
+    },
+    "panel": {
+      "title": "把 Understoria 装进手机",
+      "intro": "把 Understoria 加到主屏幕，它就能像应用一样打开——全屏、离线可用，不需要应用商店账号。"
+    },
+    "oneTap": {
+      "button": "添加到主屏幕",
+      "working": "正在打开提示…",
+      "done": "加好了。现在可以从主屏幕打开 Understoria 了。"
+    },
+    "ios": {
+      "intro": "在 Safari 里，把 Understoria 加到主屏幕：",
+      "step1": "点屏幕底部的“分享”按钮。",
+      "step2": "往下滑，点“添加到主屏幕”。",
+      "step3": "点右上角的“添加”。Understoria 就会和你的其他应用排在一起。",
+      "shareLabel": "分享"
+    },
+    "iosOther": {
+      "title": "用 Safari 打开",
+      "body": "在 iPhone 或 iPad 上，只有 Safari 能把应用加到主屏幕。用 Safari 打开这个页面，再从那里添加。"
+    },
+    "android": {
+      "intro": "把 Understoria 加到主屏幕：",
+      "step1": "打开浏览器菜单（通常是 ⋮ 或 ≡）。",
+      "step2": "点“添加到主屏幕”（或“安装应用”）。",
+      "step3": "点“添加”确认。"
+    },
+    "desktop": {
+      "intro": "把 Understoria 装到电脑上：",
+      "step1": "在地址栏右端找安装图标（Chrome 或 Edge）。",
+      "step2": "点它，再点“安装”。",
+      "step3": "Understoria 会在自己的窗口里打开，和你的其他应用并列。",
+      "otherBrowsersNote": "在用 Firefox？它在电脑上装不了网页应用——Understoria 在标签页里照样一切正常，或者用 Chrome 或 Edge 打开这个地址来安装。Safari 里用“文件”→“添加到程序坞”（macOS Sonoma 或更新）。"
+    },
+    "inAppBrowser": {
+      "title": "先在浏览器里打开",
+      "body": "你正在另一个应用里看 Understoria，它没法帮你加到主屏幕。用 Safari 或 Chrome 打开这个页面，再从那里添加。",
+      "hint": "在这个应用的菜单里找“在浏览器中打开”（常在 ⋯ 或分享图标里）。"
+    },
+    "devicePicker": {
+      "prompt": "要装在别的设备上？",
+      "ios": "iPhone 或 iPad",
+      "android": "Android",
+      "desktop": "电脑"
+    },
+    "step": {
+      "title": "把 Understoria 装进手机",
+      "intro": "可做可不做，但很方便：把 Understoria 加到主屏幕，它就能像应用一样打开，还能离线用。以后随时可以在个人资料 → 学习里再做。"
+    }
+  },
+  "hints": {
+    "board": {
+      "label": "认识公告栏",
+      "message": "顶部有三个标签：需求（大家在找的帮助）、提供（大家能拿出来的）和项目（一起完成的目标）。点一条启事可以看详情或认领。公告栏会藏起已被认领的启事，让你看到的都是还缺人手的。",
+      "learnMoreLabel": "贴启事是怎么回事"
+    },
+    "balance": {
+      "label": "看懂你的时数",
+      "message": "你的时数就是帮忙的小时。每个人一开始就有5小时，还没帮过别人也能马上开口请人搭把手。任何一种帮忙，一小时都等于一小时。按自己的节奏给予和接受。",
+      "learnMoreLabel": "时数是什么意思"
+    },
+    "invite": {
+      "label": "让社区长大",
+      "message": "社区是靠信任长大的。你邀请一个人，就是在为对方担保——对方的加入有你的名字撑着。新成员需要两份担保，才会在公告栏上显示为“已获信任”。把邀请分享给你认识的人。",
+      "learnMoreLabel": "邀请是怎么回事"
+    }
+  },
+  "nav": {
+    "board": "公告栏",
+    "calendar": "日历",
+    "dashboard": "总览",
+    "messages": "消息",
+    "myWork": "我照看的",
+    "profile": "个人资料",
+    "primaryNav": "主导航",
+    "settings": "设置"
+  },
+  "menu": {
+    "open": "菜单",
+    "close": "关闭菜单",
+    "title": "菜单",
+    "profile": "个人资料",
+    "profileHint": "你的个人资料",
+    "settings": "设置",
+    "invite": "邀请一位你认识的人",
+    "help": "帮助",
+    "search": "搜索",
+    "infrastructure": "社区基础设施"
+  },
+  "calendar": {
+    "panel": {
+      "ariaLabel": "活动详情",
+      "closeShort": "关闭",
+      "close": "关闭活动面板"
+    },
+    "title": "社区日历",
+    "tagline": "社区正在一起做的事——项目的截止日期、快到期的启事，还有已经发生的交换的节奏。",
+    "views": {
+      "agenda": "日程",
+      "month": "月",
+      "week": "周"
+    },
+    "filters": {
+      "category": "类别",
+      "project": "项目",
+      "mine": "我的",
+      "allCategories": "全部类别",
+      "allProjects": "全部项目"
+    },
+    "density": {
+      "line_one": "完成了{{count}}次交换",
+      "line_other": "完成了{{count}}次交换",
+      "tooltipBody": "这里不出现成员的名字。这个数字是社区的新陈代谢，不是任何人的分数。",
+      "legend": "交换密度"
+    },
+    "empty": {
+      "title": "这一周，社区的日历很安静。",
+      "body": "等有人创建带截止日期的项目，或贴出会到期的需求，它就会出现在这里。完成的交换也会显示出来——日历反映的是社区一起在做的事，不是要追赶的分数。知道社区该为什么事聚一聚吗？下面的 + 按钮就能发起一场活动。",
+      "filtered": "没有符合这些筛选条件的内容。",
+      "clearFilters": "清除筛选"
+    },
+    "weekNav": {
+      "prev": "上一周",
+      "next": "下一周",
+      "range": "{{start}} – {{end}}",
+      "today": "今天",
+      "thisWeek": "本周"
+    },
+    "week": {
+      "quiet": "这一周没有安排。",
+      "nextUp": "接下来：{{title}} · {{date}}"
+    },
+    "monthNav": {
+      "prev": "上一个月",
+      "next": "下一个月",
+      "today": "今天"
+    },
+    "overflowMore": "+{{count}}条",
+    "todayLabel": "今天",
+    "entry": {
+      "projectDeadline": "{{title}}截止",
+      "postExpiringNeed": "快截止了，还在等人帮忙：{{title}}",
+      "postExpiringOffer": "这份提供快结束了：{{title}}",
+      "yoursSrSuffix": "（你的）"
+    },
+    "month": {
+      "weekdayShort": {
+        "sun": "日",
+        "mon": "一",
+        "tue": "二",
+        "wed": "三",
+        "thu": "四",
+        "fri": "五",
+        "sat": "六"
+      }
+    }
+  },
+  "events": {
+    "templates": {
+      "title": "挑一个起点",
+      "intro": "这些是常见聚会的现成样式。挑一个来填好下面的表单，签署前什么都可以改。也可以从零开始。",
+      "scratch": "从零开始",
+      "scratchHint": "我自己来填。",
+      "selected": "正在使用“{{name}}”模板，签署前下面的内容都可以改。",
+      "collapsedScratch": "从零开始。",
+      "collapsedChange": "更改",
+      "collapsedPick": "挑一个模板",
+      "asideAriaLabel": "活动起步模板",
+      "meta": {
+        "duration": "约{{duration}}"
+      },
+      "filters": {
+        "search": {
+          "placeholder": "搜索模板",
+          "ariaLabel": "按名称或描述搜索活动模板"
+        },
+        "empty": "没有匹配的模板。换个词试试，或从下面从零开始。"
+      }
+    },
+    "new": {
+      "workDayBannerTitle": "正在为{{project}}安排一次动手日",
+      "workDayBannerBody": "这个活动会出现在你自己社区（本节点）的项目页上。其他社区的服务器（友邻节点）只会把它当作一次普通的社区活动，与项目的关联不会离开家门。下面的标题在签署前随你修改。",
+      "workDayTitlePrefill": "动手日——{{project}}",
+      "workDayDescriptionPrefill": "为{{project}}一起动手干活的一次聚会，哪怕只来一段时间也欢迎。",
+      "title": "创建活动",
+      "subtitle": "活动是一份签署过、会传给相连社区的记录：盖着你的身份印记，分享给相连的各个社区。签署之前，先写下你要承诺的事。",
+      "titleField": "标题",
+      "titlePlaceholder": "周六技能交流会",
+      "descriptionField": "描述",
+      "descriptionPlaceholder": "做什么、带什么、适合谁来。",
+      "category": "类别",
+      "startsAt": "开始",
+      "startDateAria": "开始日期",
+      "startTimeAria": "开始时间",
+      "endsAt": "结束",
+      "endDateAria": "结束日期",
+      "endTimeAria": "结束时间",
+      "addEndTime": "添加结束时间",
+      "quickPick": {
+        "today": "今天",
+        "tomorrow": "明天",
+        "dayAria": "将开始日期设为{{label}}",
+        "timeAria": "将开始时间设为{{label}}",
+        "timeHint": "还没选时间，点一下时间栏，或从上面挑一个。"
+      },
+      "location": "地点",
+      "locationField": "地点",
+      "locationPlaceholder": "图书馆门口的长椅",
+      "locationHint": "随便写。别写下你不愿公开的具体地址：每个友邻节点（每个相连社区的服务器）都能看到这里。",
+      "capacity": "人数上限",
+      "capacityField": "人数上限（可不填）",
+      "capacityHint": "留空表示不限人数。",
+      "signingHeading": "你签署的是什么",
+      "signingMeansTitle": "这意味着什么",
+      "signingMeansOrganizer": "你的公钥（身份中可以公开的那一半，像一张谁都能读的名牌）会作为组织者公布出去。相连社区里的任何人都能看到这次活动是你组织的。",
+      "signingMeansPublic": "你填的地点和开始时间在每个友邻节点上都可见，也就是与你的社区相连的每个社区。写描述时，只写你能公开的内容。",
+      "signingMeansPermanent": "活动只增不改。你可以取消，但不能删除或编辑。取消本身也是一份签署过的永久记录。",
+      "signingMeansRsvp": "你自己社区（本节点）成员的答复对你可见，也对在这里答复过的其他成员可见。其他社区的成员永远看不到名单。",
+      "signingNotTitle": "这不意味着什么",
+      "signingNotEditable": "可以编辑——想改时间或地点，只能取消后重新创建。",
+      "signingNotPrivate": "只对内可见——目前还没有“仅成员可见”的活动。如果不适合摆在所有相连社区都看得到的地方，就改用私信，或贴一条需求／提供启事来商量。",
+      "submit": "创建并签署",
+      "submitting": "正在签署…",
+      "created": "活动已创建。",
+      "errorGeneric": "没能创建活动，再试一次吧。",
+      "errorTitleRequired": "给活动起个标题，让成员知道要来做什么。",
+      "errorLocationRequired": "写个地点吧，随意一点也行，比如“图书馆门口的长椅”。",
+      "errorStartRequired": "挑一个开始日期和时间。",
+      "errorStartInPast": "活动开始时间已经过去了。挑一个晚于现在的时间。",
+      "errorEndInvalid": "结束时间无效。挑一个日期和时间，或去掉结束时间选项。",
+      "errorEndBeforeStart": "结束时间要晚于开始时间。",
+      "endsOtherDay": "跨天结束",
+      "errorEndBeforeStartMidnightHint": "会过午夜吗？勾上“跨天结束”。",
+      "errorCapacityInvalid": "人数上限要是正整数，留空则表示不限人数。",
+      "errorLocked": "先用口令解锁这台设备，再签署活动。"
+    },
+    "detail": {
+      "projectLinkLabel": "项目",
+      "projectLinkLine": "{{project}}的动手日",
+      "notFound": "在这个节点上找不到那个活动。",
+      "backToCalendar": "← 返回日历",
+      "organizerLabel": "组织者",
+      "startsAtLabel": "开始",
+      "endsAtLabel": "结束",
+      "locationLabel": "地点",
+      "capacityLabel": "人数上限",
+      "capacityFill": "{{going}}/{{capacity}}人参加",
+      "categoryLabel": "类别",
+      "menuLabel": "活动操作",
+      "addToCalendar": "添加到日历",
+      "addToCalendarHint": "会下载一个日历文件到你的设备。提醒由你自己和你的日历应用来安排。",
+      "organizerControlsHeading": "组织者可用的操作",
+      "cancelButton": "取消活动",
+      "cancelHint": "创建之后，唯一能做的更改就是取消。取消本身也是一份签署过的永久记录：盖着你的身份印记，无法删除；答复过的成员会在自己总览顶部的提醒区（关注栏）里看到原因。",
+      "cancelDialogTitle": "取消“{{title}}”吗？",
+      "cancelDialogBody": "这会签署一份取消记录：一则盖着你的身份印记的永久通知。它会传到相连的社区（友邻节点），无法撤回。答复过的成员会在总览顶部的提醒里看到它。",
+      "cancelReasonLabel": "原因（可不填）",
+      "cancelReasonPlaceholder": "为什么有变动？一句话就够。",
+      "cancelConfirm": "签署取消",
+      "cancelDismiss": "保留活动",
+      "cancelLocked": "先用口令解锁这台设备，再签署取消。",
+      "cancelled": "活动已取消。",
+      "attendeeCountLabel_one": "{{count}}人参加 · {{maybe}}人可能来",
+      "attendeeCountLabel_other": "{{count}}人参加 · {{maybe}}人可能来",
+      "attendeesHeading": "谁会来",
+      "attendeeFallbackKey": "（成员 {{shortKey}}）",
+      "goingRosterHeading": "参加",
+      "maybeRosterHeading": "可能来",
+      "rosterHiddenHint": "答复“参加”或“可能来”，就能看到还有谁会来。其他人只能看到人数。",
+      "printFlyer": "打印传单",
+      "printRoster": "打印签到表"
+    },
+    "rsvp": {
+      "heading": "告诉大家你是否参加",
+      "signingHeading": "如果你答复",
+      "signingBodyGoing": "如果选“参加”或“可能来”，组织者和其他答复过的成员会在这个活动上看到你的名字。",
+      "signingBodyNotGoing": "如果选“不参加”，这个选择只有你自己能看到。",
+      "signingBodyLocalOnly": "你的答复只留在你自己的社区（本节点）里。它不会向外同步，永远不会分享给其他社区。",
+      "going": "参加",
+      "maybe": "可能来",
+      "notGoing": "不参加",
+      "currentLabel": "你的答复：{{status}}",
+      "changeButton": "更改答复",
+      "withdrawButton": "撤回答复",
+      "recorded": "答复已保存，这台设备同步后社区就能看到。",
+      "status": {
+        "going": "参加",
+        "maybe": "可能来",
+        "not_going": "不参加"
+      }
+    },
+    "shifts": {
+      "heading": "时段",
+      "emptyOrganizerHint": "把一天拆成几个时段，成员就能看到哪里缺人手。",
+      "spotsOpen_one": "还有{{count}}个空位",
+      "spotsOpen_other": "还有{{count}}个空位",
+      "openSignup_one": "开放报名，已有{{count}}人报名",
+      "openSignup_other": "开放报名，已有{{count}}人报名",
+      "full_one": "已满，共{{count}}人报名",
+      "full_other": "已满，共{{count}}人报名",
+      "fullHint": "这个时段已经满了。还想搭把手的话，跟组织者说一声。",
+      "passedLabel": "这个时段已经过去了。",
+      "rosterHiddenHint": "名字只有组织者和答复了“参加”或“可能来”的成员能看到。",
+      "signedUpChip": "你在这个时段",
+      "signUpButton": "报名",
+      "removeButton": "取消我的报名",
+      "addToCalendar": "把这个时段加进我的日历（.ics）",
+      "consentHeading": "报名：{{label}}",
+      "consentRsvp": "这也会同时把你对活动的答复记为“参加”。",
+      "consentRoster": "组织者和答复了“参加”或“可能来”的成员会在这个时段的名单上看到你的名字。这里的其他人只能看到空位数量，其他社区两者都看不到。",
+      "consentRemove": "随时可以取消报名，一下就好。名字会立刻撤下，也不会通知任何人。计划有变很正常。",
+      "confirmButton": "报名",
+      "recorded": "报名成功，这台设备同步后社区就能看到。",
+      "removed": "已取消报名。",
+      "recordTimeLink": "一起记录时数：{{project}}",
+      "recordDirectLink": "一起记录时数",
+      "addButton": "添加时段",
+      "addConfirm": "添加时段",
+      "added": "时段已添加。",
+      "deleteButton": "删除这个时段",
+      "deleted": "时段已删除。",
+      "labelLabel": "这是什么时段？",
+      "labelPlaceholder": "布置小队",
+      "startsLabel": "开始",
+      "endsLabel": "结束",
+      "startDateAria": "时段开始日期",
+      "startTimeAria": "时段开始时间",
+      "endDateAria": "时段结束日期",
+      "endTimeAria": "时段结束时间",
+      "capacityLabel": "空位数（可不填）",
+      "capacityPlaceholder": "留空表示不限",
+      "editCapacityButton": "修改空位数",
+      "capacityUpdated": "空位数已更新。",
+      "capacityFloorHint_one": "已有{{count}}人报名，空位数不能少于这个数。",
+      "capacityFloorHint_other": "已有{{count}}人报名，空位数不能少于这个数。",
+      "timesRequired": "给时段挑一个开始和结束时间。"
+    },
+    "cancellation": {
+      "bannerHeading": "这个活动已取消",
+      "bannerBody": "由{{name}}于{{date}}取消。",
+      "reasonLine": "原因：{{reason}}"
+    },
+    "attention": {
+      "eventTodayLine": "{{title}}今天在{{location}}举行",
+      "eventTodayHint": "点开看看这个活动",
+      "eventCancelledLine": "{{title}}已取消",
+      "eventCancelledHint": "原因：{{reason}}",
+      "eventCancelledHintNoReason": "已取消（未说明原因）",
+      "eventCapacityReachedLine": "{{title}}人数已满（{{capacity}}人参加）",
+      "eventCapacityReachedHint": "点开看看这个活动"
+    },
+    "calendar": {
+      "entryKindLabel": "活动",
+      "entryKindLabelGoing": "你要参加的活动",
+      "eventsOnlyChip": "只看活动",
+      "fabAriaLabel": "创建活动",
+      "multiDay": {
+        "continues": "还在继续",
+        "dayOf": "第{{index}}天，共{{count}}天",
+        "endsAtLine": "{{time}}结束：{{title}}",
+        "firstDayBadge": "第1天，共{{count}}天",
+        "ariaLabel": "活动，第{{index}}天，共{{count}}天",
+        "ariaLabelGoing": "你要参加的活动，第{{index}}天，共{{count}}天",
+        "ariaLabelFinal": "活动，最后一天",
+        "ariaLabelGoingFinal": "你要参加的活动，最后一天",
+        "chipTitle": "{{title}}：第{{index}}天，共{{count}}天"
+      }
+    }
+  },
+  "messages": {
+    "title": "消息",
+    "shell": {
+      "emptyPane": "从列表里挑一个对话。"
+    },
+    "emptyTitle": "还没有对话",
+    "empty": "还没有消息。对话从启事开始——打开一条启事，点“发消息”联系对方。",
+    "sendMessage": "发消息",
+    "messageButton": "发消息",
+    "messageTarget": "给{{name}}发消息",
+    "inputPlaceholder": "写点什么…",
+    "inputLabel": "写一条消息",
+    "send": "发送",
+    "sending": "正在发送…",
+    "decryptionFailed": "（无法解密）",
+    "lockedError": "先解锁再发消息。",
+    "sendError": "消息没发出去，再试一次。",
+    "conversationWith": "{{name}}",
+    "conversation": {
+      "headerMenuLabel": "更多操作",
+      "headerMenuBlock": "屏蔽对方",
+      "headerMenuUnblock": "解除对{{name}}的屏蔽",
+      "blockedNotice": "你已经屏蔽了对方。",
+      "blockedNoticeLink": "可以在“设置 → 已屏蔽的联系人”里解除屏蔽。",
+      "blockedChip": "已屏蔽",
+      "aboutPost": "关于：{{title}}",
+      "aboutPostUnknown": "关于一条启事"
+    },
+    "compose": {
+      "aboutHint": "你在聊的是：{{title}}",
+      "aboutHintUnknown": "你在聊一条启事",
+      "aboutDismiss": "不附带这条启事",
+      "replyingTo": "回复{{name}}：{{excerpt}}",
+      "replyDismiss": "回复时不引用这条消息"
+    },
+    "noReadReceipts": "消息是私密的，没有已读回执。",
+    "search": {
+      "placeholder": "搜索你的消息",
+      "inConversation": "搜索这个对话",
+      "locked": "解锁后才能搜索",
+      "noMatches": "消息里没有匹配的内容。",
+      "noMatchesShort": "没有匹配",
+      "matchCount_one": "{{count}}条匹配",
+      "matchCount_other": "{{count}}条匹配",
+      "matchPosition": "第{{current}}条，共{{total}}条",
+      "previous": "上一条匹配",
+      "next": "下一条匹配",
+      "close": "关闭搜索",
+      "conversationWith": "与{{name}}的对话",
+      "matchedName": "匹配到了对方的名字",
+      "noMatchesHint": "试试少打几个字，或换个说法。"
+    },
+    "day": {
+      "today": "今天",
+      "yesterday": "昨天"
+    },
+    "newMessages_one": "{{count}}条新消息",
+    "newMessages_other": "{{count}}条新消息",
+    "menu": {
+      "copy": "复制",
+      "copied": "已复制 ✓",
+      "speak": "朗读",
+      "speakStop": "停止朗读",
+      "speakStarting": "正在开始…",
+      "speakUnavailable": "这台设备没法朗读消息",
+      "info": "详情",
+      "infoSent": "发送于{{when}}",
+      "infoSealed": "端到端封存，只有你和{{name}}能读到。",
+      "reply": "回复",
+      "replyVoiceExcerpt": "语音"
+    },
+    "reactions": {
+      "open": "给这条消息加个表情",
+      "pickerLabel": "挑一个表情",
+      "reactWith": "用{{emoji}}回应",
+      "remove": "移除你的{{emoji}}回应",
+      "reactedBy": "{{name}}用{{emoji}}回应了",
+      "you": "你",
+      "changeOwn": "你的{{emoji}}回应，点一下可更改或移除"
+    },
+    "voice": {
+      "record": "录一条语音",
+      "closeRecorder": "关闭语音录制",
+      "recorderLabel": "语音录制器",
+      "requesting": "正在请求麦克风…",
+      "micDenied": "用不了麦克风。检查浏览器或手机设置，允许这个网站使用麦克风，然后再试一次。",
+      "recording": "录音中… {{elapsed}} / {{max}}",
+      "stop": "停止",
+      "sendClip": "发送语音",
+      "reRecord": "重录",
+      "discard": "丢弃",
+      "playerLabel": "语音消息，约{{seconds}}秒",
+      "durationLine": "语音 · 约{{seconds}}秒",
+      "playbackFailed": "这条语音在这台设备上放不出来。"
+    }
+  },
+  "projects": {
+    "tab": "项目",
+    "fab": "发起一个项目",
+    "emptyTitle": "还没有进行中的项目",
+    "empty": "还没有进行中的项目。项目是一个共同的目标——多项任务、多位参与者。第一个项目总是最难开头的。",
+    "byOrganizer": "由{{name}}组织",
+    "cardTaskCount_one": "{{count}}项任务",
+    "cardTaskCount_other": "{{count}}项任务",
+    "cardOpenTaskCount_one": "{{count}}项待认领",
+    "cardOpenTaskCount_other": "{{count}}项待认领",
+    "progressLabel": "{{contributed}}/{{target}}（{{percent}}%）",
+    "sparkline": {
+      "label": "最近{{days}}天的项目投入，共{{hours}}小时。",
+      "caption": "最近{{days}}天 · 共投入{{hours}}小时",
+      "tableCaption": "最近{{days}}天的每日投入",
+      "tableHeaderDay": "日期",
+      "tableHeaderHours": "小时"
+    },
+    "momentum": {
+      "humming": "热火朝天",
+      "active": "进行中",
+      "stalled": "静悄悄",
+      "completed": "已完成",
+      "paused": "暂停中",
+      "planning": "筹备中",
+      "tended": "照料中",
+      "retired": "歇息中",
+      "archived": "已归档",
+      "last7Days": "本周{{hours}}小时"
+    },
+    "statusPlanning": "筹备中",
+    "statusActive": "进行中",
+    "statusPaused": "暂停中",
+    "statusCompleted": "已完成",
+    "statusTended": "照料中的共同家当",
+    "statusRetired": "歇息中",
+    "statusArchived": "已归档",
+    "commons": {
+      "scopeLabel": "项目范围",
+      "scopeBuild": "建设中",
+      "scopeTended": "照料中",
+      "nextCare": "下次照料：{{care}}",
+      "cadence": {
+        "session": "每次聚会",
+        "month": "每月",
+        "event": "每场活动",
+        "cycle": "每个周期"
+      },
+      "careRota": "照料轮值",
+      "moveToCommons": "移入共同家当",
+      "choiceTitle": "这个项目做完了——是哪种“做完”？",
+      "choiceBody": "有的项目就此收尾。有的则建成了社区会一直用下去的东西。",
+      "choiceCommons": "移入共同家当",
+      "choiceCommonsDesc": "这里建成了能长久留下的东西——用一份照料轮值让它一直活着。循环任务会不断回来，照看的人也会一直照料它。",
+      "choiceComplete": "完成并收尾",
+      "choiceCompleteDesc": "工作已经完成，不需要持续照料。项目会带着完整的历史进入归档。",
+      "momentTitle": "建成了——现在开始照料",
+      "momentTended": "现在由社区照料。",
+      "orientHint": "你们建成了大家都会用到的东西。你的一句话比系统消息传得更远——告诉社区这是什么、在哪里、怎么用。",
+      "orientCta": "写公告",
+      "announcePlaceholder": "这是什么？在哪里？大家怎么用？有问题可以找谁？",
+      "provenance": "由{{count}}人建成 · {{hours}}小时 · 完工于{{when}}",
+      "provenanceNoCrew": "建设完工于{{when}}——现在由社区照料",
+      "retire": "让这件家当歇一歇",
+      "retireTitle": "让这件家当歇一歇",
+      "retireBody": "它走到头了——这很正常，没什么可藏的。写一句为什么：这是社区想记住的，也是将来想重拾这个想法的人想知道的。一切都会留在归档里，随时可以翻看。",
+      "retireNoteLabel": "为什么结束",
+      "retirePlaceholder": "例如：那块地卖掉了。",
+      "retireConfirm": "歇息",
+      "retiredStory": "{{when}}起歇息",
+      "unretire": "把它请回来（取消歇息）",
+      "returnToBuilding": "回到建设中",
+      "returnTitle": "回到建设中？",
+      "returnBody": "这件共同家当会重新变成进行中的项目——适合大翻修，或者当初移进来本就是个误会。随时可以再移回共同家当。",
+      "returnConfirm": "回到建设中"
+    },
+    "create": {
+      "title": "发起一个项目",
+      "subtitle": "一个共同的目标，需要不止一个人、不止一项任务。",
+      "fieldTitle": "标题",
+      "fieldDescription": "介绍",
+      "fieldCategory": "类别",
+      "fieldTargetHours": "目标时数（粗略估计）",
+      "fieldTargetHoursHint": "把所有任务加在一起，你估计一共要花多少小时。",
+      "fieldDeadlineDays": "期限（天数，可不填）",
+      "fieldArea": "区域（写街区就好，不用写地址）",
+      "fieldTags": "标签（用逗号隔开，可不填）",
+      "fieldTagsPlaceholder": "菜园, 工具借用站",
+      "submit": "创建草稿",
+      "submitting": "创建中…",
+      "errorTitle": "给项目起个简短的标题吧。",
+      "errorHours": "目标时数要是正数。",
+      "errorDeadlineDays": "天数要是大于0的整数，留空表示没有期限。"
+    },
+    "templates": {
+      "asideAriaLabel": "项目起步模板",
+      "title": "挑一个起点",
+      "intro": "这些是带着现成任务的起步模板。挑一个来填好下面的表单——创建前什么都能改。也可以从零开始。",
+      "scratch": "从零开始",
+      "scratchHint": "都由我自己来填。",
+      "selected": "正在从{{name}}模板出发——创建前可以修改下面的任何内容。",
+      "selectedActive_one": "另有1个社区项目正在用它。",
+      "selectedActive_other": "另有{{count}}个社区项目正在用它。",
+      "seeActive": "去看看",
+      "activeInCommunity_one": "你的社区里已有1个",
+      "activeInCommunity_other": "你的社区里已有{{count}}个",
+      "clear": "清除模板",
+      "collapsedSelected": "已选：{{name}}",
+      "collapsedChange": "更换",
+      "collapsedScratch": "从零开始",
+      "collapsedPick": "挑一个模板",
+      "meta": {
+        "tasks_one": "{{count}}项任务",
+        "tasks_other": "{{count}}项任务",
+        "setupHours": "约{{hours}}小时准备"
+      },
+      "filters": {
+        "search": {
+          "placeholder": "搜索模板",
+          "ariaLabel": "按名称或简介搜索模板"
+        },
+        "category": {
+          "ariaLabel": "按类别筛选模板",
+          "all": "类别"
+        },
+        "setupTime": {
+          "ariaLabel": "按准备时间筛选模板",
+          "all": "准备时间",
+          "quick": "快（≤10小时）",
+          "medium": "中等（10–25小时）",
+          "bigger": "较大（25小时以上）"
+        },
+        "empty": "没有匹配的模板。试着去掉一个筛选，或者在下面从零开始。"
+      },
+      "tabs": {
+        "ariaLabel": "模板分组",
+        "fresh": "新点子",
+        "inCommunity": "你的社区里（{{count}}）"
+      },
+      "stagedHeading": "这个模板会创建的任务",
+      "stagedHint": "模板是起点，不是处方——你社区已经有的就取消勾选，时数也按你们的实际情况调整。",
+      "stagedIncludeAria": "包含任务：{{name}}",
+      "stagedHoursAria": "{{name}}的预估时数",
+      "stagedHoursUnit": "小时",
+      "stagedSkills": "有帮助的技能：{{skills}}",
+      "stagedSum_one": "{{count}}项任务 · 约{{hours}}小时的准备",
+      "stagedSum_other": "{{count}}项任务 · 约{{hours}}小时的准备",
+      "context": {
+        "whatYoullNeed": "你需要准备：",
+        "firstSteps": "第一步可以：",
+        "pitfalls": "大家常在这里绊住：",
+        "pairsWith": "很适合搭配：",
+        "learnMore": "了解更多："
+      },
+      "playbook": {
+        "title": "这件事怎么做——来自{{name}}手册"
+      }
+    },
+    "detail": {
+      "back": "← 回到项目",
+      "sidebarAriaLabel": "项目概要",
+      "notFound": "找不到这个项目。",
+      "tasks": "任务",
+      "noTasksTitle": "还没有任务",
+      "noTasks": "还没有任务。组织者可以在下面添加第一项。",
+      "addTaskTitle": "添加任务",
+      "launch": "启动项目",
+      "launchHint": "从草稿转为进行中。启动后成员就能认领任务了。",
+      "planningBanner": {
+        "title": "草稿模式",
+        "bodyOrganizer": "这个项目还在搭建中。成员能看到它，但还不能认领任务。准备好招呼大家搭手时就启动它。",
+        "bodyMember": "这个项目还在搭建中。等组织者启动后，任务就可以认领了。"
+      },
+      "pause": "暂停",
+      "pausePlaceholder": "为什么暂停？（一句话就好）",
+      "resume": "继续",
+      "markComplete": "标记项目完成",
+      "menuLabel": "项目操作",
+      "completed": "完成于{{when}}",
+      "paused": "已暂停。{{note}}",
+      "deadline": "期限",
+      "area": "区域：{{area}}",
+      "contributors": "参与者：{{count}}",
+      "createdLabel": "创建于",
+      "taskSearch": {
+        "placeholder": "搜索任务",
+        "ariaLabel": "搜索任务"
+      },
+      "taskFilter": {
+        "all": "全部",
+        "open": "待认领",
+        "inProgress": "进行中",
+        "done": "已完成",
+        "empty": {
+          "search": "没有符合搜索的任务。",
+          "open": "眼下没有待认领的任务。",
+          "inProgress": "没有进行中的任务。",
+          "done": "还没有完成的任务。",
+          "mine": "这里眼下没有你认领的任务。"
+        }
+      },
+      "taskDeepLink": {
+        "filtersCleared": "已显示全部任务，好让链接指向的那项露出来。"
+      },
+      "workingAlongside": {
+        "title": "并肩干活的人",
+        "intro": "在这里认领过或完成过任务的成员。"
+      }
+    },
+    "taskFilters": {
+      "mine": "我的"
+    },
+    "task": {
+      "addTaskButton": "+ 添加任务",
+      "claim": "认领这项任务",
+      "commentCountChip_one": "{{count}}条评论",
+      "commentCountChip_other": "{{count}}条评论",
+      "detail": {
+        "notFound": "找不到这项任务——可能已被移除。",
+        "backToProject": "回到{{title}}",
+        "followsLabel": "接在这些之后：",
+        "skillsLabel": "用得上的技能：",
+        "skillsFit": "这和你资料里的技能正好对上。",
+        "tipsLabel": "这项任务的小提示："
+      },
+      "claimSummary": "大约{{hours}}小时 · 过{{days}}天我们会私下问问你的近况。",
+      "claimSummaryNoHours": "过{{days}}天我们会私下问问你的近况。",
+      "checkInAckToast": "好的——过{{days}}天再来问问。",
+      "claimMoment": {
+        "yours": "现在由你照看了。",
+        "firstStep": "不错的第一步：",
+        "tipAbove": "上面的小提示就是不错的第一步。",
+        "planLink": "打开任务，写下你自己的第一步——只有你能看到",
+        "jotHint": "如果有帮助，在下面写下你自己的第一步——只有你能看到。",
+        "capacity": "它和你照看的另外{{count}}项任务放在一起了。",
+        "capacityLink": "看看你照看的所有事"
+      },
+      "plan": {
+        "heading": "你的私人计划",
+        "privacy": "只有你能看到。它只存在这台设备上，从不共享。",
+        "stepsHint": "把它拆成你自己的第一步——小到真能动手开始。",
+        "addPlaceholder": "用自己的话加一步…",
+        "addButton": "添加",
+        "removeStep": "删掉这一步：{{step}}",
+        "progress": "已完成{{done}}/{{total}}",
+        "dayLabel": "挑一天给它留点时间（只给你自己看）",
+        "dayToday": "今天",
+        "dayTomorrow": "明天",
+        "dayClear": "清除",
+        "dayPast": "你原本定的是{{day}}。生活总有变数——准备好了再挑个新日子就行。",
+        "noteLabel": "进展到哪儿了——写给未来的自己",
+        "noteHint": "先放下这件事时，记一笔哪些做完了、还在等什么。下次打开这项任务，就从这条笔记接着来，不用靠回忆重新拼。",
+        "notePlaceholder": "例如：还在等 Sam 回复。铰链放在棚子里。",
+        "suggestButton": "从{{count}}个建议步骤开始",
+        "suggestHint": "和小提示出自同一本手册的起步帮手——点一下就加上，之后随便改、随便删。空白开始也完全可以。同样只有你能看到。",
+        "noteSave": "保存笔记",
+        "noteSaved": "已保存。",
+        "icsButton": "放进我的日历（.ics）",
+        "icsHint": "会下载一个小小的日历文件，用你自己的日历应用打开。Understoria 从不发提醒——你的日历可以，如果你愿意。",
+        "icsDescription": "你为这项 Understoria 任务定下的日子——一个你为自己挑的日子。想改就改。"
+      },
+      "company": {
+        "heading": "有人作伴，开头更容易",
+        "why": "身边有人一起干活——哪怕做的事完全不同——能帮很多人开始并坚持下去。有人管这叫“结伴同工”（body doubling）。",
+        "cta": "从公告栏邀人作伴",
+        "how": "会打开一条已经写好、随你修改的公告栏启事。每个字都由你定，贴出去之前不会分享任何内容。"
+      },
+      "releaseReassurance": "放回任务能帮组织者早点找到下一位帮手——谁都不会说什么。",
+      "notClaimablePlanning": "这个项目还在筹备——组织者还没启动它。",
+      "notClaimablePaused": "这个项目暂停了——眼下不接受新的认领。",
+      "notClaimableOther": "这个项目眼下不接受认领。",
+      "claimableAfterLaunch": "等你启动项目后，成员就能认领这项任务了。",
+      "release": "放回这项任务",
+      "markDone": "标记完成",
+      "confirm": "确认完成",
+      "awaitingConfirmation": "等组织者确认",
+      "releaseAfterComplete": "从这项任务退下来",
+      "menuLabel": "任务操作",
+      "addFreshCopy": {
+        "button": "再加一份新的",
+        "hint": "在列表底部加一份这项任务的开放副本——适合会反复出现的活儿。",
+        "toast": "已在任务列表底部添加一份新的“{{title}}”。"
+      },
+      "actualHours": {
+        "legend": "实际花了多久？",
+        "estimateContext": "预估：{{hours}}",
+        "hint": "记下真实用时——时数应当和实际付出的帮忙相符。多了少了都没关系。",
+        "confirmCta": "记录{{hours}}并标记完成",
+        "cancel": "取消"
+      },
+      "claimerNarrative": {
+        "intro": "你已标记完成。等组织者确认，这次交换才算完成——到那时你的{{hours}}小时时数才会转过来。",
+        "estimateNote": "你为这项任务记录了{{actual}}（预估{{estimate}}）。",
+        "autoConfirm_one": "如果一直没人来确认，社区的服务器（节点）会在大约{{count}}天内自动确认。",
+        "autoConfirm_other": "如果一直没人来确认，社区的服务器（节点）会在大约{{count}}天内自动确认。"
+      },
+      "confirmDialog": {
+        "title": "确认这项任务？",
+        "body": "确认会记录一笔签名交换——盖上你的身份密钥，没人能伪造：{{hours}}小时转给{{claimer}}，同时{{hours}}小时从你的时数里转出——你是代表项目、以受助方的身份签名。",
+        "estimateNote": "{{claimer}}记录的实际用时是{{actual}}，这项任务原本预估{{estimate}}。",
+        "confirmCta": "确认并签名",
+        "confirming": "签名中…",
+        "cancelCta": "取消"
+      },
+      "sendBack": "还差一点——退回去",
+      "sendBackDialog": {
+        "title": "把这项任务退回给{{claimer}}？",
+        "body": "任务还在对方手里，你的备注会告诉对方还差什么。不会转移任何时数，也不会记在任何人头上——做完需要多久就多久。",
+        "noteLabel": "还差什么没做？",
+        "notePlaceholder": "例如：架子装好了——还差第二遍漆。",
+        "noteHint": "你的备注会作为评论贴在任务上，{{claimer}}在任何一台设备上都能看到。",
+        "noteRequired": "先写一句备注——告诉对方还差什么。",
+        "confirmCta": "带上备注退回去",
+        "sending": "退回中…",
+        "cancelCta": "算了"
+      },
+      "completedBy": "由{{name}}完成",
+      "claimedBy": "已由{{name}}认领",
+      "statusOpen": "待认领",
+      "statusClaimed": "已认领",
+      "statusAwaiting": "等待确认",
+      "statusCompleted": "已完成",
+      "statusBlocked": "接在其他任务后",
+      "needsMoreHands": "还缺人手",
+      "needsMoreHandsTooltip": "这项任务还需要更多支持，谁都可以来搭把手。",
+      "hours": "{{hours}}",
+      "edit": {
+        "button": "编辑",
+        "save": "保存",
+        "cancel": "取消"
+      },
+      "addTask": {
+        "fieldTitle": "任务标题",
+        "fieldDescription": "要做什么？",
+        "fieldHours": "预估时数",
+        "fieldHoursHint": "凭感觉估就行——以后可以改。",
+        "splitHint": "任务越大越难开头，也越慢被认领。要是它能自然拆开，小块更容易被接手——一小时左右的还会出现在公告栏的“一个小时左右能搞定”筛选里。",
+        "fieldUrgency": "紧急程度",
+        "fieldCategory": "类别",
+        "fieldSkills": "建议技能（用逗号隔开）",
+        "fieldSkillsPlaceholder": "木工, 倾听",
+        "submit": "添加任务",
+        "submitting": "添加中…",
+        "fieldCadence": "循环（可不选）",
+        "cadenceNone": "一次性任务",
+        "cadenceSession": "每次聚会",
+        "cadenceMonth": "每月",
+        "cadenceEvent": "每场活动",
+        "cadenceCycle": "每个生长周期",
+        "cadenceHint": "循环任务在被确认后会自动重新打开。"
+      },
+      "acknowledgment": {
+        "toggle": "给出力的人留句话",
+        "placeholder": "谢谢你…",
+        "hint": "可不填。社区在项目页上都能看到。"
+      },
+      "follows": "接在这些之后：{{titles}}",
+      "followsMore": "接在这些之后：{{titles}}，还有{{count}}项",
+      "followsExpandLabel": "显示全部前置任务",
+      "followsHint": "等它接续的任务完成后，这项任务就绪。",
+      "addDependency": "接在…之后",
+      "noDependencies": "没有前置任务",
+      "moveUp": "把{{title}}上移",
+      "moveDown": "把{{title}}下移",
+      "reorderError": "没排成，再试一次。",
+      "dragStart": "已拿起{{title}}。用方向键移动，按空格放下，按 Esc 取消。",
+      "dragEnd": "{{title}}已移到第{{position}}位，共{{total}}位。",
+      "dragCancel": "已取消移动{{title}}。",
+      "reorderButton": "调整任务顺序",
+      "reorderDialogTitle": "调整任务顺序",
+      "reorderDialogHint": "拖动任务，或用它的“上移/下移”按钮。每次改动都会自动保存。",
+      "reorderDialogClose": "完成",
+      "reorderDialogEmpty": "至少要有两项任务才能排顺序。",
+      "waitingOnClaimerNote": "等它就绪时会提醒你。",
+      "dependsOn": "这项任务接在",
+      "dependsOnHint": "最好先完成的那些任务。用来排个先后提醒，不会真的卡住这项任务。",
+      "dependencyCycleError": "这样会绕成一个圈（循环依赖）。",
+      "dependencyTooManyError": "每项任务最多10个前置。",
+      "comments": {
+        "startThread": "开一条评论串",
+        "showOne": "显示{{count}}条评论",
+        "showOther": "显示{{count}}条评论",
+        "hide": "收起评论",
+        "empty": "还没有评论。来说第一句吧。",
+        "composerLabel": "评论这项任务",
+        "placeholder": "写下关于这项任务的评论…",
+        "submit": "发表评论",
+        "submitting": "发表中…",
+        "postedBy": "{{name}} · {{when}}",
+        "delete": "删除",
+        "deleteConfirm": "删除这条评论？删了就找不回来了。",
+        "tombstone": "（作者已删除这条评论）",
+        "flag": "提请社区商议",
+        "flagPrompt": "为什么标记这条评论？（可不填——想让社区不带理由地自行判断，就留空。）",
+        "flaggedChip": "商议中",
+        "showOlderOne": "显示{{count}}条更早的评论",
+        "showOlderOther": "显示{{count}}条更早的评论",
+        "showFewer": "少显示一些评论"
+      },
+      "recurring": {
+        "session": "每次聚会重复",
+        "month": "每月重复",
+        "event": "每场活动重复",
+        "cycle": "每个周期重复",
+        "chipAria": "循环任务：{{cadence}}",
+        "detailHint": "这项任务确认后，列表底部会出现一份新的开放副本——轮值的位置为下一轮重新打开。"
+      }
+    },
+    "milestone": {
+      "reached": "🎉 已经走完{{percent}}%的路了！"
+    },
+    "announcements": {
+      "title": "近况",
+      "composeButton": "写一条近况",
+      "placeholder": "和社区说说最新进展…",
+      "submit": "发布近况",
+      "submitting": "发布中…",
+      "postedBy": "{{name}} · {{when}}",
+      "showOlderOne": "显示{{count}}条更早的近况",
+      "showOlderOther": "显示{{count}}条更早的近况",
+      "showFewer": "少显示一些近况"
+    },
+    "completionMoment": {
+      "title": "一起，做完了。",
+      "summary_one": "{{count}}位成员投入了{{hours}}小时，把它送到了终点。",
+      "summary_other": "{{count}}位成员一起投入了{{hours}}小时。",
+      "thanksHint": "想谢谢大家的话，就发一条近况——它会一直留在项目里。",
+      "thanksCta": "写一条近况",
+      "cardLine_one": "{{count}}位成员 · {{hours}}小时",
+      "cardLine_other": "{{count}}位成员 · {{hours}}小时，一起"
+    },
+    "coOrganizers": {
+      "title": "共同组织者",
+      "intro": "共同组织者可以确认任务、添加任务、暂停或继续项目。只有主组织者能邀请或移除共同组织者。",
+      "add": "添加",
+      "remove": "移除",
+      "selectPlaceholder": "选一位成员…",
+      "invite": {
+        "send": "发出邀请",
+        "copy": "对方下次同步时会看到你的邀请——也就是对方的应用下次连上社区服务器的时候。在对方接受之前，你随时可以撤回。",
+        "locked": "先用你的口令解锁这台设备，再发出邀请。"
+      },
+      "pending": {
+        "title": "待答复的邀请",
+        "issued": "发出于{{when}}",
+        "expires": "{{when}}到期",
+        "revoke": "撤回",
+        "revokeConfirmTitle": "取消这份邀请？",
+        "revokeConfirmBody": "对方的应用下次与社区服务器同步时，就不会再收到它。以后随时可以再邀请。"
+      },
+      "past": {
+        "title": "过往的邀请",
+        "outcome": {
+          "declined": "已婉拒",
+          "expired": "已过期",
+          "revoked": "已撤回",
+          "accepted": "已接受"
+        }
+      }
+    },
+    "coorganizer": {
+      "stepDown": "卸下共同组织者的角色",
+      "stepDownConfirmTitle": "卸下共同组织者的角色？",
+      "stepDownConfirmBody": "之后你将不能再确认任务完成或编辑这个项目。你以前做的确认都会保留。",
+      "stepDownConfirmCta": "卸下角色"
+    },
+    "coorg": {
+      "capabilitiesTitle": "作为共同组织者，你可以做什么",
+      "capabilities": {
+        "lifecycle": "启动、暂停、继续或完成项目。",
+        "tasks": "添加和编辑任务——一次一项或一次几项都行。",
+        "ordering": "安排任务的顺序和先后（哪些排在哪些前面）。",
+        "confirm": "确认完成的任务。每次确认都会把时数从你自己的时数里转出——你是以受助方的身份签名。",
+        "announce": "发布项目近况。",
+        "stepDown": "随时卸下这个角色。"
+      },
+      "notIncluded": "邀请其他共同组织者和归档项目，仍由主组织者来做。",
+      "acceptedPointer": "你现在是共同组织者了。项目页上有“你可以做什么”。"
+    },
+    "manage": {
+      "title": "打理项目",
+      "pauseItem": "暂停项目",
+      "cloneItem": "复制项目",
+      "coorgItem": "管理共同组织者",
+      "handoffItem": "移交项目",
+      "stepDownItem": "卸下共同组织者"
+    },
+    "handoff": {
+      "title": "把火炬传下去",
+      "intro": "把主组织者的角色交给一位共同组织者。你自己会继续留任共同组织者。",
+      "select": "选一位共同组织者…",
+      "submit": "移交主组织者角色",
+      "submitting": "移交中…"
+    },
+    "bulkTask": {
+      "toggle": "一次加好几项",
+      "placeholder": "一行一项任务",
+      "hint": "每行会按默认设置生成一项任务，之后可以逐项修改。",
+      "submit": "全部添加",
+      "submitting": "添加中…",
+      "success": "已添加{{count}}项任务。"
+    },
+    "clone": {
+      "button": "复制项目",
+      "titlePlaceholder": "新副本的标题",
+      "submit": "创建副本",
+      "submitting": "复制中…",
+      "reinvite": {
+        "title": "再邀请一次共同组织者？",
+        "intro": "原项目有共同组织者。新项目会发出全新的邀请——每个人重新决定一次。什么都不会自动带过来，邀请14天后过期。",
+        "candidateAria": "邀请{{name}}共同组织新项目",
+        "sourcePrimaryChip": "组织过原项目",
+        "skipHint": "眼下不想邀请的就取消勾选——以后随时可以在项目页上再邀请。",
+        "sentToast_one": "副本已创建——已发出{{count}}份邀请。",
+        "sentToast_other": "副本已创建——已发出{{count}}份邀请。",
+        "partialToast": "副本已创建。有些邀请没能发出——可以在新项目页上再邀请。"
+      }
+    },
+    "archive": {
+      "button": "归档项目",
+      "unarchive": "取消归档",
+      "title": "项目归档",
+      "subtitle": "已完成和已归档的项目",
+      "emptyTitle": "还没有完成的项目",
+      "empty": "还没有归档的项目。",
+      "viewArchive": "查看归档"
+    },
+    "history": {
+      "title": "历程",
+      "coorganizerStepdown": "共同组织者卸下了角色"
+    },
+    "activityType": {
+      "project_created": "项目已创建",
+      "task_added": "添加了任务",
+      "task_claimed": "任务已认领",
+      "task_unclaimed": "任务已放回",
+      "task_released_after_complete": "{{name}}从<taskLink>{{task}}</taskLink>退了下来",
+      "task_completed": "任务标记为完成",
+      "task_sent_back": "带备注退回了任务",
+      "task_confirmed": "任务已确认",
+      "project_launched": "项目已启动",
+      "project_paused": "项目已暂停",
+      "project_resumed": "项目已继续",
+      "project_completed": "项目已完成",
+      "project_archived": "项目已归档",
+      "project_unarchived": "项目已取消归档",
+      "milestone_reached": "达成里程碑",
+      "organizer_handoff": "组织者完成交接",
+      "coorganizer_stepdown": "共同组织者卸下了角色",
+      "coorganizer_invited": "邀请了共同组织者",
+      "coorganizer_accepted": "共同组织者接受了邀请",
+      "coorganizer_declined": "共同组织者婉拒了邀请",
+      "coorganizer_revoked": "共同组织者邀请已撤回",
+      "announcement": "发布了近况",
+      "work_day_scheduled": "安排了动手日",
+      "adopted_by_community": "经社区决定，照看的担子已交接"
+    },
+    "workDays": {
+      "heading": "接下来的动手日",
+      "scheduleButton": "安排一次动手日",
+      "itemAt": "在{{location}}",
+      "localLinkHint": "动手日是和这个项目相连的社区活动，这层关联只存在于你自己的社区（这个节点）。其他社区的服务器（友邻节点）看得到活动本身——永远看不到它和项目的关联。",
+      "nextGlanceHeading": "下一个动手日",
+      "templateHint": "这个项目的模板里有循环的集体活儿——带时段的动手日，是把人手聚起来的省事办法。",
+      "templateHintDismiss": "知道了"
+    },
+    "adoptionBanner": "社区正在商定由谁来接手照看这个项目。"
+  },
+  "adoption": {
+    "section": {
+      "title": "社区接力照看",
+      "intro": "这个项目的组织者有一阵子没在这里活动了。社区可以商定一位新的主要组织者，让项目活下去。站出来就意味着接下组织者角色要担的事——邀请、归档、交接。",
+      "rationaleLabel": "你为什么站出来",
+      "rationalePlaceholder": "你和这个项目有什么渊源？你想把哪些事继续下去？",
+      "submit": "我来接手",
+      "notice": "你的接手意愿会开启一项社区提议。它至少开放{{days}}天；如果现任组织者重新活跃，就悄悄关闭。"
+    },
+    "card": {
+      "proposedSteward": "愿意接手组织：{{name}}",
+      "quietSince": "自{{when}}起，这个项目没有组织者的动静。",
+      "voidNote": "如果现任组织者在关闭前重新活跃，这项提议就此作罢——不带任何追问。",
+      "execute": "按通过关闭并交接照看",
+      "executing": "正在交接…",
+      "imHere": "我还在",
+      "imHereHint": "点一下就关闭这项提议。不需要任何解释。"
+    },
+    "toast": {
+      "filed": "你的接手意愿已开放，等社区一起来看。",
+      "executed": "照看已交接。此前的组织者继续留任共同组织者。",
+      "voided": "组织者重新活跃了，这项提议已就此作罢。"
+    },
+    "attention": {
+      "title": "社区正在照看“{{projectTitle}}”",
+      "body": "有一项提议正开放，想在你不在的这段时间加一位新的主要组织者。你要是在，点一下就能关闭它。"
+    },
+    "closedReason": {
+      "presence": "已作罢——组织者重新活跃了。"
+    }
+  },
+  "myWork": {
+    "title": "我照看的",
+    "subtitle": "你认领的和你组织的——任务、时段、正要去帮的忙，还有你的项目，都在这一处。",
+    "emptyTitle": "眼下没有你照看的事",
+    "empty": "认领任务或发起项目后，就会出现在这里——你答应下的事和你组织的项目，都在这一处。",
+    "shiftsTitle": "你报名的时段",
+    "claimedPostsTitle": "你正要去帮的忙",
+    "shiftIcs": "把这个时段放进我的日历（.ics）",
+    "deskLink": "到案头看看所有等着你的事",
+    "askedTitle": "找你帮忙的",
+    "askedBy": "{{name}}提到了你"
+  },
+  "plugIn": {
+    "title": "参与的方式",
+    "subtitle": "按你能做的事，这里列出眼下开放的一切——对照你开放中的提供和资料里的技能匹配出来，全在你自己的设备上完成。",
+    "noObligation": "这里没有一件事是派给你的，你看了什么也不会被记录。匹配是给你的一份邀请，绝不是压在你身上的义务。",
+    "addSkills": "匹配来自你开放中的提供和资料里的技能。",
+    "addSkillsLink": "添加技能，看到更多匹配",
+    "shiftsTitle": "匹配的开放时段",
+    "needsTitle": "匹配的开放需求",
+    "tasksTitle": "匹配的开放项目任务",
+    "matchedOn": "匹配了你的“{{tokens}}”",
+    "spotsOpen_one": "还有{{count}}个名额",
+    "spotsOpen_other": "还有{{count}}个名额",
+    "follows": "接续：{{titles}}",
+    "remainderTitle": "其他开放中的一切（{{count}}）",
+    "remainderHint": "匹配只是一面镜片，不是门槛——你想搭手哪里都行。",
+    "remainderEmpty": "眼下没有别的开放了。",
+    "emptyNoLens": "还没有可以拿来匹配的东西——所有开放中的都在下面。",
+    "emptyWithLens": "眼下没有和你的提供与技能匹配的——所有开放中的都在下面。"
+  },
+  "bodyDoubling": {
+    "postTitle": "陪我一起做：{{task}}",
+    "postDescription": "我认领了“{{task}}”（{{project}}），有人在旁边一起干活，开工就容易多了——有人管这叫“搭伴工作法”（body doubling）。不需要任何技能：带上你自己的事来做，或者就单纯陪着我也行。时间地点我们商量着来。\n\n任务在这里：{{url}}",
+    "formHint": "这是为你手头任务准备的搭伴邀请，已经帮你填好，省得面对空白页。想改什么都行——贴出之前不会公开。"
+  },
+  "myTasks": {
+    "title": "你手上的任务",
+    "summaryOne": "你手上现在有1项任务。",
+    "summaryOneProject": "你手上有{{count}}项任务，都在同一个项目里。",
+    "summaryOther": "你手上有{{count}}项任务，分布在{{projects}}个项目里。",
+    "claimedAgo": "认领于{{when}}",
+    "plannedToday": "你计划今天做这件",
+    "plannedFor": "你计划{{day}}做",
+    "plannedPast": "你原计划{{day}}——什么时候方便什么时候来",
+    "empty": "在社区项目里认领的任务会出现在这里，不用一个个打开项目，就能看到自己应下的事。",
+    "emptyShort": "还没认领什么",
+    "browseProjects": "看看项目",
+    "seeAll": "查看你的全部任务",
+    "boardLink": "你手上的任务"
+  },
+  "myProjects": {
+    "title": "你组织的项目",
+    "summaryOne": "现在有1个项目由你照看。",
+    "summaryOther": "现在有{{count}}个项目由你照看。",
+    "awaiting_one": "1项任务等你确认",
+    "awaiting_other": "{{count}}项任务等你确认",
+    "openTasks_one": "1项开放任务",
+    "openTasks_other": "{{count}}项开放任务",
+    "noOpenTasks": "目前没有开放任务",
+    "pendingInvites_one": "1份共同组织者邀请还在等回音",
+    "pendingInvites_other": "{{count}}份共同组织者邀请还在等回音",
+    "coOrganizerChip": "共同组织者",
+    "empty": "当你发起一个项目，或者接受一份共同组织者邀请，它就会出现在这里——让你不用逐个打开，也能看到所有由你照看的项目。",
+    "emptyShort": "还没有由你照看的项目",
+    "startProject": "发起一个项目",
+    "seeAll": "查看你组织的全部项目",
+    "boardLink": "你组织的项目"
+  },
+  "urgency": {
+    "low": "不着急",
+    "medium": "尽快",
+    "high": "紧急",
+    "ariaLabel": "紧急程度：{{label}}"
+  },
+  "categories": {
+    "transport": "出行",
+    "food": "食物",
+    "childcare": "照看孩子",
+    "skilled_labor": "手艺活",
+    "emotional_support": "情绪支持",
+    "education": "教育",
+    "housing": "住房",
+    "tech": "技术",
+    "other": "其他",
+    "infrastructure": "基础设施",
+    "organizing": "组织协调",
+    "mutual_aid_drive": "互助行动",
+    "social": "社交",
+    "celebration": "庆祝",
+    "learning": "学习"
+  },
+  "categoryDescriptions": {
+    "transport": "顺风车、拼车、搬东西",
+    "food": "饭菜、买菜、做饭",
+    "childcare": "看孩子、接送上下学、带娃搭把手",
+    "skilled_labor": "修理、手艺活、动手的活儿",
+    "emotional_support": "倾听、陪伴、关心",
+    "education": "辅导、教课、带人入门",
+    "housing": "落脚处、搬家、家务帮忙",
+    "tech": "电脑、手机、安装设置",
+    "other": "我们社区需要的其他任何事",
+    "infrastructure": "建造、修缮和共用的实体设施",
+    "organizing": "集体行动、工会、时间银行",
+    "mutual_aid_drive": "分发物资、款项或生活必需品",
+    "social": "聚一聚，好好作伴",
+    "celebration": "一起庆祝点什么",
+    "learning": "分享手艺、一起做东西"
+  },
+  "postStatus": {
+    "open": "开放中",
+    "claimed": "已认领",
+    "awaiting_confirmation": "等待确认",
+    "completed": "已完成",
+    "cancelled": "已取消",
+    "disputed": "社区商议中"
+  },
+  "postCard": {
+    "peerCommunity": "友邻社区",
+    "expiresIn": "{{count}}天后到期",
+    "expiresToday": "今天到期",
+    "expired": "已到期"
+  },
+  "voicePost": {
+    "load": "播放语音（{{seconds}}秒）",
+    "loading": "正在获取录音…",
+    "unavailable": "这段录音还没到。它可能还在去社区服务器的路上——稍等片刻再试。",
+    "retry": "再试一次"
+  },
+  "postForm": {
+    "titleNeed": "贴出一条需求",
+    "titleOffer": "贴出一条提供",
+    "subtitleNeed": "眼下，什么样的支持才算帮到你？",
+    "subtitleOffer": "你有什么可以拿出来给大家？",
+    "tabAriaLabel": "启事类型",
+    "tabNeed": "需求",
+    "tabOffer": "提供",
+    "fieldTitle": "标题",
+    "fieldDescription": "描述",
+    "fieldCategory": "类别",
+    "fieldHours": "预计小时数",
+    "fieldHoursHint": "一小时帮忙就是一小时时数，不论做的是什么。",
+    "fieldUrgency": "紧急程度",
+    "fieldExpiresInDays": "有效期（天，可不填）",
+    "expiresPlaceholder": "留空则一直有效",
+    "placeholderTitleNeed": "比如：周四搭车去诊所",
+    "placeholderTitleOffer": "比如：这周多出的汤和面包",
+    "placeholderDescription": "写点有用的细节：时间、大致区域、无障碍需求等。",
+    "submit": "贴到公告栏",
+    "submitting": "正在贴出…",
+    "categoryOption": "{{emoji}} {{label}}——{{description}}",
+    "errorNeedTitle": "给启事起个短标题，让大家知道是关于什么的。",
+    "errorHoursPositive": "预计小时数要是正数。",
+    "errorExpiresInDays": "天数要是大于0的整数，或留空表示一直有效。",
+    "repostBanner": "正在编辑副本——提交后原来的启事会被取消。",
+    "repostAgainBanner": "从副本开始——原来的启事不受影响。",
+    "matchingNeeds": "这个类别下有{{count}}条开放中的需求——去看看",
+    "matchingNeedsAside": {
+      "title": "这个类别里开放中的需求",
+      "seeAll": "查看全部{{count}}条"
+    },
+    "voice": {
+      "field": "语音（可不填）",
+      "add": "加一条语音",
+      "hint": "不想打字就说出来，最长45秒。大家会在你的启事上看到一个播放按钮。打字照旧。",
+      "attach": "附到启事上",
+      "remove": "移除语音"
+    }
+  },
+  "postDetail": {
+    "notFound": "找不到这条启事。它可能已被撤下。",
+    "menuLabel": "启事操作",
+    "backToBoard": "回到公告栏",
+    "typeNeed": "需求",
+    "typeOffer": "提供",
+    "fieldEstimatedHours": "预计时数",
+    "fieldPosted": "贴出时间",
+    "fieldPostedBy": "贴出的人",
+    "fieldOfferedBy": "提供的人",
+    "fieldHelper": "帮忙的人",
+    "fieldClaimedBy": "认领的人",
+    "fieldArea": "区域",
+    "fieldExpires": "有效期至",
+    "personLine": "{{name}}（{{key}}）",
+    "actionsCancelPost": "撤下启事",
+    "actionsWaiting": "正在等人认领。",
+    "actionsClaimOffer": "认领这份提供",
+    "actionsOfferToHelp": "我来搭把手",
+    "actionsConfirmComplete": "确认已完成",
+    "actionsFlag": "有点不对劲——标记一下",
+    "actionsRelease": "放弃认领",
+    "actionsClaimedBy": "这条启事已被认领。{{helper}}正在帮{{helped}}。",
+    "actionsCompleted": "已完成。{{hours}}的时数从{{helped}}流向了{{helper}}。谢谢你们俩。",
+    "dialogClaimNeedTitle": "认领这条启事？",
+    "dialogClaimNeedDescription": "你要帮忙{{hours}}的{{category}}。你们双方都确认完成后，时数就会流向你。",
+    "dialogClaimOfferTitle": "认领这份提供？",
+    "dialogClaimOfferDescription": "你想接受{{hours}}的帮助。你们双方都确认后，时数才会变动。",
+    "dialogClaimConfirm": "对，认领",
+    "dialogCompleteTitle": "把这次交换标为完成？",
+    "dialogCompleteDescription": "确认帮助真的发生了。双方都确认后，时数才会变动。如果出了岔子，可以改为标记它。",
+    "dialogCompleteConfirm": "对，完成了",
+    "dialogDisputeTitle": "把这次交换交给社区商议？",
+    "dialogDisputeDescription": "这会把这次交换放到“争议”页面上，社区里任何人都可以发表看法——这里没有管理员。争议解决之前，时数不会变动。标记不是一条单行道：改主意的话，任何成员——包括你——都可以在“提议”页面把它按已撤回关闭，这次交换就回到原来的样子。",
+    "dialogDisputeConfirm": "标记它",
+    "dialogCancelTitle": "撤下这条启事？",
+    "dialogCancelDescription": "启事会立刻离开公告栏，没人再能认领。它不会被删除——这个页面会留着，标为已撤下，你仍然可以从它的链接打开。",
+    "dialogCancelConfirm": "撤下这条启事",
+    "dialogCancelDismiss": "留着我的启事",
+    "dialogReleaseTitle": "放弃你的认领？",
+    "dialogReleaseDescription": "启事会重新开放，别人就能接手了。",
+    "dialogReleaseConfirm": "放弃认领",
+    "repost": "改一改再贴",
+    "repostHint": "要改点什么？启事菜单里的“改一改再贴”会撤下这条，另开一条新启事。",
+    "cancelledOwnerHint": "这条启事已撤下，不在公告栏上了。计划又变的话，可以改一改再贴——那会生成一条新启事；这条保持已撤下。",
+    "stillLooking": "还在找人吗？补充些细节或调整预计时数，也许能让合适的人看到。可以在启事菜单里改一改再贴。",
+    "stillOffering": "还有空吗？调整一下时间或细节，也许能对上正需要的人。",
+    "postAgain": "再贴一次",
+    "guidance": {
+      "completed": "时数已经转过去了。谢谢你们俩让社区更有力量。"
+    },
+    "exchangeState": {
+      "claimed": {
+        "party": "{{name}}已认领。帮助完成后，你们双方各自确认——双方都确认了，时数才变动。",
+        "viewerClaimed": "你已认领。帮助完成后，你们双方各自确认——双方都确认了，时数才变动。",
+        "thirdParty": "这条启事已被认领。"
+      },
+      "awaitingConfirmation": {
+        "viewerOwes": "{{name}}已确认。你一确认，这次交换就完成，时数随之变动。",
+        "viewerConfirmed": "你已确认。在等{{name}}——双方都确认了，时数才变动。",
+        "autoConfirm_one": "如果对方一直没顾上，社区的服务器（节点）会在大约{{count}}天内自动确认。",
+        "autoConfirm_other": "如果对方一直没顾上，社区的服务器（节点）会在大约{{count}}天内自动确认。",
+        "thirdParty": "一方已确认，在等另一方。"
+      },
+      "completed": "这次交换已完成——时数已经变动。",
+      "disputedTitle": "社区共同商议中。",
+      "disputedBody": "社区正在讨论这次交换。",
+      "disputedLink": "见个人资料 → 争议"
+    },
+    "newRolesEarned": "新的社区角色"
+  },
+  "inPerson": {
+    "entry": "当面确认——不需要网络",
+    "title": "当面确认",
+    "offerHint": "你们正站在一起？把这个码给{{name}}看。对方的手机会核对细节、签名，然后屏幕上会出现一个回执码——在下面拍下它，你们俩就都完成了。",
+    "hoursLine": "{{hours}}的{{category}}",
+    "offerQrAlt": "当面交换的发起码——出示给你帮过的那位成员",
+    "fingerprintLabel": "密钥指纹（一段代替完整密钥的短码）",
+    "offerFingerprintHint": "对方手机的确认屏幕上会显示同一个指纹——一段代替完整密钥的短码，方便比对。在对方签名之前，两个人一起把它读出来，就能确定说话的是正确的两部手机。",
+    "captureReceipt": "对方签好了——拍下回执",
+    "captureReceiptHint": "把相机对准{{name}}屏幕上的回执码。",
+    "captureOfferHint": "把相机对准帮你的人屏幕上的发起码。",
+    "reviewBody": "你即将签名确认“{{title}}”已经完成。签名会把{{hours}}的{{category}}从你这里记给{{name}}——和在线确认是同一种时数记录，记在社区的共享账本上。",
+    "reviewFingerprintHint": "对照{{name}}屏幕上的指纹检查这一个。如果对不上，别签——你可能扫到了别的手机。",
+    "sign": "签名——记入{{hours}}",
+    "receiptHint": "最后一步：把这个回执给{{name}}看，让对方的手机也保存这笔完成的交换。",
+    "receiptQrAlt": "当面交换的回执码——出示给帮你的人",
+    "done": "完成——这笔交换在两部手机上都齐了，就在此时此地，完全不需要网络。之后每部手机一见到网络，就会把它分享给社区的服务器，服务器只保留一份。",
+    "copyText": "复制为文字",
+    "close": "关闭",
+    "error": {
+      "no_identity": "这台设备上没有身份。",
+      "locked": "这台设备锁着——先解锁。",
+      "post_missing": "这部手机上没有那条启事——先和社区同步一下，或者确认你们俩看的是同一笔交换。",
+      "already_completed": "这笔交换已经完成了。",
+      "not_confirmable": "这条启事还不能确认——得先有人认领。",
+      "not_helper": "只有出手帮忙的那位成员才能发起当面确认。",
+      "bad_hours": "这个小时数对一笔交换来说说不通。",
+      "not_an_offer": "这个码不是当面交换的发起码。",
+      "not_a_receipt": "这个码不是当面交换的回执码。",
+      "post_mismatch": "这份发起信息和这部手机上的启事对不上——人或类别不一样。别签。",
+      "wrong_member": "这份发起信息不是给你的——只有接受帮助的那位成员才能签。",
+      "different_record": "这份回执属于另一笔交换，和这部手机发起的不是同一笔。",
+      "bad_signature": "这个码上有一个签名验证不通过——防篡改的印记和内容对不上，可能说明码被改动过。别接受它。",
+      "daily_limit": "这会超出社区对同一位帮手的单日上限——等一天再确认吧。"
+    }
+  },
+  "direct": {
+    "title": "一起记下这段时间",
+    "intro": "有些帮助不在任何启事或项目里——聚会前搭手布置的几个人，邻居顺手帮的一把。你们俩手机对手机各自签名，时数就像任何一次交换一样流动。",
+    "noMember": "从人开始：这个表单的入口在成员的个人资料页上，也在已经过去的时段上。如果现在就有人在和你记时间，扫下面对方的码。",
+    "scanLead": "对方在自己手机上先开始了？",
+    "scanInstead": "扫对方的码",
+    "form": {
+      "direction": "谁帮的忙？",
+      "iHelped": "我帮了{{name}}",
+      "theyHelped": "{{name}}帮了我",
+      "hours": "实际花的小时数",
+      "hoursHint": "一小时就是一小时——记帮助实际花的时间，不是它值多少。",
+      "category": "类别",
+      "day": "什么时候",
+      "continue": "继续"
+    },
+    "consent": {
+      "title": "签名之前",
+      "body": "这会记下你和{{name}}之间一次签名的{{hours}}交换。和每次交换一样，谁帮了谁、时数、类别和时间都会进入社区的共同账本。它背后没有启事——记录上会写“直接记录”。你们俩都签了名，时数才会变动。",
+      "confirm": "签名并出示二维码"
+    },
+    "offerHint": "把这个码给{{name}}看。对方的手机核对细节、签名，屏幕上会给出一个回执码——在下面扫进来，你们就都完成了。",
+    "offerQrAlt": "直接交换的发起码",
+    "captureReceipt": "扫入对方的回执",
+    "captureReceiptHint": "把摄像头对准{{name}}屏幕上的回执码。",
+    "captureOfferHint": "把摄像头对准另一部手机上的码。",
+    "review": {
+      "theyHelpedYou": "{{name}}正在记录给过你的{{hours}}的{{category}}帮助——直接记录，背后没有启事。签名会从你的时数里转出{{hours}}。",
+      "youHelpedThem": "{{name}}正在记录你给过的{{hours}}的{{category}}帮助——直接记录，背后没有启事。签名会往你的时数里加上{{hours}}。",
+      "federates": "和每次交换一样：你们俩都签名后，谁帮了谁、时数、类别和时间会进入社区的共同账本。"
+    },
+    "sign": "签名——记下{{hours}}",
+    "receiptHint": "把这个回执给{{name}}看，对方的手机就能存下同一份记录。",
+    "receiptQrAlt": "直接交换的回执码",
+    "done": "记好了。你们俩现在都持有同一份签名的交换记录，下次联网时它会送达社区节点（你社区的服务器）。",
+    "close": "关闭",
+    "error": {
+      "no_identity": "这台设备上没有身份。",
+      "locked": "先解锁应用——签名需要你的秘密密钥，也就是证明这真的出自你手的那段私密代码。",
+      "self_exchange": "没法和自己记一次交换。",
+      "counterparty_unknown": "你的设备还不认识这位成员。",
+      "bad_hours": "填上帮助实际花的小时数。",
+      "bad_time": "选一个最近一个月内的日子。",
+      "not_an_offer": "这个码不是直接交换的发起码。",
+      "not_direct_label": "这个码不是有效的直接交换。",
+      "wrong_member": "这份发起写的是另一位成员——只有它指向的那个人才能签。",
+      "bad_signature": "这个码上的签名对不上——它的防篡改印记和内容不符。",
+      "daily_limit": "这会超过社区的每日交换上限——明天再记吧。",
+      "not_a_receipt": "这个码不是直接交换的回执。",
+      "different_record": "这份回执描述的交换和你出示的发起对不上。"
+    }
+  },
+  "lockScreen": {
+    "title": "这台设备锁着",
+    "introWith": "输入口令，解锁{{name}}在这台设备上的身份。",
+    "introNone": "输入口令，解锁这台设备。",
+    "keyLine": "身份密钥（代表你账户的那串码）：{{key}}",
+    "passphraseLabel": "口令",
+    "submit": "解锁",
+    "submitting": "正在解锁…",
+    "wrongPassphrase": "口令对不上。再试一次。",
+    "nothingToUnlock": "这台设备上没有加了口令的密钥——没有任何身份被口令加密保存——所以没有可解锁的东西。（如果你看到了这个，刷新一下页面。）",
+    "passkeyButton": "用通行密钥解锁",
+    "passkeyFailed": "通行密钥——也就是设备的人脸、指纹或 PIN 解锁——没能打开。下面的口令永远可以。",
+    "or": "或",
+    "noRecoveryNote": "忘了口令，在这里没法重置——没有人握着万能钥匙。但这不一定意味着从头再来：另一台已关联的设备仍然保存着你的身份；如果你做过恢复包或选过守护人（设置 → 恢复包／守护人），可以先抹掉这个应用（个人主页 → 紧急情况 → 彻底抹除），再从它们恢复。这些都没有的话，重新建一个身份是最后的办法。"
+  },
+  "invite": {
+    "reading": "正在读取邀请…",
+    "cantUse": "这份邀请用不了。",
+    "continueWithoutJoining": "先不加入，继续看看",
+    "notJoinedNote": "可以四处看看，但你还没加入{{name}}的社区。加入之前，你贴出的内容只会留在这台设备上——而且随时可以用一条新的邀请链接加入。",
+    "notJoinedNoteGeneric": "可以四处看看，但你还没加入任何社区。加入之前，你贴出的内容只会留在这台设备上——而且随时可以用一条新的邀请链接加入。",
+    "noFragment": {
+      "title": "打开你的邀请",
+      "body": "这个页面打开时没带上邀请码。消息应用有时会在你点链接预览时把码弄丢，把原始消息粘贴到下面，通常就能找回来。"
+    },
+    "paste": {
+      "label": "如果你有邀请链接，把整条粘贴到这里。",
+      "placeholder": "https://your-community.example/invite#…",
+      "submit": "使用这条链接",
+      "invalid": "这看起来不像邀请链接。粘贴完整的链接，或者只贴 # 号后面的那串码。"
+    },
+    "youInvited": "你收到了一份邀请",
+    "wantsYou": "{{name}}想邀请你加入自己的互助网络。",
+    "inviterKey": "邀请人密钥（标识是谁邀请你的那串码）",
+    "expires": "有效期至",
+    "expiresOn": "这份邀请在{{date}}之前有效。",
+    "fingerprintReminder": "接受之前：上面的指纹是邀请人密钥的简短版本，便于对照。确认它和{{name}}当面、或通过你信任的渠道告诉你的一致——这样你才知道这份邀请真的来自对方。要是链接是从不可信的邮件里来的，多核对一遍不亏。",
+    "welcome": "欢迎加入。正在前往公告栏…",
+    "welcomeStay": "欢迎加入。去公告栏之前，还有下面这一个问题。",
+    "notConnected": {
+      "body": "有件要紧事：这台设备还没连上社区的服务器，所以在连上之前，{{name}}那边的项目、活动和公告栏启事都不会出现。你随时可以在个人资料页的“社区节点”里连接——需要社区地址的话，问问{{name}}。",
+      "goToSettings": "打开个人资料设置",
+      "continue": "先继续"
+    },
+    "displayNameLabel": "你的昵称（欢迎使用化名）",
+    "displayNameRequired": "取一个昵称或化名再继续。",
+    "joiningAs": "以{{name}}的身份加入",
+    "attachNote": "这台设备上已经有你的身份，邀请会加到它上面——你的名字、时数和记录都还是你的。下面可以更新昵称。",
+    "someoneElse": "我是另一个人——创建新的身份",
+    "joinAsExisting": "其实我就是{{name}}——用我已有的身份加入",
+    "mintingNote": "你正在这台共用设备上创建一个全新的、独立的身份。",
+    "submit": "接受邀请并加入",
+    "submitting": "正在加入…",
+    "errors": {
+      "malformed": "这条邀请链接坏了或不完整。这通常是消息应用干的，不怪你——有些应用会在你点链接时把它改坏。试试在常用的浏览器里打开链接，或把原始消息粘贴到下面。还不行的话，找邀请你的人要一条新链接。",
+      "expired": "这份邀请过期了。找邀请你的人要一条新链接，可以粘贴到下面。",
+      "bad_signature": "这份邀请的签名（证明它出自谁手的防篡改印记）没能通过校验。可能是消息应用在传输中改动了链接，试试把原始消息粘贴到下面。还是不行的话，就别接受了：它可能被动过手脚。",
+      "already_redeemed": "已经有人用过这份邀请了。邀请只能用一次，找邀请你的人要一条新链接，粘贴到下面。",
+      "revoked": "邀请你的人撤回了这份邀请。如果这让你意外，找对方要一条新链接，可以粘贴到下面。",
+      "self_redeem": "自己发出的邀请不能自己用。把链接分享给别人吧。",
+      "inviter_not_trusted": "这份邀请还不能用——发出它的人还没获得社区的完全担保。等两位已获信任的成员为对方担保后，这些邀请就能用了；在那之前，找社区里的另一位成员要个链接。"
+    }
+  },
+  "invites": {
+    "gate": {
+      "title": "有了信任，就能开始邀请",
+      "body": "邀请会把新人带进社区，所以要等社区为你作了担保之后才会开放——这是邻居们彼此防范假账户的方式。",
+      "progress": "你已有{{have}}/{{need}}位担保人。",
+      "howTo": "帮助别人就是路：确认过的交换让邻居们认识你，而任何已获信任的成员都可以在你的资料页为你担保。",
+      "singleFounder": {
+        "title": "这个社区目前只有一位发起人",
+        "body": "获得社区完全信任需要两位已获信任的成员担保，而现在只有发起人是受信任的——所以暂时谁都无法开放邀请。等发起人添加一位共同发起人，信任就能开始流动。"
+      }
+    }
+  },
+  "notJoinedCard": {
+    "label": "还没加入",
+    "title": "你还没有加入任何社区。",
+    "body": "你在这里做的一切都留在这台设备上。有邀请链接吗？",
+    "cta": "打开邀请链接",
+    "dismiss": "关闭"
+  },
+  "nodeSetup": {
+    "title": "这个社区的服务器还没有设置好",
+    "body": "{{origin}} 上的服务器在运行，但还没有人认领它、成为这个社区的发起人。在那之前，这里创建的任何东西都无法存入社区，也无法分享给任何人——所以应用先暂停，免得你做的一切落进空气里。",
+    "founderTitle": "我正在筹建这个社区",
+    "founderIntro": "就在这里完成设置。你需要服务器的一次性设置码——它印在服务器的启动日志里（或者就是服务器 .env 文件里的 SETUP_TOKEN）。",
+    "nameLabel": "你的昵称（欢迎使用化名）",
+    "codeHint": "在服务器上：docker compose logs understoria | grep -i setup",
+    "claim": "认领这台服务器，开启社区",
+    "waitingTitle": "只是来加入这个社区的？",
+    "waitingBody": "请正在筹建的那个人先完成服务器认领，然后点下面的按钮——或者等对方弄好后，重新打开你的邀请链接就行。",
+    "checkAgain": "再检查一次",
+    "hasIdentityNote": "这台设备上已经保存了一个身份，所以不需要填名字——认领会直接用它。如果那个身份设了口令保护，先解锁；想彻底从头开始的话，在浏览器设置里清除这个网站的数据，然后重新加载。",
+    "unexpectedError": "认领时这台设备上出了点问题——服务器可能没事。如果你保存的身份用了口令，先解锁再试一次；刷新页面往往也有帮助。"
+  },
+  "nodeSuggest": {
+    "label": "连接这个社区的节点",
+    "title": "连接这个社区的节点？",
+    "body": "你是从 {{origin}} 拿到这个应用的，那里正运行着一个社区节点。连接之后，你分享的东西——启事、交换、担保，包括和你交换过的人的公钥（公钥是标识一位成员、可以放心传阅的那串码）——都会同步到那台服务器，让社区里的其他人看到。在你确认之前，什么都不会发送。确定这就是你想加入的社区，再确认。",
+    "confirm": "好，连接 {{origin}}",
+    "decline": "先不了"
+  },
+  "recoveryKit": {
+    "title": "恢复包",
+    "intro": "一个小文件（或一页打印纸）。万一这台设备丢了、又没有已关联的备用设备，它能在全新的设备上找回你的账户。里面装着你的私密密钥——那串就是你账户本身的私密代码，任何别人都不该拿到的东西——由你现在选定的一个口令锁着。",
+    "create": "创建恢复包…",
+    "passphraseIntro": "选一个恢复口令。它和你平时用的任何口令都是分开的——而且没有人能帮你重置：没有口令的恢复包只是一张纸。同时拿到恢复包和这个口令的人，就能以你的身份行事。",
+    "passphraseLabel": "恢复口令",
+    "passphraseRepeatLabel": "再输一遍",
+    "confirmCreate": "创建恢复包",
+    "created": "恢复包做好了。把文件存到这台设备以外的地方，或者打印出来——家里的抽屉胜过这台手机里的文件夹。",
+    "download": "下载文件",
+    "print": "打印",
+    "done": "完成",
+    "storageHint": "像收备用钥匙那样收好它：不放在明面上，离这台设备远一点，又要在倒霉的那一周找得到。换了社区，就再做一个新的。",
+    "errorMismatch": "两次口令不一致。",
+    "errorLocked": "这台设备已锁定——先解锁，恢复包才能装入你的密钥。",
+    "errorNoIdentity": "这台设备上没有可备份的身份。",
+    "printTitle": "Understoria 恢复包",
+    "printQrAlt": "装着这份恢复包的二维码——在 Understoria 的欢迎屏幕扫描它即可恢复",
+    "printIntro": "这一页可以在新设备上恢复{{name}}的 Understoria 账户：打开应用，选择“我有恢复包”，用任意二维码扫描器扫这个码并粘贴文本，然后输入恢复口令。把这一页收在安全的地方——配上口令，它就是这个账户本身。",
+    "printKeyLabel": "你的公钥（用来标识账户、可以分享的代码——给谁看都安全）：",
+    "printNodeLabel": "社区服务器：",
+    "printFooter": "没有任何公司保存这份东西的副本。这正是重点——也意味着，没有另一台已关联的设备时，这一页和它的口令就是唯一的回家路。"
+  },
+  "recover": {
+    "title": "用恢复包找回",
+    "intro": "如果在旧设备上做过恢复包，它会把你的账户——时数、担保、角色、成员身份——带到这台设备上。之后社区的共同历史会从它的服务器同步回来。",
+    "uploadTitle": "打开恢复包文件",
+    "uploadBody": "做恢复包时下载的那个 understoria-recovery-kit-….json 文件。",
+    "pasteLink": "打印出来的恢复包？用任意扫码应用扫二维码，把文字粘贴到这里 →",
+    "pasteLabel": "粘贴恢复包的文字",
+    "pasteUse": "使用粘贴的恢复包",
+    "kitFound": "找到了{{name}}的恢复包。输入它的恢复口令来找回。",
+    "passphraseLabel": "恢复口令",
+    "restore": "找回我的账户",
+    "restoring": "正在找回…",
+    "errorNotAKit": "这看起来不像 Understoria 的恢复包。",
+    "errorVersion": "这个恢复包出自更新版本的应用——升级后再试。",
+    "errorPassphrase": "这个口令打不开这个恢复包。",
+    "errorLocked": "这台设备已锁定——先解锁再找回。",
+    "errorCorrupted": "这个恢复包坏了——里面的密钥和它的主人对不上。试试当初下载的文件，别用重新打出来的副本。",
+    "guardiansTitle": "请守护人帮忙找回",
+    "guardiansBody": "如果你在社区里选过守护人，凑齐足够几位就能把你的账户带回来——不需要恢复包，也不需要口令。",
+    "guardiansIntro": "当面把这个码给每位守护人看（或在你们彼此信任的通话里念给对方听）。每位守护人的应用会给出一个释放码——逐个扫进来。凑齐足够的碎片，你的账户就回来了。",
+    "requestQrAlt": "找回请求码——给每位守护人看这个",
+    "piecesNone": "还没有碎片。",
+    "piecesProgress": "{{name}}的账户已有{{have}}/{{need}}份碎片。",
+    "captureRelease": "扫入一位守护人的释放码",
+    "finishGuardians": "把我的账户带回来"
+  },
+  "guardians": {
+    "title": "守护人",
+    "intro": "把你的密钥拆开分给信任的成员，这样即使你丢了所有设备、连恢复包也丢了，足够多的守护人一起也能把你带回来。任何一位守护人——以及任何服务器——都永远拿不到足以冒充你的那部分。",
+    "current": "你的{{total}}位守护人中，任意{{threshold}}位一起就能找回你的账户：{{names}}。",
+    "none": "你还没有选守护人。",
+    "setup": "选守护人…",
+    "reshard": "换一批守护人…",
+    "reshardHonesty": "换新守护人并不会作废旧的一批——你的密钥本身没变，所以足够多的旧碎片（你之前分出去的那些密钥片段）凑在一起仍然能找回它。如果有位以前的守护人让你不放心，不如新建一个账户。",
+    "needMembers": "社区里至少还需要{{min}}位其他成员，才能设置这个。",
+    "pickTitle": "谁来保管一片？",
+    "pickWarning": "选那些认得你的脸、听得出你声音的人——在找回账户时，对方唯一的任务就是确认真的是你在请求。达到门槛人数的任何一组人都能重组你的密钥，所以要选不会串通的人。",
+    "thresholdLabel": "需要几位一起同意才能找回你？",
+    "thresholdOption": "{{n}}位中任意{{k}}位",
+    "create": "生成碎片",
+    "showTo": "把这个出示给{{name}}（第{{step}}/{{count}}位）",
+    "showToHint": "交接是设备对设备的：对方从你的屏幕上扫描（设置 → 守护人 → 接受碎片），或者你通过一条你们都信任的渠道把它粘贴给对方。全程不经过任何服务器。",
+    "offerQrAlt": "守护碎片码",
+    "nextGuardian": "下一位守护人",
+    "finishSetup": "完成",
+    "dutiesTitle": "我守护的成员",
+    "noDuties": "还没有人把碎片交给你。当有人选你做守护人时，在这里接受对方的代码。",
+    "dutyLine": "{{name}}：第{{index}}片，共{{total}}片，任意{{threshold}}位可找回",
+    "helpRecover": "帮忙找回",
+    "dropDuty": "不再守护",
+    "accepted": "你现在为{{name}}保管第{{index}}片，共{{total}}片。任意{{threshold}}位守护人一起才能找回对方的账户——你这一片单独不会泄露任何东西。",
+    "accept": "接受碎片",
+    "releaseFriction": "停一下。你真的确定这是{{name}}本人吗？有人冒充对方——新号码发来的消息、催得很急的电话——正是这种东西被偷走的方式。继续之前，先见对方一面、看到对方的脸，或者在你自己拨出的电话里听到对方的声音。",
+    "releaseCaptureHint": "从对方的新设备上扫描找回请求码。",
+    "releaseReady": "把这个释放码出示给对方——它只在发出你刚才所扫请求的那台设备上有效。",
+    "releaseQrAlt": "碎片释放码",
+    "releaseDone": "完成",
+    "copyText": "复制为文本",
+    "lockedHint": "这台设备已锁定——解锁后才能使用守护人功能。",
+    "error": {
+      "no_identity": "这台设备上没有身份。",
+      "locked": "这台设备已锁定——先解锁。",
+      "bad_params": "这个组合行不通——不能自己守护自己，每位守护人只算一次，门槛至少是2、又不能超过守护人的人数。",
+      "not_a_shard": "这个代码不是守护碎片。",
+      "not_addressed_to_me": "这片碎片是给另一位成员的——每位守护人要扫自己的那份代码。",
+      "undecryptable": "这个代码在这里打不开——它是封给别人的，或者和这次请求对不上。",
+      "no_duty": "你没有为那位成员保管碎片。",
+      "bad_request": "这看起来不像找回请求码。",
+      "not_a_release": "这个代码不是碎片释放码。",
+      "different_owner": "这份释放码属于另一位成员的账户。",
+      "different_set": "这份释放码来自更早（或更新）的一批守护人，没法和你已有的碎片拼在一起。所有释放码必须来自同一批——问问守护人们哪一批是最新的。",
+      "duplicate_piece": "这一片你已经扫过了。",
+      "not_enough_pieces": "碎片还不够。",
+      "corrupted": "这些碎片拼不出这位成员的密钥——可能有一片损坏了，或者来自另一批。重新扫描后再试。",
+      "device_locked": "这台设备已锁定——先解锁再恢复。"
+    }
+  },
+  "removals": {
+    "title": "移出与迎回",
+    "intro": "这是一个社区能做的最重的决定，全部公开记录：谁被移出、谁被迎回，何时、为何、都有谁签了名。没有人能单独创建这样一份记录，服务器的运行者也不行；每一份都需要规定人数的成员共同签署——约定好的若干位成员各自签上自己的名字，记录才算数。",
+    "removedLine": "经社区共同决定，{{name}}于{{when}}被移出。",
+    "reinstatedLine": "经社区共同决定，{{name}}于{{when}}被迎回。",
+    "signedBy": "签署人：{{names}}。",
+    "proposeButton": "提议将成员移出社区…",
+    "gate": {
+      "title": "获得信任后，才能签署移出",
+      "body": "移出签名正式代表整个社区发声，参与决定谁属于这里，所以要等你获得社区完全信任之后，你的签名才开始算数。这道保护同样挡住了假账号，不让它们赶走真正的邻居。",
+      "howTo": "帮助别人就是路径：一次次确认的交换让邻居认识你，任何已获信任的成员都能在你的个人资料页为你担保。你自己的个人资料页会显示你走到了哪一步。"
+    },
+    "circleShort": "正式移出一位成员需要{{need}}位已获信任成员的签名，这个社区目前有{{have}}位——所以现在还不能移出。年轻的社区处理问题靠的是多聊聊、屏蔽，以及慎重选择为谁担保。",
+    "interstitial": "移出{{name}}是这个社区能做的最重的事，而且不能一个人完成：要好几位成员各自在一份公开记录上签下名字。再往前走之前想想：个人屏蔽已经能让对方的内容不再打扰你；一次争议可以就某次具体的交换提出异议；而一场对话修补过的社区，比这里任何工具都多。如果最终还是得走到这一步，写下一条全社区都会读到的理由。",
+    "reinstateIntro": "迎回{{name}}会重新打开这扇门：对方的阅读和发言都会恢复，不过随移出一起失效的邀请不会复活。所需签名数量和移出时一样。你可以附上一句社区都会读到的话。",
+    "reasonLabel": "理由（公开，可不填）",
+    "reasonPlaceholder": "写给社区看的，不是办案卷宗。",
+    "linkLabel": "关联社区讨论过的那份提议（可不填）",
+    "linkNone": "未关联提议",
+    "linkedProposal": "已关联社区提议：“{{title}}”",
+    "linkedProposalMissing": "这份草稿引用的社区提议还没同步到这台设备上。",
+    "beginCollecting": "开始收集签名",
+    "draftHint": "当面把这个出示给每一位同意的成员。对方的设备会签名并回一个代码，在下面逐个采集。签名没凑够之前，什么都不会提交；你随时可以停下，就当什么都没发生过。",
+    "draftQrAlt": "移出草稿码，出示给每位共同签署的成员",
+    "progress": "已收集{{have}}/{{need}}份签名。",
+    "captureCosign": "采集一份共同签名",
+    "submitRemoval": "提交移出记录",
+    "submitReinstatement": "提交迎回记录",
+    "submitted": "已提交。社区服务器接受后，这份记录会出现在下面，并在每位成员的设备下次同步时生效——同步就是应用和服务器的定期碰头。",
+    "close": "关闭",
+    "copyText": "复制为文本",
+    "cosignButton": "共同签署一份移出或迎回…",
+    "cosignCaptureHint": "从提议成员的屏幕上采集草稿码。",
+    "cosignFriction": "这份签署的内容是：将{{name}}移出社区。你的名字会永久、公开地留在记录上。只有当你掂量过那些更轻的办法、确信社区需要这样做时，再签下去。",
+    "cosignReinstateFriction": "这份签署的内容是：将{{name}}迎回社区。你的名字会永久、公开地留在记录上。",
+    "cosignReason": "提议的理由：“{{reason}}”",
+    "cosignConfirm": "签上我的名字",
+    "cosignShowBack": "把这个出示给提议的成员，对方的设备会把它计入规定人数（也就是需要凑齐的签名数量）。",
+    "cosignQrAlt": "共同签名码",
+    "reinstateButton": "发起一次迎回…",
+    "selfBanner": "这个社区已按规定人数共同决定将你移出。这台设备上的一切仍然属于你，在本机也照常可用，但与社区服务器的同步会一直失败，直到足够多的成员签署迎回。这个决定、它的理由和签署人都在“提议”页上。",
+    "error": {
+      "no_identity": "这台设备上没有身份。",
+      "locked": "这台设备已锁定，先解锁。",
+      "self_subject": "不能签署关于你自己的记录。",
+      "bad_reason": "这条理由太长了。",
+      "not_a_draft": "这个码不是移出或迎回的草稿。",
+      "not_a_fragment": "这个码不是一份共同签名。",
+      "different_record": "这份共同签名属于另一份记录，每位签署人扫的必须是这一份草稿。",
+      "subject_signature": "记录所关于的那位成员不能在上面签名。",
+      "duplicate": "这位成员已经签过了。",
+      "bad_signature": "这份共同签名没能通过校验。",
+      "not_enough": "签名还不够。"
+    },
+    "singleFounder": "正式移出一位成员需要好几位已获信任成员的签名，而目前发起人是这个社区唯一获得信任的成员——在加入一位共同发起人之前，移出无从谈起。年轻的社区处理问题靠的是多聊聊、屏蔽，以及慎重选择为谁担保。"
+  },
+  "reseed": {
+    "title": "把这个社区恢复到一个节点上",
+    "intro": "如果有一天社区的服务器全部丢失，这台设备仍保存着共同的历史——每一条启事、每一次交换、每一场活动、每一个项目和每一份成员记录，都经过密码学签名（盖了章，没人能伪造是谁写的）。把它指向一个新节点（新搭好的社区服务器），就能把这一切传回去。几位成员可以同时进行，各份副本会自然合并。",
+    "targetLabel": "要恢复到的节点",
+    "systemKeyNote": "给新节点的运行者——丢失节点的自动确认密钥（TRUSTED_SYSTEM_KEYS）：",
+    "start": "恢复社区历史…",
+    "confirmTitle": "上传这个社区的共同历史？",
+    "confirmBody": "这台设备保存的社区共同记录会全部上传到 {{url}}，与这个社区任何节点保存的数据相同。只有当那个地址确实是你社区的替补服务器时才继续。可能要花几分钟，中断后再运行会接着传。",
+    "confirm": "好，开始恢复",
+    "progress": "正在恢复{{kind}}：{{done}}/{{total}}",
+    "starting": "正在开始…",
+    "doneComplete": "恢复完成。",
+    "doneInterrupted": "恢复暂停了——再运行一次，会从停下的地方继续。",
+    "totals": "{{restored}}条已恢复 · {{present}}条本来就在 · {{skipped}}条已跳过",
+    "skippedHint": "跳过的记录是这个节点谢绝接收的——通常是自动确认的交换（运行者可以用 TRUSTED_SYSTEM_KEYS 启用），或是超出开放恢复窗口（RESEED_GRACE_UNTIL）的凭据。详见 docs/community-reseed.md。",
+    "windowedNote": "这台设备之前清理过空间，保留了最近{{years}}年的记录，加上所有进行中的和你自己的——它会恢复自己保存的部分，其余由其他成员的设备补齐。"
+  },
+  "mirrorSuggest": {
+    "label": "为这个社区添加备用服务器",
+    "title": "为这个社区添加备用服务器吗？",
+    "body": "你社区的服务器公布了一台和它一起运转的第二台服务器：{{origin}}。如果添加，平常的服务器连不上时，应用会自己切换过去，你分享的内容也会同步到那里。运行备用服务器的人能看到的社区数据，和平常服务器的运行者一样多。在你确认之前，什么都不会启用。",
+    "confirm": "添加备用服务器",
+    "decline": "以后再说"
+  },
+  "growRootSuggest": {
+    "label": "我们社区的节点空间快不够了",
+    "title": "我们社区的节点（它的服务器）空间快不够了",
+    "body": "再扎一条根可以分担压力。如果这台服务器是你在运行，它可能只是需要更多存储空间，或者该清掉一些旧记录了；不管怎样，多一台服务器都会缓解压力，让大家受益。在你决定之前，什么都不会发生。",
+    "confirm": "再扎一条根",
+    "decline": "先不了"
+  },
+  "growRoot": {
+    "title": "再扎一条根",
+    "intro": "Understoria 的社区像树一样变得强壮——靠扎下更多的根。选一个你帮得上忙的方式。",
+    "continue": "继续",
+    "copied": "已复制。",
+    "gate": {
+      "title": "这份指南凭信任开启",
+      "body": "为社区运行服务器意味着实实在在的责任——运行服务器的人会成为运行者，其权力和边界全社区都能查阅。所以这条引导路径向已获信任的成员开放：也就是获得至少{{count}}位成员担保的人，和应用其他地方用的是同一道信任门槛。",
+      "progress": "你已有{{have}}/{{need}}位担保人。这不是打分——随着你和邻居交换帮助，它自然会涨。",
+      "seedVaultLead": "有件事你现在就能做：承诺保存一份社区档案的完整副本，这向所有人开放，不需要服务器。",
+      "seedVaultLink": "在这台设备上保存完整档案",
+      "guideLink": "完整指南也向所有人开放，随时可读"
+    },
+    "paths": {
+      "run": {
+        "title": "我有一台可以一直开着的电脑",
+        "body": "衣柜里的一台旧笔记本电脑真的就够了。这份指南会替你生成设置，并和你一起检查结果。"
+      },
+      "ask": {
+        "title": "我想找个人来做",
+        "body": "给那位有闲置电脑的朋友写张便条——你出邀请，应用出步骤。"
+      },
+      "help": {
+        "title": "我没法运行服务器，但我能帮忙",
+        "body": "有一种完全不用碰服务器的办法，用你手里这台设备就能帮社区把根扎得更稳。"
+      }
+    },
+    "ask": {
+      "title": "请人再扎一条根",
+      "body": "这里有一张写好的便条，直接发出去就行。用你们平常联系的渠道就好——里面没有任何秘密。",
+      "message": "嗨！我们的社区在 {{origin}} 上互助协作——一小时的帮助就等于一小时的帮助。现在一切都跑在一台服务器上，我们想再找一个人运行第二台，这样任何一台机器（以及任何一个人）都不会成为压力点。一台一直开着的旧笔记本电脑真的就够了，应用会一步一步带着走：{{guide}}。你愿意试试吗？大概一个下午的事，我会帮你。"
+    },
+    "helper": {
+      "title": "不运行服务器也能帮忙",
+      "body": "每位成员的设备上本来就带着一份社区的签名副本，但手机在空间不够时会裁掉旧记录。承诺做一座种子库，意味着你的一台设备保存完整档案——不用做端口转发，也没有运行者的权力，只有存储和团结。万一有一天所有服务器都没了，社区就是从种子库这些设备恢复回来的。",
+      "link": "打开数据设置去承诺"
+    },
+    "needs": {
+      "title": "你需要什么",
+      "intro": "三样东西，都不稀奇：",
+      "computer": "一台能一直开着的电脑——旧笔记本（合上盖子放衣柜里）、迷你主机，或者树莓派这类小板子。",
+      "internet": "家里的网络，而且能在路由器上转发端口，或者使用隧道服务。",
+      "afternoon": "一个下午，再加上和目前为社区运行服务器的那个人聊一聊。",
+      "ack": "我已读过运行一个节点意味着什么：运行者拥有 docs/operator-powers.md 里写明的权力与边界，而且拥有这些权力对我的社区是可见的。",
+      "ackLink": "到帮助页读一读"
+    },
+    "settings": {
+      "title": "你社区的设置",
+      "loading": "正在向你社区的服务器询问它的详细信息…",
+      "noNode": "这台设备还没有连上社区服务器，指南读不到你社区的详细信息。先到设置里连接一个。",
+      "noNodeLink": "打开设置",
+      "intro": "这是为你的社区生成的新服务器设置文件。整个复制过去——还需要人来填的几行在下面标了出来。",
+      "readAuth": "我们社区要求签名读取（READ_AUTH 已开启）",
+      "readAuthHint": "拿不准就问问现任运行者。读取门槛必须在每台服务器上保持一致——一台把它关掉的镜像服务器，会把整套同步过来的数据端给任何知道其地址的人。",
+      "envLabel": "新服务器的设置",
+      "placeholdersLead": "服务器启动之前，有三行需要人来填：",
+      "placeholderDbKey": "DATABASE_KEY：在新电脑上运行注释里的命令，把结果粘贴进来。",
+      "placeholderFounders": "NODE_FOUNDER_KEYS：从现任运行者那里一字不差地复制过来。",
+      "placeholderQuorum": "REMOVAL_QUORUM：设成和现有服务器一样的数字。"
+    },
+    "handover": {
+      "title": "把这个交给现任运行者",
+      "body": "现有服务器需要几行设置，才能认上新服务器，并把它告知成员们的应用。当面出示二维码，或者把文本粘贴过去。",
+      "urlLabel": "新服务器的公开地址",
+      "urlHint": "问问新运行者服务器会安在哪里——一个域名或隧道地址，比如 https://node2.example。",
+      "label": "现有服务器的设置",
+      "qrAlt": "载有现任运行者所需设置块的二维码",
+      "tokenNote": "两个设置块里出现同一个令牌是有意为之——两台服务器就是靠它互相认出对方。它只通过这个复制按钮或二维码传递，绝不经过网络。"
+    },
+    "verify": {
+      "title": "检查你的新根",
+      "intro": "等新服务器跑起来、两份设置文件都就位后，把它的地址填在这里，我们一起看看。",
+      "urlLabel": "新服务器的地址",
+      "run": "运行检查",
+      "running": "正在检查…",
+      "rerun": "再运行一次检查",
+      "check": {
+        "reachable": "新服务器有应答",
+        "config": "它公开了自己的设置页",
+        "distinctNodeId": "它有自己的名字",
+        "announced": "你现有的服务器已把它告知成员"
+      },
+      "status": {
+        "ok": "通过",
+        "fail": "还没有",
+        "unknown": "看不出来"
+      },
+      "notYet": "还没全绿——第一次尝试时完全正常。按那一行说的调整一下，重启服务器，再运行一次检查；重试不会弄坏任何东西。",
+      "allGreen": "现在，每位成员的应用都会在一张征求同意的卡片上提供这条新根——包括你的。你的社区刚刚变得更难被击垮了。",
+      "dashboardLink": "回到总览"
+    }
+  },
+  "format": {
+    "justNow": "刚刚",
+    "minutesAgo": "{{count}}分钟前",
+    "hoursAgo": "{{count}}小时前",
+    "daysAgo": "{{count}}天前",
+    "weeksAgo": "{{count}}周前",
+    "monthsAgo": "{{count}}个月前",
+    "yearsAgo": "{{count}}年前",
+    "inMinutes": "{{count}}分钟后",
+    "inHours": "{{count}}小时后",
+    "inDays": "{{count}}天后"
+  },
+  "trust": {
+    "trusted": "已获信任",
+    "trustedWithCountOne": "已获信任（{{count}}位担保人）",
+    "trustedWithCountOther": "已获信任（{{count}}位担保人）",
+    "trustedTooltip": "这位成员已有至少两份有效担保。",
+    "pending": "新来的",
+    "pendingWithCount": "新来的（{{have}}/{{need}}位担保人）",
+    "pendingTooltip": "目前担保人还不到两位。照样可以贴出需求和提供。",
+    "founder": "发起成员",
+    "founderTooltip": "这个社区的服务器记着这是一位发起成员——信任网络从这里开始，所以不需要担保就算已获信任。"
+  },
+  "achievement": {
+    "first_exchange": {
+      "label": "第一次交换",
+      "description": "完成了你的第一次交换——给出或收到都算。"
+    },
+    "connector_5": {
+      "label": "牵线人",
+      "description": "在我们的社区里帮过5位不同的人。"
+    },
+    "regular_4weeks": {
+      "label": "常来常往",
+      "description": "已连续活跃4周——每周至少完成一次交换。"
+    },
+    "bridge_builder": {
+      "label": "搭桥人",
+      "description": "满足了一项需求，而那个类别此前还没有人补上过。"
+    },
+    "seed_planter": {
+      "label": "播种人",
+      "description": "你邀请的3个人都各自完成了一次交换。"
+    },
+    "listener": {
+      "label": "倾听者",
+      "description": "已经3次通过交换在情绪上陪伴了别人。"
+    },
+    "weaver": {
+      "label": "织网人",
+      "description": "你的交换把社区里3个及以上区域的成员连在了一起。"
+    },
+    "groundbreaker": {
+      "label": "破土人",
+      "description": "发起了一个社区项目，并且至少有一位成员来出力。"
+    },
+    "crew_member": {
+      "label": "队友",
+      "description": "在各个社区项目里完成了3项及以上已确认的任务。"
+    },
+    "momentum_maker": {
+      "label": "添柴人",
+      "description": "你组织的一个项目达到了目标时数的一半。"
+    },
+    "keystone": {
+      "label": "顶梁柱",
+      "description": "你组织的一个项目圆满完成了。"
+    },
+    "earnedDate": "{{date}}获得认可"
+  },
+  "attention": {
+    "title": "等你来处理",
+    "mobileSummary": "有事等着你",
+    "intro": "有几件事在等你。有空的时候点开处理就好。",
+    "exchangeLine": "{{name}}标记“{{title}}”已完成，确认一下确实发生了。",
+    "taskLine": "{{name}}完成了{{project}}项目的“{{task}}”，去确认一下。",
+    "tapToConfirm": "点一下确认，这笔时数就会转过去。",
+    "tapToConfirmTask": "点一下确认，给帮忙的人记上时数。",
+    "taskCheckIn": {
+      "line": "还在做{{project}}的“{{task}}”吗？你是{{when}}认领的。",
+      "hint": "精力会变，需要就放手，不会留下任何记录。",
+      "stillOn": "还在做",
+      "release": "放回去，让别人接手",
+      "openProject": "打开项目"
+    },
+    "postClaimed": {
+      "needLine": "{{name}}认领了你的需求：{{title}}",
+      "offerLine": "{{name}}接受了你的提供：{{title}}",
+      "hint": "帮手在路上了。点开看看这条启事。"
+    },
+    "vouchReceived": {
+      "line": "{{name}}为你作了担保。",
+      "hint": "每一份担保都让你离“已获信任”更近一步。"
+    },
+    "growRoot": {
+      "line": "咱们社区的节点快没空间了。",
+      "hint": "再扎一条根能缓解压力——点一下来搭把手。"
+    },
+    "projectDeadline": {
+      "line": "{{project}}：还有{{days}}天到截止。",
+      "hint": "点开看看进展。"
+    },
+    "projectPaused": {
+      "line": "{{project}}已经暂停了一阵子。",
+      "hint": "准备好了就继续，或者标记为完成。"
+    },
+    "coorgInvitation": {
+      "line": "{{name}}邀请你共同组织“{{project}}”。",
+      "hint": "接受后，确认项目里的工作会用上你的时数和身份。先看看再决定。",
+      "openProject": "打开项目",
+      "lockedToRespond": "先用口令解锁这台设备，再回应。",
+      "accept": {
+        "cta": "接受",
+        "title": "接受“{{project}}”的共同组织者角色",
+        "meansTitle": "这意味着什么",
+        "meansConfirm": "确认任务完成：每确认一次，都会从你自己的时数里转出相应的小时。",
+        "meansSign": "以项目组织者的身份签名：你在这个角色里签署的记录，随项目历史（跨相连社区共享的联合历史）走到哪儿，都能追溯到你的身份。",
+        "meansVisible": "社区看得见：在每位成员、每个相连社区的副本上，项目页都会把你列为共同组织者。",
+        "notTitle": "这不意味着什么",
+        "notObligation": "没有长期义务，你随时可以自己退出这个角色。",
+        "notDeputy": "对主组织者没有任何权限，交接和移除仍由主组织者掌握。共同组织者是平起平坐的同伴，不是副手。",
+        "sign": "接受并签署"
+      },
+      "decline": {
+        "cta": "婉拒",
+        "confirmTitle": "婉拒共同组织“{{project}}”吗？",
+        "confirmBody": "不会分配任何角色。组织者下次查看项目时会看到你婉拒了。"
+      }
+    }
+  },
+  "board": {
+    "title": "社区公告栏",
+    "tagline": "需要什么，贴出来。能帮什么，也贴出来。",
+    "oneSmallThing": {
+      "button": "给我看一件小事",
+      "heading": "一件小事",
+      "why": "留给没什么力气的日子：不用挑。从眼下开放的事里随机抽出一件有边界的小事——从不排名，也从不看你的历史。",
+      "empty": "眼下没有合适的开放小事——上面的标签页里有全部内容。",
+      "another": "再换一件",
+      "open": "打开看看",
+      "close": "关闭",
+      "kindTask": "项目任务",
+      "kindNeed": "公告栏上的需求"
+    },
+    "tabs": {
+      "needs": "需求",
+      "offers": "提供",
+      "ariaLabel": "启事类型"
+    },
+    "openCount": "（{{count}}）",
+    "showClaimed": "显示{{count}}条已认领",
+    "filters": {
+      "categoryAriaLabel": "按类别筛选",
+      "urgencyAriaLabel": "按紧急程度筛选",
+      "zoneAriaLabel": "按区域筛选",
+      "allCategories": "全部类别",
+      "allUrgencies": "全部紧急程度",
+      "allZones": "全部区域",
+      "claimedShown": "含已认领"
+    },
+    "projectFilters": {
+      "category": {
+        "ariaLabel": "按类别筛选项目",
+        "all": "全部类别"
+      },
+      "status": {
+        "ariaLabel": "按状态筛选项目",
+        "all": "全部状态",
+        "planning": "筹备中",
+        "active": "进行中",
+        "paused": "暂停中",
+        "completed": "已完成"
+      },
+      "openTasks": {
+        "toggle": "只看有待认领任务的"
+      },
+      "needsMoreHands": {
+        "toggle": "还缺人手"
+      },
+      "hourSized": {
+        "toggle": "一个小时左右能搞定"
+      },
+      "emptyForFilters": "没有符合筛选的内容。"
+    },
+    "search": {
+      "placeholderPosts": "搜索启事",
+      "placeholderProjects": "搜索项目",
+      "noMatches": "没有符合搜索的内容。"
+    },
+    "fab": {
+      "postNeed": "贴出一条需求",
+      "postOffer": "贴出一条提供"
+    },
+    "empty": {
+      "titleNeeds": "这里还没冒出新芽",
+      "titleOffers": "这里还没冒出新芽",
+      "needs": "还没有符合这些筛选的需求。需要帮忙就贴出来——在时间银行里，求助永远不设门槛。",
+      "offers": "还没有符合这些筛选的提供。这个星期，你能为社区搭把什么手？",
+      "search": "没有找到“{{query}}”的结果。",
+      "filtered": "没有符合这些筛选的内容。",
+      "clearFilters": "清除筛选"
+    },
+    "panel": {
+      "ariaLabel": "启事详情",
+      "closeShort": "关闭",
+      "close": "关闭启事面板"
+    },
+    "printView": "打印这一页",
+    "plugInLink": "参与的方式",
+    "inMyCareHeading": "我照看的"
+  },
+  "dashboard": {
+    "title": "社区总览",
+    "tagline": "进步的单位是我们，不是我。",
+    "membershipRejectedBanner": "这台设备已连上你社区的服务器，但服务器还没认出你是成员——所以社区的内容不会出现在这里，你做的任何东西也不会离开这台设备。这通常说明你的邀请还没送到服务器：在这台设备上重新打开邀请链接，或者请邀请你的人再发一份新的。等服务器认出你，这条提示就会自己消失。",
+    "resume": {
+      "title": "接着上次继续",
+      "hint": "你最后碰过的任务——你自己的导航记忆，只存在这台设备上。"
+    },
+    "gatherings": {
+      "title": "接下来",
+      "going": "你会参加"
+    },
+    "handsWelcome": {
+      "title": "缺人手的地方",
+      "intro": "几扇敞开的门，等你有余力的时候。",
+      "typeNeed": "需求",
+      "typeProject": "项目"
+    },
+    "proposalsOpen_one": "{{count}}个提议开放讨论中",
+    "proposalsOpen_other": "{{count}}个提议开放讨论中",
+    "totalHoursLabel": "交换的总小时数",
+    "totalExchangesOne": "来自{{count}}次交换",
+    "totalExchangesOther": "来自{{count}}次交换",
+    "stats": {
+      "activeWeek": "本周活跃",
+      "activeMonth": "本月活跃",
+      "ofMembers": "共{{count}}位成员",
+      "streak": "互助连续纪录",
+      "streakUnitOne": "天",
+      "streakUnitOther": "天连续不断",
+      "streakGathering": "酝酿中",
+      "streakGatheringSub": "下一次交换就会开启它",
+      "needsMet": "本周完成的需求",
+      "needsMetSub": "帮助已送到，并由双方确认",
+      "needsAnswered": "已有人接手的新需求",
+      "ofPosted": "本周共贴出{{count}}条",
+      "noNeedsPosted": "本周没有贴出新的需求",
+      "seeOpenNeeds": "看看开放中的需求",
+      "seeOpenNeedsAria": "在社区公告栏查看开放中的需求"
+    },
+    "milestones": {
+      "title": "集体里程碑",
+      "hours": "互助小时数",
+      "exchanges": "完成的交换",
+      "members": "成员人数",
+      "topReached": "——最高里程碑已达成",
+      "valueOf": "{{value}} / {{next}}",
+      "lastReached": "最近达成：{{label}}",
+      "next": "下一个：{{label}}",
+      "celebration": "我们达成了一个里程碑",
+      "label": {
+        "hours": "{{count, number}}小时互助",
+        "exchanges": "{{count, number}}次交换",
+        "members": "{{count, number}}位成员同行"
+      }
+    },
+    "categoryBreakdown": {
+      "title": "帮助流向哪里",
+      "emptyTitle": "一片新的 understoria",
+      "empty": "还没有交换。等第一次交换发生，你就能看到照护、劳动和支持在社区里流动的样子。"
+    },
+    "resilience": {
+      "title": "社区韧性",
+      "nodeTitle": "一台社区服务器",
+      "tier": {
+        "seedling": "幼苗",
+        "taking_root": "扎根中",
+        "sturdy": "结实",
+        "deep_rooted": "根深叶茂"
+      },
+      "bodySeedling": "眼下这个社区只活在这台设备上。连上一台社区服务器——或者自己开一台——就能让每个人的副本保持同步。",
+      "bodyOne": "一台服务器承载着这个社区——还有{{count}}位成员在自己的设备上也带着它。拿走一台机器，拿不走这里的任何东西。",
+      "bodyOther": "一台服务器承载着这个社区——它的{{count}}位成员每个人也都在自己的设备上带着它。拿走一台机器，拿不走这里的任何东西。",
+      "bodyMultiOne": "{{nodes}}台服务器承载着这个社区——还有{{count}}位成员在自己的设备上也带着它。拿走一台机器，拿不走这里的任何东西。",
+      "bodyMultiOther": "{{nodes}}台服务器承载着这个社区——它的{{count}}位成员每个人也都在自己的设备上带着它。拿走一台机器，拿不走这里的任何东西。",
+      "bodyFailover": "就算一台服务器消失了，你的应用会自己切换到其他几台。什么都不会丢。",
+      "windowedNote": "这台设备保留最近{{years}}年的记录，加上所有进行中的和你自己的——完整历史由服务器保存。",
+      "seedVaultsOne": "{{count}}位成员在自己的设备上保存着完整档案——一座种子库。",
+      "seedVaultsOther": "{{count}}位成员在各自的设备上保存着完整档案——一座座种子库。",
+      "nodeQuiet": "最近没有服务器应答——你的副本安然无恙，等有服务器回来，同步就会继续。",
+      "capacityRed": "我们社区的节点（它的服务器）空间快满了——再扎一条根能缓解压力。",
+      "leaf": {
+        "fresh": "今天同步过",
+        "lagging": "落后了一些",
+        "quiet": "最近没有应答"
+      },
+      "cta": "再扎一条根",
+      "infraLink": "社区基础设施"
+    },
+    "federation": {
+      "title": "联邦之间",
+      "summaryOne": "{{count}}次交换 · {{hours}}小时，流经{{peers}}个友邻社区——与我们相连、同样运行 Understoria 的邻居社区",
+      "summaryOther": "{{count}}次交换 · {{hours}}小时，流经{{peers}}个友邻社区——与我们相连、同样运行 Understoria 的邻居社区"
+    },
+    "breadth": {
+      "title": "广度，不是深度",
+      "intro": "看一眼帮助铺得有多广——每一条横条都是一位成员在社区里触及的范围。慷慨铺得广，而不是堆得深。",
+      "empty": "还没有交换。第一次交换会开始画出这幅图。",
+      "rowLabel": "{{name}}帮过{{count}}个不同的人",
+      "moreNote": "还有{{count}}位{{noun}}至少帮到过一个人——要是全列出来，社区里每个名字都该在这里。",
+      "personSingular": "成员",
+      "personPlural": "成员"
+    },
+    "reciprocity": {
+      "title": "有来有往",
+      "intro": "双向流动的联结——A 帮过 B，B 也帮过 A。",
+      "rate": "{{total}}条联结中有{{reciprocal}}条双向流动",
+      "oneWaySoFar_one": "目前帮助还在单向流动——已经有{{count}}条联结开始了。当有人把帮助回给曾帮过自己的人，它就变成了一条双向的联结。",
+      "oneWaySoFar_other": "目前帮助还在单向流动——已经有{{count}}条联结开始了。当有人把帮助回给曾帮过自己的人，它就变成了一条双向的联结。",
+      "emptyTitle": "第一次交换还在前方",
+      "empty": "还没有来往可以看。",
+      "footnote": "这不是评分，只是一扇窗，看看帮助在社区里的模样。"
+    },
+    "rolesThisMonth": {
+      "title": "本月的社区角色",
+      "lineOne": "{{count}}位成员担起了{{role}}",
+      "lineOther": "{{count}}位成员担起了{{role}}"
+    }
+  },
+  "member": {
+    "notFound": "这台设备上找不到这位成员。",
+    "aboutTitle": "关于",
+    "skills": "技能",
+    "availability": "有空的时间",
+    "area": "所在区域",
+    "none": "—",
+    "vouchTitle": "担保",
+    "vouchIntro": "担保是一份签名声明——盖着你的密钥印记，任何人都能验证它确实出自你——声明这个人是我们社区的一员。两份来自不同成员的担保（包括兑换邀请）就能让一位成员获得信任。",
+    "vouchButton": "为这位成员担保",
+    "vouching": "正在担保…",
+    "vouchedJustNow": "已担保。你的签名声明存进了这台设备的记录簿——如果配置了社区节点，也正在送往社区服务器的路上。",
+    "cannotVouchSelf": "不能为自己担保。",
+    "vouchGate": {
+      "title": "担保凭信任开启",
+      "body": "你的担保是在告诉全社区：这个人是我们中的一员——所以要等你获得社区完全信任之后，它才开始算数。这和防止假账号互相担保混进来的，是同一道保护。",
+      "howTo": "帮助别人就是路：确认过的交换是邻居认识你的方式，而任何已获信任的成员都能在你的页面上为你担保。你自己的页面会显示你走到了哪一步。",
+      "singleFounder": {
+        "title": "这个社区目前只有一位发起人",
+        "body": "要等两位已获信任的成员能为一个人作保，担保才开始算数，而现在只有发起人获得了信任。等发起人添加了共同发起人，担保就会向所有人开放。"
+      }
+    },
+    "alreadyFullyTrusted": "这位成员已经获得信任。再多一份担保也不会改变什么。",
+    "alreadyVouchedByYou": "你已经为这位成员担保过了。",
+    "backToBoard": "回公告栏",
+    "recordDirectHint": "在启事和项目之外互相帮了忙？一起把时数记下来——你们俩都签名，手机对手机。"
+  },
+  "settings": {
+    "openSettings": "打开设置",
+    "title": "设置",
+    "intro": "按“谁能改、怎么改”分组：从只存在这台设备上的设置，到整个社区如何共同运转，再到你的节点服务器如何搭建。",
+    "back": "← 回到个人资料",
+    "betaLine": "Understoria 还是测试版软件——大部分代码由 AI 工具写成并经人工审阅，尚未经过独立的安全审计。敏感数据先别放进来。完整说明在“帮助”里。",
+    "buildStamp": "构建 {{stamp}}",
+    "zones": {
+      "device": {
+        "title": "在这台设备上",
+        "authority": "这些由你自己改。它们只存在这台设备上——不会同步到社区。"
+      },
+      "community": {
+        "title": "这个社区如何共同运转",
+        "authority": "由大家一起决定，通过提议和投票——不是哪一个人拨一下就行的开关。"
+      },
+      "node": {
+        "title": "这个节点",
+        "authority": "你的设备与社区服务器之间的连接。服务器本身怎么搭建，是运行者的事。"
+      }
+    },
+    "community": {
+      "summary": {
+        "title": "我们现在用的规则",
+        "intro": "这个社区目前使用的各项门槛。想改哪一项，就提一个提议让社区一起掂量——它不是个人设置。",
+        "proposeChange": "提一个改动 →",
+        "seeProposals": "查看进行中的提议",
+        "on": "开",
+        "off": "关"
+      }
+    }
+  },
+  "betaNotice": {
+    "dismiss": "知道了",
+    "title": "请了解你在用的是什么",
+    "body1": "Understoria 还是测试版软件。它的大部分代码由 AI 工具写成、由人审阅，还没有经过独立的安全审计。你会看到的那些保护——端到端加密的消息、紧急抹除、签名的记录——都是真实且测试过的，但测试版意味着可能有漏洞，包括我们还没发现的。",
+    "body2": "它是为日常的邻里互助协调而做的。别把泄露出去会伤到你或别人的东西放进来——证件号码、医疗或移民信息，或者任何你只肯私下说的话。拿不准的时候，当面说。"
+  },
+  "pilotJournal": {
+    "title": "试点日志",
+    "back": "← 返回帮助",
+    "intro": "写给试点的笔记，保存在这台设备上。随手记下让你犯迷糊的、出毛病的、或者用着顺手的地方——凡是能帮做试点的人把它变得更好的都行。",
+    "privacyNote": "这里的内容哪儿也不会发。它一直留在这台设备上，直到你删掉，或者自己交出去：点“分享我的日志”保存一份纯文本，可以交给组织者，或在碰头会上念出来。",
+    "newLabel": "添加一条笔记",
+    "placeholder": "比如“我找了半天才发现在哪儿确认任务”",
+    "addButton": "保存笔记",
+    "shareButton": "分享我的日志",
+    "empty": "还没有笔记。遇到值得记的，随时加一条。",
+    "deleteButton": "删除",
+    "helpDoorway": "记下哪里让人迷糊、哪里好用，对试点很有帮助。",
+    "helpDoorwayLink": "打开你的试点日志"
+  },
+  "invitesPage": {
+    "title": "你的邀请",
+    "back": "← 回到个人资料",
+    "intro": "你发出的邀请。未使用的排在前面；每一条都可以复制、重新出示二维码或撤销。",
+    "empty": {
+      "title": "还没有发出过邀请",
+      "message": "到你的个人资料页生成第一条邀请。",
+      "cta": "去个人资料"
+    },
+    "revokeConfirm": {
+      "title": "撤销这条邀请？",
+      "body": "撤销后这条链接就失效了。如果已经发给了别人，对方将无法用它加入。之后随时可以再生成一条新的。",
+      "confirm": "撤销邀请"
+    }
+  },
+  "profile": {
+    "title": "你的个人资料",
+    "identity": "身份：{{key}}",
+    "fullKey": {
+      "show": "显示完整公钥",
+      "hide": "隐藏完整公钥",
+      "title": "你的完整公钥",
+      "hint": "这把钥匙是公开的——分享、打印、贴到哪里都安全。服务器和其他成员就是靠它认出你的。如果你为社区运行服务器，把这个值原样填进它 .env 文件里的 NODE_FOUNDER_KEYS 就行。",
+      "qrHint": "二维码就是同一把公钥——共同发起仪式和运行者设置时可以直接扫码，不用复制文本。"
+    },
+    "sidebarAriaLabel": "资料摘要",
+    "addDevice": {
+      "title": "再添一台设备",
+      "subtitle": "在第二台设备上使用同一个身份——手机、笔记本，或者都用。",
+      "cta": "开始关联"
+    },
+    "pairingLog": {
+      "title": "已关联的设备",
+      "intro": "你在这台设备上完成过的关联——每一次把另一台设备连到这个身份的记录，留着帮你记起来。这份清单只存在这台设备上。",
+      "rotateHint": "想更换身份——整个换成一把全新的密钥，比如设备丢了的时候——看下面的“紧急情况”。",
+      "sourceTitle": "我从这里授权过的设备",
+      "destinationTitle": "这台设备被别处授权的记录",
+      "unlabeled": "（未命名）"
+    },
+    "balance": {
+      "label": "你的时数",
+      "seed": "种子：{{hours}}",
+      "footerNote": "时数可以是负的——求助永远不设门槛。",
+      "surplus": "最近你付出了很多。帮手也开口求助，社区才健康——有什么能帮到你的？",
+      "neutral": "你的时数正好停在起始时数上。这个位置挺好的。",
+      "receiving": "你最近一直在接受帮助——起始时数就是为这个准备的。需要什么就开口。",
+      "pendingLine": "{{hours}}小时待确认",
+      "awaitingYouLine": "{{hours}}小时等你确认",
+      "pendingWhy": "确认是怎么回事",
+      "pendingExplainerAuto_one": "双方都确认之后，时数才会流动。如果对方一直没顾上，社区节点（你社区的服务器）会在大约{{count}}天内替对方确认——不会有什么卡住。",
+      "pendingExplainerAuto_other": "双方都确认之后，时数才会流动。如果对方一直没顾上，社区节点（你社区的服务器）会在大约{{count}}天内替对方确认——不会有什么卡住。",
+      "pendingExplainerManual": "双方都确认之后，时数才会流动。不会有什么卡住：第二份确认一出现，时数立刻流动。",
+      "projectOutflowLine": "其中包括你替“{{project}}”转给帮手们的{{hours}}小时。",
+      "projectOutflowLineMore_one": "其中包括你替“{{project}}”和另外{{count}}个项目转给帮手们的{{hours}}小时。",
+      "projectOutflowLineMore_other": "其中包括你替“{{project}}”和另外{{count}}个项目转给帮手们的{{hours}}小时。",
+      "projectOutflowUnknownProject": "一个社区项目"
+    },
+    "about": {
+      "title": "关于你",
+      "avatarNote": "这株小植物就是你的身份，由你的公钥画出来。持有同一把钥匙的人，看到的都是同一株植物。它没法更改——别人正是靠它在整个应用里认出你。",
+      "name": "你的昵称（欢迎使用化名）",
+      "skills": "技能（用逗号分隔）",
+      "skillsPlaceholder": "做饭，倾听，西班牙语",
+      "availability": "空闲时间",
+      "availabilityPlaceholder": "例如：傍晚和周末",
+      "availabilityHeading": "你通常什么时候有空",
+      "availabilitySubhead": "选填。挑合适的，或者留空——“随时找我”也完全可以。",
+      "availabilityNotesLabel": "关于空闲时间的备注（选填）",
+      "area": "大致区域（写街区就好，不用写地址）",
+      "areaPlaceholder": "例如：城北一带"
+    },
+    "rolesEarned": {
+      "title": "你在社区里的角色",
+      "empty": "还没有被命名的角色。它们会随着你的参与出现——不是奖杯，而是给你各种付出的样子起的名字。"
+    },
+    "history": {
+      "title": "你的交换历史",
+      "emptyTitle": "你的故事从这里开始",
+      "empty": "这里还什么都没有。当你付出或收到帮助时，每次交换都会以签名记录的形式出现——盖着双方的密钥，任何人都能核对它是真的。",
+      "helped": "帮助了",
+      "received": "得到帮助，来自",
+      "helpedPending": "正在帮助",
+      "receivedPending": "正在接受帮助，来自",
+      "flag": "社区商议中",
+      "flagShort": "这次交换特别短——已提请社区一起看看。",
+      "flagReciprocal": "和同一个人反复往来交换——已提请社区一起看看。",
+      "flagDailyLimit": "接近每日交换上限。",
+      "flagDefault": "社区商议中。",
+      "pendingBadge": "待确认",
+      "awaitingYouBadge": "等你确认",
+      "taskWorkingOn": "正在做",
+      "taskRow": "{{taskTitle}}——{{projectTitle}}",
+      "showOlderOne": "再看{{count}}条更早的交换",
+      "showOlderOther": "再看{{count}}条更早的交换",
+      "showFewer": "少看一些交换",
+      "directChip": "直接记录",
+      "directInReview": "社区商议中",
+      "directFlag": "有什么不对劲？",
+      "directFlagTitle": "把这次交换提请社区商议",
+      "directFlagBody": "这次交换是直接记录的——手机对手机，背后没有启事。提出之后，它会出现在“争议”页面，全社区都能看到并回应。这里没有管理员；这是开启一场对话，不是惩罚。",
+      "directFlagConfirm": "提出来",
+      "postFlagTitle": "把这次交换提请社区商议",
+      "postFlagBody": "这会把这次交换放到“争议”页面，社区里的任何人都能说说看法——这里没有管理员。事情解决之前，时数不会流动。提出之后并非覆水难收：如果你改了主意，任何成员——包括你自己——都可以在“提议”页面把它按撤回收起来，这次交换就回到原来的样子。",
+      "postFlagConfirm": "提出来"
+    },
+    "memberSwitcher": {
+      "title": "切换成员（本地开发用）",
+      "note": "真实部署中，每台设备只保存一个身份。这个切换器是为了让你在测试时能自己走完整个交换流程。",
+      "noAreaSet": "未填写区域"
+    },
+    "settingsRow": {
+      "label": "设置",
+      "description": "语言、外观、已屏蔽的联系人、安全。"
+    },
+    "data": {
+      "title": "数据与隐私",
+      "intro": "你看到的一切都保存在这台设备本地。没有服务器，没有数据追踪，也不用注册账号。",
+      "storageUsage": "你这份社区副本：{{size}}",
+      "storageProtected": "已受保护，浏览器清理时不会动它",
+      "storageUnprotected": "磁盘空间紧张时，浏览器可能会把它清掉——把应用安装到设备上通常能保住它",
+      "storageUnknown": "这个浏览器上无法确定是否受清理保护",
+      "export": "导出我的数据",
+      "window": {
+        "full": "这台设备保存着社区的完整历史。",
+        "windowed": "这台设备保留最近{{years}}年的内容，外加所有仍在进行的和属于你的东西。完整历史一直在你社区的服务器上。",
+        "freeUp": "在这台设备上腾出空间…",
+        "chooseHorizon": "这台设备要保留多久的历史？",
+        "keepYears": "保留{{years}}年",
+        "preview": "这只会从这台设备上移除{{total}}条旧记录：{{posts}}条已了结的启事、{{events}}场过去的活动、{{projects}}个已收尾的项目，以及它们的详情。",
+        "previewNote": "你写下的内容、仍在进行的事情，还有社区的时数记录、成员名册和加入记录，都不会被动到。移除的每条记录都还在你社区的服务器和其他成员的设备上——以后随时可以全部找回来。",
+        "confirm": "腾出空间",
+        "done": "好了——已从这台设备移除{{total}}条记录。",
+        "undo": "重新保存完整历史",
+        "undoDone": "这台设备会在后台重新下载完整历史。早已收尾的项目的活动日志不会回来——它们从来只存在于各台设备上。"
+      },
+      "vault": {
+        "body": "有闲置的空间吗——一台旧笔记本、抽屉里的平板？可以承诺在这台设备上保存完整档案。这是让社区更难被抹去的省心办法：没有要架的服务器，没有要配置的网络（不用碰“端口转发”那种东西），只要存储空间，和一份同舟共济的心意。你的承诺是公开的，好让社区知道现在有多少份完整副本；随时可以停下。",
+        "enable": "在这台设备上保存完整档案",
+        "disable": "不再承诺保存档案",
+        "active": "这台设备是一座种子库——保存着社区的完整档案。",
+        "enabled": "已承诺。这台设备现在会保存全部内容（之前腾出的空间正在重新下载）。",
+        "disabled": "承诺已撤回。什么都没有删除——只是这台设备不再承诺保存全部内容了。",
+        "error": {
+          "no_identity": "这台设备上还没有身份。",
+          "locked": "这台设备已锁定——先解锁。"
+        }
+      }
+    },
+    "communityAccount": {
+      "title": "社区与账户"
+    },
+    "learn": {
+      "title": "学习",
+      "rowDescription": "指南、常见问题和设计理念——全部离线可用。",
+      "intro": "欢迎导览、常见问题、精简版成员指南，还有给学习小组的讨论题。这里的一切离线也能用。",
+      "revisitWelcome": "再走一遍欢迎导览",
+      "helpFaq": "常见问题",
+      "memberGuide": "成员指南",
+      "opsecGuide": "保护好自己",
+      "opsecIntro": "互助工作有实实在在的风险。这份短指南讲了保护自己和社区的基本要点。先读一遍；情况有变时再回来看看。",
+      "designPrinciples": "设计理念",
+      "principlesIntro": "Understoria 的每个设计选择都有它的理由。这些理念解释了应用为什么这样运作，并举了其他项目换种做法后发生过什么的例子。",
+      "studyPrompts": "学习小组讨论题",
+      "addToPhone": "添加到手机",
+      "promptCopy": "复制一份带去聚会",
+      "promptCopied": "已复制"
+    },
+    "communitySettings": {
+      "title": "社区设置",
+      "rowDescription": "打开查看或调整社区的各项门槛。",
+      "intro": "这些门槛，社区可以按自己的情况调整。默认值适合大多数群体。",
+      "bootstrapNote": "在这里直接修改，会立刻对这台设备上的所有人生效；设置的变更也可以走社区提议和投票的路子。",
+      "proposeLink": "或者提出一个改动，让社区一起讨论 →",
+      "dailyLimit": {
+        "label": "每日帮手上限",
+        "hint": "任何一位帮手在24小时内最多能完成的交换次数。这是硬性上限，不是建议。"
+      },
+      "shortExchange": {
+        "label": "过短交换的提示门槛（小时）",
+        "hint": "短于这个时长的交换会得到一个提示标记，交给社区一起看看。不拦、不罚——只是让大家看得见。"
+      },
+      "reciprocal": {
+        "label": "反复往来的提示门槛",
+        "hint": "同样两位成员在30天内交换达到这个次数时，最新一次交换会得到提示标记。"
+      },
+      "taskCheckInDays": {
+        "label": "任务问一声（天）",
+        "hint": "过了这么多天，认领了项目任务的成员会在自己的提醒列表里私下收到一句“还在做吗？”。也可以悄悄放手，谁都不会看到。"
+      },
+      "taskNeedsHelpDays": {
+        "label": "任务“还缺人手”（天）",
+        "hint": "过了这么多天，已被认领的任务会公开标记为还缺人手。说的是任务，不是人。这个天数不能小于“问一声”的门槛。"
+      },
+      "taskCheckInGraceDays": {
+        "label": "任务问一声后的宽限（天）",
+        "hint": "认领人回应了那句私下的提醒之后，这么多天内先不显示公开的“还缺人手”标记。这样，有回应的认领人可以让任务先不进入社区的视野。数值保持小一些（1-3），长期没有回音时任务仍会浮现。"
+      },
+      "deliberationDays": {
+        "label": "提议的商议期（天）",
+        "hint": "一项提议至少要开放这么多天，才能因共识自动通过。避免仓促投票。"
+      },
+      "minAffirms": {
+        "label": "最少赞同数",
+        "hint": "提议自动通过所需的不同成员赞同数。就算商议期已满，只有一个人赞同的提议也不该悄悄通过。"
+      },
+      "inviteOnly": {
+        "label": "仅凭邀请加入",
+        "helpText": "开启后，访问 /welcome 的人会看到“仅限邀请”的页面。全新节点上第一位加入的成员是例外（初始引导）。"
+      },
+      "save": "保存设置",
+      "reset": "恢复默认值"
+    },
+    "language": {
+      "title": "语言",
+      "intro": "选择 Understoria 在这台设备上用哪种语言和你说话。随着 i18n 迁移推进，会有更多语言，应用其余部分的翻译也在路上。",
+      "newTranslationNote": "这份翻译还很新——由 AI 协助写成、经过人工审校，但还没有母语者从头到尾把过关。哪里读着别扭，告诉我们：欢迎指正，改起来也容易。",
+      "contentEnglishNote": "较长的指南——常见问题、项目模板和任务小贴士——在这个语言下暂时还是英文。它们是接下来要翻译的。"
+    },
+    "appearance": {
+      "title": "外观",
+      "intro": "浅色或深色。“跟随系统”跟着你的设备走——如果你设置了系统按时间自动切换，用它正合适。",
+      "system": "跟随系统",
+      "light": "浅色",
+      "dark": "深色",
+      "textSizeTitle": "文字大小",
+      "textSizeIntro": "会和设备的文字大小相乘：如果你在系统里调大了字，这里更大的选项会在那个基础上再放大。",
+      "auto": "自动",
+      "autoSublabel": "在这块屏幕上，“自动”显示为“{{resolved}}”。调整窗口大小就能看到它切换。",
+      "default": "默认",
+      "larger": "较大",
+      "largest": "最大",
+      "densityTitle": "布局密度",
+      "densityIntro": "紧凑会收窄卡片留白，让密一些的屏幕在首屏放下更多内容。可点按的区域大小不变。",
+      "density": {
+        "default": "舒适",
+        "compact": "紧凑"
+      },
+      "paletteTitle": "颜色",
+      "paletteIntro": "四套配色，各有浅色和深色。“林冠”就是你熟悉的那抹绿。",
+      "palette": {
+        "canopy": "林冠",
+        "riverbed": "河床",
+        "harvest": "丰收",
+        "fieldnotes": "田野笔记"
+      }
+    },
+    "node": {
+      "title": "社区节点",
+      "intro": "可以选择把你已完成的交换抄送一份到社区节点（你社区共用的服务器），让它们出现在全社区的共同账本里。节点会核验每一条签名；它从不保存你的私钥：你身份里保密的那一半，始终留在你自己的设备上。",
+      "urlLabel": "节点 URL",
+      "urlPlaceholder": "https://aid.our-union.example/api",
+      "enableLabel": "把已完成的交换抄送一份到这个节点",
+      "save": "保存",
+      "saved": "已保存",
+      "lastSuccess": "上次成功：{{when}}",
+      "lastError": "上次出错：{{message}}",
+      "noActivity": "还没有抄送过任何记录。",
+      "pending": "{{count}}条在发件箱等待",
+      "poisoned": "{{count}}条被标记待查看",
+      "retryNow": "现在重试",
+      "retrying": "重试中…",
+      "inviteLink": "有邀请链接？在这里打开。",
+      "consent": {
+        "title": "把你的交换记录发送到这台服务器？",
+        "body": "开启抄送后，你参与的每一次交换都会发送到这台服务器——包括对方的公钥（对方可分享的成员标识）、证明记录真实的签名、类别、时数和时间。一台不由你们掌握的服务器，可以用这些信息描绘出社区里谁在帮谁。只有当这个节点由你的社区自己运行、也被大家信任时，才开启它。",
+        "confirm": "是的，抄送到这个节点"
+      },
+      "claim": {
+        "toggle": "发起人设置——认领一个新节点",
+        "statusUnknown": "联系不上节点，无法确认它是否还缺发起人。检查上面的地址是否正确，再试一次。",
+        "alreadyClaimed": "这个节点已经有自己的发起成员了——这里不用再做什么。",
+        "intro": "全新的节点在发起成员认领之前是锁着的。输入服务器启动日志（你运行服务器的那个终端）里打印的一次性设置码。",
+        "codeLabel": "设置码",
+        "claim": "认领这个节点",
+        "claiming": "认领中…",
+        "success": "节点认领成功——你就是发起成员，下次拉取时同步就会开始。欢迎回家。",
+        "errors": {
+          "already_claimed": "已经有人认领了这个节点。如果那不是你，去找运行这台服务器的人聊聊。",
+          "bad_setup_token": "这个码对不上。要从服务器启动日志里原样复制——服务器每次重启都会生成新的码。",
+          "stale_claim": "这台设备的时钟好像偏差了好几分钟——校准时间后再试。",
+          "bad_signature": "没能正确签署这次认领。解锁应用后再试一次。",
+          "unreachable": "联系不上节点。检查地址和网络连接。",
+          "rejected": "节点拒绝了这次认领。到服务器日志里看看详情。"
+        }
+      }
+    },
+    "invites": {
+      "title": "你发出的邀请",
+      "intro": "新成员需要两份担保才能获得信任。你的邀请算作第一份——加入之后，还需要另一位成员为对方担保。",
+      "empty": "你还没有邀请过任何人。邀请之后，链接会出现在这里，方便你再次分享或撤销。",
+      "summary": {
+        "open_one": "1份未使用",
+        "open_other": "{{count}}份未使用",
+        "redeemed_one": "1份已使用",
+        "redeemed_other": "{{count}}份已使用",
+        "revoked_one": "1份已撤销",
+        "revoked_other": "{{count}}份已撤销",
+        "expired_one": "1份已过期",
+        "expired_other": "{{count}}份已过期",
+        "manageAll": "管理全部 →"
+      },
+      "generate": "生成邀请链接",
+      "generateAnother": "再生成一条邀请链接",
+      "generating": "生成中…",
+      "shareTitle": "把这条链接分享给一个人",
+      "openShareTitle": "你的未使用邀请——还没有人用过",
+      "openInviteMeta": "生成于{{when}} · 有效期至{{date}}",
+      "shareNote": "链接只能用一次，14天后失效。如果在被使用前泄露了，就在下面撤销它。",
+      "openShareNote": "这就是你之前生成的那条一次性链接。把它分享给一位你信任的人——如果担心已经泄露，就到“管理全部”里撤销，再生成一条新的。",
+      "generated": "生成于{{when}}",
+      "redeemed": "使用于{{when}}",
+      "redeemedBy": "{{name}}在{{when}}使用了它",
+      "usedAfterRevoke": "在你撤销之后，{{name}}于{{when}}使用了它。它照样不会放任何人进来——不过也许值得聊一聊。",
+      "expires": "有效期至{{date}}",
+      "revoke": "撤销",
+      "statusOpen": "未使用",
+      "statusRedeemed": "已使用",
+      "statusRedeemedDespiteRevocation": "撤销后仍被使用",
+      "statusRevoked": "已撤销",
+      "statusExpired": "已过期",
+      "showShareSheet": "显示二维码",
+      "shareLinkHidden": "•••••• 已隐藏——点“显示链接”查看",
+      "revealLink": "显示链接",
+      "hideLink": "隐藏链接",
+      "revealedHint": "任何摄像头拍得到的地方都能读到它。用完记得再藏起来。",
+      "shareSheet": {
+        "title": "分享这份邀请",
+        "intro": "当面出示二维码，或把链接发给一位你信任的人。拿到这条链接的任何人都能加入——分享时多留个心眼。",
+        "qrAriaLabel": "包含邀请链接的二维码",
+        "qrFallback": "二维码画不出来。改用下面的链接吧。",
+        "urlLabel": "或复制链接",
+        "shareButton": "打开分享菜单",
+        "close": "完成",
+        "shareTitle": "来 Understoria 加入我的社区吧",
+        "shareText": "我邀请你在 Understoria 上加入我的社区。",
+        "statusShared": "已分享。",
+        "statusCopied": "链接已复制到剪贴板。",
+        "statusFailed": "分享和复制都没成功。选中链接，手动复制一下。",
+        "cameraGate": {
+          "title": "出示之前，先看看四周",
+          "body": "监控摄像头和电脑摄像头隔着一个房间也能读取二维码。它一旦出现在屏幕上，摄像头拍得到的任何人都能存下来，自己用它加入你的社区。",
+          "followup": "这个提醒每次都会出现——两次分享之间，你周围的环境可能已经变了。",
+          "cancel": "先不",
+          "confirm": "现在出示"
+        },
+        "printPoster": "打印海报",
+        "gate": {
+          "title": "分享这条邀请链接",
+          "body": "拿到这条链接的任何人都能加入你的社区——只发给一位你信任的人。",
+          "shareWithoutShowing": "不显示链接，直接发送",
+          "reveal": "显示邀请",
+          "cancel": "先不",
+          "notAvailable": "你的浏览器没法在不显示链接的情况下分享或复制。点“显示邀请”，然后手动复制。",
+          "statusCopied": "链接已复制到剪贴板。把它粘贴到 Signal、短信或任何你想发的地方——链接没有出现在屏幕上。",
+          "statusFailed": "浏览器拦下了分享和剪贴板。点“显示邀请”手动复制吧。"
+        }
+      },
+      "noteLabel": "这是给谁的？（只有你自己看得到）",
+      "notePlaceholder": "例如：菜园的 Carol——只存在这台设备上，不会随链接发出",
+      "noteFor": "给：{{note}}",
+      "noteAdd": "添加备注",
+      "noteEdit": "编辑备注"
+    },
+    "security": {
+      "title": "安全",
+      "summaryProtected": "这台设备上的私密密钥——身份中保密的那一半——已经加密封存（打乱保管），封存用的密钥由你的口令推导而来。",
+      "summaryUnprotected": "你的私密密钥现在以明文保存——任何拿到设备的人都能直接复制的可读文本。要把设备留在别人可能拿起你手机的地方之前，先开启口令保护。",
+      "enable": "开启口令保护",
+      "change": "更改口令",
+      "disable": "关闭保护",
+      "lockNow": "立即锁定",
+      "currentPassphrase": "当前口令",
+      "newPassphrase": "新口令",
+      "passphrase": "口令",
+      "repeat": "再输一遍",
+      "passphraseHint": "至少8个字符。用密码管理器生成的四个词连成的口令最理想。没有任何找回途径——我们没法帮你找回来。",
+      "disableWarn": "这会把加密封存的密钥改回明文保存——不再由口令护着——就在这台设备上。确定设备安全时才这样做。",
+      "submitEnable": "开启",
+      "submitChange": "更改",
+      "submitDisable": "关闭",
+      "working": "处理中…",
+      "successEnable": "口令保护已开启。把口令抄在安全的地方——它没法找回。",
+      "successChange": "口令已更改。下次解锁时用新的。",
+      "successDisable": "口令保护已关闭。私密密钥又以明文保存在这台设备上了——拿到设备的人都能读到。",
+      "errorMismatch": "两次输入的口令不一致。",
+      "errorMismatchNew": "两次输入的新口令不一致。",
+      "passkey": {
+        "title": "通行密钥",
+        "intro": "用指纹、面容或设备 PIN 码解锁这台设备，不必输入口令。口令仍然保留，是永远管用的后备方式。",
+        "enableFirst": "先开启口令保护——通行密钥只是多一种解锁方式，绝不会是唯一的方式。",
+        "add": "添加通行密钥",
+        "adding": "添加中…",
+        "remove": "移除通行密钥",
+        "addedOn": "已有一枚通行密钥可以解锁这台设备（添加于{{date}}）。口令也仍然可用。",
+        "promptNote": "设备可能会让你确认两次——一次创建通行密钥，一次为解锁做准备。这是正常的。",
+        "needUnlock": "先解锁这台设备，才能更改通行密钥设置。",
+        "prfUnsupported": "这台设备创建了通行密钥，但它的安全硬件带不动这里的解锁（缺少一个叫 PRF 的功能）。什么都没有改动——可以到设备的密码管理器里删掉那枚没用上的通行密钥。",
+        "failed": "通行密钥没能设置好。什么都没有改动——口令照常可用。",
+        "successAdd": "通行密钥已添加。下次这台设备锁定时，轻轻一按就能解锁——口令也永远管用。",
+        "successRemove": "通行密钥已不再用于解锁这台设备。也可以顺手把它从设备的密码管理器里删掉。"
+      },
+      "whenAsked": "在应用被关闭或重新加载后再打开时，以及你自己用下面的“立即锁定”按钮锁上之后，才会要你输入口令——应用一直开着时，绝不会因为过了多久就来要。"
+    },
+    "emergency": {
+      "title": "紧急情况",
+      "intro": "两个危急选项，留给设备处境危险的时候。它们都不会联系任何服务器；一切只发生在这台设备上。",
+      "softBullet": "轻度抹除——清空所有能认出人的文字（名字、描述、区域、技能），但保留已签名的交换记录簿（历次交换的记录）和你的密钥对（构成你账户的那对密钥）。适合设备将短暂落入想伤害你的人手里的情况。",
+      "hardBullet": "彻底抹除——清掉这里保存的一切，包括私钥，并换上一个全新的身份（一把全新的密钥）。无法恢复。之后页面会重新加载。",
+      "federatedNote": "坦白说明：两个选项都只作用于这台设备。已经同步给社区的内容——启事、交换、担保、投票和其他签名记录——仍会留在社区节点（共用的服务器）和其他成员的设备上。一张你不再认同的公开投票可以重新投：以最新的那一票为准。",
+      "softButton": "轻度抹除（匿名化）",
+      "hardButton": "彻底抹除（删除一切）",
+      "softTitle": "确定轻度抹除吗？",
+      "softConfirmDescription": "每位成员和每条启事上能认出人的文字都会被清空。已签名的交换记录和你的密钥对（构成你账户的那对密钥）会保留。这一步无法撤销。",
+      "softConfirm": "是的，匿名化",
+      "hardTitle": "确定彻底抹除吗？",
+      "hardConfirmDescription": "这里保存的一切都会被抹掉——包括你的私钥。会生成一个全新的身份（一把新密钥），然后应用重新加载。无法撤销。",
+      "hardConfirm": "是的，全部抹除",
+      "completedSoft": "轻度抹除完成，用时{{ms}}毫秒。",
+      "completedHard": "彻底抹除完成，用时{{ms}}毫秒。",
+      "spokenSoft": "注意。这会从这台设备上抹去名字和个人文字，且无法撤销。按确认按钮继续，或者取消。",
+      "spokenHard": "注意。这会抹去这台设备上的一切，包括你的密钥，且无法撤销。按确认按钮继续，或者取消。"
+    },
+    "readAloud": {
+      "title": "朗读",
+      "intro": "开启后，你碰到或聚焦到的每个按钮、每个输入框，应用都会用设备自带的声音念出名字——什么都不会被发送到别处。看屏幕上的字吃力时会很有帮助。",
+      "turnOn": "开启朗读",
+      "turnOff": "关闭朗读",
+      "spokenOn": "朗读已开启。碰一碰任何按钮，就能听到它的名字。",
+      "spokenOff": "朗读已关闭。",
+      "unsupported": "这台设备的浏览器没有自带语音，朗读在这里用不了。"
+    }
+  },
+  "help": {
+    "title": "常见问题",
+    "subtitle": "使用应用时常碰到的问题，这里有快速解答。想看更完整的？翻翻成员指南，或在下面再走一遍欢迎导览。",
+    "tourLink": "再走一遍欢迎导览",
+    "footer": "没找到你的问题？这里没有的，多半是该和社区聊的事，而不是应用功能——找一位你信任的成员聊聊。",
+    "filterLabel": "筛选问题",
+    "filterPlaceholder": "输入文字筛选问题…",
+    "filterMatches_one": "{{count}}个问题符合。",
+    "filterMatches_other": "{{count}}个问题符合。",
+    "clearFilter": "清除筛选",
+    "noMatchesTitle": "没有符合的问题",
+    "noMatches": "换几个词试试——或者清除筛选，按板块浏览。",
+    "expandAll": "全部展开",
+    "collapseAll": "全部收起",
+    "sectionsNav": "跳到某一节"
+  },
+  "startCommunity": {
+    "title": "开一个新社区",
+    "subtitle": "从这个社区的服务器到你自己的服务器，完整的一条路——不用 GitHub，不用应用商店，不用向谁请示。",
+    "toDownloads": "下载都在“社区基础设施”页面上"
+  },
+  "disputes": {
+    "title": "争议",
+    "subtitle": "有人标记出来、请社区一起看看的交换。任何人都能看到这份列表——这里没有管理员。当事双方在启事上已经能看到标记；这里是让其他人也看到的地方。",
+    "emptyTitle": "没有需要社区留意的事",
+    "empty": "眼下没有被标记的交换。有人标记时，会显示在这里，社区就能看到并回应。",
+    "flagChip": "商议中",
+    "typeNeed": "需求",
+    "typeOffer": "提供",
+    "typeDirect": "直接记录",
+    "directTitle": "直接记录——没有对应的启事",
+    "helperLabel": "帮忙的一方",
+    "recipientLabel": "受助的一方",
+    "postedLabel": "最初贴出于",
+    "viewPost": "打开启事",
+    "viewTask": "打开项目",
+    "commentSubjectChip": "任务评论",
+    "commentTitle": "被标记的评论",
+    "commentAuthorLabel": "作者",
+    "openInDecisions": "在提议里打开",
+    "footer": "每条争议也会出现在“提议”里，社区可以在那里投票决定如何回应。一处解决，两处都会关闭。",
+    "entry": {
+      "title": "社区争议",
+      "descriptionNone": "眼下没有被标记的交换。",
+      "descriptionOne": "有{{count}}笔交换被标记出来，等社区一起商议。",
+      "descriptionOther": "有{{count}}笔交换被标记出来，等社区一起商议。",
+      "open": "打开"
+    }
+  },
+  "proposals": {
+    "title": "提议",
+    "subtitle": "社区正在进行中的决定。谁都可以发起提议；只要社区达成一致，谁都可以记录结果。应用内投票以后会有——现在这里先记下大家在别处做出的决定。",
+    "filterAriaLabel": "按状态筛选",
+    "filter": {
+      "open": "进行中",
+      "all": "全部",
+      "passed": "已通过",
+      "rejected": "未通过",
+      "withdrawn": "已撤回"
+    },
+    "startNew": "发起一个提议",
+    "emptyTitleOpen": "没有进行中的提议",
+    "emptyTitleFiltered": "没有符合的",
+    "emptyOpen": "眼下没有进行中的提议。",
+    "emptyFiltered": "没有提议符合这个筛选条件。",
+    "contested": "已记录为通过，但全社区的投票里还有一个未撤回的阻止——这个结果存在争议。大家坐下来谈一谈；记录会保留。",
+    "gate": {
+      "title": "记录结果这一步，随信任开启",
+      "body": "记录结果，就是正式说出社区的决定——它会关闭提议，让结果在每个地方生效——所以要等社区完全信任你之后，这一步才开始算数。你现在照样可以提议、讨论和投票；你投的阻止始终有效。",
+      "howTo": "帮大家搭把手就是通往那里的路：一次次确认的交换让邻居们慢慢认识你，任何已获信任的成员都可以在你的个人主页为你担保。你自己的个人主页会显示你走到了哪一步。",
+      "withdrawOwnHint": "你自己的提议始终归你——随时都可以撤回。"
+    },
+    "consensusPendingViewer": "共识条件已经达到。这不是卡住了——记录结果这一步随信任开启，所以正在等一位获得社区完全信任的成员来动手。",
+    "errors": {
+      "closer_not_trusted": "社区服务器先替你保管着这个结果，等社区完全信任你之后就会自动记录——它没有被拒绝。在那之前，任何获得社区完全信任的成员都可以先记录它。"
+    },
+    "localOnly": "只记录在这台设备上——它创建于社区决定还没在设备间同步的时候，其他成员看不到它。",
+    "footer": "这里的投票是公开的：你的票记着你的名字，社区内可见，并会同步到每位成员的设备。提议开放期间可以随时改票——以最新的一次为准。等社区做出决定，任何获得社区完全信任的成员都可以记录结果，结果随即在每个地方生效。",
+    "proposerLabel": "提议人",
+    "backfillProposer": "（历史记录，提出者不详）",
+    "proposedLabel": "发起于",
+    "closedLabel": "关闭于",
+    "outcomeReasonLabel": "原因",
+    "outcomeReasonPlaceholder": "简单写几句，社区是怎么走到这个结果的。",
+    "recordOutcomeHint": "社区已经有决定了？把结果记下来：",
+    "outcomePassed": "通过",
+    "outcomeRejected": "未通过",
+    "outcomeWithdrawn": "撤回",
+    "confirmClose": {
+      "passed": "标记为通过",
+      "rejected": "标记为未通过",
+      "withdrawn": "撤回"
+    },
+    "consensusReached": "已达成共识：{{affirms}}个赞同、{{blocks}}个阻止。任何获得社区完全信任的成员都可以关闭这个提议。",
+    "closeAsPassed": "关闭并标记为通过",
+    "closedReason": {
+      "consensus": "共识条件达成后，由成员操作关闭。"
+    },
+    "payloadHeader": "提议的配置",
+    "status": {
+      "open": "进行中",
+      "passed": "已通过",
+      "rejected": "未通过",
+      "withdrawn": "已撤回"
+    },
+    "category": {
+      "config_change": "配置变更",
+      "dispute": "争议",
+      "project_adoption": "项目照料"
+    },
+    "reversibility": {
+      "easy": "容易撤销",
+      "easyTooltip": "另一个提议就能撤销它。大多数配置微调都属于这一档。",
+      "easyHint": "另一个提议就能撤销它。大多数配置微调都属于这一档。",
+      "moderate": "中等",
+      "moderateTooltip": "撤销起来要费些功夫。通过之前值得停一停。",
+      "moderateHint": "撤销起来要费些功夫。通过之前值得停一停。",
+      "hard": "难以撤销",
+      "hardTooltip": "撤销意味着要重建一些东西。建议先做影响思考。",
+      "hardHint": "撤销意味着要重建一些东西。难撤销档的提议，建议先做影响思考。"
+    },
+    "entry": {
+      "title": "社区提议",
+      "descriptionNone": "眼下没有进行中的提议。",
+      "descriptionOne": "{{count}}个提议正开放，等社区一起讨论。",
+      "descriptionOther": "{{count}}个提议正开放，等社区一起讨论。",
+      "open": "打开"
+    },
+    "errorTitleRequired": "给提议起个简短的标题吧。",
+    "errorPositiveInteger": "必须是大于0的整数。",
+    "eligibility": {
+      "waitDeliberation": "如果在那之前没有阻止出现，{{when}}就会自动通过。",
+      "waitAffirms": "需要{{need}}个赞同才能按共识自动通过；目前有{{have}}个。",
+      "waitAffirmsPending": "需要{{need}}个计入的赞同才能按共识自动通过；目前有{{have}}个，另有{{pending}}个已记录，等投票的成员获得社区完全信任后就开始计入。",
+      "blocked": "被{{count}}个阻止拦下了——先解决它，事情才能往前走。"
+    },
+    "vote": {
+      "headingNone": "还没有人投票",
+      "headingOne": "{{count}}位成员表达了看法",
+      "headingOther": "{{count}}位成员表达了看法",
+      "castPrompt": "你怎么看？",
+      "changeChoice": "你目前的投票：{{choice}}。想改就改：",
+      "affirm": "赞同",
+      "block": "阻止",
+      "abstain": "弃权",
+      "blockReasonLabel": "你为什么阻止？",
+      "blockReasonPlaceholder": "需要先解决什么，事情才能往前走？",
+      "confirmBlock": "记录阻止",
+      "choice": {
+        "affirm": "赞同",
+        "block": "阻止",
+        "abstain": "弃权"
+      },
+      "pendingAffirmNote": "你的投票会立即记录并可见。赞同要等社区完全信任你之后才开始计入共识——阻止则始终算数。",
+      "tally": {
+        "affirms": "赞同：{{count}}",
+        "affirmsCounted": "赞同：{{total}}个中有{{counted}}个计入共识——投票的成员获得社区完全信任后，赞同才开始计入",
+        "blocks": "阻止：{{count}}",
+        "abstains": "弃权：{{count}}"
+      }
+    },
+    "toast": {
+      "created": "提议已发起。在你们常用的渠道上分享给社区吧。"
+    },
+    "new": {
+      "title": "发起一个提议",
+      "subtitle": "提议修改你社区节点的配置。提议会一直开放，直到有人记录结果——这一步暂时是手动的，我们还在摸索真实的提议长什么样。",
+      "fieldTitle": "标题",
+      "fieldDescription": "为什么要改？",
+      "descriptionPlaceholder": "这解决什么问题？有什么顾虑？希望社区怎么参与讨论？",
+      "configHeader": "提议的数值",
+      "configIntro": "三个阈值都可以改。没改动的字段保持现值。",
+      "currentValue": "目前：{{value}}",
+      "unchanged": "未改动",
+      "tierHeader": "可撤销程度",
+      "tierIntro": "这件事撤销起来有多难？默认是“容易”，因为配置可以由另一个提议改回来——如果文化上的影响比技术上的撤销更大，就调到“中等”或“难以撤销”。",
+      "impactHeader": "影响思考",
+      "impactIntro": "难以撤销的决定值得停一停。难撤销档的提议必须答完四个问题——目的就是慢下来，在做一件更难收回的事之前，把每个维度都想一遍。",
+      "impactFooter": "这些笔记会和提议一起展示给社区。",
+      "impact": {
+        "yearOneLabel": "第一年会有什么变化？",
+        "yearOnePlaceholder": "现在就能预见的具体影响。",
+        "fiveYearLabel": "五年后会有什么变化？",
+        "fiveYearPlaceholder": "等它安顿下来，会是什么样子？",
+        "reversalPathLabel": "如果发现错了，要怎么撤销？",
+        "reversalPathPlaceholder": "回头的路是什么？需要哪些人点头？",
+        "vulnerableImpactLabel": "谁受影响最大——尤其是最脆弱的成员？",
+        "vulnerableImpactPlaceholder": "万一出了岔子，重担落在谁身上？",
+        "required": "难撤销档的提议必须填写。"
+      },
+      "submit": "发起提议",
+      "submitting": "正在发起…"
+    },
+    "impact": {
+      "heading": "影响思考",
+      "yearOne": "第一年",
+      "fiveYear": "五年后",
+      "reversalPath": "撤销路径",
+      "vulnerableImpact": "对脆弱成员的影响"
+    }
+  },
+  "community": {
+    "autoConfirmHours": {
+      "label": "多久后自动确认",
+      "help": "当一方不再回应时，社区节点的系统密钥（属于服务器本身的一把密钥）会代为签署，把交换记为完成，让时数流动起来。设为0可完全关闭自动确认。这需要运行者配置好系统密钥；没有的话，这个自动收尾什么也不会做。",
+      "unit": "小时（0为关闭）"
+    },
+    "customMilestones": {
+      "title": "自定义里程碑",
+      "intro": "在小时数、交换次数和成员数这些基础里程碑之外，再加上对你们社区有意义的数字。它们会和基础里程碑一起出现在总览上。",
+      "add": "添加里程碑",
+      "typeLabel": "类型",
+      "typeHours": "小时数",
+      "typeExchanges": "交换次数",
+      "typeMembers": "成员数",
+      "thresholdLabel": "门槛值",
+      "labelField": "名称",
+      "labelHint": "达到时要庆祝什么",
+      "remove": "移除",
+      "emptyMessage": "还没有自定义里程碑。加上对你们社区有意义的那些吧。",
+      "validation": {
+        "duplicate": "已经有相同类型和门槛值的里程碑了。",
+        "labelTooLong": "名称太长了（最多80个字符）。",
+        "labelRequired": "给里程碑起个名称，让成员知道它庆祝的是什么。",
+        "threshold": "门槛值要是正整数。",
+        "maxReached": "自定义里程碑最多20个。"
+      }
+    }
+  },
+  "welcome": {
+    "skip": "跳过",
+    "next": "下一步",
+    "start": "打开公告栏",
+    "nextSteps": "接下来：看看邻居们需要什么，或者贴出一条你自己的提供。",
+    "pairDeviceLink": "身份已经在另一台设备上？关联这台 →",
+    "recoveryKitLink": "设备丢了，但手上有恢复包——那份能重建身份的备份文件或打印件？在这里恢复 →",
+    "installedArrival": {
+      "title": "应用已经在你的主屏幕上了",
+      "intro": "开始之前先问一句：",
+      "bringTitle": "我已经在这部手机的浏览器里用 Understoria",
+      "bringBody": "安装版应用有自己的空白存储，看不到你在浏览器里的登录。把身份搬过来——点两下，不用打字，一分钟不到。",
+      "newTitle": "我是新来的——从头开始",
+      "newBody": "先看一段简短的介绍，然后创建你的身份。"
+    },
+    "screens": {
+      "timebank": {
+        "title": "这是一个时间银行",
+        "body": "帮助以小时计。你的一小时帮助，和任何人的一小时一样值钱。",
+        "bodyMore": "没有价格，没有评分。每一种帮助都一样算数。"
+      },
+      "credit": {
+        "title": "你一开始就有时数",
+        "body": "每个人一开始就有5小时。还没帮过别人，也可以先请人帮忙。",
+        "bodyMore": "开口是正常的。邻居之间本来就是这样互相帮忙的。"
+      },
+      "identity": {
+        "title": "你自己掌管自己的密钥",
+        "body": "没有邮箱，没有密码。你有一把只属于你的私钥。",
+        "bodyMore": "没有公司拥有它，所以没人能把你锁在门外。这份交换的另一面是：没有重置，也没有哪家公司能帮你找回——如果这台设备丢了、又没有已关联的备用设备，这个身份就没了。"
+      },
+      "community": {
+        "title": "社区说了算",
+        "body": "这里没有老板。大家一起做决定。",
+        "bodyMore": "出了问题，先坐下来谈，而不是把人踢出去。"
+      },
+      "projects": {
+        "title": "有些帮助需要一群人",
+        "body": "大事——比如办一个工具图书馆——不是一次帮忙能搞定的。项目就是许多人一起努力的共同目标。",
+        "bodyMore": "开新项目之前，先看看有没有已经在进行的。"
+      }
+    },
+    "profileSetup": {
+      "title": "说说你自己",
+      "intro": "选一个邻居们会看到的名字。其余都是选填——它们能帮别人在需要附近的人或某项手艺时找到你。以后都可以在个人资料里修改。",
+      "introExisting": "很高兴见到你，{{name}}——这是你选的名字，可以在这里调整。其余都是选填，能帮邻居找到你。以后都可以在个人资料里修改。",
+      "nameLabel": "你的昵称（欢迎使用化名）",
+      "nameRequired": "选一个昵称或化名才能继续。",
+      "hint": "这里的内容对网络来说都不算私密——只分享你愿意告诉邻居的东西。"
+    },
+    "inviteOnly": {
+      "title": "Understoria 凭邀请加入",
+      "body1": "这个社区靠现有成员的亲自邀请运转。",
+      "body2": "如果有成员给你发过邀请链接，请直接打开那个链接。如果没有，找一位成员请对方发一份。"
+    }
+  },
+  "block": {
+    "action": {
+      "button": "屏蔽联系人",
+      "unblockButton": "取消屏蔽"
+    },
+    "confirm": {
+      "titleDefault": "屏蔽这位联系人",
+      "titleWithGovernance": "屏蔽这位联系人（完全）",
+      "commitsHeading": "屏蔽意味着",
+      "commits": {
+        "cannotReach": "{{name}}将无法再给你发私信、认领你的启事、为你担保，也无法答复你的活动。",
+        "youWontSee": "你不会再看到对方的启事、评论、担保和活动。",
+        "shadow": "对方不会收到任何通知。",
+        "governanceExtra": "对方的提议、投票和争议评论也会对你隐藏。在其他每位成员那里，它们照常显示。"
+      },
+      "notCommitsHeading": "屏蔽不意味着",
+      "notCommits": {
+        "dispute": "这不会提交争议，也不会通知谁来处理。想向社区提出关切，去“个人主页 → 争议”。",
+        "deletion": "这不会从联邦中删除对方签名过的记录——已经与你的社区及其相连社区共享的交换、投票和担保，都会留在原处。",
+        "otherNodes": "这不会在其他节点（其他社区的服务器）上屏蔽对方——只在这里，只对你生效。"
+      },
+      "notePlaceholder": "私密备注（选填，只有你能看到）",
+      "hideGovernanceCheckbox": "同时对我隐藏对方的提议、投票和争议评论。",
+      "hideGovernanceWhy": "默认情况下，你仍会看到对方在社区治理里的参与。在这里隐藏它们是你个人的选择——对方的声音仍会传到社区里的其他每位成员。",
+      "button": "屏蔽联系人",
+      "buttonPending": "正在屏蔽…",
+      "cancel": "取消",
+      "success": "已屏蔽这位联系人。",
+      "errorGeneric": "没能屏蔽。再试一次。"
+    },
+    "unblock": {
+      "confirmTitle": "取消对{{name}}的屏蔽？",
+      "confirmBody": "对方将又能给你发消息、认领你的启事、为你担保、答复你的活动。已有的记录（你之前对对方的屏蔽）会留在你的本地历史里。",
+      "confirmButton": "取消屏蔽",
+      "confirmingButton": "正在取消屏蔽…",
+      "dismiss": "取消",
+      "success": "已取消屏蔽。",
+      "errorGeneric": "没能取消屏蔽。再试一次。"
+    },
+    "settings": {
+      "sectionTitle": "已屏蔽的联系人",
+      "sectionIntro": "你的个人屏蔽名单。它只留在这台设备上——从不参与联邦同步（不会分享给任何服务器或其他成员），也没有别人能看到。",
+      "activeHeading": "生效中的屏蔽",
+      "activeEmpty": "你还没有屏蔽过谁。想屏蔽某人，打开和对方的会话，点会话顶部的菜单。",
+      "historyHeading": "之前屏蔽过的",
+      "historyEmpty": "还没有历史。等你取消对某人的屏蔽，对方会出现在这里，帮你记着。",
+      "obscuredRowLabel": "已屏蔽的联系人",
+      "tapToReveal": "点一下显示",
+      "collapse": "收起",
+      "unblockButton": "取消屏蔽",
+      "hideGovernanceToggle": "对我隐藏对方在社区治理里的参与",
+      "clearHistoryButton": "清空已取消屏蔽的历史",
+      "clearHistoryConfirmTitle": "清空已取消屏蔽的历史？",
+      "clearHistoryConfirmBody": "这会删除“之前屏蔽过的”备忘里的每一行。生效中的屏蔽不受影响。这一步无法撤销。",
+      "clearHistoryConfirmButton": "清空历史",
+      "clearHistorySuccess": "已清空取消屏蔽的历史。",
+      "crossDeviceWarning": "新关联的设备在关联时会收到你的屏蔽名单。在创建某条屏蔽之前就已关联的设备，需要重新关联才能收到它。",
+      "blockedAtLabel": "屏蔽于{{date}}",
+      "firstBlockedAtLabel": "首次屏蔽于{{when}}",
+      "unblockedAtLabel": "取消屏蔽于{{when}}",
+      "pubkeyLabel": "密钥 {{shortKey}}",
+      "noteLabel": "你的私密备注",
+      "noteEmpty": "没有备注。写一条私密备注可以帮你记住原因——只有你能看到。",
+      "noteEditButton": "编辑备注",
+      "noteAddButton": "添加私密备注",
+      "noteSave": "保存备注",
+      "noteSaved": "备注已保存。"
+    },
+    "error": {
+      "cannotBlockSelf": "你没法屏蔽自己。",
+      "noteTooLong": "备注最多500个字符。"
+    }
+  },
+  "palette": {
+    "ariaLabel": "命令面板",
+    "placeholder": "搜索一切，或跳到某个地方…",
+    "resultsAriaLabel": "搜索结果",
+    "noResults": "没有匹配的内容。搜索的一切都只在这台设备上。",
+    "hint": "↑↓ 移动 · Enter 打开 · Esc 关闭",
+    "close": "关闭命令面板",
+    "routes": {
+      "help": "帮助",
+      "settings": "设置",
+      "proposals": "提议",
+      "newPost": "贴出需求或提供",
+      "newProject": "发起项目",
+      "newEvent": "创建活动",
+      "desk": "你的书桌",
+      "infrastructure": "社区基础设施",
+      "present": "聚会大屏"
+    },
+    "kind": {
+      "postNeed": "需求",
+      "postOffer": "提供",
+      "project": "项目",
+      "event": "活动",
+      "member": "成员",
+      "proposal": "提议",
+      "help": "帮助"
+    }
+  },
+  "present": {
+    "anonymous": "一位邻居",
+    "postedBy": "由{{name}}贴出",
+    "lobby": {
+      "title": "聚会大屏",
+      "body": "全屏轮播你社区的活动、任务和请求——每一条都带二维码，在场的人扫一下就能加入。放在电视上，或支一台大家都看得到的笔记本电脑，效果最好。",
+      "start": "开始放映",
+      "back": "返回"
+    },
+    "welcome": {
+      "eyebrow": "欢迎",
+      "title": "让力量从下面长起来",
+      "hint": "用手机扫任意一个码就能加入。",
+      "empty": "眼下没有安排——去公告栏看看。"
+    },
+    "event": {
+      "eyebrow": "即将到来",
+      "cta": "扫码答复是否参加",
+      "qrAria": "用于答复是否参加{{title}}的二维码"
+    },
+    "task": {
+      "eyebrow": "等人搭把手",
+      "in": "来自{{project}}",
+      "cta": "扫码认领",
+      "qrAria": "用于认领任务{{title}}的二维码"
+    },
+    "need": {
+      "eyebrow": "有人需要搭把手",
+      "cta": "扫码来帮忙",
+      "qrAria": "给{{name}}发消息、说一声愿意帮忙的二维码"
+    },
+    "offer": {
+      "eyebrow": "有人提供帮助",
+      "cta": "扫码来问问",
+      "qrAria": "就这条提供给{{name}}发消息的二维码"
+    },
+    "controls": {
+      "prev": "上一张",
+      "next": "下一张",
+      "pause": "暂停",
+      "play": "播放",
+      "exit": "退出聚会大屏"
+    },
+    "customize": {
+      "summary": "自定义大屏",
+      "titleLabel": "大屏标题",
+      "titlePlaceholder": "比如：修理咖啡日——周六",
+      "dwellLabel": "每张停留秒数",
+      "dwellUnit": "{{n}}秒",
+      "categoriesLabel": "显示",
+      "cat": {
+        "events": "活动",
+        "tasks": "任务",
+        "needs": "需求",
+        "offers": "提供"
+      },
+      "itemsLabel": "置顶或隐藏具体条目",
+      "itemsEmpty": "还没有可显示的内容——先添加一个活动、项目或启事。",
+      "pin": "置顶",
+      "pinned": "已置顶",
+      "hide": "隐藏",
+      "hidden": "已隐藏"
+    }
+  },
+  "desk": {
+    "title": "你的案头",
+    "tagline": "你组织的一切里，所有等着你的事，和所有缺人手的地方。",
+    "emptyTitle": "没有事在等你",
+    "empty": "你的项目、启事和聚会都处理完了。休息也是这份工作的一部分。",
+    "present": {
+      "title": "聚会大屏",
+      "body": "把你的活动、任务和请求放上共享大屏，配上二维码，在场的人扫一下就能加入。"
+    },
+    "confirmations": {
+      "title": "等你确认的事",
+      "count_one": "{{count}}件待你确认",
+      "count_other": "{{count}}件待你确认"
+    },
+    "posts": {
+      "title": "等你确认并签名的交换",
+      "confirm": "确认",
+      "someone": "一位成员"
+    },
+    "shifts": {
+      "title": "缺人手的时段",
+      "count": "已报名{{signedUp}}/{{capacity}}人"
+    },
+    "openTasks": {
+      "title": "有开放任务的项目",
+      "count_one": "{{count}}项开放任务",
+      "count_other": "{{count}}项开放任务"
+    },
+    "doorway_one": "有{{count}}件事在你的案头等着",
+    "doorway_other": "有{{count}}件事在你的案头等着"
+  },
+  "infra": {
+    "title": "社区基础设施",
+    "tagline": "这个社区靠什么撑着。每位成员都能看这个页面——没有只给运行者看的视图。",
+    "servers": {
+      "title": "支撑这个社区的服务器",
+      "checking": "正在检查…",
+      "none": "还没有连接任何服务器。眼下这台设备就是这个社区——一切都在这里和其他成员的手机上。",
+      "primary": "主服务器",
+      "mirror": "镜像（备份副本）",
+      "answered": "有回应",
+      "noAnswer": "从这里没得到回应",
+      "nodeId": "对外公布的节点标识：{{nodeId}}",
+      "nodeIdMismatch": "这台服务器公布的节点标识（也就是它的社区识别码）和这台设备预期的 {{expected}} 不一样。值得问问你的运行者——可能是地址换了，也可能是服务器被换掉了。",
+      "offline": "你现在离线，暂时没法询问服务器。“没得到回应”就是字面意思——从这台设备问了，没有回音——绝不等于“垮了”。",
+      "recheck": "再检查一次"
+    },
+    "device": {
+      "title": "这台设备承载着什么",
+      "members": "记录保存在这部手机上的成员",
+      "lastSync": "上次成功同步",
+      "never": "还没有过",
+      "freshness": {
+        "fresh": "一天以内",
+        "lagging": "一周以内",
+        "quiet": "更久以前"
+      },
+      "outboxPending": "等待发出的记录",
+      "outboxPoisoned": "被服务器拒收的记录",
+      "outboxClear": "没有等待发出的记录——你签过名的一切都已送达社区。"
+    },
+    "governance": {
+      "title": "社区治理",
+      "openProposals": "目前开放的提议",
+      "quorum": "移出所需人数（社区规则：要多少位成员共同签名才能移出一位成员）",
+      "quorumUnknown": "尚未公布",
+      "view": "查看提议"
+    },
+    "source": {
+      "title": "软件本身",
+      "body": "Understoria 是自由软件。这台服务器提供它自己的源代码，社区手里的这份应用就不必依赖其他任何人一直在线。",
+      "version": "版本 {{version}} · 构建（commit） {{commit}}",
+      "download": "下载源代码（{{size}}）",
+      "bundle": "完整历史打包（{{size}}）",
+      "checksums": "校验和",
+      "caution": "校验和只能证明下载没有损坏——不能证明没人改过它。要验证这一点，就和另一台服务器上的副本或公共仓库比对。",
+      "absent": "这套部署还没有提供源代码下载。可以让运行者用最新的构建重新部署，或使用",
+      "repo": "公共仓库",
+      "walkthrough": "用这份下载发起一个新社区——完整教程"
+    },
+    "flashDrive": {
+      "title": "U盘",
+      "body": "一个脚本就能做出一只完整的安装U盘：应用的镜像、它的源代码和文档。之后任何装有 Docker 的机器都能变成一个节点——或重建这一个——不用下载一个字节。趁太平时候，在服务器上运行它：",
+      "sealed": "加上 --include-env 会把这台服务器的密钥用一段口令封存进U盘，并打印一张应急单——谁拿着U盘、口令和这张单子，一条命令就能把社区带回来。口令要和U盘分开存放：合在一起，它们就是节点。",
+      "drill": "完整手册在 docs/flash-drive-install.md（U盘上也带着一份）。下面的U盘演练能证明你这只真的能用——别等到要用时才发现。"
+    },
+    "drills": {
+      "title": "灾难演练",
+      "intro": "趁还不需要的时候，先把这些恢复流程练一遍。清单只存在这台设备上——仓库里链接的手册才是权威版本。",
+      "lastDrilled": "上次演练：{{date}}。",
+      "notYet": "还没演练过。",
+      "markToday": "我们今天练过了",
+      "reset": "清除勾选",
+      "stormHub": {
+        "title": "风雨驿站演练",
+        "body": "证明应急背包里的那台服务器能在断网期间撑起整个社区。",
+        "step1": "切断互联网：拔掉路由器的上行网线（WAN）。",
+        "step2": "用两位成员的手机加入驿站的 WiFi。",
+        "step3": "从一部手机贴出一条启事，看它出现在另一部上。",
+        "step4": "拿一部从没装过这个应用的手机：在驿站 WiFi 上打开社区地址，安装，再用邀请二维码加入。",
+        "step5": "检查几个要点：驿站的证书在最近90天内更新过，手机接受驿站的 DNS，驿站的时钟走得准。",
+        "step6": "接回互联网，确认驿站把数据同步回其他服务器。"
+      },
+      "reseed": {
+        "title": "重新播种演练",
+        "body": "证明哪怕所有服务器都没了，也能从一位成员的设备把社区恢复到一台全新的服务器上。",
+        "step1": "用社区一模一样的发起人密钥搭起一台全新的空服务器（operator-guide §6，“Recovering from total node loss”）。",
+        "step2": "设置它的恢复参数：RESEED_GRACE_UNTIL，以及取自这个应用记下的密钥档案的 TRUSTED_SYSTEM_KEYS。",
+        "step3": "在一位成员的设备上：设置 →“把这个社区恢复到一个节点上”，指向新地址。",
+        "step4": "看着恢复完成，然后用第二位成员的设备拉取一遍，检查历史一条不少。",
+        "step5": "把读取门重新打开（READ_AUTH=on），确认成员只凭回执就能进来。",
+        "step6": "把恢复参数从服务器上移除。"
+      },
+      "flashDrive": {
+        "title": "U盘演练",
+        "body": "证明在一台没有互联网的机器上，也能用社区的U盘装起（或重建）一个节点。",
+        "step1": "趁太平时候做好U盘：运行 scripts/make-flash-drive.sh，再把 UNDERSTORIA 文件夹拷到U盘上。",
+        "step2": "在一台装了 Docker、互联网断开的机器上，从U盘运行 START-HERE.sh：封存过的U盘只要口令就能恢复；全新的U盘会问几个安装问题。",
+        "step3": "让两部手机加入新节点的网络：一部贴出启事，另一部能看到。",
+        "step4": "在别人的电脑上运行U盘里的 verify.sh——它会把每个文件和 MANIFEST.txt 核对一遍（U盘签过名的话，把签名也验一下）。",
+        "step5": "带一次更新过去：把U盘里的镜像 docker load 到一台运行中的节点上，docker compose up -d，然后确认历史完好无损。"
+      },
+      "seizure": {
+        "title": "查扣演练",
+        "body": "证明社区能从一台被夺走的服务器抽身离开——哪怕它还在不怀好意的人手里运转——什么都不丢。",
+        "step1": "在社区约定好的场外联络渠道上宣布这次演习——这条渠道本身就是要测试的东西。",
+        "step2": "桌面推演一遍清单：照着威胁模型，把一台被查扣的服务器上有什么大声念出来。真到那天，不要有意外。",
+        "step3": "在一个新地址搭一台练手节点：同样的发起人密钥、一个全新的 DATABASE_KEY、设好 RESEED_GRACE_UNTIL，再把旧的系统密钥放进 TRUSTED_SYSTEM_KEYS——取自这个应用记下的密钥档案。",
+        "step4": "只通过场外渠道分享新地址——成员各自把“设置 → 社区节点”指向它。",
+        "step5": "由一位成员运行“把这个社区恢复到一个节点上”，大家一起读逐类小结：每一类都恢复了或本就在，每一处跳过都有解释。",
+        "step6": "在第二位成员的设备上：同步、检查历史，然后把 READ_AUTH=on 打开，确认成员只凭回执就能进来。",
+        "step7": "当成真的来轮换：登记新的系统密钥、移除恢复参数、两边都换上新的友邻和镜像令牌——然后把演练标记为完成。"
+      }
+    }
+  },
+  "print": {
+    "printButton": "打印",
+    "footer": "于{{date}}从 Understoria 打印——纸不会同步，也不会抹除。等这张纸过时了，回收它，再打印一张新的。",
+    "invite": {
+      "headline": "邀请你加入我们的互助网络",
+      "what": "邻居之间交换时间和手艺——帮别人一小时，就是你可以开口求助的一小时。它运行在我们自己的社区服务器上，不在哪家公司的服务器上。用手机相机扫一扫这个码就能加入。",
+      "qrAria": "邀请二维码——扫码加入这个社区",
+      "urlLead": "或者输入这个地址：",
+      "expires": "这份邀请到{{date}}都有效。",
+      "expired": "这份邀请已经过期——贴出去会让人吃闭门羹。签发一份新邀请，打印那一份。",
+      "invalid": "这看起来不像一个有效的邀请链接，所以没有可以放心打印的内容。"
+    },
+    "board": {
+      "titleNeeds": "社区公告栏——大家需要的事",
+      "titleOffers": "社区公告栏——可以提供的帮助",
+      "filtered": "当前显示：{{filters}}",
+      "empty": "眼下这个视图里没有匹配的内容。",
+      "qrAria": "启事“{{title}}”的二维码"
+    },
+    "flyer": {
+      "rsvp": "扫码查看详情并答复是否参加——或者打开 {{host}}，在日历里找到它。",
+      "qrAria": "这次聚会的二维码",
+      "cancelled": "这次聚会取消了——传单会把人引错地方，所以没什么可打印的。",
+      "ended": "这次聚会已经结束了，没有什么要往墙上贴的了。",
+      "notFound": "这台设备上没有这次聚会。",
+      "rosterLink": "打印签到表"
+    },
+    "roster": {
+      "subtitle": "签到表 · {{date}}",
+      "instructions": "在一行上写下你的名字——或者扫码用手机报名。纸上的名字之后由组织者录入应用。",
+      "qrAria": "用手机报名的二维码",
+      "slots": "应用里已有{{signedUp}}人报名，共{{capacity}}个名额",
+      "slotsUncapped": "应用里已有{{signedUp}}人报名 · 不限人数",
+      "full": "应用里已经报满——加名字之前先问问组织者。",
+      "andMore": "…多来些人也欢迎。",
+      "noShifts": "这次聚会还没有时段——改打印传单吧。"
+    },
+    "calendar": {
+      "title": "我们社区接下来的安排",
+      "link": "打印近期活动",
+      "empty": "接下来六周的日历上还没有安排。",
+      "more": "…应用里还有{{count}}条——一张纸装不下所有。",
+      "qrAria": "“{{title}}”的二维码"
+    },
+    "guide": {
+      "title": "我们的时间银行是怎么运作的",
+      "link": "打印一页纸的介绍，摆摊时用",
+      "tagline": "一个邻里之间交换时间的网络——一页纸，回答大家最先问的那些问题。",
+      "cta": "想加入？找这张桌子旁的人要一份邀请——扫一下就加入，不花一分钱。"
+    },
+    "tabs": {
+      "cut": "撕一条下来，回头再扫",
+      "qrAria": "可撕下的二维码纸条"
+    },
+    "kit": {
+      "link": "打印断网应急包（墙面海报和钱包卡片）",
+      "setup": {
+        "title": "打印之前：驿站的 WiFi",
+        "body": "由你在这里亲手输入，绝不会从你的设备读取。要是社区还没有风雨驿站，就留空——应急包上会改印成“向身边的人询问社区 WiFi”。",
+        "ssid": "驿站 WiFi 名称（SSID）",
+        "ssidPlaceholder": "例如 Riverside-Hub",
+        "password": "驿站 WiFi 密码（会印在海报上）",
+        "passwordPlaceholder": "开放网络就留空",
+        "backups": "备用地址（印在海报和卡片上）",
+        "backupsPlaceholder": "https://mirror.example.org\nhttp://….onion",
+        "backupsHelp": "一行一个，最多三个：镜像服务器（已从这台设备信任的那些预填好），如果社区有 Tor 的 .onion 地址也可以写上——地址只有在需要之前就握在成员手里才帮得上忙。不是地址的行会被忽略；留空就什么都不印。"
+      },
+      "poster": {
+        "headline": "断网了？我们的社区照常运转。",
+        "step1": "1. 连上驿站 WiFi",
+        "wifiQrAria": "用来连入驿站 WiFi 的二维码",
+        "passwordLine": "密码：{{password}}",
+        "askForWifi": "向一位成员或安置点前台询问社区 WiFi。",
+        "step2": "2. 打开 {{host}}——还是平常那个地址",
+        "addressQrAria": "社区地址的二维码",
+        "sameAddress": "不用装新应用，不用设置。连上驿站 WiFi，平常的地址照样能用。",
+        "step3": "3. 你已经在社区小岛上了",
+        "step3Body": "贴出需求、搭把手、确认交换、迎接新邻居。等互联网回来，一切会同步回更大的网络。",
+        "backupsTitle": "如果主地址打不开了",
+        "backupsBody": "这些地址通向同一个社区——同样的人，同样的历史。按顺序试；.onion 地址需要用 Tor 浏览器。",
+        "backupQrAria": "备用地址二维码",
+        "sharesWifi": "这张海报会把驿站 WiFi 分享给每一个看到它的人——就贴在需要这样的地方。"
+      },
+      "cards": {
+        "title": "钱包卡片",
+        "cut": "沿虚线剪开——一张放进你的钱包，一张给邻居",
+        "body": "如果断网了：找到社区 WiFi，连上去，打开同一个地址。应用会继续工作。",
+        "wifiLine": "驿站 WiFi：{{ssid}}",
+        "backupsLine": "备用地址：{{addresses}}",
+        "askForWifi": "驿站 WiFi：问一位成员"
+      }
+    }
+  },
+  "soleFounder": {
+    "title": "你是这个社区唯一的发起人",
+    "body": "你是这个社区唯一受信任的成员——在你添加共同发起人之前，其他人永远无法邀请或担保。",
+    "invitesWork": "你自己的邀请照常可用：先把人请进来，再从中选一位做共同发起人。",
+    "cta": "添加共同发起人",
+    "pendingBody": "你的共同发起人提名正在等{{name}}在自己的设备上接受。",
+    "pendingCta": "查看待接受的提名"
+  },
+  "cofounder": {
+    "title": "添加共同发起人",
+    "intro": {
+      "title": "社区由两位发起人开始",
+      "permanence": "发起是永久的。共同发起人会永远成为这个社区的信任之根——应用里没有任何办法撤销，永远没有。",
+      "body": "共同发起人是第二条信任之根：有了两位发起人，邻居之间就能互相担保获得信任，社区也能在没有你的情况下继续生长。选一个你已经深深信任的人——你会当面从对方自己的屏幕上采集密钥。",
+      "start": "选择共同发起人"
+    },
+    "capture": {
+      "title": "采集对方的公钥",
+      "hint": "请对方在自己的设备上打开个人资料 → 显示完整密钥，然后扫描二维码——或者粘贴密钥文本。",
+      "invalid": "这看起来不像成员的公钥。请对方在个人资料 → 显示完整密钥下出示二维码，或者一字不差地复制密钥文本。"
+    },
+    "deadEnd": {
+      "title": "这把密钥还不属于任何成员",
+      "body": "共同发起人必须已经是这个社区的成员。先邀请对方——你的邀请是有效的——等对方加入后再回到这里。",
+      "retry": "采集另一把密钥"
+    },
+    "ownKey": {
+      "title": "这是你自己的密钥",
+      "body": "你已经是这个社区的发起人了。去采集你想请到身边的那个人的密钥。",
+      "retry": "采集另一把密钥"
+    },
+    "confirm": {
+      "title": "确认你的共同发起人",
+      "line": "你正在让{{name}}永久成为发起人。",
+      "fingerprint": "密钥指纹：{{fingerprint}}",
+      "check": "签名之前，当面和对方核对名字和头像。",
+      "sign": "签名并发出提名",
+      "signing": "正在签名…"
+    },
+    "pending": {
+      "title": "提名已发出",
+      "body": "现在需要{{name}}在自己的设备上接受——发起需要双方签名。对方会在“需要你留意”里找到这份邀请。",
+      "expires": "这份提名将于{{when}}过期。",
+      "expired": "这份提名已过期。等你们都准备好，再发一份新的。",
+      "resend": "发一份新提名",
+      "withdraw": "撤回",
+      "withdrawNote": "撤回会清掉这台设备上的待定状态；提名本身会自行过期。"
+    },
+    "done": {
+      "title": "你的社区有两位发起人了",
+      "body": "信任现在可以流动起来：有了两位已获信任的成员，邻居就能通过担保获得信任，社区也能在没有你的情况下继续生长。",
+      "close": "完成"
+    },
+    "accept": {
+      "title": "{{name}}请你共同发起这个社区",
+      "permanence": "成为发起人是永久的。你将永远是这个社区的信任之根——应用里没有任何办法撤销，永远没有。",
+      "body": "作为共同发起人，你的担保——和{{name}}的一起——正是让邻居获得信任的依凭。",
+      "expires": "这份邀请将于{{when}}过期。",
+      "accept": "接受并签名",
+      "accepting": "正在签名…",
+      "notNow": "先不了",
+      "notNowHint": "“先不了”会清掉这台设备上的这张卡片。提名在过期前一直有效，所以卡片可能还会回来——如果你不想接受，直接告诉{{name}}。",
+      "acceptedTitle": "你是这个社区的发起人了",
+      "acceptedBody": "双方的签名都已记录在案，社区现在有了两条信任之根。从这一刻起，你的担保开始算数。",
+      "acceptedClose": "完成"
+    },
+    "claimSuccess": {
+      "next": "下一步：社区由两位发起人开始。等第一位邻居加入后，添加一位共同发起人，让信任在没有你的时候也能流动。",
+      "cta": "添加共同发起人"
+    },
+    "errors": {
+      "invalid_body": "节点读不懂这个请求。更新应用后再试。",
+      "invalid_expiry": "提名的时间窗在节点看来说不通。检查这台设备的日期和时间，再试一次。",
+      "wrong_node": "这份提名属于另一个社区节点。",
+      "stale_nomination": "这台设备的时钟似乎偏差了好几分钟——校正日期和时间后再试。",
+      "node_unclaimed": "这个节点还没有发起成员——先认领它。",
+      "root_count_not_one": "仪式进行期间，社区的发起人发生了变化——只有在恰好只有一位发起人时，这个仪式才能进行。",
+      "nominator_not_founder": "只有社区的发起人才能提名共同发起人。",
+      "nominee_not_a_member": "对方还不是这个社区的成员。先邀请对方——你的邀请是有效的。",
+      "nominee_already_founder": "对方已经是这个社区的发起人了。",
+      "bad_signature": "签名没能生成，或者没能通过校验。解锁应用后再试。",
+      "acceptance_out_of_window": "这台设备的时钟似乎不准——接受落在了提名的时间窗之外。校正日期和时间后再试。",
+      "nomination_expired": "这份提名已过期。让对方再发一份新的。",
+      "unreachable": "联系不上社区节点。检查网络连接后再试。",
+      "rejected": "节点拒绝了。查看服务器日志了解详情。"
+    }
+  }
+}

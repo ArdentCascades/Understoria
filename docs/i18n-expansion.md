@@ -4,14 +4,20 @@ Status: PHASE 0 SHIPPED (infrastructure — lazy locale loading, the
 language registry in `src/i18n/languages.ts`, generalized parity/
 interpolation/plural gates, `<html lang>`/`<html dir>` wiring,
 `speakLangFor()`, and the translation-status note mechanism).
-PHASE 1 IN PROGRESS: **French (fr) and Portuguese (pt) SHIPPED**
-(UI strings complete — glossaries at `docs/i18n-glossary/{fr,pt}.md`,
-6-agent bulk pass + splice validation + cross-chunk consistency
-reconciliation + layout smoke per language; registries carry
-`reviewStatus: "new"` + `content: "ui-only"` with both honesty notes
-rendering in Settings; pt's board tab shortened to "Pedidos" after
-the smoke caught "Necessidades" overflowing the 3-up pill at 375px).
-Wave 1 remaining: zh-Hans. Baseline numbers below refreshed
+PHASE 1 WAVE 1 COMPLETE: **French (fr), Portuguese (pt), and
+Chinese (zh) SHIPPED** (UI strings complete — glossaries at
+`docs/i18n-glossary/{fr,pt,zh}.md`, 6-agent bulk pass + splice
+validation + cross-chunk consistency reconciliation + layout smoke
+per language; registries carry `reviewStatus: "new"` +
+`content: "ui-only"` with both honesty notes rendering in Settings).
+Wave-1 field notes: pt's board tab shortened to "Pedidos" after the
+smoke caught "Necessidades" overflowing the 3-up pill at 375px;
+Chinese shipped under the language-only code `zh` rather than the
+plan's `zh-Hans` label — browsers send zh-CN/zh-SG and i18next's
+language-only fallback resolves those to `zh`, while a literal
+zh-Hans code would match neither (zh-Hant stays open as a future
+sibling). Wave 2 (hi, vi, ru) is next; ru will exercise the
+_one/_few/_many plural gate. Baseline numbers below refreshed
 2026-07-27.
 
 ## Where we start from

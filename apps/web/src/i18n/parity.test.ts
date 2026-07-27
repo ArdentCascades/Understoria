@@ -23,6 +23,7 @@ import en from "./locales/en.json";
 import es from "./locales/es.json";
 import fr from "./locales/fr.json";
 import pt from "./locales/pt.json";
+import zh from "./locales/zh.json";
 import { LANGUAGES } from "./languages";
 
 // Every shipped locale, keyed for the gates below. Locale files are
@@ -34,6 +35,7 @@ const SHIPPED_LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   { code: "es", data: es },
   { code: "fr", data: fr },
   { code: "pt", data: pt },
+  { code: "zh", data: zh },
 ];
 
 type JsonValue =
