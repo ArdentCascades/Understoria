@@ -680,3 +680,14 @@ export const FAQ_SECTIONS: readonly FaqSection[] = [
     ],
   },
 ] as const;
+
+// The Spanish FAQ lives in faq.es.ts inside the lazy Spanish content
+// bundle (i18n Phase 2a) — never import it statically from app code.
+// Selector mirrors getProjectTemplates: sync, English fallback.
+import { getContentBundle } from "./registry";
+
+export function getFaqSections(
+  locale: string | undefined,
+): readonly FaqSection[] {
+  return getContentBundle(locale).FAQ_SECTIONS;
+}

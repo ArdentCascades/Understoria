@@ -130,12 +130,24 @@ repo's disclosed AI-assisted posture:
 
 ## Phase 2 — Authored content (the ~990KB corpus)
 
-1. **Restructure first (no new languages yet):** move the inline
-   `{ en, es }` fields of `projectTemplates` / `taskSteps` / `taskTips`
-   into per-language modules loaded on demand, following the
-   `faq.es.ts` pattern. This alone cuts today's bundle for every
-   member, and is the precondition for languages 3…N not multiplying
-   bundle size.
+1. **Restructure first (no new languages yet) — SHIPPED (Phase 2a).**
+   As built: the inline `{ en, es }` corpus (projectTemplates,
+   taskSteps, taskTips, eventTemplates, plus faq/startCommunity's
+   statically-imported `.es.ts` files) split into per-language
+   modules behind `src/content/registry.ts` — English eager (the
+   fallback), Spanish a lazy `lazy-content-es` chunk excluded from
+   the SW precache and runtime-cached like UI locale chunks. Every
+   content selector KEPT its synchronous signature: boot chains
+   `ensureContent()` into `i18nReady` and `setLanguage` awaits it
+   before i18next switches, so a render in language X always finds
+   X's bundle cached (or falls back to English honestly). Cross-
+   language title→index recovery for tips/steps and the work-day
+   hint moved to a compact GENERATED eager index
+   (`content/taskTitleIndex.ts`, drift-locked by its test) so those
+   render-path lookups never touch a bundle. Measured: the eager
+   content chunk dropped from ~1MB to 494.6KB (170.7KB gzip) with
+   Spanish's 513.8KB (167.2KB gzip) loading only when chosen —
+   languages 3…N now add zero first-load bytes.
 2. **Translate in member-impact order:** FAQ + start-a-community →
    event templates → the 64 project templates with their task steps
    and tips (agent fleet per template, review per template — the same

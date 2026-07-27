@@ -20,8 +20,7 @@
  */
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { FAQ_SECTIONS } from "@/content/faq";
-import { FAQ_SECTIONS_ES } from "@/content/faq.es";
+import { getFaqSections } from "@/content/faq";
 import { shareOrigin } from "@/lib/appOrigin";
 import { resolveGuideEntries } from "@/lib/printGuide";
 import { PrintFooter, PrintToolbar } from "@/components/PrintChrome";
@@ -36,7 +35,7 @@ export default function PrintGuidePage() {
   const es = i18n.resolvedLanguage?.startsWith("es") ?? false;
 
   const entries = useMemo(
-    () => resolveGuideEntries(es ? FAQ_SECTIONS_ES : FAQ_SECTIONS).entries,
+    () => resolveGuideEntries(getFaqSections(i18n.resolvedLanguage)).entries,
     [es],
   );
 

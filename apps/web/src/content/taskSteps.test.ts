@@ -7,9 +7,11 @@
 import { describe, expect, it } from "vitest";
 import {
   PROJECT_TEMPLATES_EN,
-  PROJECT_TEMPLATES_ES,
 } from "@/content/projectTemplates";
-import { TASK_STEPS, getTaskSteps } from "@/content/taskSteps";
+import { PROJECT_TEMPLATES_ES } from "@/content/projectTemplates.es";
+import { getTaskSteps } from "@/content/taskSteps";
+import { TASK_STEPS_EN } from "@/content/taskSteps.en";
+import { TASK_STEPS_ES } from "@/content/taskSteps.es";
 
 // Coverage guard for the suggested-starter-steps content — the same
 // tie taskTips.test.ts provides for the tips: the steps are keyed by
@@ -18,46 +20,46 @@ import { TASK_STEPS, getTaskSteps } from "@/content/taskSteps";
 // task, THIS suite fails until the steps move with it.
 describe("TASK_STEPS coverage", () => {
   it("covers exactly the template id set (no missing, no strays)", () => {
-    expect(Object.keys(TASK_STEPS).sort()).toEqual(
+    expect(Object.keys(TASK_STEPS_EN).sort()).toEqual(
       PROJECT_TEMPLATES_EN.map((tpl) => tpl.id).sort(),
     );
   });
 
   it("has one step list per task, index-aligned, in both locales", () => {
     for (const tpl of PROJECT_TEMPLATES_EN) {
-      expect(TASK_STEPS[tpl.id], tpl.id).toBeDefined();
-      expect(TASK_STEPS[tpl.id].length, tpl.id).toBe(tpl.tasks.length);
+      expect(TASK_STEPS_EN[tpl.id], tpl.id).toBeDefined();
+      expect(TASK_STEPS_EN[tpl.id].length, tpl.id).toBe(tpl.tasks.length);
     }
     for (const tpl of PROJECT_TEMPLATES_ES) {
-      expect(TASK_STEPS[tpl.id].length, `${tpl.id} (es)`).toBe(
+      expect(TASK_STEPS_ES[tpl.id]?.length, `${tpl.id} (es)`).toBe(
         tpl.tasks.length,
       );
     }
   });
 
   it("gives every task 3-5 steps per locale, with matching counts", () => {
-    for (const [id, entries] of Object.entries(TASK_STEPS)) {
-      entries.forEach((entry, i) => {
-        expect(entry.en.length, `${id}[${i}].en`).toBeGreaterThanOrEqual(3);
-        expect(entry.en.length, `${id}[${i}].en`).toBeLessThanOrEqual(5);
-        expect(entry.es.length, `${id}[${i}] es/en counts`).toBe(
-          entry.en.length,
+    for (const [id, en] of Object.entries(TASK_STEPS_EN)) {
+      en.forEach((list, i) => {
+        expect(list.length, `${id}[${i}].en`).toBeGreaterThanOrEqual(3);
+        expect(list.length, `${id}[${i}].en`).toBeLessThanOrEqual(5);
+        expect(TASK_STEPS_ES[id]?.[i]?.length, `${id}[${i}] es/en counts`).toBe(
+          list.length,
         );
       });
     }
   });
 
   it("keeps every step a short, checkable to-do (non-empty, translated, no essays)", () => {
-    for (const [id, entries] of Object.entries(TASK_STEPS)) {
-      entries.forEach((entry, i) => {
-        entry.en.forEach((s, j) => {
+    for (const [id, en] of Object.entries(TASK_STEPS_EN)) {
+      en.forEach((enList, i) => {
+        enList.forEach((s, j) => {
           expect(s.trim(), `${id}[${i}].en[${j}]`).not.toBe("");
           expect(s.length, `${id}[${i}].en[${j}]`).toBeLessThanOrEqual(120);
         });
-        entry.es.forEach((s, j) => {
+        (TASK_STEPS_ES[id]?.[i] ?? []).forEach((s, j) => {
           expect(s.trim(), `${id}[${i}].es[${j}]`).not.toBe("");
           expect(s.length, `${id}[${i}].es[${j}]`).toBeLessThanOrEqual(120);
-          expect(s, `${id}[${i}].es[${j}] es===en`).not.toBe(entry.en[j]);
+          expect(s, `${id}[${i}].es[${j}] es===en`).not.toBe(enList[j]);
         });
       });
     }
@@ -74,7 +76,7 @@ describe("getTaskSteps", () => {
     // index (and thus the es steps) must resolve from it.
     const tplEs = PROJECT_TEMPLATES_ES.find((t) => t.id === tpl.id)!;
     const es = getTaskSteps(tpl.id, tplEs.tasks[0].name, "es");
-    expect(es).toEqual([...TASK_STEPS[tpl.id][0].es]);
+    expect(es).toEqual([...TASK_STEPS_ES[tpl.id][0]]);
   });
 
   it("yields null for from-scratch projects, unknown templates, and renamed tasks", () => {

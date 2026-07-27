@@ -18,8 +18,7 @@ import {
 } from "react";
 import { Link, useNavigate, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
-import { FAQ_SECTIONS, type FaqEntry, type FaqSection } from "@/content/faq";
-import { FAQ_SECTIONS_ES } from "@/content/faq.es";
+import { getFaqSections, type FaqEntry, type FaqSection } from "@/content/faq";
 import { HighlightedText } from "@/components/HighlightedText";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 import {
@@ -78,9 +77,7 @@ function entryMatches(entry: FaqEntry, needle: string): boolean {
 
 export default function HelpPage() {
   const { t, i18n } = useTranslation();
-  const sections = i18n.language?.startsWith("es")
-    ? FAQ_SECTIONS_ES
-    : FAQ_SECTIONS;
+  const sections = getFaqSections(i18n.language);
   const navigate = useNavigate();
   const location = useLocation();
   const reduced = useReducedMotion();

@@ -205,3 +205,14 @@ export const START_COMMUNITY: StartCommunityGuide = {
       "the day-to-day manual for whoever keeps the server up.",
   ],
 };
+
+// The Spanish guide lives in startCommunity.es.ts inside the lazy
+// Spanish content bundle (i18n Phase 2a) — never import it statically
+// from app code. Selector mirrors getProjectTemplates.
+import { getContentBundle } from "./registry";
+
+export function getStartCommunityGuide(
+  locale: string | undefined,
+): StartCommunityGuide {
+  return getContentBundle(locale).START_COMMUNITY;
+}

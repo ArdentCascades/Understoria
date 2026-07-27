@@ -25,6 +25,7 @@ import { initReactI18next } from "react-i18next";
 
 import en from "./locales/en.json";
 import { languageInfo, SUPPORTED_LANGUAGES } from "./languages";
+import { ensureContent } from "@/content/registry";
 
 export {
   LANGUAGES,
@@ -79,9 +80,11 @@ const STORAGE_KEY = "understoria.language";
 
 /**
  * Resolves once i18next is initialized AND the detected language's
- * resources are loaded. main.tsx gates the first render on this so a
- * returning Spanish-speaking member never sees an English flash while
- * the locale chunk arrives (it is one same-origin, SW-cached fetch).
+ * resources are loaded — including its authored-content bundle
+ * (templates, tips, steps, FAQ; content/registry.ts). main.tsx gates
+ * the first render on this, which is what keeps every content
+ * selector synchronous: by the time anything renders in language X,
+ * X's content is cached or English is the honest fallback.
  */
 export const i18nReady: Promise<unknown> = i18n
   .use(lazyLocaleBackend)
@@ -105,7 +108,11 @@ export const i18nReady: Promise<unknown> = i18n
       caches: ["localStorage"],
     },
     returnNull: false,
-  });
+  })
+  // The detected language's authored-content bundle loads before the
+  // gate opens (see the i18nReady doc comment above). ensureContent
+  // never rejects on unknown locales — English is the fallback.
+  .then(() => ensureContent(i18n.resolvedLanguage));
 
 // <html lang> / <html dir> follow the active language. lang feeds
 // screen readers and the read-aloud voice pick; dir is the RTL
@@ -117,13 +124,23 @@ function applyDocumentLanguage(lng: string | undefined): void {
   document.documentElement.lang = info.code;
   document.documentElement.dir = info.dir;
 }
-i18n.on("languageChanged", applyDocumentLanguage);
+i18n.on("languageChanged", (lng) => {
+  applyDocumentLanguage(lng);
+  // Safety net for changeLanguage calls that bypass setLanguage
+  // (tests, future callers): start the content load; the render that
+  // races it falls back to English until the bundle lands.
+  void ensureContent(lng);
+});
 void i18nReady.then(() => applyDocumentLanguage(i18n.resolvedLanguage));
 
 export function setLanguage(lang: string): void {
-  // changeLanguage pulls the locale chunk through the backend if this
-  // device has never used the language before.
-  void i18n.changeLanguage(lang);
+  // The content bundle loads BEFORE i18next switches, so the
+  // re-render that follows changeLanguage sees translated templates
+  // immediately — never an English flash that fixes itself. The UI
+  // locale chunk itself still loads through the backend inside
+  // changeLanguage. ensureContent never rejects (English fallback),
+  // and changeLanguage failures were already fire-and-forget here.
+  void ensureContent(lang).then(() => i18n.changeLanguage(lang));
   try {
     window.localStorage.setItem(STORAGE_KEY, lang);
   } catch {

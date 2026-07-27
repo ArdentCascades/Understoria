@@ -121,7 +121,7 @@ export default defineConfig({
         // Phase 0): a member downloads only the language they use.
         // The runtime route below caches a chunk on first use, so
         // offline keeps working for the language(s) actually chosen.
-        globIgnores: ["**/locale-*.js"],
+        globIgnores: ["**/locale-*.js", "**/lazy-content-*.js"],
         navigateFallback: "/index.html",
         runtimeCaching: [
           {
@@ -130,10 +130,10 @@ export default defineConfig({
             options: { cacheName: "understoria-pages" },
           },
           {
-            // Hashed, immutable locale chunks: cache-first forever;
-            // a new deploy emits new hashes and the old entries age
-            // out via maxEntries.
-            urlPattern: /\/assets\/locale-[\w-]+\.js$/,
+            // Hashed, immutable locale + lazy-content chunks:
+            // cache-first forever; a new deploy emits new hashes and
+            // the old entries age out via maxEntries.
+            urlPattern: /\/assets\/(?:locale|lazy-content)-[\w-]+\.js$/,
             handler: "CacheFirst",
             options: {
               cacheName: "understoria-locales",
@@ -170,6 +170,16 @@ export default defineConfig({
             {
               name: "locale-zh",
               test: /src[\\/]i18n[\\/]locales[\\/]zh\.json/,
+            },
+            // Lazy per-language CONTENT bundles (templates, tips,
+            // steps, FAQ — i18n Phase 2a): the distinct "lazy-"
+            // prefix keeps the SW globs below from ever colliding
+            // with the eager "content" chunk's hashed filename. Must
+            // sit BEFORE the catch-all content group. Add a group per
+            // language alongside its content/bundles/<code>.ts.
+            {
+              name: "lazy-content-es",
+              test: /src[\\/]content[\\/](?:[^\\/]+\.es\.ts|bundles[\\/]es\.ts)/,
             },
             // Authored content (templates, tips, starter steps) is pure
             // data and grew the main chunk past workbox's 2 MiB per-file
