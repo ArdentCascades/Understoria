@@ -4,12 +4,15 @@ Status: PHASE 0 SHIPPED (infrastructure — lazy locale loading, the
 language registry in `src/i18n/languages.ts`, generalized parity/
 interpolation/plural gates, `<html lang>`/`<html dir>` wiring,
 `speakLangFor()`, and the translation-status note mechanism).
-PHASE 1 IN PROGRESS: **French (fr) SHIPPED** (UI strings complete —
-glossary at `docs/i18n-glossary/fr.md`, 6-agent bulk pass + splice
-validation + cross-chunk consistency reconciliation, layout smoke
-clean; registry carries `reviewStatus: "new"` + `content: "ui-only"`
-with both honesty notes rendering in Settings). Wave 1 remaining:
-zh-Hans, pt. Baseline numbers below refreshed 2026-07-27.
+PHASE 1 IN PROGRESS: **French (fr) and Portuguese (pt) SHIPPED**
+(UI strings complete — glossaries at `docs/i18n-glossary/{fr,pt}.md`,
+6-agent bulk pass + splice validation + cross-chunk consistency
+reconciliation + layout smoke per language; registries carry
+`reviewStatus: "new"` + `content: "ui-only"` with both honesty notes
+rendering in Settings; pt's board tab shortened to "Pedidos" after
+the smoke caught "Necessidades" overflowing the 3-up pill at 375px).
+Wave 1 remaining: zh-Hans. Baseline numbers below refreshed
+2026-07-27.
 
 ## Where we start from
 
