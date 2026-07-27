@@ -34,7 +34,6 @@ import {
   PALETTE_PREFERENCES,
   type PalettePreference,
 } from "@/lib/palette";
-import { MIST_PREFERENCES, type MistPreference } from "@/lib/mist";
 
 // Each text-size label renders at the size it represents so the
 // choice is self-demonstrating. Auto borrows the currently-resolved
@@ -70,8 +69,6 @@ export function AppearanceSection() {
     setDensityPreference,
     palettePreference,
     setPalettePreference,
-    mistPreference,
-    setMistPreference,
   } = useApp();
   return (
     <section className="card mb-4" aria-labelledby="appearance-section-title">
@@ -251,38 +248,6 @@ export function AppearanceSection() {
         })}
       </div>
 
-      <h3
-        id="appearance-mist-title"
-        className="mb-2 mt-6 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
-      >
-        {t("profile.appearance.mistTitle")}
-      </h3>
-      <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
-        {t("profile.appearance.mistIntro")}
-      </p>
-      <div
-        role="radiogroup"
-        aria-labelledby="appearance-mist-title"
-        className="flex flex-wrap gap-2"
-      >
-        {MIST_PREFERENCES.map((pref: MistPreference) => {
-          const selected = mistPreference === pref;
-          return (
-            <button
-              key={pref}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              onClick={() => {
-                void setMistPreference(pref);
-              }}
-              className={selected ? "btn-primary" : "btn-secondary"}
-            >
-              {t(`profile.appearance.mist.${pref}`)}
-            </button>
-          );
-        })}
-      </div>
     </section>
   );
 }

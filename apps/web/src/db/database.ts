@@ -1348,11 +1348,6 @@ export const SETTING_KEYS = {
    *  right `data-palette` attribute before first paint. See
    *  lib/palette.ts. */
   palette: "palette",
-  /** "Morning mist" frosted-chrome toggle (docs/themes-plan.md T3):
-   *  "off" | "on". Absent or invalid reads as "off". Mirrored to
-   *  localStorage so the inline script in index.html applies the
-   *  `mist` root class before first paint. See lib/mist.ts. */
-  mist: "mist",
   /** Cursor for `pullFederatedExchanges` — the highest `completedAt`
    *  observed so far. Mirrors the post / claim / task-comment cursors
    *  in `federationSync.ts`. Absent on a fresh install means "pull

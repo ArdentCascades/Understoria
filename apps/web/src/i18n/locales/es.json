@@ -2838,12 +2838,6 @@
         "riverbed": "Río",
         "harvest": "Cosecha",
         "fieldnotes": "Cuaderno de campo"
-      },
-      "mistTitle": "Niebla matinal",
-      "mistIntro": "Una niebla pálida se posa sobre la cabecera, las bandas de pestañas y la barra inferior — un velo esmerilado más claro bajo el que se desliza el contenido. Funciona con cualquier tema de color. Se atenúa solo en dispositivos que piden transparencia reducida.",
-      "mist": {
-        "off": "Apagada",
-        "on": "Encendida"
       }
     },
     "node": {

@@ -2838,12 +2838,6 @@
         "riverbed": "Riverbed",
         "harvest": "Harvest",
         "fieldnotes": "Field notes"
-      },
-      "mistTitle": "Morning mist",
-      "mistIntro": "A pale fog settles over the header, tab bands, and bottom bar — a lighter frosted veil that content drifts beneath. Works with every color theme. Turns itself down on devices that ask for reduced transparency.",
-      "mist": {
-        "off": "Off",
-        "on": "On"
       }
     },
     "node": {

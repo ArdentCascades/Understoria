@@ -111,12 +111,6 @@ import {
   isPalettePreference,
   type PalettePreference,
 } from "@/lib/palette";
-import {
-  applyMist,
-  cacheMist,
-  isMistPreference,
-  type MistPreference,
-} from "@/lib/mist";
 
 export interface AppContextValue {
   ready: boolean;
@@ -237,8 +231,6 @@ export interface AppContextValue {
   setDensityPreference: (pref: DensityPreference) => Promise<void>;
   palettePreference: PalettePreference;
   setPalettePreference: (pref: PalettePreference) => Promise<void>;
-  mistPreference: MistPreference;
-  setMistPreference: (pref: MistPreference) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -261,8 +253,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     useState<DensityPreference>("default");
   const [palettePreference, setPalettePreferenceState] =
     useState<PalettePreference>("canopy");
-  const [mistPreference, setMistPreferenceState] =
-    useState<MistPreference>("off");
   const cleanupRef = useRef<(() => void) | null>(null);
 
   const refreshLockState = useCallback(async () => {
@@ -356,16 +346,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       applyPalette(palPref);
       cachePalette(palPref);
       applyThemeColorMeta(palPref, resolveTheme(pref, systemPrefersDark()));
-      // Morning mist toggle. Same pattern; default off — an absent
-      // row renders identically to pre-mist builds.
-      const rawMist = await getSetting(SETTING_KEYS.mist);
-      const mistPref: MistPreference = isMistPreference(rawMist)
-        ? rawMist
-        : "off";
-      if (cancelled) return;
-      setMistPreferenceState(mistPref);
-      applyMist(mistPref);
-      cacheMist(mistPref);
       // Demo-community seed runs in DEV builds (operator ruling R1)
       // and in the client-only DEMO build (VITE_DEMO=1, which is what
       // the seed exists to showcase): both get a demo community to
@@ -560,13 +540,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [themePreference],
   );
-
-  const setMistPreference = useCallback(async (pref: MistPreference) => {
-    await setSetting(SETTING_KEYS.mist, pref);
-    setMistPreferenceState(pref);
-    applyMist(pref);
-    cacheMist(pref);
-  }, []);
 
   const unlock = useCallback(
     async (passphrase: string) => {
@@ -936,8 +909,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setDensityPreference,
       palettePreference,
       setPalettePreference,
-      mistPreference,
-      setMistPreference,
     }),
     [
       ready,
@@ -986,8 +957,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setDensityPreference,
       palettePreference,
       setPalettePreference,
-      mistPreference,
-      setMistPreference,
     ],
   );
 

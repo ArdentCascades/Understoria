@@ -235,7 +235,7 @@ export default function ProposalsPage() {
           and the start-new affordance visible as they scroll through
           long proposal lists. backdrop-blur + 95%-opaque background
           keep content underneath legible while the bar sticks. */}
-      <div className="chrome-mist sticky top-0 z-10 -mx-4 mb-4 flex flex-wrap items-center justify-between gap-3 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70">
+      <div className="sticky top-0 z-10 -mx-4 mb-4 flex flex-wrap items-center justify-between gap-3 bg-white/95 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:bg-moss-950/95 dark:supports-[backdrop-filter]:bg-moss-950/70">
         <div
           role="tablist"
           aria-label={t("proposals.filterAriaLabel")}
