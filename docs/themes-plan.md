@@ -3,22 +3,38 @@
 > **Status: COMPLETE — T1 + T2 + T3 SHIPPED** (T3: opt-in "Morning
 > mist" — html.mist + .chrome-mist on the five chrome surfaces
 > (AppHeader, BottomNav, Board/Proposals/Messages sticky bands),
-> blur(20px) saturate(1.2) at moss-50/0.65 light + moss-950/0.60
-> dark, solid fallbacks under prefers-reduced-transparency and
-> missing backdrop-filter, Settings toggle + Dexie/bootstrap
-> plumbing + refreshed CSP hash on both Caddyfile vhosts.
-> **§1.4 amendment, post-pilot-report:** the statically-certified
-> tint floors (0.92/0.85) shipped first and proved INVISIBLE — more
-> opaque than the default /70-with-blur chrome those same surfaces
-> already carry, so the toggle changed nothing perceptible. Mist
-> now deliberately sits on the shipped default treatment's
-> acceptance basis instead — chrome-text-only surfaces over
-> blur-averaged real content, opt-in, fully solid fallbacks — and
-> DockedPanel was dropped from the treatment per this plan's own
-> reading-surfaces-stay-opaque rule. The §1.4 floor math remains
-> correct as the static-certification bound; it is simply not the
-> operative constraint for an opt-in effect on surfaces whose
-> default is already less conservative.)
+> blur(24px) saturate(1.35) at moss-100/0.65 light + moss-700/0.5
+> dark, solid fallbacks (moss-50 light / moss-800 dark) under
+> prefers-reduced-transparency and missing backdrop-filter,
+> Settings toggle + Dexie/bootstrap plumbing + refreshed CSP hash
+> on both Caddyfile vhosts.
+> **§1.4 amendment, post-pilot-report (two findings):** (1) the
+> statically-certified tint floors (0.92/0.85) shipped first and
+> proved INVISIBLE — more opaque than the default /70-with-blur
+> chrome those same surfaces already carry, so the toggle changed
+> nothing perceptible. (2) The alpha-only rework that followed
+> (moss-50/0.5 light, moss-950/0.45 dark) was ALSO imperceptible in
+> practice — measured end-to-end in the built app, mist on-vs-off
+> peaked at 2–3/255 pixel delta in dark mode and 10/255 in light,
+> because a same-lightness tint at a different alpha over this
+> app's own content converges to the same rendered color, and
+> saturate() has nothing to lift in desaturated darks. The
+> operative mechanism for a perceptible frost is a LUMINANCE-
+> shifted tint — fog is milkier than what it covers — so mist now
+> tints one to two steps away from each mode's resting chrome
+> lightness (moss-100 over near-white, moss-700 over near-black),
+> visible even at scroll-top (measured ≥22/255 peak chrome delta
+> both modes). Solid fallbacks are statically certified: dark
+> moss-800 holds moss-300 5.31 / canopy-300 7.34 / canopy-200
+> 9.39; light stays moss-50 because solid moss-100 would drop
+> canopy-700 chrome text to 4.20. Translucent-state posture is
+> unchanged: the shipped default treatment's acceptance basis —
+> chrome-text-only surfaces over blur-averaged real content,
+> opt-in — and DockedPanel stays dropped from the treatment per
+> this plan's own reading-surfaces-stay-opaque rule. The §1.4
+> floor math remains correct as the static-certification bound; it
+> is simply not the operative constraint for an opt-in effect on
+> surfaces whose default is already less conservative.)
 > **T1 + T2 SHIPPED** (T2: [data-palette] blocks for the
 > three themes, pre-paint bootstrap attr + refreshed CSP hash on
 > both Caddyfile vhosts, lib/palette.ts + Dexie/AppContext/Settings

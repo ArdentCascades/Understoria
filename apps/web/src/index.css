@@ -463,40 +463,47 @@
    * Settings → Appearance). Chrome surfaces that content scrolls
    * under — sticky header, page bands, bottom nav — carry
    * .chrome-mist and get a genuinely frosted treatment: deep blur,
-   * a saturation lift, and the THEME's page tint at a translucency
-   * a notch past the default chrome's own /70.
+   * a saturation lift, and — the part that makes it PERCEPTIBLE —
+   * a LUMINANCE-shifted tint, not just a translucency change. Fog
+   * is milkier than what it covers: a same-lightness tint at a
+   * different alpha is invisible over this app's content (measured:
+   * ≤3/255 peak pixel delta in dark mode), so mist tints one to two
+   * steps AWAY from the surface's resting lightness — moss-100 over
+   * the near-white light chrome, moss-700 over the near-black dark
+   * chrome. That shift is what a member sees, even at scroll-top.
    *
-   * Contrast posture, stated honestly (plan §1.4 amendment): the
-   * statically-certified floors (0.92/0.85 over a worst-case
-   * underlay) proved indistinguishable from the default treatment
-   * — MORE opaque than the /70-with-blur chrome every member
-   * already sees — so opt-in mist instead matches the acceptance
-   * basis of that long-shipped default: chrome-text-only surfaces,
-   * real-content backdrops averaged by heavy blur, solid fallbacks
-   * below. Reading surfaces (cards, docked panels) never get this
-   * class — their certified pairings assume solid backgrounds.
+   * Contrast posture, stated honestly (plan §1.4 amendment): mist
+   * matches the acceptance basis of the long-shipped default /70
+   * chrome — chrome-text-only surfaces, real-content backdrops
+   * averaged by heavy blur — with solid fallbacks below. The solid
+   * fallbacks ARE statically certified: light falls back to
+   * moss-50 (the milk lives in the translucency; a solid moss-100
+   * would drop canopy-700 chrome text to 4.20:1), dark falls back
+   * to moss-800 (moss-300 5.31, canopy-300 7.34, canopy-200 9.39).
+   * Reading surfaces (cards, docked panels) never get this class —
+   * their certified pairings assume solid backgrounds.
    *
    * html.mist .chrome-mist (0,2,1) deliberately out-specifies the
    * surfaces' own bg utilities (0,1,0), so no call-site utility
    * removal is needed; with mist off the class is inert. */
   html.mist .chrome-mist {
-    background-color: rgb(var(--moss-50) / 0.5);
+    background-color: rgb(var(--moss-100) / 0.65);
     -webkit-backdrop-filter: blur(24px) saturate(1.35);
     backdrop-filter: blur(24px) saturate(1.35);
   }
   html.mist.dark .chrome-mist {
-    background-color: rgb(var(--moss-950) / 0.45);
+    background-color: rgb(var(--moss-700) / 0.5);
   }
-  /* Solid fallbacks — no backdrop-filter support means the low
-   * tint alphas above would put chrome text over raw content, so
-   * both fallbacks go fully solid. Same under an explicit
-   * reduced-transparency request. */
+  /* Solid fallbacks — no backdrop-filter support means the tint
+   * alphas above would put chrome text over raw content, so both
+   * fallbacks go fully solid (certified pairs, see header comment).
+   * Same under an explicit reduced-transparency request. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     html.mist .chrome-mist {
       background-color: rgb(var(--moss-50));
     }
     html.mist.dark .chrome-mist {
-      background-color: rgb(var(--moss-950));
+      background-color: rgb(var(--moss-800));
     }
   }
   @media (prefers-reduced-transparency: reduce) {
@@ -506,7 +513,7 @@
       backdrop-filter: none;
     }
     html.mist.dark .chrome-mist {
-      background-color: rgb(var(--moss-950));
+      background-color: rgb(var(--moss-800));
     }
   }
 }

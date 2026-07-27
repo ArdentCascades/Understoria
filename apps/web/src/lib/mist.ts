@@ -22,8 +22,11 @@
 // "Morning mist" chrome treatment (docs/themes-plan.md §1.4, T3):
 // a genuinely frosted look on the floating chrome surfaces (sticky
 // header, page bands, bottom nav) — deep blur, a saturation lift,
-// and a theme-following tint a notch more translucent than the
-// default chrome's own /70 treatment. Opt-in only; default off.
+// and a theme-following tint whose LIGHTNESS shifts away from the
+// surface's resting tone (milky moss-100 in light, fog-gray
+// moss-700 in dark). The lightness shift is what makes the toggle
+// perceptible: an alpha-only change over this app's content
+// measured ≤3/255 peak pixel delta. Opt-in only; default off.
 //
 // Contrast posture (plan §1.4 amendment): the statically-certified
 // tint floors proved MORE opaque than the default /70-with-blur
