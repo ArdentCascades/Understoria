@@ -69,6 +69,16 @@ export function LanguageSection() {
           {t("profile.language.newTranslationNote")}
         </p>
       )}
+      {current.content === "ui-only" && (
+        // Content-coverage honesty (plan Phase 2): the UI is
+        // translated but the authored corpus (FAQ, project templates,
+        // task tips) still falls back to English until this
+        // language's content phase ships. Said out loud — never a
+        // silent mixed-language surprise.
+        <p className="mt-2 text-xs text-moss-600 dark:text-moss-300">
+          {t("profile.language.contentEnglishNote")}
+        </p>
+      )}
     </section>
   );
 }

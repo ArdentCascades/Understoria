@@ -79,10 +79,11 @@ describe("HelpPage — locale-aware FAQ", () => {
     expect(container.textContent).not.toContain("Posts and exchanges");
   });
 
-  it("falls back to English for unsupported locales", async () => {
-    // Force-set the language to a locale we don't have a FAQ for.
-    // The selector should fall through to the English source
-    // rather than render an empty page.
+  it("FAQ content falls back to English for locales without content translations", async () => {
+    // fr ships UI strings but no FAQ translation yet (the plan's
+    // Phase 2 ships authored content per language). The selector
+    // must fall through to the English source rather than render an
+    // empty page — the Settings language card discloses the gap.
     await i18n.changeLanguage("fr");
     render(<HelpPage />);
     expect(container.textContent).toContain("Posts and exchanges");

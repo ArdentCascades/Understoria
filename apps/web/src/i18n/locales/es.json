@@ -2811,7 +2811,8 @@
     "language": {
       "title": "Idioma",
       "intro": "Elige cómo Understoria te habla en este dispositivo. Pronto vendrán más idiomas y traducciones del resto de la aplicación.",
-      "newTranslationNote": "Esta traducción es nueva — hecha con ayuda de IA y revisada por personas, pero aún sin una revisión completa de hablantes nativos. Si algo suena mal, dínoslo: las correcciones son bienvenidas y fáciles de hacer."
+      "newTranslationNote": "Esta traducción es nueva — hecha con ayuda de IA y revisada por personas, pero aún sin una revisión completa de hablantes nativos. Si algo suena mal, dínoslo: las correcciones son bienvenidas y fáciles de hacer.",
+      "contentEnglishNote": "Las guías largas — las preguntas frecuentes, las plantillas de proyectos y los consejos de tareas — siguen en inglés en este idioma. Son lo próximo que traduciremos."
     },
     "appearance": {
       "title": "Apariencia",

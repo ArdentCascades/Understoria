@@ -22,6 +22,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import i18n from "./index";
 import en from "./locales/en.json";
 import es from "./locales/es.json";
+import fr from "./locales/fr.json";
 
 // CLDR plural-suffix completeness for every shipped locale
 // (docs/i18n-expansion.md Phase 0), plus the original Spanish
@@ -34,6 +35,7 @@ import es from "./locales/es.json";
 const LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   { code: "en", data: en },
   { code: "es", data: es },
+  { code: "fr", data: fr },
 ];
 
 function flatKeys(obj: unknown, prefix = ""): string[] {

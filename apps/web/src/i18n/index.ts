@@ -48,6 +48,7 @@ const LOCALE_LOADERS: Record<
 > = {
   en: () => Promise.resolve({ default: en }),
   es: () => import("./locales/es.json"),
+  fr: () => import("./locales/fr.json"),
 };
 
 // Minimal i18next backend over the loader map. `supportedLngs` below

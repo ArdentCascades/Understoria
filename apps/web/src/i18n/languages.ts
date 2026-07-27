@@ -46,11 +46,26 @@ export interface LanguageInfo {
    *  awaiting a native-speaker review cycle. Renders the honesty note
    *  in Settings → Language. Remove after the review completes. */
   reviewStatus?: "new";
+  /** "full" when the authored content corpus (FAQ, templates, task
+   *  steps/tips) exists in this language too; "ui-only" while only
+   *  the UI strings are translated and content falls back to English
+   *  (docs/i18n-expansion.md Phase 2 ships content per language).
+   *  Renders the honest content-fallback note in Settings — never
+   *  silent mixed-language surprises. */
+  content: "full" | "ui-only";
 }
 
 export const LANGUAGES = [
-  { code: "en", endonym: "English", dir: "ltr", speakLang: "en" },
-  { code: "es", endonym: "Español", dir: "ltr", speakLang: "es" },
+  { code: "en", endonym: "English", dir: "ltr", speakLang: "en", content: "full" },
+  { code: "es", endonym: "Español", dir: "ltr", speakLang: "es", content: "full" },
+  {
+    code: "fr",
+    endonym: "Français",
+    dir: "ltr",
+    speakLang: "fr",
+    reviewStatus: "new",
+    content: "ui-only",
+  },
 ] as const satisfies readonly LanguageInfo[];
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]["code"];

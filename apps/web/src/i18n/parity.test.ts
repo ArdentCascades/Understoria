@@ -21,6 +21,7 @@
 import { describe, expect, it } from "vitest";
 import en from "./locales/en.json";
 import es from "./locales/es.json";
+import fr from "./locales/fr.json";
 import { LANGUAGES } from "./languages";
 
 // Every shipped locale, keyed for the gates below. Locale files are
@@ -30,6 +31,7 @@ import { LANGUAGES } from "./languages";
 const SHIPPED_LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   { code: "en", data: en },
   { code: "es", data: es },
+  { code: "fr", data: fr },
 ];
 
 type JsonValue =
