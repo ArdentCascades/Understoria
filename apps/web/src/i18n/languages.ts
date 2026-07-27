@@ -66,6 +66,26 @@ export const LANGUAGES = [
     reviewStatus: "new",
     content: "ui-only",
   },
+  {
+    code: "pt",
+    endonym: "Português",
+    dir: "ltr",
+    speakLang: "pt",
+    reviewStatus: "new",
+    content: "ui-only",
+  },
+  // Simplified Chinese ships under the language-only code "zh" —
+  // that's what browsers send (zh-CN, zh-SG) and what i18next's
+  // language-only fallback resolves; a "zh-Hans" code would match
+  // neither. zh-Hant (Traditional) is a possible future sibling.
+  {
+    code: "zh",
+    endonym: "中文",
+    dir: "ltr",
+    speakLang: "zh-CN",
+    reviewStatus: "new",
+    content: "ui-only",
+  },
 ] as const satisfies readonly LanguageInfo[];
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]["code"];
@@ -79,8 +99,10 @@ export const SUPPORTED_LANGUAGES: readonly SupportedLanguage[] =
 export function languageInfo(lang: string | undefined): LanguageInfo {
   const base = (lang ?? "en").toLowerCase();
   return (
-    LANGUAGES.find((l) => base === l.code || base.startsWith(`${l.code}-`)) ??
-    LANGUAGES[0]
+    LANGUAGES.find((l) => {
+      const code = l.code.toLowerCase();
+      return base === code || base.startsWith(`${code}-`);
+    }) ?? LANGUAGES[0]
   );
 }
 
