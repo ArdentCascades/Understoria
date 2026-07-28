@@ -64,7 +64,7 @@ export const LANGUAGES = [
     dir: "ltr",
     speakLang: "fr",
     reviewStatus: "new",
-    content: "ui-only",
+    content: "full",
   },
   {
     code: "pt",

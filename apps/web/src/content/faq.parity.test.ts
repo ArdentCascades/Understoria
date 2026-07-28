@@ -12,6 +12,7 @@
 import { describe, expect, it } from "vitest";
 import { FAQ_SECTIONS } from "./faq";
 import { FAQ_SECTIONS_ES } from "./faq.es";
+import { FAQ_SECTIONS_FR } from "./faq.fr";
 
 // Guardrail against translation drift. The FAQ ids are stable URL
 // fragments shared across languages (`/help#confirm-exchange`), so
@@ -20,17 +21,20 @@ import { FAQ_SECTIONS_ES } from "./faq.es";
 // section. This test makes that a CI failure rather than a quiet
 // regression.
 
-describe("FAQ parity — English ↔ Spanish", () => {
+describe.each([
+  ["Spanish", FAQ_SECTIONS_ES],
+  ["French", FAQ_SECTIONS_FR],
+] as const)("FAQ parity — English ↔ %s", (localeName, FAQ_SECTIONS_TR) => {
   it("has the same section ids in both languages", () => {
     const enSectionIds = FAQ_SECTIONS.map((s) => s.id).sort();
-    const esSectionIds = FAQ_SECTIONS_ES.map((s) => s.id).sort();
-    expect(esSectionIds).toEqual(enSectionIds);
+    const trSectionIds = FAQ_SECTIONS_TR.map((s) => s.id).sort();
+    expect(trSectionIds).toEqual(enSectionIds);
   });
 
   it("has the same section ordering in both languages", () => {
     // Ordering matters: members scrolling the page expect to find
     // the same topics in the same order regardless of language.
-    expect(FAQ_SECTIONS_ES.map((s) => s.id)).toEqual(
+    expect(FAQ_SECTIONS_TR.map((s) => s.id)).toEqual(
       FAQ_SECTIONS.map((s) => s.id),
     );
   });
@@ -39,14 +43,14 @@ describe("FAQ parity — English ↔ Spanish", () => {
     const enBySection = new Map(
       FAQ_SECTIONS.map((s) => [s.id, s.entries.map((e) => e.id).sort()]),
     );
-    const esBySection = new Map(
-      FAQ_SECTIONS_ES.map((s) => [s.id, s.entries.map((e) => e.id).sort()]),
+    const trBySection = new Map(
+      FAQ_SECTIONS_TR.map((s) => [s.id, s.entries.map((e) => e.id).sort()]),
     );
     for (const [sectionId, enIds] of enBySection) {
-      const esIds = esBySection.get(sectionId);
-      expect(esIds, `section "${sectionId}" missing in Spanish`).toBeDefined();
+      const trIds = trBySection.get(sectionId);
+      expect(trIds, `section "${sectionId}" missing in ${localeName}`).toBeDefined();
       expect(
-        esIds,
+        trIds,
         `entry ids drift in section "${sectionId}"`,
       ).toEqual(enIds);
     }
@@ -62,13 +66,13 @@ describe("FAQ parity — English ↔ Spanish", () => {
         s.entries.map((e) => [`${s.id}/${e.id}`, e.answer.length] as const),
       ),
     );
-    const esEntries = new Map(
-      FAQ_SECTIONS_ES.flatMap((s) =>
+    const trEntries = new Map(
+      FAQ_SECTIONS_TR.flatMap((s) =>
         s.entries.map((e) => [`${s.id}/${e.id}`, e.answer.length] as const),
       ),
     );
     for (const [key, enLen] of enEntries) {
-      expect(esEntries.get(key), `paragraph count for ${key}`).toBe(enLen);
+      expect(trEntries.get(key), `paragraph count for ${key}`).toBe(enLen);
     }
   });
 
@@ -77,7 +81,7 @@ describe("FAQ parity — English ↔ Spanish", () => {
     // ASCII-identifier-shaped. If a translator slipped accented
     // characters into an id, this catches it.
     const idPattern = /^[a-z0-9-]+$/;
-    for (const section of FAQ_SECTIONS_ES) {
+    for (const section of FAQ_SECTIONS_TR) {
       expect(section.id).toMatch(idPattern);
       for (const entry of section.entries) {
         expect(entry.id).toMatch(idPattern);

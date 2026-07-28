@@ -9,9 +9,11 @@ import {
   PROJECT_TEMPLATES_EN,
 } from "@/content/projectTemplates";
 import { PROJECT_TEMPLATES_ES } from "@/content/projectTemplates.es";
+import { PROJECT_TEMPLATES_FR } from "@/content/projectTemplates.fr";
 import { getTaskSteps } from "@/content/taskSteps";
 import { TASK_STEPS_EN } from "@/content/taskSteps.en";
 import { TASK_STEPS_ES } from "@/content/taskSteps.es";
+import { TASK_STEPS_FR } from "@/content/taskSteps.fr";
 
 // Coverage guard for the suggested-starter-steps content — the same
 // tie taskTips.test.ts provides for the tips: the steps are keyed by
@@ -25,13 +27,18 @@ describe("TASK_STEPS coverage", () => {
     );
   });
 
-  it("has one step list per task, index-aligned, in both locales", () => {
+  it("has one step list per task, index-aligned, in every locale", () => {
     for (const tpl of PROJECT_TEMPLATES_EN) {
       expect(TASK_STEPS_EN[tpl.id], tpl.id).toBeDefined();
       expect(TASK_STEPS_EN[tpl.id].length, tpl.id).toBe(tpl.tasks.length);
     }
     for (const tpl of PROJECT_TEMPLATES_ES) {
       expect(TASK_STEPS_ES[tpl.id]?.length, `${tpl.id} (es)`).toBe(
+        tpl.tasks.length,
+      );
+    }
+    for (const tpl of PROJECT_TEMPLATES_FR) {
+      expect(TASK_STEPS_FR[tpl.id]?.length, `${tpl.id} (fr)`).toBe(
         tpl.tasks.length,
       );
     }
@@ -43,6 +50,9 @@ describe("TASK_STEPS coverage", () => {
         expect(list.length, `${id}[${i}].en`).toBeGreaterThanOrEqual(3);
         expect(list.length, `${id}[${i}].en`).toBeLessThanOrEqual(5);
         expect(TASK_STEPS_ES[id]?.[i]?.length, `${id}[${i}] es/en counts`).toBe(
+          list.length,
+        );
+        expect(TASK_STEPS_FR[id]?.[i]?.length, `${id}[${i}] fr/en counts`).toBe(
           list.length,
         );
       });
@@ -61,6 +71,11 @@ describe("TASK_STEPS coverage", () => {
           expect(s.length, `${id}[${i}].es[${j}]`).toBeLessThanOrEqual(120);
           expect(s, `${id}[${i}].es[${j}] es===en`).not.toBe(enList[j]);
         });
+        (TASK_STEPS_FR[id]?.[i] ?? []).forEach((s, j) => {
+          expect(s.trim(), `${id}[${i}].fr[${j}]`).not.toBe("");
+          expect(s.length, `${id}[${i}].fr[${j}]`).toBeLessThanOrEqual(120);
+          expect(s, `${id}[${i}].fr[${j}] fr===en`).not.toBe(enList[j]);
+        });
       });
     }
   });
@@ -77,6 +92,10 @@ describe("getTaskSteps", () => {
     const tplEs = PROJECT_TEMPLATES_ES.find((t) => t.id === tpl.id)!;
     const es = getTaskSteps(tpl.id, tplEs.tasks[0].name, "es");
     expect(es).toEqual([...TASK_STEPS_ES[tpl.id][0]]);
+    // Same recovery for a project created in French.
+    const tplFr = PROJECT_TEMPLATES_FR.find((t) => t.id === tpl.id)!;
+    const fr = getTaskSteps(tpl.id, tplFr.tasks[0].name, "fr");
+    expect(fr).toEqual([...TASK_STEPS_FR[tpl.id][0]]);
   });
 
   it("yields null for from-scratch projects, unknown templates, and renamed tasks", () => {

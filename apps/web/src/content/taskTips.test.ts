@@ -14,9 +14,11 @@ import {
   PROJECT_TEMPLATES_EN,
 } from "@/content/projectTemplates";
 import { PROJECT_TEMPLATES_ES } from "@/content/projectTemplates.es";
+import { PROJECT_TEMPLATES_FR } from "@/content/projectTemplates.fr";
 import { getTaskTips } from "@/content/taskTips";
 import { TASK_TIPS_EN } from "@/content/taskTips.en";
 import { TASK_TIPS_ES } from "@/content/taskTips.es";
+import { TASK_TIPS_FR } from "@/content/taskTips.fr";
 
 // Coverage guard for the per-task tips content. The tips live in their
 // own table keyed by template id + task index, so nothing in the type
@@ -30,7 +32,7 @@ describe("TASK_TIPS coverage", () => {
     );
   });
 
-  it("has one tip per task, index-aligned, in both locales", () => {
+  it("has one tip per task, index-aligned, in every locale", () => {
     for (const tpl of PROJECT_TEMPLATES_EN) {
       expect(TASK_TIPS_EN[tpl.id], tpl.id).toBeDefined();
       expect(TASK_TIPS_EN[tpl.id].length, tpl.id).toBe(tpl.tasks.length);
@@ -42,15 +44,23 @@ describe("TASK_TIPS coverage", () => {
         tpl.tasks.length,
       );
     }
+    for (const tpl of PROJECT_TEMPLATES_FR) {
+      expect(TASK_TIPS_FR[tpl.id]?.length, `${tpl.id} (fr)`).toBe(
+        tpl.tasks.length,
+      );
+    }
   });
 
   it("every tip is non-empty and actually translated", () => {
     for (const [id, tips] of Object.entries(TASK_TIPS_EN)) {
       tips.forEach((tip, i) => {
         const es = TASK_TIPS_ES[id]?.[i] ?? "";
+        const fr = TASK_TIPS_FR[id]?.[i] ?? "";
         expect(tip.trim(), `${id}[${i}].en`).not.toBe("");
         expect(es.trim(), `${id}[${i}].es`).not.toBe("");
         expect(es, `${id}[${i}] es===en`).not.toBe(tip);
+        expect(fr.trim(), `${id}[${i}].fr`).not.toBe("");
+        expect(fr, `${id}[${i}] fr===en`).not.toBe(tip);
       });
     }
   });
@@ -62,6 +72,10 @@ describe("TASK_TIPS coverage", () => {
         expect(
           (TASK_TIPS_ES[id]?.[i] ?? "").length,
           `${id}[${i}].es`,
+        ).toBeLessThanOrEqual(400);
+        expect(
+          (TASK_TIPS_FR[id]?.[i] ?? "").length,
+          `${id}[${i}].fr`,
         ).toBeLessThanOrEqual(400);
       });
     }
@@ -92,6 +106,14 @@ describe("getTaskTips", () => {
     );
     expect(getTaskTips(tpl.id, tpl.tasks[0].name, "es-MX")).toBe(
       TASK_TIPS_ES[tpl.id][0],
+    );
+    // …and in French, including a project created UNDER es viewed
+    // in fr — the title index recovers across any language pair.
+    expect(getTaskTips(tpl.id, tpl.tasks[0].name, "fr")).toBe(
+      TASK_TIPS_FR[tpl.id][0],
+    );
+    expect(getTaskTips(tpl.id, tplEs.tasks[0].name, "fr")).toBe(
+      TASK_TIPS_FR[tpl.id][0],
     );
   });
 

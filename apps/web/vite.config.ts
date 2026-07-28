@@ -181,6 +181,10 @@ export default defineConfig({
               name: "lazy-content-es",
               test: /src[\\/]content[\\/](?:[^\\/]+\.es\.ts|bundles[\\/]es\.ts)/,
             },
+            {
+              name: "lazy-content-fr",
+              test: /src[\\/]content[\\/](?:[^\\/]+\.fr\.ts|bundles[\\/]fr\.ts)/,
+            },
             // Authored content (templates, tips, starter steps) is pure
             // data and grew the main chunk past workbox's 2 MiB per-file
             // precache limit. Its own chunk keeps every file precachable
