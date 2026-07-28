@@ -10,6 +10,15 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The full authored-content library now exists in Portuguese.**
+  Same scope as the French translation below — all 64 project
+  templates with their tips and starter steps, the 14 event
+  templates, the FAQ, and the start-a-community walkthrough — in
+  warm Brazilian-leaning Portuguese that follows the shipped UI's
+  terminology (mutirão, mural, Pedidos) and no-shame register. The
+  Settings note about content appearing in English is gone for
+  Portuguese; content loads as its own lazy chunk only when
+  Portuguese is chosen. Chinese is next.
 - **The full authored-content library now exists in French.** All 64
   project templates (with every task's suggested starter steps and
   per-task tips), the 14 event templates, the in-app FAQ, and the

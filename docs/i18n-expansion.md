@@ -151,21 +151,25 @@ repo's disclosed AI-assisted posture:
 2. **Translate in member-impact order:** FAQ + start-a-community →
    event templates → the 64 project templates with their task steps
    and tips (agent fleet per template, review per template — the same
-   process that authored them). **French SHIPPED (Phase 2b):** the
-   full corpus (64 templates + aligned tips/steps, 14 event
-   templates, FAQ, start-a-community guide) as `*.fr.ts` modules
-   behind `content/bundles/fr.ts` (`lazy-content-fr` chunk), with
-   the title index regenerated to carry fr task names and every
-   content parity gate extended per-language. French's registry
-   entry flipped to `content: "full"`, which removes the Settings
-   English-content disclosure. Production method: 10-agent fleet,
+   process that authored them). **French and Portuguese SHIPPED
+   (Phase 2b):** each language's full corpus (64 templates + aligned
+   tips/steps, 14 event templates, FAQ, start-a-community guide) as
+   `*.<code>.ts` modules behind `content/bundles/<code>.ts`
+   (`lazy-content-<code>` chunks), with the title index regenerated
+   to carry each language's task names and every content parity gate
+   extended per-language. Both registry entries flipped to
+   `content: "full"`, removing the Settings English-content
+   disclosure. Production method (per language): 10-agent fleet,
    each template bundled WITH its tips+steps so index alignment is
-   guaranteed per agent; the shipped `fr.json` UI file and
-   `docs/i18n-glossary/fr.md` were the binding terminology
+   guaranteed per agent; the shipped UI locale file and
+   `docs/i18n-glossary/<code>.md` were the binding terminology
    authorities; independent script validation of every fragment
-   (locale-invariant fields byte-identical, counts, lengths, French
-   typography) before assembly. pt and zh follow on the same rails,
-   each its own PR.
+   (locale-invariant fields byte-identical, counts, lengths,
+   language typography/register) before assembly. Portuguese field
+   notes: mutirão reserved for work days (moving crew = "equipe de
+   mudanças"), food safety rendered to avoid the food-security
+   collision, board smoke re-verified at 375px ("Pedidos" still
+   fits). zh follows on the same rails as its own PR.
 3. **Honest fallback while in flight:** a language may ship complete
    UI + FAQ while templates are still English, with a visible "not yet
    translated" line on English-fallback content — never silent mixed-

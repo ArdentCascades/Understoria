@@ -72,7 +72,7 @@ export const LANGUAGES = [
     dir: "ltr",
     speakLang: "pt",
     reviewStatus: "new",
-    content: "ui-only",
+    content: "full",
   },
   // Simplified Chinese ships under the language-only code "zh" —
   // that's what browsers send (zh-CN, zh-SG) and what i18next's
