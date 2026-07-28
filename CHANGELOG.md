@@ -10,6 +10,16 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The app now speaks Hindi.** All ~2,900 UI strings are translated
+  into warm, contemporary Hindustani (Devanagari) — the register a
+  community organizer uses across a kitchen table, guided by a new
+  binding glossary (docs/i18n-glossary/hi.md): uniform आप, gender-
+  neutral constructions, श्रमदान for work days, हामी for vouching,
+  and no officialese or debt vocabulary. Hindi appears in Settings →
+  Language as हिन्दी with the new-translation review note; authored
+  content (templates, FAQ) shows in English for now with the honest
+  disclosure, until its Phase 2 translation lands. The Hindi UI
+  loads as its own lazy chunk only when chosen.
 - **The full authored-content library now exists in Chinese —
   completing translations for every language the app ships.** Same
   scope as French and Portuguese below: all 64 project templates

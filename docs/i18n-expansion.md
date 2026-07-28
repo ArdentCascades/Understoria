@@ -16,7 +16,15 @@ Chinese shipped under the language-only code `zh` rather than the
 plan's `zh-Hans` label — browsers send zh-CN/zh-SG and i18next's
 language-only fallback resolves those to `zh`, while a literal
 zh-Hans code would match neither (zh-Hant stays open as a future
-sibling). Wave 2 (hi, vi, ru) is next; ru will exercise the
+sibling). WAVE 2 IN PROGRESS: **Hindi (hi) SHIPPED**
+(UI strings complete — glossary at `docs/i18n-glossary/hi.md` with
+the आप-register decision and Devanagari conventions; 6-agent bulk
+pass + splice validation + cross-chunk reconciliation (sign →
+दस्तख़त, public key → सार्वजनिक चाबी, बाकी nukta normalization) +
+375px Devanagari layout smoke; registry carries
+`reviewStatus: "new"` + `content: "ui-only"` — the first new tenant
+of the content-fallback disclosure since Phase 2b completed the
+original languages). vi and ru follow; ru will exercise the
 _one/_few/_many plural gate. Baseline numbers below refreshed
 2026-07-27.
 
