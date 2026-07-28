@@ -14,6 +14,7 @@ import {
 } from "./eventTemplates";
 import { EVENT_TEMPLATES_ES } from "./eventTemplates.es";
 import { EVENT_TEMPLATES_FR } from "./eventTemplates.fr";
+import { EVENT_TEMPLATES_PT } from "./eventTemplates.pt";
 import { PROJECT_CATEGORY_META } from "@/lib/categories";
 
 // Every category a template may use: the new event-specific strings plus
@@ -27,6 +28,7 @@ const BOTH: Array<[string, readonly EventTemplate[]]> = [
   ["en", EVENT_TEMPLATES_EN],
   ["es", EVENT_TEMPLATES_ES],
   ["fr", EVENT_TEMPLATES_FR],
+  ["pt", EVENT_TEMPLATES_PT],
 ];
 
 describe("eventTemplates — vocabulary", () => {
@@ -44,11 +46,13 @@ describe("eventTemplates — set shape and parity", () => {
     expect(EVENT_TEMPLATES_EN).toHaveLength(14);
     expect(EVENT_TEMPLATES_ES).toHaveLength(14);
     expect(EVENT_TEMPLATES_FR).toHaveLength(14);
+    expect(EVENT_TEMPLATES_PT).toHaveLength(14);
   });
 
   it.each([
     ["es", EVENT_TEMPLATES_ES] as const,
     ["fr", EVENT_TEMPLATES_FR] as const,
+    ["pt", EVENT_TEMPLATES_PT] as const,
   ])("en and %s share the same id set in the same order", (_, set) => {
     expect(set.map((t) => t.id)).toEqual(EVENT_TEMPLATES_EN.map((t) => t.id));
   });
@@ -80,6 +84,7 @@ describe("eventTemplates — set shape and parity", () => {
   it.each([
     ["es", EVENT_TEMPLATES_ES] as const,
     ["fr", EVENT_TEMPLATES_FR] as const,
+    ["pt", EVENT_TEMPLATES_PT] as const,
   ])("keeps locale-invariant fields identical across en and %s", (_, set) => {
     const byId = new Map(set.map((t) => [t.id, t]));
     for (const en of EVENT_TEMPLATES_EN) {
@@ -127,6 +132,8 @@ describe("eventTemplates — accessors", () => {
     expect(getEventTemplates("es-MX")).toBe(EVENT_TEMPLATES_ES);
     expect(getEventTemplates("fr")).toBe(EVENT_TEMPLATES_FR);
     expect(getEventTemplates("fr-CA")).toBe(EVENT_TEMPLATES_FR);
+    expect(getEventTemplates("pt")).toBe(EVENT_TEMPLATES_PT);
+    expect(getEventTemplates("pt-BR")).toBe(EVENT_TEMPLATES_PT);
     expect(getEventTemplates("en")).toBe(EVENT_TEMPLATES_EN);
     expect(getEventTemplates("zh-CN")).toBe(EVENT_TEMPLATES_EN);
   });

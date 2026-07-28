@@ -52,6 +52,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Recrute un roulement de nettoyage et de réapprovisionnement",
       "Tisse des liens avec des sources de dons",
       "Mets en place un contact en cas de pépin"
+    ],
+    "pt": [
+      "Encontre um espaço anfitrião com tomada e movimento",
+      "Consiga uma geladeira e um abrigo contra o tempo",
+      "Defina as regras e etiquete tudo",
+      "Monte uma escala de limpeza e reposição",
+      "Construa relações com quem doa",
+      "Crie um contato para problemas"
     ]
   },
   "community-garden": {
@@ -81,6 +89,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Plante selon ton climat et ta saison",
       "Mets en place un roulement d'arrosage et de désherbage",
       "Prévois la récolte et le surplus"
+    ],
+    "pt": [
+      "Garanta o terreno e a permissão",
+      "Analise o solo e planeje os canteiros",
+      "Reúna materiais e construa",
+      "Decidam como compartilhar",
+      "Plante conforme o clima e a estação",
+      "Organize uma escala de rega e capina",
+      "Planeje a colheita e o excedente"
     ]
   },
   "tool-lending-library": {
@@ -110,6 +127,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Mets en place la fiche de sortie",
       "Forme tes bibliothécaires",
       "Entretiens et fais grandir la collection"
+    ],
+    "pt": [
+      "Encontre onde guardar e um horário de atendimento",
+      "Reúna e organize o acervo",
+      "Catalogue tudo",
+      "Escreva as regras de empréstimo",
+      "Monte o registro de saída",
+      "Capacite quem atende",
+      "Mantenha e faça crescer a biblioteca"
     ]
   },
   "neighborhood-care-network": {
@@ -139,6 +165,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Prépare un plan pour donner l'alerte",
       "Coordonne l'aide concrète",
       "Prends soin des bénévoles aussi"
+    ],
+    "pt": [
+      "Descubra quem está por perto",
+      "Convoque e verifique as pessoas voluntárias",
+      "Forme os pares com cuidado",
+      "Defina um ritmo de contato",
+      "Crie um plano para situações de crise",
+      "Coordene a ajuda prática",
+      "Cuide também de quem acompanha"
     ]
   },
   "emergency-preparedness": {
@@ -168,6 +203,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Repère des points sûrs",
       "Organise un exercice ou une soirée d'info",
       "Définis les rôles du « jour J »"
+    ],
+    "pt": [
+      "Mapeie os riscos da sua vizinhança",
+      "Monte uma corrente de contatos",
+      "Planeje a comunicação sem internet",
+      "Estoque suprimentos compartilhados",
+      "Identifique pontos seguros",
+      "Façam um simulado ou uma noite informativa",
+      "Defina os papéis para \"a hora H\""
     ]
   },
   "free-store": {
@@ -194,6 +238,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Présente pour qu'on puisse choisir avec dignité",
       "Assure l'équipe le jour J",
       "Occupe-toi des restes"
+    ],
+    "pt": [
+      "Escolha o formato e o espaço",
+      "Defina o que se aceita como doação",
+      "Organize a recepção e a triagem",
+      "Exponha para as pessoas escolherem com dignidade",
+      "Montem a equipe do evento",
+      "Cuide das sobras"
     ]
   },
   "skill-share": {
@@ -217,6 +269,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Trouve un lieu et un horaire",
       "Monte un programme",
       "Rends-le accessible"
+    ],
+    "pt": [
+      "Pesquise saberes e interesses",
+      "Convide e prepare quem ensina",
+      "Encontre espaço e horário",
+      "Monte uma agenda",
+      "Torne tudo acessível"
     ]
   },
   "bulk-buying-coop": {
@@ -246,6 +305,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Organise la livraison et un espace de répartition",
       "Répartis les commandes équitablement",
       "Faites tourner le travail"
+    ],
+    "pt": [
+      "Reúna seu grupo de compras",
+      "Encontre um fornecedor",
+      "Monte o sistema de pedidos",
+      "Cuide do dinheiro com transparência",
+      "Organize a entrega e um espaço de separação",
+      "Dividam os pedidos com justiça",
+      "Revezem o trabalho"
     ]
   },
   "repair-cafe": {
@@ -272,6 +340,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Crée un circuit d'accueil",
       "Gère la sécurité et les attentes",
       "Garde en stock les pièces et consommables courants"
+    ],
+    "pt": [
+      "Recrute quem conserta, por especialidade",
+      "Monte as estações de conserto",
+      "Marque uma data recorrente",
+      "Crie um fluxo de recepção",
+      "Cuide da segurança e das expectativas",
+      "Mantenha um estoque de peças e consumíveis comuns"
     ]
   },
   "rides-transportation": {
@@ -301,6 +377,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Définis ce qui est couvert",
       "Gère les frais",
       "Veille sur les personnes transportées et celles qui conduisent"
+    ],
+    "pt": [
+      "Recrute e avalie quem dirige",
+      "Resolva seguro e responsabilidade",
+      "Monte um sistema de pedidos",
+      "Crie uma rotina de coordenação",
+      "Definam o que é coberto",
+      "Cuidem dos custos",
+      "Mantenha a segurança de quem viaja e de quem dirige"
     ]
   },
   "tenant-union": {
@@ -330,6 +415,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Organise un atelier « connais tes droits »",
       "Prépare un protocole de réponse aux expulsions",
       "Relie-toi à l'aide juridique et au soutien durable"
+    ],
+    "pt": [
+      "Recrute um comitê organizador de base",
+      "Mapeie os prédios e os problemas de quem mora",
+      "Reúna informação local precisa sobre direitos",
+      "Monte um sistema de contato de resposta rápida",
+      "Organize uma oficina “conheça seus direitos”",
+      "Definam um protocolo de resposta a despejos",
+      "Conecte-se à assistência jurídica e ao apoio contínuo"
     ]
   },
   "childcare-collective": {
@@ -359,6 +453,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Pose les règles santé, allergies et urgences",
       "Forme les personnes qui gardent aux bases",
       "Fais une séance d'essai et recueille les retours"
+    ],
+    "pt": [
+      "Reúna as famílias fundadoras e combinem um modelo",
+      "Definam padrões de segurança e avaliação",
+      "Encontre um espaço e deixe-o seguro para crianças",
+      "Criem um sistema de agenda e créditos",
+      "Definam políticas de saúde, alergias e emergências",
+      "Treinem o básico com quem cuida",
+      "Façam uma sessão piloto e recolham impressões"
     ]
   },
   "community-composting": {
@@ -388,6 +491,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Rends clair ce qui est accepté",
       "Recrute et forme un roulement d'entretien",
       "Distribue le compost mûr"
+    ],
+    "pt": [
+      "Encontre um local de compostagem",
+      "Escolha um método de compostagem",
+      "Consiga baldes e equipamento",
+      "Monte um sistema de coleta",
+      "Deixem claro o que é aceito",
+      "Recrute e treine uma escala de manutenção",
+      "Distribua o composto pronto"
     ]
   },
   "free-little-library": {
@@ -411,6 +523,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Garnis la collection de départ",
       "Ajoute un panneau et des repères simples",
       "Trouve une personne pour veiller sur la boîte"
+    ],
+    "pt": [
+      "Construa ou consiga uma caixa de livros à prova de tempo",
+      "Escolha e prepare um lugar",
+      "Monte o acervo inicial",
+      "Coloque uma placa e normas simples",
+      "Encontre quem vai zelar pela caixa"
     ]
   },
   "community-first-aid-training": {
@@ -437,6 +556,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Recrute les participantes et participants",
       "Tiens les séances de formation",
       "Distribue les trousses et organise les rappels"
+    ],
+    "pt": [
+      "Faça parceria com instrutores certificados",
+      "Consiga os materiais",
+      "Encontre espaço e agende as sessões",
+      "Convide participantes",
+      "Faça as sessões de treinamento",
+      "Distribua kits e marque reciclagens"
     ]
   },
   "time-bank": {
@@ -466,6 +593,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Lance un annuaire des services",
       "Coordonne et provoque les échanges",
       "Construis des pratiques de confiance et de sécurité"
+    ],
+    "pt": [
+      "Recrute membros fundadores e façam um inventário de habilidades",
+      "Escolha um sistema de registro",
+      "Definam as regras",
+      "Deem as boas-vindas aos membros",
+      "Lance um diretório de serviços",
+      "Coordene e costure as trocas",
+      "Construam práticas de confiança e segurança"
     ]
   },
   "solidarity-fund": {
@@ -495,6 +631,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Lancer la collecte de fonds",
       "Construire un processus de décision et de versement",
       "Rendre des comptes en toute transparence"
+    ],
+    "pt": [
+      "Forme uma pequena equipe responsável",
+      "Monte um sistema transparente para o dinheiro",
+      "Definam critérios de pedido e de repasse",
+      "Crie um formulário de pedido simples e sem barreiras",
+      "Ponha a arrecadação de pé",
+      "Monte um processo de decisão e pagamento",
+      "Preste contas com transparência"
     ]
   },
   "diaper-hygiene-bank": {
@@ -518,6 +663,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Trier et inventorier par taille et par type",
       "Fixer une règle de distribution équitable",
       "Planifier la distribution et réunir l'équipe"
+    ],
+    "pt": [
+      "Encontre um lugar para guardar e um ponto de distribuição",
+      "Organize o abastecimento",
+      "Separe e inventarie por tamanho e tipo",
+      "Defina uma política de distribuição justa",
+      "Agende a distribuição e reúna quem ajuda"
     ]
   },
   "community-bike-workshop": {
@@ -544,6 +696,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Recruter des mécanos bénévoles",
       "Fixer des permanences et un modèle « gagne ton vélo »",
       "Poser des pratiques de sécurité"
+    ],
+    "pt": [
+      "Encontre um espaço para a oficina",
+      "Junte ferramentas e um cavalete",
+      "Recolha bicicletas e peças doadas",
+      "Convoque mecânicas e mecânicos voluntários",
+      "Defina horários e um modelo “ganhe sua bicicleta”",
+      "Estabeleça práticas de segurança"
     ]
   },
   "newcomer-translation-network": {
@@ -570,6 +730,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Créer des supports d'orientation",
       "Proposer un accompagnement aux rendez-vous",
       "Poser des pratiques de confidentialité et de sécurité"
+    ],
+    "pt": [
+      "Convoque pessoas voluntárias bilíngues e multilíngues",
+      "Mapeie serviços e parcerias locais",
+      "Monte um sistema de pedidos e conexões",
+      "Crie materiais de orientação",
+      "Ofereça acompanhamento a consultas e atendimentos",
+      "Estabeleçam práticas de privacidade e segurança"
     ]
   },
   "community-meal": {
@@ -599,6 +767,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Recruter une équipe de cuisine et de service",
       "Fixer un rythme et faire passer le mot",
       "Assurer le repas et le nettoyage"
+    ],
+    "pt": [
+      "Encontrem uma cozinha e um espaço para servir",
+      "Resolvam a segurança alimentar e os alvarás",
+      "Construam um fluxo de abastecimento de alimentos",
+      "Planejem cardápios para escala, dietas e alergias",
+      "Convoquem uma equipe de cozinha e serviço",
+      "Definam uma agenda e espalhem a notícia",
+      "Façam a refeição e limpem"
     ]
   },
   "seed-library": {
@@ -622,6 +799,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Organiser et étiqueter la collection",
       "Poser des règles d'emprunt et de partage",
       "Entretenir la viabilité et réassortir"
+    ],
+    "pt": [
+      "Encontrem um anfitrião e um sistema de guarda",
+      "Consigam as sementes iniciais",
+      "Organizem e etiquetem a coleção",
+      "Definam as regras de empréstimo e troca",
+      "Mantenham a viabilidade e reponham o estoque"
     ]
   },
   "digital-literacy": {
@@ -651,6 +835,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Concevoir un parcours pour débutants",
       "Planifier des cours et des permanences d'aide",
       "Poser des règles de sécurité des données et de retour"
+    ],
+    "pt": [
+      "Recolham e recondicionem dispositivos",
+      "Montem um sistema de empréstimo",
+      "Providenciem o acesso à internet",
+      "Convoquem e preparem quem vai ensinar",
+      "Desenhem um currículo para quem está começando",
+      "Programem aulas e horários de ajuda livre",
+      "Definam políticas de segurança de dados e devolução"
     ]
   },
   "weatherization-brigade": {
@@ -677,6 +870,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Trouver matériaux et outils",
       "Régler la sécurité et la responsabilité",
       "Planifier et mener les journées de chantier"
+    ],
+    "pt": [
+      "Convoquem pessoas voluntárias habilidosas",
+      "Definam o alcance do trabalho",
+      "Montem um sistema de pedidos e avaliação",
+      "Consigam materiais e ferramentas",
+      "Resolvam segurança e responsabilidade",
+      "Agendem e façam os mutirões"
     ]
   },
   "pet-food-bank": {
@@ -700,6 +901,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Triez et inventoriez par animal et par taille",
       "Fixez une règle de distribution",
       "Planifiez les distributions et l'équipe"
+    ],
+    "pt": [
+      "Encontrem armazenamento e um ponto de distribuição",
+      "Montem um fluxo de doações de ração",
+      "Separem e inventariem por animal e porte",
+      "Definam uma política de distribuição",
+      "Programem e cuidem da distribuição"
     ]
   },
   "youth-mentorship": {
@@ -729,6 +937,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Gérez les inscriptions, les allergies et les infos d'urgence",
       "Trouvez goûters et fournitures",
       "Animez les séances et gardez le lien avec les familles"
+    ],
+    "pt": [
+      "Garantam um espaço seguro e definam o horário",
+      "Definam padrões de proteção infantil e verificação",
+      "Convoquem e capacitem mentoras e mentores",
+      "Planejem a programação",
+      "Cuidem de inscrições, alergias e informações de emergência",
+      "Consigam lanches e materiais",
+      "Conduzam as sessões e acompanhem as famílias"
     ]
   },
   "gleaning-network": {
@@ -758,6 +975,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Réglez responsabilité et hygiène alimentaire",
       "Construisez les circuits de distribution",
       "Menez les glanages et pesez les récoltes"
+    ],
+    "pt": [
+      "Encontrem fontes de colheita",
+      "Convoquem uma equipe de resgate",
+      "Organizem transporte e armazenamento",
+      "Montem a programação e o chamado",
+      "Resolvam responsabilidade e cuidado com os alimentos",
+      "Construam canais de distribuição",
+      "Façam os resgates e registrem os quilos"
     ]
   },
   "community-mediation": {
@@ -787,6 +1013,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Posez la confidentialité et les règles de base",
       "Faites connaître le service",
       "Suivez les résultats et soutenez l'équipe de médiation"
+    ],
+    "pt": [
+      "Convoquem e capacitem pessoas mediadoras",
+      "Montem um processo de pedido e acolhimento",
+      "Encontrem espaços neutros de encontro",
+      "Definam o alcance e os limites",
+      "Estabeleçam a confidencialidade e as regras básicas",
+      "Divulguem o serviço",
+      "Acompanhem os resultados e cuidem de quem media"
     ]
   },
   "reentry-support": {
@@ -816,6 +1051,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Reliez à l'emploi et au logement",
       "Proposez un mentorat entre pairs",
       "Posez des pratiques de confidentialité et de limites"
+    ],
+    "pt": [
+      "Montem um diretório de recursos e parcerias",
+      "Convoquem e capacitem pessoas voluntárias",
+      "Criem uma acolhida e uma conversa de necessidades",
+      "Apoiem com documentos e benefícios",
+      "Conectem com emprego e moradia",
+      "Ofereçam mentoria entre pares",
+      "Estabeleçam práticas de privacidade e limites"
     ]
   },
   "community-wood-bank": {
@@ -845,6 +1089,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Montez un système de demande et de livraison",
       "Fixez les critères de distribution",
       "Planifiez les journées de chantier et le séchage"
+    ],
+    "pt": [
+      "Garantam uma fonte de lenha",
+      "Encontrem um lugar para processar e armazenar",
+      "Consigam equipamento e proteção",
+      "Convoquem e treinem a equipe da lenha",
+      "Montem um sistema de pedido e entrega",
+      "Definam critérios de distribuição",
+      "Programem os mutirões e a secagem"
     ]
   },
   "community-wifi-mesh": {
@@ -874,6 +1127,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Trouvez des lieux d'accueil pour les nœuds",
       "Posez des règles d'usage et de vie privée",
       "Entretenez et étendez le réseau"
+    ],
+    "pt": [
+      "Mapeiem as necessidades e os vazios de cobertura",
+      "Garantam uma conexão de internet de base",
+      "Convoquem pessoas voluntárias com perfil técnico",
+      "Consigam e configurem o equipamento",
+      "Encontrem locais anfitriões para os nós",
+      "Definam normas de uso aceitável e privacidade",
+      "Mantenham e ampliem a rede"
     ]
   },
   "mental-health-peer-support": {
@@ -903,6 +1165,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Posez la confidentialité et les règles du groupe",
       "Planifiez et faites connaître les rencontres",
       "Soutenez l'équipe d'animation et prévenez l'épuisement"
+    ],
+    "pt": [
+      "Convoquem e capacitem pessoas facilitadoras",
+      "Definam o alcance e os limites do círculo",
+      "Montem um plano de encaminhamento e resposta a crises",
+      "Encontrem um espaço privado e seguro",
+      "Combinem a confidencialidade e as regras do grupo",
+      "Agendem e divulguem os encontros",
+      "Apoiem quem facilita e previnam o esgotamento"
     ]
   },
   "community-cleanup": {
@@ -926,6 +1197,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Rassembler le matériel et l'équipement de sécurité",
       "Recruter et organiser les bénévoles",
       "Mener la journée de nettoyage ou de remise en état"
+    ],
+    "pt": [
+      "Identifiquem e priorizem os locais",
+      "Consigam as permissões e um plano de descarte",
+      "Reúnam materiais e equipamento de segurança",
+      "Convoquem e organizem as pessoas voluntárias",
+      "Realizem o dia de limpeza ou recuperação"
     ]
   },
   "free-tax-prep": {
@@ -955,6 +1233,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Faire connaître la permanence aux voisins éligibles",
       "Garantir la sécurité et la confidentialité des données",
       "Proposer un suivi d'autonomie financière"
+    ],
+    "pt": [
+      "Treinem e certifiquem as pessoas preparadoras",
+      "Façam parceria com um programa reconhecido de declaração gratuita",
+      "Preparem um espaço e os equipamentos",
+      "Montem um sistema de agendamento e acolhimento",
+      "Divulguem para vizinhos e vizinhas elegíveis",
+      "Garantam a segurança e a privacidade dos dados",
+      "Ofereçam acompanhamento de empoderamento financeiro"
     ]
   },
   "community-market": {
@@ -984,6 +1271,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Recruter et planifier les bénévoles",
       "Faire connaître et fixer un horaire régulier",
       "Tenir le stand et gérer les restes"
+    ],
+    "pt": [
+      "Garantam o abastecimento de alimentos e itens",
+      "Encontrem um ponto e montem a banca",
+      "Decidam o modelo",
+      "Organizem exposição, armazenamento e higiene dos alimentos",
+      "Convoquem e escalem as pessoas voluntárias",
+      "Divulguem e fixem um horário regular",
+      "Toquem a banca e cuidem das sobras"
     ]
   },
   "welcome-wagon": {
@@ -1007,6 +1303,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Composer les paniers de bienvenue",
       "Recruter et former les personnes qui accueillent",
       "Mettre en place mise en relation et inscription"
+    ],
+    "pt": [
+      "Decidam quem vocês vão receber e como",
+      "Montem um kit de informações locais",
+      "Montem as cestas de boas-vindas",
+      "Convoquem e preparem quem dá as boas-vindas",
+      "Montem um sistema de indicação e adesão"
     ]
   },
   "library-of-things": {
@@ -1036,6 +1339,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Écrire les règles d'emprunt et une politique de confiance",
       "Mettre en place le prêt et former les bibliothécaires",
       "Entretenir, désinfecter et faire grandir la collection"
+    ],
+    "pt": [
+      "Pesquisem o que a comunidade quer pegar emprestado",
+      "Encontrem espaço de armazenamento e horários de funcionamento",
+      "Recolham, limpem e testem os itens",
+      "Cataloguem e fotografem o acervo",
+      "Escrevam regras de empréstimo e uma política de confiança",
+      "Montem a rotina de empréstimo e preparem as pessoas bibliotecárias",
+      "Mantenham, higienizem e façam a coleção crescer"
     ]
   },
   "laundry-shower-access": {
@@ -1062,6 +1374,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Établir les protocoles d'hygiène et de sécurité",
       "Recruter et former les bénévoles",
       "Fixer un horaire et faire passer le mot"
+    ],
+    "pt": [
+      "Garantam o acesso a lavanderia e chuveiros",
+      "Consigam os suprimentos",
+      "Montem um sistema de inscrição e horários",
+      "Estabeleçam protocolos de higiene e segurança",
+      "Convoquem e preparem as pessoas voluntárias",
+      "Fixem um horário e espalhem a notícia"
     ]
   },
   "voter-registration": {
@@ -1088,6 +1408,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Choisir des lieux et événements passants",
       "Tenir le stand d'inscription",
       "Accompagner la suite"
+    ],
+    "pt": [
+      "Aprendam as regras das campanhas de registro",
+      "Treinem pessoas voluntárias apartidárias",
+      "Reúnam materiais e informação exata",
+      "Escolham pontos e eventos de grande movimento",
+      "Atendam a mesa de registro",
+      "Ajudem com os próximos passos"
     ]
   },
   "health-navigation": {
@@ -1117,6 +1445,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Soutenir rendez-vous et ordonnances",
       "Fixer des pratiques de confidentialité pour la santé",
       "Faire équipe avec cliniques et soignants"
+    ],
+    "pt": [
+      "Montem um diretório de recursos de saúde",
+      "Convoquem e treinem as pessoas navegadoras",
+      "Montem um sistema de pedido e acolhimento",
+      "Ajudem com planos e inscrições",
+      "Ofereçam apoio com consultas e receitas",
+      "Definam práticas de privacidade para informações de saúde",
+      "Façam parceria com clínicas e serviços de saúde"
     ]
   },
   "toy-library": {
@@ -1140,6 +1477,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Cataloguez et ensachez avec toutes les pièces",
       "Rédigez les règles de prêt",
       "Mettez en place le prêt et formez les ludothécaires"
+    ],
+    "pt": [
+      "Consigam espaço e horários de funcionamento",
+      "Coletem, limpem e chequem a segurança dos brinquedos",
+      "Cataloguem e ensaquem com todas as peças",
+      "Escrevam as regras de empréstimo",
+      "Montem o empréstimo e treinem quem cuida do acervo"
     ]
   },
   "food-preservation": {
@@ -1169,6 +1513,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Planifiez des séances de mise en conserve en groupe",
       "Menez les séances et enseignez en sécurité",
       "Partagez les conserves et gardez trace"
+    ],
+    "pt": [
+      "Garantam uma cozinha adequada",
+      "Aprendam métodos seguros de conservação",
+      "Reúnam equipamento e vidros",
+      "Consigam alimentos",
+      "Planejem sessões de conservas em grupo",
+      "Ensinem e conduzam as sessões com segurança",
+      "Compartilhem as conservas e registrem"
     ]
   },
   "free-haircut": {
@@ -1192,6 +1545,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Réunissez matériel et fournitures",
       "Organisez la désinfection et le respect des règles",
       "Animez les journées coiffure"
+    ],
+    "pt": [
+      "Convoquem cabeleireiras e barbeiros licenciados",
+      "Encontrem um espaço com condições de higiene",
+      "Consigam equipamento e materiais",
+      "Montem a higienização e a conformidade com as licenças",
+      "Conduzam os dias de cuidado pessoal"
     ]
   },
   "mutual-aid-moving-crew": {
@@ -1221,6 +1581,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Organisez calendrier et coordination",
       "Définissez le périmètre et les limites",
       "Réalisez les déménagements et prenez des nouvelles"
+    ],
+    "pt": [
+      "Convoquem uma equipe e veículos",
+      "Reúnam materiais de mudança",
+      "Montem um sistema de pedido e avaliação",
+      "Resolvam segurança e responsabilidade",
+      "Definam agenda e despacho",
+      "Definam alcance e limites",
+      "Façam as mudanças e acompanhem depois"
     ]
   },
   "disability-support-network": {
@@ -1250,6 +1619,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Créez une réserve de prêt de matériel",
       "Proposez appui aux démarches et défense des droits",
       "Fixez des normes d'accessibilité pour tous les événements du programme"
+    ],
+    "pt": [
+      "Centrem a liderança nas pessoas com deficiência",
+      "Montem um sistema de comunicação acessível",
+      "Mapeiem necessidades e recursos",
+      "Montem uma troca de apoio mútuo",
+      "Criem um acervo de empréstimo de equipamentos",
+      "Ofereçam apoio de defesa de direitos e navegação",
+      "Definam padrões de acessibilidade para todos os eventos do programa"
     ]
   },
   "books-to-prisoners": {
@@ -1276,6 +1654,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Recrutez et formez des bénévoles",
       "Couvrez les frais d'envoi et la logistique",
       "Organisez un programme de correspondance"
+    ],
+    "pt": [
+      "Aprendam as regras de correspondência de cada unidade",
+      "Reúnam livros e um espaço de trabalho",
+      "Montem um sistema para cuidar dos pedidos",
+      "Convoquem e treinem pessoas voluntárias",
+      "Cubram postagem e logística",
+      "Organizem um programa de cartas"
     ]
   },
   "community-music": {
@@ -1302,6 +1688,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Trouvez un espace pour les cours et les jams",
       "Programmez cours et jams",
       "Posez les attentes d'entretien et de retour"
+    ],
+    "pt": [
+      "Coletem e consertem instrumentos",
+      "Montem um sistema de empréstimo de instrumentos",
+      "Convoquem professoras e professores voluntários",
+      "Encontrem um espaço para aulas e jams",
+      "Agendem aulas e jam sessions",
+      "Definam expectativas de cuidado e devolução"
     ]
   },
   "school-supply-program": {
@@ -1325,6 +1719,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Triez et assemblez par niveau",
       "Installez le stockage et un point de distribution",
       "Programmez et animez la distribution"
+    ],
+    "pt": [
+      "Consigam as listas de material e meçam a necessidade",
+      "Façam campanhas de arrecadação e compras em atacado",
+      "Separem e montem por ano escolar",
+      "Montem o armazenamento e um ponto de entrega",
+      "Agendem a entrega e escalem quem ajuda"
     ]
   },
   "legal-aid-clinic": {
@@ -1354,6 +1755,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Créer des supports Connais tes droits et animer des ateliers",
       "Faire connaître et planifier les permanences",
       "Protéger la confidentialité et vérifier les conflits d'intérêts"
+    ],
+    "pt": [
+      "Façam parceria com advogadas, advogados e assistência jurídica",
+      "Definam o alcance e os caminhos de encaminhamento",
+      "Montem um espaço e uma acolhida",
+      "Montem um sistema confidencial de horários",
+      "Desenvolvam materiais e oficinas de Conheça seus direitos",
+      "Divulguem e agendem as clínicas",
+      "Protejam a confidencialidade e chequem conflitos"
     ]
   },
   "resource-hub-dispatch": {
@@ -1383,6 +1793,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Recruter et former des personnes coordinatrices",
       "Fixer des pratiques de confidentialité et de suivi",
       "Suivre les besoins non couverts et les manques"
+    ],
+    "pt": [
+      "Montem uma acolhida única para necessidades e ofertas",
+      "Montem uma lista de pessoas voluntárias e recursos",
+      "Criem um processo para casar e encaminhar pedidos",
+      "Mantenham um diretório-mestre de recursos",
+      "Convidem e treinem pessoas coordenadoras",
+      "Definam práticas de privacidade de dados e acompanhamento",
+      "Registrem necessidades não atendidas e lacunas"
     ]
   },
   "harm-reduction-supplies": {
@@ -1409,6 +1828,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Assembler des kits avec des notices en langage simple",
       "Organiser des tournées de distribution et des points fixes",
       "Réapprovisionner, suivre et garder la formation fraîche"
+    ],
+    "pt": [
+      "Façam o treinamento e encontrem uma parceria de redução de danos",
+      "Confira a lei local sobre insumos",
+      "Consiga naloxona e insumos para os kits",
+      "Montem kits com instruções em linguagem simples",
+      "Estabeleça rondas de distribuição e pontos fixos",
+      "Reabasteça, acompanhe e mantenha o treinamento em dia"
     ]
   },
   "court-support": {
@@ -1435,6 +1862,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Former les bénévoles d'accompagnement",
       "Coordonner trajets et garde d'enfants pour les audiences",
       "Organiser les lettres de soutien quand la défense en demande"
+    ],
+    "pt": [
+      "Conectem-se com defensorias e grupos que já atuam no fórum",
+      "Escreva as regras base: apoio, não direito",
+      "Monte uma acolhida e um calendário de audiências",
+      "Treine as pessoas voluntárias de acompanhamento",
+      "Coordene caronas e cuidado das crianças para as audiências",
+      "Organize cartas de apoio quando a defesa pedir"
     ]
   },
   "cooling-warming-center": {
@@ -1464,6 +1899,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Monter la rotation des créneaux",
       "Faire passer le mot avant la saison",
       "Ouvrir, accueillir et remettre en état à chaque activation"
+    ],
+    "pt": [
+      "Encontre um espaço anfitrião com climatização",
+      "Definam os gatilhos de ativação e um plano de aviso",
+      "Estoque os insumos",
+      "Convide e treine quem recebe nos turnos",
+      "Monte a escala de turnos",
+      "Espalhe a notícia antes da temporada",
+      "Abra, receba e reorganize a cada ativação"
     ]
   },
   "community-oral-history": {
@@ -1484,6 +1928,12 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Réunir le matériel et une liste de questions",
       "Enregistrer les séances d'histoires",
       "Archiver et rendre, à leurs conditions"
+    ],
+    "pt": [
+      "Escreva um termo de consentimento em linguagem simples",
+      "Reúna o equipamento e uma lista de perguntas",
+      "Grave as sessões de histórias",
+      "Arquive e devolva, nos termos de cada pessoa"
     ]
   },
   "community-solar-coop": {
@@ -1513,6 +1963,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "S'associer à des installateurs et fournisseurs",
       "Monter le système d'adhésion et de crédits sur facture",
       "Former les membres à leur consommation d'énergie"
+    ],
+    "pt": [
+      "Reúna membros e meça o interesse",
+      "Aprenda os modelos e as regras locais",
+      "Encontre um lugar ou um programa para entrar",
+      "Resolva o financiamento e a estrutura jurídica",
+      "Faça parceria com instaladores e fornecedores",
+      "Monte o sistema de créditos na conta e de participação",
+      "Eduque os membros sobre o consumo de energia"
     ]
   },
   "worker-coop-incubator": {
@@ -1542,6 +2001,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Relier aux ressources de démarrage",
       "Offrir du mentorat",
       "Construire l'entraide entre projets"
+    ],
+    "pt": [
+      "Levante as habilidades e as metas dos membros",
+      "Ofereça preparação para o trabalho e formação em habilidades",
+      "Ensine o modelo cooperativo",
+      "Acompanhe a formação das cooperativas",
+      "Conecte com recursos de largada",
+      "Ofereça mentoria",
+      "Construa apoio entre os empreendimentos"
     ]
   },
   "elder-meal-delivery": {
@@ -1571,6 +2039,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Noter les régimes, allergies et contacts d'urgence",
       "Établir un protocole de vérification du bien-être",
       "Soutenir les bénévoles et recueillir les retours"
+    ],
+    "pt": [
+      "Identifique as pessoas idosas que não saem de casa",
+      "Convoque e verifique voluntários",
+      "Garanta uma fonte de refeições",
+      "Planeje as rotas e o calendário de entregas",
+      "Registre informações de dieta, alergias e emergência",
+      "Estabeleça um protocolo de verificação de bem-estar",
+      "Apoie os voluntários e recolha opiniões"
     ]
   },
   "disaster-relief-hub": {
@@ -1600,6 +2077,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Recruter et former une équipe de bénévoles mobilisables",
       "Se coordonner avec les autres équipes d'intervention",
       "Planifier la communication et la sécurité"
+    ],
+    "pt": [
+      "Identifique de antemão um local e um reserva",
+      "Construa canais de abastecimento",
+      "Monte a recepção, a triagem e o inventário",
+      "Crie um sistema de distribuição",
+      "Convoque e treine uma equipe de voluntários de prontidão",
+      "Coordene com outras equipes de resposta",
+      "Planeje a comunicação e a segurança"
     ]
   },
   "recovery-peer-support": {
@@ -1629,6 +2115,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Poser la confidentialité et les règles du groupe",
       "Planifier et faire connaître les réunions",
       "Soutenir les facilitateurs et prévenir l'épuisement"
+    ],
+    "pt": [
+      "Convoque e forme facilitadores pares",
+      "Defina o escopo e os limites",
+      "Construa caminhos de encaminhamento e de crise",
+      "Encontre um espaço seguro, privado e livre de substâncias",
+      "Estabeleça a confidencialidade e as normas do grupo",
+      "Agende e divulgue os encontros",
+      "Apoie os facilitadores e previna o esgotamento"
     ]
   },
   "community-fitness": {
@@ -1658,6 +2153,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Prendre soin de la sécurité et de la santé",
       "Fixer un calendrier et faire passer le mot",
       "Cultiver le lien et la régularité"
+    ],
+    "pt": [
+      "Sonde interesses e níveis de atividade",
+      "Convoque pessoas para guiar as atividades",
+      "Encontre espaços seguros",
+      "Planeje uma programação inclusiva, para todos os níveis",
+      "Cuide da segurança e da saúde",
+      "Defina uma agenda e espalhe a notícia",
+      "Cultive comunidade e constância"
     ]
   },
   "urban-orchard": {
@@ -1687,6 +2191,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Organiser des journées de plantation",
       "Mettre en place l'entretien à long terme",
       "Prévoir le partage de la récolte"
+    ],
+    "pt": [
+      "Garanta o acesso à terra de longo prazo",
+      "Planeje o desenho do plantio",
+      "Consiga as árvores e as plantas",
+      "Prepare o terreno",
+      "Organize mutirões de plantio",
+      "Monte o cuidado de longo prazo",
+      "Planeje a partilha da colheita"
     ]
   },
   "new-parent-support": {
@@ -1716,6 +2229,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Créer des cercles de soutien entre pairs",
       "Poser des pratiques de sécurité et de limites",
       "Relier aux autres projets"
+    ],
+    "pt": [
+      "Convoque voluntários e pares de apoio",
+      "Monte uma corrente de refeições",
+      "Ofereça ajuda prática",
+      "Monte um diretório de recursos",
+      "Crie rodas de apoio entre pares",
+      "Defina práticas de segurança e de limites",
+      "Conecte com os outros projetos"
     ]
   },
   "foster-kinship-support": {
@@ -1745,6 +2267,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Proposer des groupes de soutien entre pairs",
       "Construire un répertoire de ressources",
       "Poser les pratiques de sécurité et de vie privée des enfants"
+    ],
+    "pt": [
+      "Conecte-se com as famílias cuidadoras",
+      "Monte uma reserva de roupas e itens",
+      "Crie um sistema de entrega rápida",
+      "Organize o apoio de respiro",
+      "Ofereça grupos de apoio entre pares",
+      "Monte um diretório de recursos",
+      "Defina práticas de segurança das crianças e de privacidade"
     ]
   },
   "weather-survival-outreach": {
@@ -1774,6 +2305,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Construire un plan de distribution et de tournées",
       "Relier les gens aux hébergements et aux services",
       "Prévoir les urgences"
+    ],
+    "pt": [
+      "Monte kits para cada estação",
+      "Consiga os suprimentos",
+      "Mapeie onde encontrar as pessoas",
+      "Convoque e treine voluntários de rua",
+      "Monte um plano de distribuição e rotas",
+      "Conecte as pessoas a abrigos e serviços",
+      "Prepare-se para as emergências"
     ]
   }
 };
