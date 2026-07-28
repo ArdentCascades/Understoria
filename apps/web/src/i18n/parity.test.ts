@@ -26,6 +26,7 @@ import pt from "./locales/pt.json";
 import zh from "./locales/zh.json";
 import hi from "./locales/hi.json";
 import vi from "./locales/vi.json";
+import ru from "./locales/ru.json";
 import { LANGUAGES } from "./languages";
 
 // Every shipped locale, keyed for the gates below. Locale files are
@@ -40,6 +41,7 @@ const SHIPPED_LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   { code: "zh", data: zh },
   { code: "hi", data: hi },
   { code: "vi", data: vi },
+  { code: "ru", data: ru },
 ];
 
 type JsonValue =

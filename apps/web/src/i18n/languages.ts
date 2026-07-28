@@ -102,6 +102,14 @@ export const LANGUAGES = [
     reviewStatus: "new",
     content: "ui-only",
   },
+  {
+    code: "ru",
+    endonym: "Русский",
+    dir: "ltr",
+    speakLang: "ru",
+    reviewStatus: "new",
+    content: "ui-only",
+  },
 ] as const satisfies readonly LanguageInfo[];
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]["code"];

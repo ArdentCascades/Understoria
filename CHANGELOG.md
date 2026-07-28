@@ -10,6 +10,19 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The app now speaks Russian — completing the second wave of
+  languages.** All ~2,900 UI strings in warm, plain Russian — вы
+  throughout (never the bank-letter Вы), ё always written, and a
+  new binding glossary (docs/i18n-glossary/ru.md): взаимопомощь in
+  its full Kropotkin lineage, «день общих дел» for work days,
+  поручиться for vouching, «огонёк в бурю» for storm hubs, and no
+  officialese, debt vocabulary, or war-marked words. Russian's
+  three plural forms (1 час / 2 часа / 5 часов) are carried
+  correctly everywhere counts appear — the translation
+  infrastructure was extended so languages with more plural forms
+  than English get them all. Русский appears in Settings → Language
+  with the new-translation review note; authored content shows in
+  English for now with the honest disclosure.
 - **The app now speaks Vietnamese.** All ~2,900 UI strings in warm,
   pan-regional Vietnamese — bạn as the uniform address (no guessed
   kinship terms), full diacritics everywhere, and a new binding
