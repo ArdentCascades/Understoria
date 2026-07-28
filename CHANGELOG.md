@@ -10,6 +10,16 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The full authored-content library now exists in Hindi.** All 64
+  project templates with their tips and starter steps, the 14 event
+  templates, the FAQ, and the start-a-community walkthrough, in the
+  same warm Hindustani register as the Hindi UI and bound by its
+  glossary — श्रमदान for work days, साँचे for templates, no
+  officialese or debt vocabulary, and FAQ answers that quote the
+  shipped Hindi buttons word-for-word. The Settings note that
+  authored content was still in English is gone for Hindi; the
+  content loads as its own lazy chunk only when Hindi is chosen, so
+  no other member downloads it.
 - **The app now speaks Russian — completing the second wave of
   languages.** All ~2,900 UI strings in warm, plain Russian — вы
   throughout (never the bank-letter Вы), ё always written, and a
@@ -39,10 +49,9 @@ include breaking changes.
   binding glossary (docs/i18n-glossary/hi.md): uniform आप, gender-
   neutral constructions, श्रमदान for work days, हामी for vouching,
   and no officialese or debt vocabulary. Hindi appears in Settings →
-  Language as हिन्दी with the new-translation review note; authored
-  content (templates, FAQ) shows in English for now with the honest
-  disclosure, until its Phase 2 translation lands. The Hindi UI
-  loads as its own lazy chunk only when chosen.
+  Language as हिन्दी with the new-translation review note; the
+  authored content followed in its own Phase 2 translation (entry
+  above). The Hindi UI loads as its own lazy chunk only when chosen.
 - **The full authored-content library now exists in Chinese —
   completing translations for every language the app ships.** Same
   scope as French and Portuguese below: all 64 project templates

@@ -29,6 +29,7 @@ import { PROJECT_TEMPLATES_ES } from "./projectTemplates.es";
 import { PROJECT_TEMPLATES_FR } from "./projectTemplates.fr";
 import { PROJECT_TEMPLATES_PT } from "./projectTemplates.pt";
 import { PROJECT_TEMPLATES_ZH } from "./projectTemplates.zh";
+import { PROJECT_TEMPLATES_HI } from "./projectTemplates.hi";
 
 // Canonical category mapping per the design decision. If you change a
 // template's defaultCategory and don't update this map, the test will
@@ -133,11 +134,16 @@ describe("projectTemplates", () => {
     expect(PROJECT_TEMPLATES_ZH.length).toBe(64);
   });
 
+  it("ships exactly 64 templates in Hindi", () => {
+    expect(PROJECT_TEMPLATES_HI.length).toBe(64);
+  });
+
   it.each([
     ["es", PROJECT_TEMPLATES_ES] as const,
     ["fr", PROJECT_TEMPLATES_FR] as const,
     ["pt", PROJECT_TEMPLATES_PT] as const,
     ["zh", PROJECT_TEMPLATES_ZH] as const,
+    ["hi", PROJECT_TEMPLATES_HI] as const,
   ])("en and %s share the same id set in the same order", (_, list) => {
     const enIds = PROJECT_TEMPLATES_EN.map((t) => t.id);
     expect(list.map((t) => t.id)).toEqual(enIds);
@@ -155,6 +161,7 @@ describe("projectTemplates", () => {
     ["fr", PROJECT_TEMPLATES_FR] as const,
     ["pt", PROJECT_TEMPLATES_PT] as const,
     ["zh", PROJECT_TEMPLATES_ZH] as const,
+    ["hi", PROJECT_TEMPLATES_HI] as const,
   ])("%s templates use the same default categories as English", (_, list) => {
     for (const tpl of list) {
       expect(tpl.defaultCategory).toBe(EXPECTED_CATEGORY[tpl.id]);
@@ -167,6 +174,7 @@ describe("projectTemplates", () => {
     ["fr", PROJECT_TEMPLATES_FR] as const,
     ["pt", PROJECT_TEMPLATES_PT] as const,
     ["zh", PROJECT_TEMPLATES_ZH] as const,
+    ["hi", PROJECT_TEMPLATES_HI] as const,
   ])("[%s] every template has non-empty copy and at least one task", (_, list) => {
     for (const tpl of list) {
       expect(tpl.name.length).toBeGreaterThan(0);
@@ -183,6 +191,7 @@ describe("projectTemplates", () => {
     ["fr", PROJECT_TEMPLATES_FR] as const,
     ["pt", PROJECT_TEMPLATES_PT] as const,
     ["zh", PROJECT_TEMPLATES_ZH] as const,
+    ["hi", PROJECT_TEMPLATES_HI] as const,
   ])("[%s] every task has positive hours and non-empty copy", (_, list) => {
     for (const tpl of list) {
       for (const task of tpl.tasks) {
@@ -199,6 +208,7 @@ describe("projectTemplates", () => {
     ["fr", PROJECT_TEMPLATES_FR] as const,
     ["pt", PROJECT_TEMPLATES_PT] as const,
     ["zh", PROJECT_TEMPLATES_ZH] as const,
+    ["hi", PROJECT_TEMPLATES_HI] as const,
   ])("[%s] sum of task hours per template is positive", (_, list) => {
     for (const tpl of list) {
       const total = tpl.tasks.reduce((s, t) => s + t.hours, 0);
@@ -212,6 +222,7 @@ describe("projectTemplates", () => {
     ["fr", PROJECT_TEMPLATES_FR] as const,
     ["pt", PROJECT_TEMPLATES_PT] as const,
     ["zh", PROJECT_TEMPLATES_ZH] as const,
+    ["hi", PROJECT_TEMPLATES_HI] as const,
   ])("[%s] every recurring task uses a known cadence enum value", (_, list) => {
     for (const tpl of list) {
       for (const task of tpl.tasks) {
@@ -227,6 +238,7 @@ describe("projectTemplates", () => {
     ["fr", PROJECT_TEMPLATES_FR] as const,
     ["pt", PROJECT_TEMPLATES_PT] as const,
     ["zh", PROJECT_TEMPLATES_ZH] as const,
+    ["hi", PROJECT_TEMPLATES_HI] as const,
   ])("en and %s templates have matching task counts per id", (code, list) => {
     for (const enTpl of PROJECT_TEMPLATES_EN) {
       const tpl = list.find((t) => t.id === enTpl.id);
@@ -240,6 +252,7 @@ describe("projectTemplates", () => {
     ["fr", PROJECT_TEMPLATES_FR] as const,
     ["pt", PROJECT_TEMPLATES_PT] as const,
     ["zh", PROJECT_TEMPLATES_ZH] as const,
+    ["hi", PROJECT_TEMPLATES_HI] as const,
   ])("en and %s recurring-cadence positions match within each template", (_, list) => {
     // Recurring tasks should line up so the cadence-suffix UI is
     // identical in every locale — otherwise one language would tag
@@ -276,6 +289,7 @@ describe("getProjectTemplates", () => {
 
   it("returns the Chinese set for 'zh' and zh-* sublocales", () => {
     expect(getProjectTemplates("zh")).toBe(PROJECT_TEMPLATES_ZH);
+    expect(getProjectTemplates("hi")).toBe(PROJECT_TEMPLATES_HI);
     expect(getProjectTemplates("zh-CN")).toBe(PROJECT_TEMPLATES_ZH);
   });
 

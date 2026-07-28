@@ -40,8 +40,10 @@ reconciliation unified device-lock to разблокировать (contacts kee
 заблокировать unambiguously). Wave 2 surfaced an upstream en defect
 worth a follow-up: several `_one` strings hardcode the digit 1
 ("1 open", "1 task waiting") with no {{count}}, which mis-renders at
-21/101 in every _one-category language. Baseline numbers below
-refreshed 2026-07-27.
+21/101 in every _one-category language. PHASE 2 WAVE-2 CONTENT IN
+PROGRESS: **Hindi (hi) content SHIPPED** (full corpus, registry
+flipped to `content: "full"`; vi and ru next — see Phase 2 below).
+Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from
 
@@ -195,7 +197,21 @@ repo's disclosed AI-assisted posture:
    -register kitchen-table Chinese (never 您), 动手日 for work days,
    拾穗 for gleaning, and full-width punctuation throughout. The
    "unknown locale falls back to English" gates now probe `vi`
-   (zh-CN resolves to real Chinese content).
+   (zh-CN resolves to real Chinese content). **Phase 2 Wave-2
+   content underway — Hindi SHIPPED:** the full corpus in the hi
+   glossary's Hindustani register (श्रमदान, साँचे, हामी; FAQ answers
+   quote shipped hi.json button labels verbatim), by the same
+   10-agent fleet + independent validation + assembly pipeline
+   (docs/i18n-playbook.md §B). New reconciliation dimension learned:
+   skills TAGS diverge across batch agents even when each is
+   internally consistent (10 of 32 en skills had 2–4 renderings) —
+   reconciliation now unifies them corpus-wide by majority, since
+   the skills-match feature groups tasks by exact string. Prose
+   reconciliations: विकलांग over दिव्यांग (the movement's own word,
+   per the no-shame register), the community-center venue unified to
+   सामुदायिक भवन. hi's registry entry is `content: "full"`; vi and
+   ru content are next, then the disclosure mechanism again idles
+   until a new ui-only language ships.
 3. **Honest fallback while in flight:** a language may ship complete
    UI + FAQ while templates are still English, with a visible "not yet
    translated" line on English-fallback content — never silent mixed-
