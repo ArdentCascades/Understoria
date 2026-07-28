@@ -151,7 +151,21 @@ repo's disclosed AI-assisted posture:
 2. **Translate in member-impact order:** FAQ + start-a-community →
    event templates → the 64 project templates with their task steps
    and tips (agent fleet per template, review per template — the same
-   process that authored them).
+   process that authored them). **French SHIPPED (Phase 2b):** the
+   full corpus (64 templates + aligned tips/steps, 14 event
+   templates, FAQ, start-a-community guide) as `*.fr.ts` modules
+   behind `content/bundles/fr.ts` (`lazy-content-fr` chunk), with
+   the title index regenerated to carry fr task names and every
+   content parity gate extended per-language. French's registry
+   entry flipped to `content: "full"`, which removes the Settings
+   English-content disclosure. Production method: 10-agent fleet,
+   each template bundled WITH its tips+steps so index alignment is
+   guaranteed per agent; the shipped `fr.json` UI file and
+   `docs/i18n-glossary/fr.md` were the binding terminology
+   authorities; independent script validation of every fragment
+   (locale-invariant fields byte-identical, counts, lengths, French
+   typography) before assembly. pt and zh follow on the same rails,
+   each its own PR.
 3. **Honest fallback while in flight:** a language may ship complete
    UI + FAQ while templates are still English, with a visible "not yet
    translated" line on English-fallback content — never silent mixed-

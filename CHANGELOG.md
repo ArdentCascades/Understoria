@@ -9,7 +9,20 @@ include breaking changes.
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+- **The full authored-content library now exists in French.** All 64
+  project templates (with every task's suggested starter steps and
+  per-task tips), the 14 event templates, the in-app FAQ, and the
+  start-a-community walkthrough are translated — a French organizer
+  now sees "Frigo communautaire" instead of "Community Fridge", and
+  the Settings note about content appearing in English is gone for
+  French. The translation follows the shipped French UI's
+  terminology and the same warm, no-shame register; commands, ids,
+  hours, and cross-references stay byte-identical to English, and
+  the per-language content gates enforce that in CI. French content
+  loads as its own lazy chunk only when French is chosen — first
+  load for everyone else is unchanged. Portuguese and Chinese
+  content translations are next on the same rails.
 
 ## [0.3.0] — 2026-07-25
 
