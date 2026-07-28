@@ -94,6 +94,14 @@ export const LANGUAGES = [
     reviewStatus: "new",
     content: "ui-only",
   },
+  {
+    code: "vi",
+    endonym: "Tiếng Việt",
+    dir: "ltr",
+    speakLang: "vi",
+    reviewStatus: "new",
+    content: "ui-only",
+  },
 ] as const satisfies readonly LanguageInfo[];
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]["code"];

@@ -175,6 +175,10 @@ export default defineConfig({
               name: "locale-hi",
               test: /src[\\/]i18n[\\/]locales[\\/]hi\.json/,
             },
+            {
+              name: "locale-vi",
+              test: /src[\\/]i18n[\\/]locales[\\/]vi\.json/,
+            },
             // Lazy per-language CONTENT bundles (templates, tips,
             // steps, FAQ — i18n Phase 2a): the distinct "lazy-"
             // prefix keeps the SW globs below from ever colliding
