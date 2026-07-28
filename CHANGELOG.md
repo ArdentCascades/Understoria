@@ -10,6 +10,16 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The app now speaks Vietnamese.** All ~2,900 UI strings in warm,
+  pan-regional Vietnamese — bạn as the uniform address (no guessed
+  kinship terms), full diacritics everywhere, and a new binding
+  glossary (docs/i18n-glossary/vi.md): ngày chung tay for work days,
+  đứng ra bảo đảm for vouching, của chung for the commons, điểm trú
+  bão for storm hubs, and no officialese or debt vocabulary. Tiếng
+  Việt appears in Settings → Language with the new-translation
+  review note; authored content shows in English for now with the
+  honest disclosure. The Vietnamese UI loads as its own lazy chunk
+  only when chosen.
 - **The app now speaks Hindi.** All ~2,900 UI strings are translated
   into warm, contemporary Hindustani (Devanagari) — the register a
   community organizer uses across a kitchen table, guided by a new

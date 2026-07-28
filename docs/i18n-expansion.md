@@ -16,16 +16,20 @@ Chinese shipped under the language-only code `zh` rather than the
 plan's `zh-Hans` label — browsers send zh-CN/zh-SG and i18next's
 language-only fallback resolves those to `zh`, while a literal
 zh-Hans code would match neither (zh-Hant stays open as a future
-sibling). WAVE 2 IN PROGRESS: **Hindi (hi) SHIPPED**
+sibling). WAVE 2 IN PROGRESS: **Hindi (hi) and Vietnamese (vi) SHIPPED**
 (UI strings complete — glossary at `docs/i18n-glossary/hi.md` with
 the आप-register decision and Devanagari conventions; 6-agent bulk
 pass + splice validation + cross-chunk reconciliation (sign →
 दस्तख़त, public key → सार्वजनिक चाबी, बाकी nukta normalization) +
 375px Devanagari layout smoke; registry carries
-`reviewStatus: "new"` + `content: "ui-only"` — the first new tenant
-of the content-fallback disclosure since Phase 2b completed the
-original languages). vi and ru follow; ru will exercise the
-_one/_few/_many plural gate. Baseline numbers below refreshed
+`reviewStatus: "new"` + `content: "ui-only"`). Vietnamese field
+notes: glossary at `docs/i18n-glossary/vi.md` — bạn uniformly (the
+kinship system is unusable with unknown age/gender), chúng tôi
+banned as the app's voice, **node kept English** because the
+Vietnamese calque nút is the word for a UI button, ngày chung tay
+for work days, điểm trú bão for storm hubs; NFC-normalization is a
+splice gate; cross-chunk reconciliation unified flag → gắn cờ. ru
+remains; it will exercise the _one/_few/_many plural gate. Baseline numbers below refreshed
 2026-07-27.
 
 ## Where we start from
