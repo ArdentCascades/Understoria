@@ -11,11 +11,13 @@ import {
 import { PROJECT_TEMPLATES_ES } from "@/content/projectTemplates.es";
 import { PROJECT_TEMPLATES_FR } from "@/content/projectTemplates.fr";
 import { PROJECT_TEMPLATES_PT } from "@/content/projectTemplates.pt";
+import { PROJECT_TEMPLATES_ZH } from "@/content/projectTemplates.zh";
 import { getTaskSteps } from "@/content/taskSteps";
 import { TASK_STEPS_EN } from "@/content/taskSteps.en";
 import { TASK_STEPS_ES } from "@/content/taskSteps.es";
 import { TASK_STEPS_FR } from "@/content/taskSteps.fr";
 import { TASK_STEPS_PT } from "@/content/taskSteps.pt";
+import { TASK_STEPS_ZH } from "@/content/taskSteps.zh";
 
 // Coverage guard for the suggested-starter-steps content — the same
 // tie taskTips.test.ts provides for the tips: the steps are keyed by
@@ -49,6 +51,11 @@ describe("TASK_STEPS coverage", () => {
         tpl.tasks.length,
       );
     }
+    for (const tpl of PROJECT_TEMPLATES_ZH) {
+      expect(TASK_STEPS_ZH[tpl.id]?.length, `${tpl.id} (zh)`).toBe(
+        tpl.tasks.length,
+      );
+    }
   });
 
   it("gives every task 3-5 steps per locale, with matching counts", () => {
@@ -63,6 +70,9 @@ describe("TASK_STEPS coverage", () => {
           list.length,
         );
         expect(TASK_STEPS_PT[id]?.[i]?.length, `${id}[${i}] pt/en counts`).toBe(
+          list.length,
+        );
+        expect(TASK_STEPS_ZH[id]?.[i]?.length, `${id}[${i}] zh/en counts`).toBe(
           list.length,
         );
       });
@@ -91,6 +101,11 @@ describe("TASK_STEPS coverage", () => {
           expect(s.length, `${id}[${i}].pt[${j}]`).toBeLessThanOrEqual(120);
           expect(s, `${id}[${i}].pt[${j}] pt===en`).not.toBe(enList[j]);
         });
+        (TASK_STEPS_ZH[id]?.[i] ?? []).forEach((s, j) => {
+          expect(s.trim(), `${id}[${i}].zh[${j}]`).not.toBe("");
+          expect(s.length, `${id}[${i}].zh[${j}]`).toBeLessThanOrEqual(120);
+          expect(s, `${id}[${i}].zh[${j}] zh===en`).not.toBe(enList[j]);
+        });
       });
     }
   });
@@ -114,6 +129,9 @@ describe("getTaskSteps", () => {
     const tplPt = PROJECT_TEMPLATES_PT.find((t) => t.id === tpl.id)!;
     const pt = getTaskSteps(tpl.id, tplPt.tasks[0].name, "pt");
     expect(pt).toEqual([...TASK_STEPS_PT[tpl.id][0]]);
+    const tplZh = PROJECT_TEMPLATES_ZH.find((t) => t.id === tpl.id)!;
+    const zh = getTaskSteps(tpl.id, tplZh.tasks[0].name, "zh");
+    expect(zh).toEqual([...TASK_STEPS_ZH[tpl.id][0]]);
   });
 
   it("yields null for from-scratch projects, unknown templates, and renamed tasks", () => {

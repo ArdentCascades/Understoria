@@ -26,6 +26,7 @@ beforeEach(() => {
 // under test.
 import i18n from "@/i18n";
 import HelpPage from "./Help";
+import { getFaqSections } from "@/content/faq";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -80,12 +81,12 @@ describe("HelpPage — locale-aware FAQ", () => {
   });
 
   it("FAQ content falls back to English for locales without content translations", async () => {
-    // zh ships UI strings but no FAQ translation yet (the plan's
-    // Phase 2 ships authored content per language; fr and pt
-    // graduated in Phase 2b). The selector must fall through to the
-    // English source rather than render an empty page — the
-    // Settings language card discloses the gap.
-    await i18n.changeLanguage("zh");
+    // Every SHIPPED language now has translated content (Phase 2b),
+    // so the honest-fallback path is exercised with a locale the
+    // registry doesn't know at all: the selector must fall through
+    // to the English source rather than render an empty page.
+    expect(getFaqSections("vi")).toBe(getFaqSections("en"));
+    await i18n.changeLanguage("vi");
     render(<HelpPage />);
     expect(container.textContent).toContain("Posts and exchanges");
   });
