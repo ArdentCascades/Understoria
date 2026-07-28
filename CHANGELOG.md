@@ -10,6 +10,16 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The full authored-content library now exists in Chinese —
+  completing translations for every language the app ships.** Same
+  scope as French and Portuguese below: all 64 project templates
+  with their tips and starter steps, the 14 event templates, the
+  FAQ, and the start-a-community walkthrough, in warm Simplified
+  Chinese that follows the shipped UI's terminology (动手日, 共同账本,
+  你 never 您) and no-shame register. With this, the Settings note
+  about content appearing in English is gone for every language;
+  each language's content loads as its own lazy chunk only when
+  chosen.
 - **The full authored-content library now exists in Portuguese.**
   Same scope as the French translation below — all 64 project
   templates with their tips and starter steps, the 14 event

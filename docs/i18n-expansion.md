@@ -151,25 +151,28 @@ repo's disclosed AI-assisted posture:
 2. **Translate in member-impact order:** FAQ + start-a-community →
    event templates → the 64 project templates with their task steps
    and tips (agent fleet per template, review per template — the same
-   process that authored them). **French and Portuguese SHIPPED
-   (Phase 2b):** each language's full corpus (64 templates + aligned
-   tips/steps, 14 event templates, FAQ, start-a-community guide) as
-   `*.<code>.ts` modules behind `content/bundles/<code>.ts`
-   (`lazy-content-<code>` chunks), with the title index regenerated
-   to carry each language's task names and every content parity gate
-   extended per-language. Both registry entries flipped to
-   `content: "full"`, removing the Settings English-content
-   disclosure. Production method (per language): 10-agent fleet,
-   each template bundled WITH its tips+steps so index alignment is
-   guaranteed per agent; the shipped UI locale file and
-   `docs/i18n-glossary/<code>.md` were the binding terminology
-   authorities; independent script validation of every fragment
-   (locale-invariant fields byte-identical, counts, lengths,
-   language typography/register) before assembly. Portuguese field
-   notes: mutirão reserved for work days (moving crew = "equipe de
-   mudanças"), food safety rendered to avoid the food-security
-   collision, board smoke re-verified at 375px ("Pedidos" still
-   fits). zh follows on the same rails as its own PR.
+   process that authored them). **Phase 2b COMPLETE — French,
+   Portuguese, and Chinese all SHIPPED:** every shipped language now
+   carries the full corpus (64 templates + aligned tips/steps, 14
+   event templates, FAQ, start-a-community guide) as `*.<code>.ts`
+   modules behind `content/bundles/<code>.ts`
+   (`lazy-content-<code>` chunks), with the title index carrying all
+   five languages' task names and every content parity gate running
+   per-language. All registry entries are `content: "full"` — the
+   Settings English-content disclosure no longer renders anywhere
+   (the mechanism stays for future ui-only languages). Production
+   method (per language): 10-agent fleet, each template bundled WITH
+   its tips+steps so index alignment is guaranteed per agent; the
+   shipped UI locale file and `docs/i18n-glossary/<code>.md` were
+   the binding terminology authorities; independent script
+   validation of every fragment (locale-invariant fields
+   byte-identical, counts, lengths, language typography/register)
+   before assembly. Field notes: pt reserved mutirão for work days
+   and dodged the food-safety/food-security collision; zh shipped 你
+   -register kitchen-table Chinese (never 您), 动手日 for work days,
+   拾穗 for gleaning, and full-width punctuation throughout. The
+   "unknown locale falls back to English" gates now probe `vi`
+   (zh-CN resolves to real Chinese content).
 3. **Honest fallback while in flight:** a language may ship complete
    UI + FAQ while templates are still English, with a visible "not yet
    translated" line on English-fallback content — never silent mixed-

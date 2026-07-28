@@ -60,6 +60,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Monte uma escala de limpeza e reposição",
       "Construa relações com quem doa",
       "Crie um contato para problemas"
+    ],
+    "zh": [
+      "找一个有电、有人来往的落脚点",
+      "找到冰箱，搭好防风遮雨的棚子",
+      "定好规矩，贴上标签",
+      "招一批人排清洁补货轮值",
+      "和货源处好关系",
+      "设一个报修联系方式"
     ]
   },
   "community-garden": {
@@ -98,6 +106,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Plante conforme o clima e a estação",
       "Organize uma escala de rega e capina",
       "Planeje a colheita e o excedente"
+    ],
+    "zh": [
+      "落实土地和许可",
+      "检测土壤，规划苗床",
+      "备料开工",
+      "商量好怎么分享",
+      "按气候和时节下种",
+      "排好浇水除草轮值",
+      "安排收获和富余"
     ]
   },
   "tool-lending-library": {
@@ -136,6 +153,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Monte o registro de saída",
       "Capacite quem atende",
       "Mantenha e faça crescer a biblioteca"
+    ],
+    "zh": [
+      "找地方存放，定开放时间",
+      "收集并整理库存",
+      "给每件东西建档",
+      "写好借用规矩",
+      "搭好借出登记",
+      "帮馆员们上手",
+      "维护好，慢慢添新"
     ]
   },
   "neighborhood-care-network": {
@@ -174,6 +200,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Crie um plano para situações de crise",
       "Coordene a ajuda prática",
       "Cuide também de quem acompanha"
+    ],
+    "zh": [
+      "摸清附近都有谁",
+      "招募并核实志愿者",
+      "用心配对",
+      "定下问候的节奏",
+      "定好紧急情况的应对",
+      "协调实际的搭手",
+      "也照应好志愿者"
     ]
   },
   "emergency-preparedness": {
@@ -212,6 +247,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Identifique pontos seguros",
       "Façam um simulado ou uma noite informativa",
       "Defina os papéis para \"a hora H\""
+    ],
+    "zh": [
+      "摸清你们街区的风险",
+      "搭一棵联络树",
+      "商量断网时怎么联络",
+      "备好共用物资",
+      "找好安全点",
+      "办一次演练或说明夜",
+      "分好“当天”的角色"
     ]
   },
   "free-store": {
@@ -246,6 +290,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Exponha para as pessoas escolherem com dignidade",
       "Montem a equipe do evento",
       "Cuide das sobras"
+    ],
+    "zh": [
+      "定形式，找场地",
+      "定好收哪些捐赠",
+      "安排收货和分拣",
+      "陈列得让人有尊严地挑",
+      "安排活动人手",
+      "处理剩下的东西"
     ]
   },
   "skill-share": {
@@ -276,6 +328,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Encontre espaço e horário",
       "Monte uma agenda",
       "Torne tudo acessível"
+    ],
+    "zh": [
+      "摸一摸大家的本事和兴趣",
+      "邀请老师，陪着备课",
+      "找空间，定时间",
+      "排出课程表",
+      "让人人都来得了"
     ]
   },
   "bulk-buying-coop": {
@@ -314,6 +373,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Organize a entrega e um espaço de separação",
       "Dividam os pedidos com justiça",
       "Revezem o trabalho"
+    ],
+    "zh": [
+      "凑齐合买的家庭",
+      "找一家供应商",
+      "定好怎么下单",
+      "把钱算得明明白白",
+      "安排送货和分装场地",
+      "把订单分得公公道道",
+      "把活儿轮着干"
     ]
   },
   "repair-cafe": {
@@ -348,6 +416,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Crie um fluxo de recepção",
       "Cuide da segurança e das expectativas",
       "Mantenha um estoque de peças e consumíveis comuns"
+    ],
+    "zh": [
+      "按专长招募修理帮手",
+      "布置修理工位",
+      "定一个固定重复的日子",
+      "设计接待流程",
+      "管好安全和预期",
+      "备齐常用零件和耗材"
     ]
   },
   "rides-transportation": {
@@ -386,6 +462,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Definam o que é coberto",
       "Cuidem dos custos",
       "Mantenha a segurança de quem viaja e de quem dirige"
+    ],
+    "zh": [
+      "招募司机并做好把关",
+      "理清保险和责任",
+      "搭一个请求渠道",
+      "建立调度节奏",
+      "定清楚哪些行程包含在内",
+      "处理花费",
+      "保障搭车人和司机的安全"
     ]
   },
   "tenant-union": {
@@ -424,6 +509,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Organize uma oficina “conheça seus direitos”",
       "Definam um protocolo de resposta a despejos",
       "Conecte-se à assistência jurídica e ao apoio contínuo"
+    ],
+    "zh": [
+      "组建核心组织委员会",
+      "摸清各栋楼和租客的难处",
+      "收集准确的当地租客权利信息",
+      "搭一套快速响应联络系统",
+      "办一场“了解你的权利”工作坊",
+      "定一套驱逐应对流程",
+      "接上法律援助与长期支持"
     ]
   },
   "childcare-collective": {
@@ -462,6 +556,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Definam políticas de saúde, alergias e emergências",
       "Treinem o básico com quem cuida",
       "Façam uma sessão piloto e recolham impressões"
+    ],
+    "zh": [
+      "聚齐发起家庭，商定模式",
+      "定下安全与把关标准",
+      "找好场地，做足儿童安全防护",
+      "建一套排期和时数系统",
+      "定健康、过敏和紧急情况的规矩",
+      "给照看的人做基础培训",
+      "办一次试运行并收集反馈"
     ]
   },
   "community-composting": {
@@ -500,6 +603,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Deixem claro o que é aceito",
       "Recrute e treine uma escala de manutenção",
       "Distribua o composto pronto"
+    ],
+    "zh": [
+      "找一处堆肥场地",
+      "选一种堆肥方法",
+      "备齐桶和工具",
+      "搭一套收集系统",
+      "讲清楚收什么不收什么",
+      "招人并培训维护轮值",
+      "分发堆好的肥"
     ]
   },
   "free-little-library": {
@@ -530,6 +642,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Monte o acervo inicial",
       "Coloque uma placa e normas simples",
       "Encontre quem vai zelar pela caixa"
+    ],
+    "zh": [
+      "做一个或找一个防风雨书箱",
+      "选好位置，做好准备",
+      "备齐起步的书",
+      "挂上牌子和简单的规矩",
+      "找一位照看人"
     ]
   },
   "community-first-aid-training": {
@@ -564,6 +683,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Convide participantes",
       "Faça as sessões de treinamento",
       "Distribua kits e marque reciclagens"
+    ],
+    "zh": [
+      "和持证培训者结成伙伴",
+      "筹措物资",
+      "找场地、排课程",
+      "招学员",
+      "办好每场培训",
+      "发放急救包，安排复训"
     ]
   },
   "time-bank": {
@@ -602,6 +729,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Lance um diretório de serviços",
       "Coordene e costure as trocas",
       "Construam práticas de confiança e segurança"
+    ],
+    "zh": [
+      "招募创始成员，盘点手艺",
+      "选一套记录系统",
+      "定下规则",
+      "迎新成员上手",
+      "上线一份帮忙名录",
+      "协调和撮合交换",
+      "建立信任与安全的做法"
     ]
   },
   "solidarity-fund": {
@@ -640,6 +776,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ponha a arrecadação de pé",
       "Monte um processo de decisão e pagamento",
       "Preste contas com transparência"
+    ],
+    "zh": [
+      "组建一个小小的管钱小组",
+      "搭好透明的资金管理",
+      "定下申请和发放的标准",
+      "做一份简单、低门槛的申请表",
+      "把筹款做起来",
+      "建立决定和发放的流程",
+      "透明地向大家汇报"
     ]
   },
   "diaper-hygiene-bank": {
@@ -670,6 +815,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Separe e inventarie por tamanho e tipo",
       "Defina uma política de distribuição justa",
       "Agende a distribuição e reúna quem ajuda"
+    ],
+    "zh": [
+      "找好储存点和发放点",
+      "把货源建起来",
+      "按尺码和种类分拣、清点",
+      "定一个公平的发放规矩",
+      "排好发放日并安排人手"
     ]
   },
   "community-bike-workshop": {
@@ -704,6 +856,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Convoque mecânicas e mecânicos voluntários",
       "Defina horários e um modelo “ganhe sua bicicleta”",
       "Estabeleça práticas de segurança"
+    ],
+    "zh": [
+      "找一个工坊场地",
+      "凑齐工具和一个修车架",
+      "收集捐赠的自行车和零件",
+      "找愿意帮忙的修车师傅",
+      "定开放时间和“挣一辆车”的玩法",
+      "立好安全规矩"
     ]
   },
   "newcomer-translation-network": {
@@ -738,6 +898,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Crie materiais de orientação",
       "Ofereça acompanhamento a consultas e atendimentos",
       "Estabeleçam práticas de privacidade e segurança"
+    ],
+    "zh": [
+      "找会双语、多语的帮手",
+      "摸清本地的机构和伙伴",
+      "搭一套请求和配对的办法",
+      "做入门指南材料",
+      "提供陪同赴约",
+      "立好隐私和安全的规矩"
     ]
   },
   "community-meal": {
@@ -776,6 +944,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Convoquem uma equipe de cozinha e serviço",
       "Definam uma agenda e espalhem a notícia",
       "Façam a refeição e limpem"
+    ],
+    "zh": [
+      "找到厨房和开饭的场地",
+      "把食品安全和许可办妥",
+      "建起食材的来源渠道",
+      "按人量、饮食和过敏来定菜单",
+      "召集做饭和开饭的队伍",
+      "定下时间，把消息传开",
+      "开一顿饭，收拾干净"
     ]
   },
   "seed-library": {
@@ -806,6 +983,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Organizem e etiquetem a coleção",
       "Definam as regras de empréstimo e troca",
       "Mantenham a viabilidade e reponham o estoque"
+    ],
+    "zh": [
+      "找落脚点和存放办法",
+      "凑第一批种子",
+      "整理编目、贴上标签",
+      "定好取种和分享的规矩",
+      "保持发芽率，及时补货"
     ]
   },
   "digital-literacy": {
@@ -844,6 +1028,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Desenhem um currículo para quem está começando",
       "Programem aulas e horários de ajuda livre",
       "Definam políticas de segurança de dados e devolução"
+    ],
+    "zh": [
+      "收集设备、翻新整备",
+      "搭一套出借登记",
+      "解决上网问题",
+      "找人来教，先带一带",
+      "设计一套新手课程",
+      "排好课程和随到随问的时间",
+      "定好数据安全和归还的规矩"
     ]
   },
   "weatherization-brigade": {
@@ -878,6 +1071,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Consigam materiais e ferramentas",
       "Resolvam segurança e responsabilidade",
       "Agendem e façam os mutirões"
+    ],
+    "zh": [
+      "找有手艺的帮手",
+      "画好活的界线",
+      "搭一套请求和上门评估的办法",
+      "备齐材料和工具",
+      "把安全和责任理清楚",
+      "安排并开展动手日"
     ]
   },
   "pet-food-bank": {
@@ -908,6 +1109,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Separem e inventariem por animal e porte",
       "Definam uma política de distribuição",
       "Programem e cuidem da distribuição"
+    ],
+    "zh": [
+      "找到储存空间和发放点",
+      "建立宠物粮的稳定来源",
+      "按动物和分量分类清点",
+      "定一套发放规则",
+      "排班并安排发放"
     ]
   },
   "youth-mentorship": {
@@ -946,6 +1154,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Cuidem de inscrições, alergias e informações de emergência",
       "Consigam lanches e materiais",
       "Conduzam as sessões e acompanhem as famílias"
+    ],
+    "zh": [
+      "找到安全场地，定下时间",
+      "定下儿童保护和审查标准",
+      "招募并培训导师",
+      "安排活动内容",
+      "办理报名、过敏和紧急信息",
+      "张罗点心和物资",
+      "带好每次活动，和家庭保持联系"
     ]
   },
   "gleaning-network": {
@@ -984,6 +1201,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Resolvam responsabilidade e cuidado com os alimentos",
       "Construam canais de distribuição",
       "Façam os resgates e registrem os quilos"
+    ],
+    "zh": [
+      "找到果蔬来源",
+      "组一支拾穗队",
+      "安排运输和存放",
+      "搭一套通知调度的办法",
+      "理清责任和食品安全",
+      "建好分发渠道",
+      "组织拾穗行动并记录斤两"
     ]
   },
   "community-mediation": {
@@ -1022,6 +1248,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Estabeleçam a confidencialidade e as regras básicas",
       "Divulguem o serviço",
       "Acompanhem os resultados e cuidem de quem media"
+    ],
+    "zh": [
+      "招募并培训调解人",
+      "搭一套申请与受理流程",
+      "找到中立的会面场地",
+      "划定范围和边界",
+      "立好保密和基本规则",
+      "把消息传出去",
+      "记录结果，照顾调解人"
     ]
   },
   "reentry-support": {
@@ -1060,6 +1295,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Conectem com emprego e moradia",
       "Ofereçam mentoria entre pares",
       "Estabeleçam práticas de privacidade e limites"
+    ],
+    "zh": [
+      "建一份资源与合作名录",
+      "招募并培训帮手",
+      "设计一套欢迎和需求了解流程",
+      "帮忙办证件和补助",
+      "对接工作和住处",
+      "安排过来人导师",
+      "立好隐私和边界的规矩"
     ]
   },
   "community-wood-bank": {
@@ -1098,6 +1342,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Montem um sistema de pedido e entrega",
       "Definam critérios de distribuição",
       "Programem os mutirões e a secagem"
+    ],
+    "zh": [
+      "落实柴源",
+      "找一处加工和存放场地",
+      "备齐设备和护具",
+      "招募并培训砍柴队",
+      "搭一套申请和送柴的办法",
+      "定好分柴的标准",
+      "排好动手日和晾晒"
     ]
   },
   "community-wifi-mesh": {
@@ -1136,6 +1389,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Encontrem locais anfitriões para os nós",
       "Definam normas de uso aceitável e privacidade",
       "Mantenham e ampliem a rede"
+    ],
+    "zh": [
+      "摸清覆盖需求和缺口",
+      "谈妥一条上游网络线路",
+      "招募技术帮手",
+      "张罗并配置设备",
+      "找安放节点的场所",
+      "定好使用和隐私的规矩",
+      "维护并扩展网络"
     ]
   },
   "mental-health-peer-support": {
@@ -1174,6 +1436,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Combinem a confidencialidade e as regras do grupo",
       "Agendem e divulguem os encontros",
       "Apoiem quem facilita e previnam o esgotamento"
+    ],
+    "zh": [
+      "招募并培训引导者",
+      "划定圈子的范围和边界",
+      "建一套危机转介和升级预案",
+      "找一个私密安全的空间",
+      "定下保密和圈子的基本规则",
+      "排好时间，把消息传出去",
+      "支持引导者，防止耗竭"
     ]
   },
   "community-cleanup": {
@@ -1204,6 +1475,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Reúnam materiais e equipamento de segurança",
       "Convoquem e organizem as pessoas voluntárias",
       "Realizem o dia de limpeza ou recuperação"
+    ],
+    "zh": [
+      "排查场地并排出先后",
+      "拿到许可，定好清运方案",
+      "备齐物资和安全装备",
+      "招募并安排志愿者",
+      "办好大扫除或修复日"
     ]
   },
   "free-tax-prep": {
@@ -1242,6 +1520,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Divulguem para vizinhos e vizinhas elegíveis",
       "Garantam a segurança e a privacidade dos dados",
       "Ofereçam acompanhamento de empoderamento financeiro"
+    ],
+    "zh": [
+      "让报税员完成培训和认证",
+      "与受认可的免费报税项目结成伙伴",
+      "布置场地和设备",
+      "搭好预约和接待流程",
+      "向符合条件的邻居宣传",
+      "守住数据安全和隐私",
+      "提供后续的理财陪伴"
     ]
   },
   "community-market": {
@@ -1280,6 +1567,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Convoquem e escalem as pessoas voluntárias",
       "Divulguem e fixem um horário regular",
       "Toquem a banca e cuidem das sobras"
+    ],
+    "zh": [
+      "落实果蔬和物资的货源",
+      "找场地，搭摊位",
+      "定下模式",
+      "布置陈列、储存和食品安全",
+      "招募并排班志愿者",
+      "定期开摊并广而告之",
+      "开摊当天与余量处理"
     ]
   },
   "welcome-wagon": {
@@ -1310,6 +1606,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Montem as cestas de boas-vindas",
       "Convoquem e preparem quem dá as boas-vindas",
       "Montem um sistema de indicação e adesão"
+    ],
+    "zh": [
+      "定下欢迎谁、怎么欢迎",
+      "编一册本地信息手册",
+      "装迎新篮子",
+      "招募并培训迎新员",
+      "搭好转介与报名渠道"
     ]
   },
   "library-of-things": {
@@ -1348,6 +1651,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Escrevam regras de empréstimo e uma política de confiança",
       "Montem a rotina de empréstimo e preparem as pessoas bibliotecárias",
       "Mantenham, higienizem e façam a coleção crescer"
+    ],
+    "zh": [
+      "问问大家想借什么",
+      "找储物空间，定开放时间",
+      "收集、清洁并测试物品",
+      "编目并拍照",
+      "写借用规则和一份信任守则",
+      "搭好借出登记，培训馆员",
+      "养护、消毒，让馆藏慢慢生长"
     ]
   },
   "laundry-shower-access": {
@@ -1382,6 +1694,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Estabeleçam protocolos de higiene e segurança",
       "Convoquem e preparem as pessoas voluntárias",
       "Fixem um horário e espalhem a notícia"
+    ],
+    "zh": [
+      "落实洗衣和淋浴的场地",
+      "筹集物资",
+      "搭好报名和时段安排",
+      "定好卫生与安全流程",
+      "招募并培训志愿者",
+      "定下时间表，把消息传开"
     ]
   },
   "voter-registration": {
@@ -1416,6 +1736,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Escolham pontos e eventos de grande movimento",
       "Atendam a mesa de registro",
       "Ajudem com os próximos passos"
+    ],
+    "zh": [
+      "摸清登记行动的规则",
+      "培训不偏不倚的志愿者",
+      "备齐材料和准确的信息",
+      "挑人流量大的地点和活动",
+      "摆桌办理登记",
+      "陪大家走完后面几步"
     ]
   },
   "health-navigation": {
@@ -1454,6 +1782,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ofereçam apoio com consultas e receitas",
       "Definam práticas de privacidade para informações de saúde",
       "Façam parceria com clínicas e serviços de saúde"
+    ],
+    "zh": [
+      "编一份医疗资源名录",
+      "招募并培训领路人",
+      "搭一条求助与接待渠道",
+      "帮忙办保险和参保",
+      "陪伴预约和取药",
+      "为健康信息立好隐私规矩",
+      "和诊所、医疗机构结成伙伴"
     ]
   },
   "toy-library": {
@@ -1484,6 +1821,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Cataloguem e ensaquem com todas as peças",
       "Escrevam as regras de empréstimo",
       "Montem o empréstimo e treinem quem cuida do acervo"
+    ],
+    "zh": [
+      "找到存放点，定好开放时间",
+      "收集、清洁并做安全检查",
+      "编目装袋，零件点清",
+      "写一份借用规则",
+      "建好借出登记，带馆员上手"
     ]
   },
   "food-preservation": {
@@ -1522,6 +1866,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Planejem sessões de conservas em grupo",
       "Ensinem e conduzam as sessões com segurança",
       "Compartilhem as conservas e registrem"
+    ],
+    "zh": [
+      "找一间合用的厨房",
+      "学会安全的保存方法",
+      "凑齐器具和罐子",
+      "张罗食材",
+      "排好集体装罐场次",
+      "安全带场，边做边教",
+      "分享保存好的食物并做记录"
     ]
   },
   "free-haircut": {
@@ -1552,6 +1905,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Consigam equipamento e materiais",
       "Montem a higienização e a conformidade com as licenças",
       "Conduzam os dias de cuidado pessoal"
+    ],
+    "zh": [
+      "招募持证发型师和理发师",
+      "找一个卫生条件过关的场地",
+      "备齐设备和用品",
+      "落实消毒和执业合规",
+      "把打理日办起来"
     ]
   },
   "mutual-aid-moving-crew": {
@@ -1590,6 +1950,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Definam agenda e despacho",
       "Definam alcance e limites",
       "Façam as mudanças e acompanhem depois"
+    ],
+    "zh": [
+      "召集队伍和车辆",
+      "凑齐搬家用具",
+      "搭一套求助与评估流程",
+      "理顺安全和责任",
+      "定好排期和调度",
+      "划清能接与不能接",
+      "完成搬家并回访"
     ]
   },
   "disability-support-network": {
@@ -1628,6 +1997,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Criem um acervo de empréstimo de equipamentos",
       "Ofereçam apoio de defesa de direitos e navegação",
       "Definam padrões de acessibilidade para todos os eventos do programa"
+    ],
+    "zh": [
+      "把带头的位置交给残障者",
+      "搭一套无障碍的沟通方式",
+      "摸清需求和资源",
+      "搭起互助交换",
+      "建一个辅具借用池",
+      "提供权益争取和办事引路",
+      "给项目所有活动定下无障碍标准"
     ]
   },
   "books-to-prisoners": {
@@ -1662,6 +2040,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Convoquem e treinem pessoas voluntárias",
       "Cubram postagem e logística",
       "Organizem um programa de cartas"
+    ],
+    "zh": [
+      "弄清各监狱的邮寄规定",
+      "凑书并布置打包角",
+      "建一套处理求书信的流程",
+      "招募并培训志愿者",
+      "落实邮资和寄送安排",
+      "组织笔友通信项目"
     ]
   },
   "community-music": {
@@ -1696,6 +2082,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Encontrem um espaço para aulas e jams",
       "Agendem aulas e jam sessions",
       "Definam expectativas de cuidado e devolução"
+    ],
+    "zh": [
+      "收集并修复乐器",
+      "建一套乐器借用系统",
+      "招募志愿老师",
+      "找一个能上课能合奏的场地",
+      "排好课程和即兴合奏",
+      "定好保养和归还的约定"
     ]
   },
   "school-supply-program": {
@@ -1726,6 +2120,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Separem e montem por ano escolar",
       "Montem o armazenamento e um ponto de entrega",
       "Agendem a entrega e escalem quem ajuda"
+    ],
+    "zh": [
+      "拿到文具清单，摸清需求",
+      "办文具募集并批发采购",
+      "按年级分拣、装包",
+      "落实存放点和发放点",
+      "排好发放日，安排人手"
     ]
   },
   "legal-aid-clinic": {
@@ -1764,6 +2165,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Desenvolvam materiais e oficinas de Conheça seus direitos",
       "Divulguem e agendem as clínicas",
       "Protejam a confidencialidade e chequem conflitos"
+    ],
+    "zh": [
+      "联络律师和法律援助机构",
+      "划定范围和转介路径",
+      "布置场地和接待登记",
+      "搭一套保密的预约系统",
+      "编写“了解你的权利”材料并办讲座",
+      "宣传咨询点并排定日程",
+      "守好保密底线，做好利益冲突排查"
     ]
   },
   "resource-hub-dispatch": {
@@ -1802,6 +2212,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Convidem e treinem pessoas coordenadoras",
       "Definam práticas de privacidade de dados e acompanhamento",
       "Registrem necessidades não atendidas e lacunas"
+    ],
+    "zh": [
+      "为需求和提供设一个统一入口",
+      "建一份志愿者和资源名册",
+      "定一套匹配和调度流程",
+      "维护一份资源总目录",
+      "招募并培训协调人",
+      "定下数据隐私和回访的做法",
+      "记录没接住的需求和缺口"
     ]
   },
   "harm-reduction-supplies": {
@@ -1836,6 +2255,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Montem kits com instruções em linguagem simples",
       "Estabeleça rondas de distribuição e pontos fixos",
       "Reabasteça, acompanhe e mantenha o treinamento em dia"
+    ],
+    "zh": [
+      "接受培训，找到降低伤害领域的伙伴",
+      "查清当地关于物资的法律",
+      "采购纳洛酮和物资包材料",
+      "组装物资包，配上大白话说明卡",
+      "排好发放路线和固定投放点",
+      "补货、记录，让培训保持新鲜"
     ]
   },
   "court-support": {
@@ -1870,6 +2297,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Treine as pessoas voluntárias de acompanhamento",
       "Coordene caronas e cuidado das crianças para as audiências",
       "Organize cartas de apoio quando a defesa pedir"
+    ],
+    "zh": [
+      "联络辩护人和已有的法庭团体",
+      "写下底线规矩：只陪伴，不碰法律",
+      "建一个求助入口和开庭日历",
+      "培训陪同志愿者",
+      "为庭审安排接送和看孩子",
+      "辩护律师需要时组织支持信"
     ]
   },
   "cooling-warming-center": {
@@ -1908,6 +2343,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Monte a escala de turnos",
       "Espalhe a notícia antes da temporada",
       "Abra, receba e reorganize a cada ativação"
+    ],
+    "zh": [
+      "找一处有冷暖空调的场地",
+      "定下启用门槛和通知方案",
+      "备齐物资",
+      "招募并培训各时段的值守人",
+      "排好时段轮换表",
+      "赶在季节之前把消息传开",
+      "每次启用：开门、值守、复位"
     ]
   },
   "community-oral-history": {
@@ -1934,6 +2378,12 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Reúna o equipamento e uma lista de perguntas",
       "Grave as sessões de histórias",
       "Arquive e devolva, nos termos de cada pessoa"
+    ],
+    "zh": [
+      "写一份大白话的同意书",
+      "备好设备和一份问题清单",
+      "录制故事场次",
+      "归档，并按讲述人的意愿分享回去"
     ]
   },
   "community-solar-coop": {
@@ -1972,6 +2422,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Faça parceria com instaladores e fornecedores",
       "Monte o sistema de créditos na conta e de participação",
       "Eduque os membros sobre o consumo de energia"
+    ],
+    "zh": [
+      "召集成员，摸清意愿",
+      "弄懂模式和当地规则",
+      "找一处场地或一个可加入的项目",
+      "理清融资和法律架构",
+      "对接安装商和供应商",
+      "搭好电费抵扣和成员账目系统",
+      "带成员看懂用电"
     ]
   },
   "worker-coop-incubator": {
@@ -2010,6 +2469,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Conecte com recursos de largada",
       "Ofereça mentoria",
       "Construa apoio entre os empreendimentos"
+    ],
+    "zh": [
+      "摸底成员的技能和心愿",
+      "开设求职和技能培训",
+      "讲透合作社模式",
+      "陪伴合作社正式成立",
+      "对接起步资源",
+      "安排导师陪跑",
+      "让创业团队互相扶持"
     ]
   },
   "elder-meal-delivery": {
@@ -2048,6 +2516,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Registre informações de dieta, alergias e emergência",
       "Estabeleça um protocolo de verificação de bem-estar",
       "Apoie os voluntários e recolha opiniões"
+    ],
+    "zh": [
+      "找到出不了门的老人",
+      "招募并核查帮手",
+      "落实饭菜来源",
+      "规划送餐路线和时间表",
+      "记录饮食、过敏和紧急联络信息",
+      "定一套确认平安的流程",
+      "照应帮手，收集反馈"
     ]
   },
   "disaster-relief-hub": {
@@ -2086,6 +2563,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Convoque e treine uma equipe de voluntários de prontidão",
       "Coordene com outras equipes de resposta",
       "Planeje a comunicação e a segurança"
+    ],
+    "zh": [
+      "提前找好集散场地和备选",
+      "搭建物资来源渠道",
+      "搭好接收、分拣和库存流程",
+      "建立发放办法",
+      "招募并训练一支应急帮手队伍",
+      "和其他救援力量协调",
+      "规划通讯和安全"
     ]
   },
   "recovery-peer-support": {
@@ -2124,6 +2610,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Estabeleça a confidencialidade e as normas do grupo",
       "Agende e divulgue os encontros",
       "Apoie os facilitadores e previna o esgotamento"
+    ],
+    "zh": [
+      "招募并培训同伴引导者",
+      "定下范围和边界",
+      "打通转介和危机渠道",
+      "找一个安全、私密、不沾成瘾物质的场地",
+      "立下保密和小组规矩",
+      "排好聚会时间并传出去",
+      "照应引导者，别让他们累垮"
     ]
   },
   "community-fitness": {
@@ -2162,6 +2657,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Cuide da segurança e da saúde",
       "Defina uma agenda e espalhe a notícia",
       "Cultive comunidade e constância"
+    ],
+    "zh": [
+      "摸底大家的兴趣和活动量",
+      "找活动带队人",
+      "找安全的场地",
+      "设计人人能参与、不分水平的活动",
+      "把安全和健康顾上",
+      "定下时间表，把消息传开",
+      "把人气和习惯养起来"
     ]
   },
   "urban-orchard": {
@@ -2200,6 +2704,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Organize mutirões de plantio",
       "Monte o cuidado de longo prazo",
       "Planeje a partilha da colheita"
+    ],
+    "zh": [
+      "拿下长期的土地使用权",
+      "规划种植设计",
+      "筹措树苗和植物",
+      "整备场地",
+      "办种树日",
+      "安排长期照看",
+      "商定收成怎么分"
     ]
   },
   "new-parent-support": {
@@ -2238,6 +2751,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Crie rodas de apoio entre pares",
       "Defina práticas de segurança e de limites",
       "Conecte com os outros projetos"
+    ],
+    "zh": [
+      "招募帮手和同伴支持者",
+      "搭一套送餐接力",
+      "搭手干实事",
+      "整一份资源目录",
+      "办同伴支持圈",
+      "定下安全和边界的做法",
+      "和其他项目连起来"
     ]
   },
   "foster-kinship-support": {
@@ -2276,6 +2798,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ofereça grupos de apoio entre pares",
       "Monte um diretório de recursos",
       "Defina práticas de segurança das crianças e de privacidade"
+    ],
+    "zh": [
+      "和照护家庭连上线",
+      "攒起衣物和用品储备",
+      "建一套快速送达的机制",
+      "组织喘息支持",
+      "办同伴支持小组",
+      "整一份资源目录",
+      "定下儿童安全和隐私的做法"
     ]
   },
   "weather-survival-outreach": {
@@ -2314,6 +2845,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Monte um plano de distribuição e rotas",
       "Conecte as pessoas a abrigos e serviços",
       "Prepare-se para as emergências"
+    ],
+    "zh": [
+      "按季节配好物资包",
+      "筹措物资",
+      "摸清人们在哪儿",
+      "招募并训练上街的帮手",
+      "排好发放计划和路线",
+      "把人和庇护所、援助点连起来",
+      "为紧急情况做好准备"
     ]
   }
 };
