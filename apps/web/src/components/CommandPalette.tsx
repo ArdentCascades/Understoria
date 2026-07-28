@@ -28,8 +28,7 @@ import {
   searchPalette,
   type PaletteEntry,
 } from "@/lib/commandPalette";
-import { FAQ_SECTIONS } from "@/content/faq";
-import { FAQ_SECTIONS_ES } from "@/content/faq.es";
+import { getFaqSections } from "@/content/faq";
 
 // The command palette (docs/desktop-power-tools.md plan 1, P1):
 // Ctrl/Cmd+K anywhere opens a search over everything this device
@@ -92,8 +91,7 @@ export function CommandPalette() {
   }, [open]);
 
   const index = useMemo(() => {
-    const es = i18n.resolvedLanguage?.startsWith("es") ?? false;
-    const faq = es ? FAQ_SECTIONS_ES : FAQ_SECTIONS;
+    const faq = getFaqSections(i18n.resolvedLanguage);
     return buildPaletteIndex({
       routes: [
         { kind: "route", id: "route:/", title: t("nav.board"), to: "/" },

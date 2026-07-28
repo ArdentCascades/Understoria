@@ -20,8 +20,7 @@
  */
 import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
-import { START_COMMUNITY } from "@/content/startCommunity";
-import { START_COMMUNITY_ES } from "@/content/startCommunity.es";
+import { getStartCommunityGuide } from "@/content/startCommunity";
 
 // The in-app walkthrough for starting a NEW community from an
 // existing node — served by the node itself, so the person who most
@@ -36,9 +35,7 @@ import { START_COMMUNITY_ES } from "@/content/startCommunity.es";
 
 export default function StartCommunityPage() {
   const { t, i18n } = useTranslation();
-  const guide = i18n.language?.startsWith("es")
-    ? START_COMMUNITY_ES
-    : START_COMMUNITY;
+  const guide = getStartCommunityGuide(i18n.language);
   const navigate = useNavigate();
 
   return (

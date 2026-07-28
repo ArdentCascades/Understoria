@@ -18,10 +18,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import "fake-indexeddb/auto";
 
-// The Spanish content bundle is lazy in production (content/registry
-// gates rendering on it); tests exercise real es content
-// synchronously all over the suite, so preload it here once.
-import { ensureContent } from "@/content/registry";
-await ensureContent("es");
+// The English content bundle — eager (English is the fallback for
+// every content surface). Every bundle module exports this exact
+// shape; content/registry.ts types itself off this one.
+export { PROJECT_TEMPLATES_EN as PROJECT_TEMPLATES } from "../projectTemplates.en";
+export { TASK_STEPS_EN as TASK_STEPS } from "../taskSteps.en";
+export { TASK_TIPS_EN as TASK_TIPS } from "../taskTips.en";
+export { EVENT_TEMPLATES_EN as EVENT_TEMPLATES } from "../eventTemplates.en";
+export { FAQ_SECTIONS } from "../faq";
+export { START_COMMUNITY } from "../startCommunity";

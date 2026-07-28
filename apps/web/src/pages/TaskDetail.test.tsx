@@ -91,7 +91,7 @@ vi.mock("@/db/projects", () => ({
 
 import "@/i18n";
 import { addProjectTask } from "@/db/projects";
-import { TASK_TIPS } from "@/content/taskTips";
+import { TASK_TIPS_EN } from "@/content/taskTips.en";
 import TaskDetailPage from "./TaskDetail";
 import type { Member, Project, ProjectTask } from "@/types";
 
@@ -905,7 +905,7 @@ describe("per-task tip", () => {
   // title, which is how the authored tip (content/taskTips.ts) is
   // recovered — no tip data is stored on the task itself.
   const templateTaskTitle = "Find a host site with power and foot traffic";
-  const expectedTip = TASK_TIPS["community-fridge"][0].en;
+  const expectedTip = TASK_TIPS_EN["community-fridge"][0];
 
   it("renders the authored tip for a template task", () => {
     mockState.projects = [project({ templateId: "community-fridge" })];

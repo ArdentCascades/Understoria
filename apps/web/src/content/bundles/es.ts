@@ -18,10 +18,15 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import "fake-indexeddb/auto";
 
-// The Spanish content bundle is lazy in production (content/registry
-// gates rendering on it); tests exercise real es content
-// synchronously all over the suite, so preload it here once.
-import { ensureContent } from "@/content/registry";
-await ensureContent("es");
+// The Spanish content bundle — loaded lazily by content/registry.ts
+// (its own `lazy-content-es` chunk, excluded from the service-worker
+// precache and runtime-cached after first use). Never import this
+// statically from app code: a static import anywhere drags the whole
+// bundle back into first load for every member.
+export { PROJECT_TEMPLATES_ES as PROJECT_TEMPLATES } from "../projectTemplates.es";
+export { TASK_STEPS_ES as TASK_STEPS } from "../taskSteps.es";
+export { TASK_TIPS_ES as TASK_TIPS } from "../taskTips.es";
+export { EVENT_TEMPLATES_ES as EVENT_TEMPLATES } from "../eventTemplates.es";
+export { FAQ_SECTIONS_ES as FAQ_SECTIONS } from "../faq.es";
+export { START_COMMUNITY_ES as START_COMMUNITY } from "../startCommunity.es";

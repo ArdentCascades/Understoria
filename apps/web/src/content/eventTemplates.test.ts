@@ -8,11 +8,11 @@ import { describe, expect, it } from "vitest";
 import {
   EVENT_CATEGORY_IDS,
   EVENT_TEMPLATES_EN,
-  EVENT_TEMPLATES_ES,
   getEventTemplate,
   getEventTemplates,
   type EventTemplate,
 } from "./eventTemplates";
+import { EVENT_TEMPLATES_ES } from "./eventTemplates.es";
 import { PROJECT_CATEGORY_META } from "@/lib/categories";
 
 // Every category a template may use: the new event-specific strings plus

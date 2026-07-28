@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { getTemplate } from "@/content/projectTemplates";
+import { TEMPLATE_SUGGESTS_WORK_DAYS } from "@/content/taskTitleIndex";
 
 /**
  * Decision logic for the ONE quiet work-day hint on a project page —
@@ -24,10 +24,11 @@ import { getTemplate } from "@/content/projectTemplates";
  */
 
 /** Whether the project's template flags rota-shaped work. The flag is
- *  structural (same across locales), so the EN table is authoritative. */
+ *  structural (same across locales), read from the eager title index
+ *  so this render-path check never touches a content bundle. */
 export function projectSuggestsWorkDays(templateId: string | null): boolean {
   if (!templateId) return false;
-  return getTemplate(templateId, "en")?.suggestsWorkDays === true;
+  return TEMPLATE_SUGGESTS_WORK_DAYS[templateId] === true;
 }
 
 export function shouldShowWorkDayHint(opts: {

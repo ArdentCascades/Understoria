@@ -9,8 +9,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { FAQ_SECTIONS, type FaqEntry } from "@/content/faq";
-import { FAQ_SECTIONS_ES } from "@/content/faq.es";
+import { getFaqSections, type FaqEntry } from "@/content/faq";
 
 /**
  * Resolvers behind the selected-template "Before you start" context
@@ -24,7 +23,7 @@ export function findFaqEntry(
   entryId: string,
   locale: string,
 ): FaqEntry | null {
-  const sections = locale.startsWith("es") ? FAQ_SECTIONS_ES : FAQ_SECTIONS;
+  const sections = getFaqSections(locale);
   for (const section of sections) {
     const entry = section.entries.find((e) => e.id === entryId);
     if (entry) return entry;

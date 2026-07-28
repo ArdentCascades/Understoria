@@ -23,9 +23,9 @@ import {
   getProjectTemplates,
   getTemplate,
   PROJECT_TEMPLATES_EN,
-  PROJECT_TEMPLATES_ES,
   type RecurringCadence,
 } from "./projectTemplates";
+import { PROJECT_TEMPLATES_ES } from "./projectTemplates.es";
 
 // Canonical category mapping per the design decision. If you change a
 // template's defaultCategory and don't update this map, the test will

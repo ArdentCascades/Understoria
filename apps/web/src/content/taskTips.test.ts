@@ -12,9 +12,11 @@
 import { describe, expect, it } from "vitest";
 import {
   PROJECT_TEMPLATES_EN,
-  PROJECT_TEMPLATES_ES,
 } from "@/content/projectTemplates";
-import { TASK_TIPS, getTaskTips } from "@/content/taskTips";
+import { PROJECT_TEMPLATES_ES } from "@/content/projectTemplates.es";
+import { getTaskTips } from "@/content/taskTips";
+import { TASK_TIPS_EN } from "@/content/taskTips.en";
+import { TASK_TIPS_ES } from "@/content/taskTips.es";
 
 // Coverage guard for the per-task tips content. The tips live in their
 // own table keyed by template id + task index, so nothing in the type
@@ -23,40 +25,44 @@ import { TASK_TIPS, getTaskTips } from "@/content/taskTips";
 // updated in the same PR, and this suite is what fails until they are.
 describe("TASK_TIPS coverage", () => {
   it("covers exactly the template id set (no missing, no strays)", () => {
-    expect(Object.keys(TASK_TIPS).sort()).toEqual(
+    expect(Object.keys(TASK_TIPS_EN).sort()).toEqual(
       PROJECT_TEMPLATES_EN.map((tpl) => tpl.id).sort(),
     );
   });
 
   it("has one tip per task, index-aligned, in both locales", () => {
     for (const tpl of PROJECT_TEMPLATES_EN) {
-      expect(TASK_TIPS[tpl.id], tpl.id).toBeDefined();
-      expect(TASK_TIPS[tpl.id].length, tpl.id).toBe(tpl.tasks.length);
+      expect(TASK_TIPS_EN[tpl.id], tpl.id).toBeDefined();
+      expect(TASK_TIPS_EN[tpl.id].length, tpl.id).toBe(tpl.tasks.length);
     }
     // The es arrays are parity-locked to en in projectTemplates.test.ts,
     // but assert directly so THIS suite stands alone.
     for (const tpl of PROJECT_TEMPLATES_ES) {
-      expect(TASK_TIPS[tpl.id].length, `${tpl.id} (es)`).toBe(
+      expect(TASK_TIPS_ES[tpl.id]?.length, `${tpl.id} (es)`).toBe(
         tpl.tasks.length,
       );
     }
   });
 
   it("every tip is non-empty and actually translated", () => {
-    for (const [id, tips] of Object.entries(TASK_TIPS)) {
+    for (const [id, tips] of Object.entries(TASK_TIPS_EN)) {
       tips.forEach((tip, i) => {
-        expect(tip.en.trim(), `${id}[${i}].en`).not.toBe("");
-        expect(tip.es.trim(), `${id}[${i}].es`).not.toBe("");
-        expect(tip.es, `${id}[${i}] es===en`).not.toBe(tip.en);
+        const es = TASK_TIPS_ES[id]?.[i] ?? "";
+        expect(tip.trim(), `${id}[${i}].en`).not.toBe("");
+        expect(es.trim(), `${id}[${i}].es`).not.toBe("");
+        expect(es, `${id}[${i}] es===en`).not.toBe(tip);
       });
     }
   });
 
   it("keeps tips short enough for a task page (no essays)", () => {
-    for (const [id, tips] of Object.entries(TASK_TIPS)) {
+    for (const [id, tips] of Object.entries(TASK_TIPS_EN)) {
       tips.forEach((tip, i) => {
-        expect(tip.en.length, `${id}[${i}].en`).toBeLessThanOrEqual(400);
-        expect(tip.es.length, `${id}[${i}].es`).toBeLessThanOrEqual(400);
+        expect(tip.length, `${id}[${i}].en`).toBeLessThanOrEqual(400);
+        expect(
+          (TASK_TIPS_ES[id]?.[i] ?? "").length,
+          `${id}[${i}].es`,
+        ).toBeLessThanOrEqual(400);
       });
     }
   });
@@ -68,24 +74,24 @@ describe("getTaskTips", () => {
 
   it("resolves a tip by the en task title", () => {
     expect(getTaskTips(tpl.id, tpl.tasks[0].name, "en")).toBe(
-      TASK_TIPS[tpl.id][0].en,
+      TASK_TIPS_EN[tpl.id][0],
     );
   });
 
   it("resolves by an es-created task title too", () => {
     // A project created under es stores the es task names verbatim.
     expect(getTaskTips(tpl.id, tplEs.tasks[0].name, "es")).toBe(
-      TASK_TIPS[tpl.id][0].es,
+      TASK_TIPS_ES[tpl.id][0],
     );
   });
 
   it("serves the viewer's language independent of creation language", () => {
     // en-created project viewed in es (and regional es variants).
     expect(getTaskTips(tpl.id, tpl.tasks[0].name, "es")).toBe(
-      TASK_TIPS[tpl.id][0].es,
+      TASK_TIPS_ES[tpl.id][0],
     );
     expect(getTaskTips(tpl.id, tpl.tasks[0].name, "es-MX")).toBe(
-      TASK_TIPS[tpl.id][0].es,
+      TASK_TIPS_ES[tpl.id][0],
     );
   });
 
