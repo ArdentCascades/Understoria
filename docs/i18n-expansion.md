@@ -16,7 +16,7 @@ Chinese shipped under the language-only code `zh` rather than the
 plan's `zh-Hans` label — browsers send zh-CN/zh-SG and i18next's
 language-only fallback resolves those to `zh`, while a literal
 zh-Hans code would match neither (zh-Hant stays open as a future
-sibling). WAVE 2 IN PROGRESS: **Hindi (hi) and Vietnamese (vi) SHIPPED**
+sibling). PHASE 1 WAVE 2 COMPLETE: **Hindi (hi), Vietnamese (vi), and Russian (ru) SHIPPED**
 (UI strings complete — glossary at `docs/i18n-glossary/hi.md` with
 the आप-register decision and Devanagari conventions; 6-agent bulk
 pass + splice validation + cross-chunk reconciliation (sign →
@@ -28,9 +28,20 @@ kinship system is unusable with unknown age/gender), chúng tôi
 banned as the app's voice, **node kept English** because the
 Vietnamese calque nút is the word for a UI button, ngày chung tay
 for work days, điểm trú bão for storm hubs; NFC-normalization is a
-splice gate; cross-chunk reconciliation unified flag → gắn cờ. ru
-remains; it will exercise the _one/_few/_many plural gate. Baseline numbers below refreshed
-2026-07-27.
+splice gate; cross-chunk reconciliation unified flag → gắn cờ.
+Russian field notes: glossary at `docs/i18n-glossary/ru.md` — вы
+uniformly and lowercase (ты forces gendered past tense), ё always
+written, «день общих дел» coined over субботник, a ru-specific
+war-marked-vocabulary ban; the parity gate gained its sanctioned
+plural-suffix relaxation so ru.json carries FOUR keys per plural
+family (_one/_few/_many/_other — 38 families, +76 keys), finally
+exercising the Slavic branch of the plurals gate; cross-chunk
+reconciliation unified device-lock to разблокировать (contacts keep
+заблокировать unambiguously). Wave 2 surfaced an upstream en defect
+worth a follow-up: several `_one` strings hardcode the digit 1
+("1 open", "1 task waiting") with no {{count}}, which mis-renders at
+21/101 in every _one-category language. Baseline numbers below
+refreshed 2026-07-27.
 
 ## Where we start from
 

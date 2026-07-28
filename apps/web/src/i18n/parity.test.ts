@@ -26,6 +26,7 @@ import pt from "./locales/pt.json";
 import zh from "./locales/zh.json";
 import hi from "./locales/hi.json";
 import vi from "./locales/vi.json";
+import ru from "./locales/ru.json";
 import { LANGUAGES } from "./languages";
 
 // Every shipped locale, keyed for the gates below. Locale files are
@@ -40,6 +41,7 @@ const SHIPPED_LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   { code: "zh", data: zh },
   { code: "hi", data: hi },
   { code: "vi", data: vi },
+  { code: "ru", data: ru },
 ];
 
 type JsonValue =
@@ -72,6 +74,23 @@ function interpolationVars(value: string): Set<string> {
   return out;
 }
 
+const CLDR_PLURAL_SUFFIX = /^(.*)_(zero|one|two|few|many|other)$/;
+
+/** True when `key` is a CLDR plural-suffix variant of a plural family
+ *  en itself declares (its `_other` form exists in en). Such keys are
+ *  the one sanctioned locale-only addition — see the key-set test. */
+function isExtraPluralVariant(key: string, enSet: Set<string>): boolean {
+  const m = key.match(CLDR_PLURAL_SUFFIX);
+  return m !== null && enSet.has(`${m[1]}_other`);
+}
+
+/** The en string an extra plural variant should be compared against
+ *  for interpolation parity: its family's `_other` form. */
+function pluralFamilyEnKey(key: string): string | null {
+  const m = key.match(CLDR_PLURAL_SUFFIX);
+  return m ? `${m[1]}_other` : null;
+}
+
 const enEntries = flattenEntries(en as JsonValue);
 const enKeys = enEntries.map(([k]) => k).sort();
 const enMap = new Map(enEntries);
@@ -98,6 +117,15 @@ describe("i18n locale parity", () => {
      * missing-side translation file: adding a key in en without a
      * matching entry in every shipped locale (or vice versa) is the
      * bug.
+     *
+     * ONE deliberate relaxation (the plan's Wave-2 Russian case): a
+     * locale may carry EXTRA CLDR plural-suffix keys for a family en
+     * already declares — Russian needs `hours_few`/`hours_many`
+     * beyond en's `hours_one`/`hours_other`, because its plural
+     * categories genuinely differ. Only recognized CLDR suffixes on
+     * an existing en `_other` family qualify; anything else is still
+     * drift. plurals.test.ts enforces that the categories present
+     * are exactly the ones the language's Intl.PluralRules demands.
      */
     it(`en.json and ${code}.json have identical key sets`, () => {
       const keys = flattenEntries(data as JsonValue)
@@ -106,7 +134,9 @@ describe("i18n locale parity", () => {
       const enSet = new Set(enKeys);
       const set = new Set(keys);
       const onlyInEn = enKeys.filter((k) => !set.has(k));
-      const onlyInLocale = keys.filter((k) => !enSet.has(k));
+      const onlyInLocale = keys
+        .filter((k) => !enSet.has(k))
+        .filter((k) => !isExtraPluralVariant(k, enSet));
       expect(
         onlyInEn,
         `Keys present in en.json but missing from ${code}.json`,
@@ -126,7 +156,10 @@ describe("i18n locale parity", () => {
     it(`${code}.json keeps every interpolation variable from en.json`, () => {
       const mismatches: string[] = [];
       for (const [key, value] of flattenEntries(data as JsonValue)) {
-        const enValue = enMap.get(key);
+        // Extra plural variants (see the key-set test) have no exact
+        // en twin; their variables must match the family's en _other.
+        const enValue =
+          enMap.get(key) ?? enMap.get(pluralFamilyEnKey(key) ?? "");
         if (typeof value !== "string" || typeof enValue !== "string") continue;
         const a = [...interpolationVars(enValue)].sort();
         const b = [...interpolationVars(value)].sort();
