@@ -10,6 +10,19 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The full authored-content library now exists in Vietnamese.** All
+  64 project templates with their tips and starter steps, the 14
+  event templates, the FAQ, and the start-a-community walkthrough,
+  in the same warm pan-regional Vietnamese as the UI and bound by
+  its glossary — ngày chung tay for work days, của chung for the
+  commons, no officialese or debt vocabulary, NFC-clean diacritics,
+  and FAQ answers that quote the shipped Vietnamese buttons
+  word-for-word. The Settings note that authored content was still
+  in English is gone for Vietnamese; the content loads as its own
+  lazy chunk only when Tiếng Việt is chosen. Also fixed along the
+  way: the Spanish FAQ's identity section had one entry out of
+  order versus English, and the parity gate now enforces entry
+  order per section for every language.
 - **The full authored-content library now exists in Hindi.** All 64
   project templates with their tips and starter steps, the 14 event
   templates, the FAQ, and the start-a-community walkthrough, in the

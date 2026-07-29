@@ -100,7 +100,7 @@ export const LANGUAGES = [
     dir: "ltr",
     speakLang: "vi",
     reviewStatus: "new",
-    content: "ui-only",
+    content: "full",
   },
   {
     code: "ru",

@@ -16,6 +16,7 @@ import { FAQ_SECTIONS_FR } from "./faq.fr";
 import { FAQ_SECTIONS_PT } from "./faq.pt";
 import { FAQ_SECTIONS_ZH } from "./faq.zh";
 import { FAQ_SECTIONS_HI } from "./faq.hi";
+import { FAQ_SECTIONS_VI } from "./faq.vi";
 
 // Guardrail against translation drift. The FAQ ids are stable URL
 // fragments shared across languages (`/help#confirm-exchange`), so
@@ -30,6 +31,7 @@ describe.each([
   ["Portuguese", FAQ_SECTIONS_PT],
   ["Chinese", FAQ_SECTIONS_ZH],
   ["Hindi", FAQ_SECTIONS_HI],
+  ["Vietnamese", FAQ_SECTIONS_VI],
 ] as const)("FAQ parity — English ↔ %s", (localeName, FAQ_SECTIONS_TR) => {
   it("has the same section ids in both languages", () => {
     const enSectionIds = FAQ_SECTIONS.map((s) => s.id).sort();
@@ -45,12 +47,17 @@ describe.each([
     );
   });
 
-  it("has the same entry ids inside each section", () => {
+  it("has the same entry ids inside each section, in the same order", () => {
+    // Unsorted on purpose: a member following "see the question below"
+    // (or comparing notes with a neighbor on another language) expects
+    // the entries at the same positions. Sorted comparison let the
+    // Spanish identity section ship with install-app three slots away
+    // from its English position.
     const enBySection = new Map(
-      FAQ_SECTIONS.map((s) => [s.id, s.entries.map((e) => e.id).sort()]),
+      FAQ_SECTIONS.map((s) => [s.id, s.entries.map((e) => e.id)]),
     );
     const trBySection = new Map(
-      FAQ_SECTIONS_TR.map((s) => [s.id, s.entries.map((e) => e.id).sort()]),
+      FAQ_SECTIONS_TR.map((s) => [s.id, s.entries.map((e) => e.id)]),
     );
     for (const [sectionId, enIds] of enBySection) {
       const trIds = trBySection.get(sectionId);

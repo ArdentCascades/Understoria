@@ -81,12 +81,13 @@ describe("HelpPage — locale-aware FAQ", () => {
   });
 
   it("FAQ content falls back to English for locales without content translations", async () => {
-    // Every SHIPPED language now has translated content (Phase 2b),
-    // so the honest-fallback path is exercised with a locale the
-    // registry doesn't know at all: the selector must fall through
-    // to the English source rather than render an empty page.
-    expect(getFaqSections("vi")).toBe(getFaqSections("en"));
-    await i18n.changeLanguage("vi");
+    // Exercised with ru — a shipped UI language whose content
+    // corpus hasn't landed yet (content: "ui-only"): the selector
+    // must fall through to the English source rather than render an
+    // empty page. When ru content ships, move this probe to a code
+    // the registry doesn't know at all.
+    expect(getFaqSections("ru")).toBe(getFaqSections("en"));
+    await i18n.changeLanguage("ru");
     render(<HelpPage />);
     expect(container.textContent).toContain("Posts and exchanges");
   });

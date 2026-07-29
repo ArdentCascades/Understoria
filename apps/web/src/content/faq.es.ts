@@ -175,44 +175,6 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
         ],
       },
       {
-        id: "install-app",
-        question: "¿Puedo instalar Understoria como una app?",
-        answer: [
-          "Sí. Understoria es una aplicación web que puedes poner en " +
-            "tu pantalla de inicio como cualquier otra app: obtienes " +
-            "un icono, se abre a pantalla completa sin las barras del " +
-            "navegador, arranca más rápido y sigue funcionando sin " +
-            "conexión.",
-          "En iPhone o iPad, abre Understoria en Safari, toca el botón " +
-            "Compartir y elige 'Añadir a pantalla de inicio.'",
-          "En Android, ábrela en Chrome, toca el menú (⋮) en la esquina " +
-            "superior y elige 'Añadir a pantalla de inicio' o 'Instalar " +
-            "aplicación.'",
-          "En un navegador de escritorio, busca el icono de instalación " +
-            "al final derecho de la barra de direcciones.",
-          "En una computadora con Linux también hay una app de " +
-            "escritorio — un solo archivo (un AppImage) que tu " +
-            "comunidad puede compartir y que corre sin navegador. " +
-            "Hazlo ejecutable (clic derecho → Propiedades → permitir " +
-            "ejecutar, o chmod +x), ábrelo y vincúlalo desde tu " +
-            "teléfono: Ajustes → 'Agregar otro dispositivo' en el " +
-            "teléfono, y la vía de pegar el código en la computadora. " +
-            "Cuenta como su propio dispositivo, igual que el caso del " +
-            "iPhone más abajo, y solo se actualiza cuando reemplazas " +
-            "el archivo por uno más nuevo.",
-          "Algo que debes saber antes de instalar: en iPhone y iPad la " +
-            "app instalada tiene su PROPIO almacenamiento separado, así " +
-            "que arranca sin sesión aunque la copia del navegador sí " +
-            "tenga tu identidad — no se pierde nada, simplemente tienes " +
-            "dos 'dispositivos' separados en un mismo teléfono. La app " +
-            "instalada lo pregunta en su primera pantalla: elige 'Ya " +
-            "uso Understoria en el navegador de este teléfono' y te " +
-            "guía paso a paso para traer tu identidad. (En Android y en " +
-            "computadora la app instalada comparte el almacenamiento " +
-            "del navegador, así que tu sesión se mantiene.)",
-        ],
-      },
-      {
         id: "lost-passphrase",
         question: "¿Qué pasa si pierdo mi contraseña?",
         answer: [
@@ -263,6 +225,44 @@ export const FAQ_SECTIONS_ES: readonly FaqSection[] = [
           "Lo que nunca vuelve en un dispositivo nuevo: los mensajes " +
             "directos y los borradores sin enviar — solo vivían en el " +
             "teléfono perdido, por diseño.",
+        ],
+      },
+      {
+        id: "install-app",
+        question: "¿Puedo instalar Understoria como una app?",
+        answer: [
+          "Sí. Understoria es una aplicación web que puedes poner en " +
+            "tu pantalla de inicio como cualquier otra app: obtienes " +
+            "un icono, se abre a pantalla completa sin las barras del " +
+            "navegador, arranca más rápido y sigue funcionando sin " +
+            "conexión.",
+          "En iPhone o iPad, abre Understoria en Safari, toca el botón " +
+            "Compartir y elige 'Añadir a pantalla de inicio.'",
+          "En Android, ábrela en Chrome, toca el menú (⋮) en la esquina " +
+            "superior y elige 'Añadir a pantalla de inicio' o 'Instalar " +
+            "aplicación.'",
+          "En un navegador de escritorio, busca el icono de instalación " +
+            "al final derecho de la barra de direcciones.",
+          "En una computadora con Linux también hay una app de " +
+            "escritorio — un solo archivo (un AppImage) que tu " +
+            "comunidad puede compartir y que corre sin navegador. " +
+            "Hazlo ejecutable (clic derecho → Propiedades → permitir " +
+            "ejecutar, o chmod +x), ábrelo y vincúlalo desde tu " +
+            "teléfono: Ajustes → 'Agregar otro dispositivo' en el " +
+            "teléfono, y la vía de pegar el código en la computadora. " +
+            "Cuenta como su propio dispositivo, igual que el caso del " +
+            "iPhone más abajo, y solo se actualiza cuando reemplazas " +
+            "el archivo por uno más nuevo.",
+          "Algo que debes saber antes de instalar: en iPhone y iPad la " +
+            "app instalada tiene su PROPIO almacenamiento separado, así " +
+            "que arranca sin sesión aunque la copia del navegador sí " +
+            "tenga tu identidad — no se pierde nada, simplemente tienes " +
+            "dos 'dispositivos' separados en un mismo teléfono. La app " +
+            "instalada lo pregunta en su primera pantalla: elige 'Ya " +
+            "uso Understoria en el navegador de este teléfono' y te " +
+            "guía paso a paso para traer tu identidad. (En Android y en " +
+            "computadora la app instalada comparte el almacenamiento " +
+            "del navegador, así que tu sesión se mantiene.)",
         ],
       },
       {
