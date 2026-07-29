@@ -310,7 +310,7 @@ export function PairDeviceCapture({
           >
             {t("pairDevice.capture.samePhone.title")}
           </h2>
-          <ol className="ml-5 list-decimal space-y-1 text-sm text-moss-700 dark:text-moss-200">
+          <ol className="ms-5 list-decimal space-y-1 text-sm text-moss-700 dark:text-moss-200">
             <li>{t("pairDevice.capture.samePhone.step1")}</li>
             <li>{t("pairDevice.capture.samePhone.step2")}</li>
             <li>{t("pairDevice.capture.samePhone.step3")}</li>
@@ -374,7 +374,7 @@ export function PairDeviceCapture({
         >
           {t("pairDevice.capture.directions.title")}
         </h2>
-        <ol className="ml-5 list-decimal space-y-1 text-sm text-moss-700 dark:text-moss-200">
+        <ol className="ms-5 list-decimal space-y-1 text-sm text-moss-700 dark:text-moss-200">
           <li>{t("pairDevice.capture.directions.step1")}</li>
           <li>{t("pairDevice.capture.directions.step2")}</li>
           <li>{t("pairDevice.capture.directions.step3")}</li>

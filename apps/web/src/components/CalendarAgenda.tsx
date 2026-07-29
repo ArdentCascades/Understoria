@@ -169,7 +169,7 @@ export function CalendarAgenda({
 // (no-leaderboards). Every row carries the same border width (accent
 // rows colour it, ambient rows keep it transparent) so alignment never
 // shifts.
-const ENTRY_ROW_BASE = `group flex items-center gap-2 rounded-xl border-l-2
+const ENTRY_ROW_BASE = `group flex items-center gap-2 rounded-xl border-s-2
    px-2 py-1.5 hover:bg-moss-50 dark:hover:bg-moss-900`;
 const ENTRY_ROW_AMBIENT = `${ENTRY_ROW_BASE} border-transparent`;
 const ENTRY_ROW_VIEWER = `${ENTRY_ROW_BASE} border-canopy-600 dark:border-canopy-400`;
@@ -253,7 +253,7 @@ function AgendaEntry({
             entry.viewerGoing ? "font-semibold" : "",
           ].join(" ")}
         >
-          <span aria-hidden="true" className="mr-1">
+          <span aria-hidden="true" className="me-1">
             {meta.emoji}
           </span>
           {isLastDay && entry.endsAt !== null ? (
@@ -291,7 +291,7 @@ function AgendaEntry({
           {entry.viewerGoing ? (
             <span
               aria-hidden="true"
-              className="ml-1.5 font-semibold text-canopy-600 dark:text-canopy-300"
+              className="ms-1.5 font-semibold text-canopy-600 dark:text-canopy-300"
             >
               ✓
             </span>
@@ -350,7 +350,7 @@ function AgendaEntry({
           isViewers ? "font-semibold" : "",
         ].join(" ")}
       >
-        <span aria-hidden="true" className="mr-1">{glyph}</span>
+        <span aria-hidden="true" className="me-1">{glyph}</span>
         {label}
         {/* Not colour/weight-only: screen readers hear the suffix. */}
         {isViewers ? (

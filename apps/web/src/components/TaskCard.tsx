@@ -80,12 +80,12 @@ function FollowsBadge({
       </button>
       <WhyTooltip principleId="follows-not-blocked" />
       {expanded && (
-        <ul className="basis-full pl-4">
+        <ul className="basis-full ps-4">
           {unmetDeps.map((dep) => (
             <li key={dep.id}>
               <button
                 type="button"
-                className="text-left text-xs text-moss-700 underline decoration-moss-300 underline-offset-2 hover:text-canopy-700 dark:text-moss-200 dark:hover:text-canopy-300"
+                className="text-start text-xs text-moss-700 underline decoration-moss-300 underline-offset-2 hover:text-canopy-700 dark:text-moss-200 dark:hover:text-canopy-300"
                 onClick={() => {
                   const el = document.getElementById(`task-${dep.id}`);
                   el?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -238,7 +238,7 @@ export function TaskCard({
               ),
             })}
           >
-            <span aria-hidden="true" className="mr-1">
+            <span aria-hidden="true" className="me-1">
               {"\u21BB"}
             </span>
             {t(
@@ -251,7 +251,7 @@ export function TaskCard({
             className="chip bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
             title={t("projects.task.needsMoreHandsTooltip")}
           >
-            <span aria-hidden="true" className="mr-1">
+            <span aria-hidden="true" className="me-1">
               {"\u{1F91D}"}
             </span>
             {t("projects.task.needsMoreHands")}
@@ -278,7 +278,7 @@ export function TaskCard({
             })}
             title={t("projects.task.commentCountChip", { count: commentCount })}
           >
-            <span aria-hidden="true" className="mr-1">
+            <span aria-hidden="true" className="me-1">
               {"\u{1F4AC}"}
             </span>
             {commentCount}

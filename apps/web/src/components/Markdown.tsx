@@ -139,7 +139,7 @@ function PendingAuthorLink({ href, label }: { href: string; label: string }) {
       {showLabel ? `${trimmed} — ${href}` : href}
       <button
         type="button"
-        className="ml-1 text-xs text-moss-400 underline-offset-2 hover:text-moss-600 hover:underline dark:text-moss-300 dark:hover:text-moss-300"
+        className="ms-1 text-xs text-moss-400 underline-offset-2 hover:text-moss-600 hover:underline dark:text-moss-300 dark:hover:text-moss-300"
         aria-label={t("markdown.pendingLink.whyLabel")}
         aria-expanded={open}
         onClick={() => setOpen(!open)}
@@ -330,17 +330,17 @@ function renderList(
 
   if (isTaskList) {
     return (
-      <ul key={key} className="list-none space-y-1 pl-0">
+      <ul key={key} className="list-none space-y-1 ps-0">
         {items}
       </ul>
     );
   }
   return block.ordered ? (
-    <ol key={key} className="list-decimal space-y-1 pl-5">
+    <ol key={key} className="list-decimal space-y-1 ps-5">
       {items}
     </ol>
   ) : (
-    <ul key={key} className="list-disc space-y-1 pl-5">
+    <ul key={key} className="list-disc space-y-1 ps-5">
       {items}
     </ul>
   );
@@ -372,7 +372,7 @@ function renderBlock(block: MdBlock, key: number): ReactNode {
       return (
         <blockquote
           key={key}
-          className="border-l-2 border-moss-300 pl-3 text-moss-600 dark:border-moss-600 dark:text-moss-300"
+          className="border-s-2 border-moss-300 ps-3 text-moss-600 dark:border-moss-600 dark:text-moss-300"
         >
           {block.children.map(renderBlock)}
         </blockquote>

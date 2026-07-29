@@ -222,15 +222,15 @@ export function CalendarMonth({
               ) : null}
               {openDay === cell.key ? (
                 <div
-                  className="absolute left-0 right-0 top-full z-20 mt-1 rounded-xl border
-                             border-moss-200 bg-white p-2 text-left shadow-leaf
+                  className="absolute start-0 end-0 top-full z-20 mt-1 rounded-xl border
+                             border-moss-200 bg-white p-2 text-start shadow-leaf
                              dark:border-moss-800 dark:bg-moss-900"
                   role="dialog"
                 >
                   <button
                     type="button"
                     onClick={() => setOpenDay(null)}
-                    className="float-right text-[11px] text-moss-600 hover:text-moss-700 dark:text-moss-300"
+                    className="float-end text-[11px] text-moss-600 hover:text-moss-700 dark:text-moss-300"
                     aria-label="Close"
                   >
                     ×
@@ -275,7 +275,7 @@ function DensityLegend({ anyDensity }: { anyDensity: boolean }) {
   if (!anyDensity) return null;
   return (
     <p className="text-xs text-moss-600 dark:text-moss-300">
-      <span className="mr-1 inline-flex items-center gap-1">
+      <span className="me-1 inline-flex items-center gap-1">
         <span className="inline-block h-2 w-2 rounded-full bg-canopy-600 opacity-30" />
         <span className="inline-block h-2 w-2 rounded-full bg-canopy-600 opacity-60" />
         <span className="inline-block h-2 w-2 rounded-full bg-canopy-600 opacity-90" />

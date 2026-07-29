@@ -151,7 +151,7 @@ export function DockedPanel({
           <span aria-hidden="true" className="text-lg leading-none">
             ×
           </span>
-          <span className="ml-1 text-sm">{closeShortLabel}</span>
+          <span className="ms-1 text-sm">{closeShortLabel}</span>
         </button>
       </div>
       <DockedPanelDockContext.Provider value={docked}>

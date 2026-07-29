@@ -239,7 +239,7 @@ describe("Calendar filters disclosure", () => {
     expect(tablist.parentElement).toBe(trigger().parentElement);
     // …with the switcher holding the right edge, and DOM order
     // (pill → chips → switcher) matching visual order.
-    expect(tablist.className).toContain("ml-auto");
+    expect(tablist.className).toContain("ms-auto");
     expect(
       trigger().compareDocumentPosition(tablist) &
         Node.DOCUMENT_POSITION_FOLLOWING,

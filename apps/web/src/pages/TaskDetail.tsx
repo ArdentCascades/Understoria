@@ -104,7 +104,7 @@ export default function TaskDetailPage() {
           label={t("projects.task.detail.backToProject", {
             title: project.title,
           })}
-          className="btn-ghost -ml-2 mt-4 inline-block text-sm"
+          className="btn-ghost -ms-2 mt-4 inline-block text-sm"
         />
       </div>
     );

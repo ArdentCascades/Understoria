@@ -212,8 +212,8 @@ export default function MessagesShell() {
       <div
         className={
           splitCapable
-            ? "min-h-0 h-full min-w-[260px] overflow-y-auto border-r border-moss-200 dark:border-moss-800"
-            : `min-h-0 lg:h-full lg:overflow-y-auto lg:border-r lg:border-moss-200 lg:dark:border-moss-800 ${
+            ? "min-h-0 h-full min-w-[260px] overflow-y-auto border-e border-moss-200 dark:border-moss-800"
+            : `min-h-0 lg:h-full lg:overflow-y-auto lg:border-e lg:border-moss-200 lg:dark:border-moss-800 ${
                 hasConversation ? "hidden lg:block" : ""
               }`
         }

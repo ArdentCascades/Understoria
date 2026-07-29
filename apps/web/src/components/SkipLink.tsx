@@ -30,7 +30,7 @@ export function SkipLink({ targetId = "main" }: SkipLinkProps) {
         sr-only
         focus:not-sr-only
         focus:fixed
-        focus:left-4
+        focus:start-4
         focus:top-4
         focus:z-50
         focus:rounded-md

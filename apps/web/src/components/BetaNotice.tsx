@@ -58,7 +58,7 @@ export function BetaNotice({ className = "" }: { className?: string }) {
   return (
     <div
       role="note"
-      className={`rounded-xl border border-amber-300 bg-amber-50 p-3 text-left text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100 ${className}`.trim()}
+      className={`rounded-xl border border-amber-300 bg-amber-50 p-3 text-start text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100 ${className}`.trim()}
     >
       <p className="font-semibold">{t("betaNotice.title")}</p>
       <p className="mt-1">{t("betaNotice.body1")}</p>

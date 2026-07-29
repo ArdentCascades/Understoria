@@ -9,6 +9,19 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+- **Groundwork for right-to-left languages.** Every horizontal margin,
+  padding, border, alignment and edge-anchor in the app now uses the
+  direction-aware form (`ms`/`me`, `ps`/`pe`, `start`/`end`,
+  `text-start`/`text-end`, `border-s`/`border-e`) instead of naming a
+  physical side. Nothing moves for anyone reading left to right — the
+  browser resolves these to exactly the properties they replaced — but
+  Arabic and Urdu now have a layout that can mirror instead of one
+  wedged the wrong way round. A guard test keeps physical sides from
+  creeping back, and the handful of genuinely physical spots (a device
+  notch inset, a table's author-chosen column alignment) are listed
+  with their reasons rather than quietly tolerated.
+
 ### Fixed
 - **Counts no longer lie in languages whose grammar groups more than
   one number as "singular."** Nine strings hardcoded the digit 1

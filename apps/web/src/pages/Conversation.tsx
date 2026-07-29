@@ -831,7 +831,7 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
             <BackLink
               to="/messages"
               label={t("common.back")}
-              className="btn-ghost -ml-2 text-sm"
+              className="btn-ghost -ms-2 text-sm"
             />
           )}
           <MemberAvatar publicKey={otherKey} size={48} framed />
@@ -869,7 +869,7 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
           <BackLink
             to="/messages"
             label={t("common.back")}
-            className="btn-ghost -ml-2 text-sm"
+            className="btn-ghost -ms-2 text-sm"
           />
         )}
         {otherKey && <MemberAvatar publicKey={otherKey} size={48} framed />}
@@ -877,7 +877,7 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
           {t("messages.conversationWith", { name: otherName })}
         </h1>
         {currentMember && otherKey && (
-          <div className="ml-auto flex items-center gap-1">
+          <div className="ms-auto flex items-center gap-1">
             {/* Search lives behind this toggle (the Signal pattern) —
                 see the searchOpen state for why. */}
             <button
@@ -1125,7 +1125,7 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                     </p>
                   )}
                   {endsGroup && (
-                    <p className="mt-1 text-right text-xs opacity-60">
+                    <p className="mt-1 text-end text-xs opacity-60">
                       {formatRelativeTime(m.createdAt)}
                     </p>
                   )}
@@ -1380,7 +1380,7 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
           with an X to detach it (they may have arrived from a post
           but want to talk about something else). */}
       {aboutPostId && (
-        <div className="mt-3 flex items-center gap-2 rounded-xl bg-canopy-50 pl-3 text-xs text-canopy-900 dark:bg-canopy-900/40 dark:text-canopy-100">
+        <div className="mt-3 flex items-center gap-2 rounded-xl bg-canopy-50 ps-3 text-xs text-canopy-900 dark:bg-canopy-900/40 dark:text-canopy-100">
           <p className="min-w-0 flex-1 truncate py-2">
             {aboutPost
               ? t("messages.compose.aboutHint", { title: aboutPost.title })
@@ -1402,7 +1402,7 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
           an ✕ to reply without the quote after all. The quote itself
           is applied at send time (handleSend). */}
       {replyTo && (
-        <div className="mt-3 flex items-center gap-2 rounded-xl bg-moss-100 pl-3 text-xs text-moss-800 dark:bg-moss-900/60 dark:text-moss-100">
+        <div className="mt-3 flex items-center gap-2 rounded-xl bg-moss-100 ps-3 text-xs text-moss-800 dark:bg-moss-900/60 dark:text-moss-100">
           <p className="min-w-0 flex-1 truncate py-2">
             {t("messages.compose.replyingTo", {
               name:

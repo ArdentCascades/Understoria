@@ -139,7 +139,7 @@ describe("Markdown — SAFE block rendering", () => {
     render({ text: "> quoted text" });
     const bq = container.querySelector("blockquote");
     expect(bq).not.toBeNull();
-    expect(bq!.className).toContain("border-l-2");
+    expect(bq!.className).toContain("border-s-2");
     expect(bq!.textContent).toContain("quoted text");
     // The recursively-rendered child is a paragraph.
     expect(bq!.querySelector("p")).not.toBeNull();

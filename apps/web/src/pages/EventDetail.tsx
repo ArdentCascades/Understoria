@@ -318,7 +318,7 @@ export default function EventDetailPage() {
           to="/calendar"
           label={t("events.detail.backToCalendar")}
           preferHistory
-          className="btn-ghost -ml-2 mb-3 inline-block text-sm"
+          className="btn-ghost -ms-2 mb-3 inline-block text-sm"
         />
       )}
 

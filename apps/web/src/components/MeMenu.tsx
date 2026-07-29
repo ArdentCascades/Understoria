@@ -75,7 +75,7 @@ export function MeMenu({
   if (!open) return null;
 
   const itemClass =
-    "touch-target flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-moss-700 hover:bg-canopy-50 hover:text-canopy-800 dark:text-moss-200 dark:hover:bg-canopy-950/40 dark:hover:text-canopy-200";
+    "touch-target flex w-full items-center gap-3 rounded-xl px-3 py-3 text-start text-sm font-medium text-moss-700 hover:bg-canopy-50 hover:text-canopy-800 dark:text-moss-200 dark:hover:bg-canopy-950/40 dark:hover:text-canopy-200";
 
   // Portaled to <body>: the component mounts inside the AppHeader,
   // whose backdrop-filter makes the header the CONTAINING BLOCK for
@@ -204,7 +204,7 @@ function MenuLink({
     <li>
       <Link
         to={to}
-        className="touch-target flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-moss-700 hover:bg-canopy-50 hover:text-canopy-800 dark:text-moss-200 dark:hover:bg-canopy-950/40 dark:hover:text-canopy-200"
+        className="touch-target flex w-full items-center gap-3 rounded-xl px-3 py-3 text-start text-sm font-medium text-moss-700 hover:bg-canopy-50 hover:text-canopy-800 dark:text-moss-200 dark:hover:bg-canopy-950/40 dark:hover:text-canopy-200"
         onClick={onClose}
       >
         <Icon size={20} />

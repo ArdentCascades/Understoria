@@ -504,7 +504,7 @@ export function TaskDetailBody({
                   }`}
                 >
                   {fits && (
-                    <span aria-hidden="true" className="mr-1">
+                    <span aria-hidden="true" className="me-1">
                       {"✓"}
                     </span>
                   )}
@@ -535,7 +535,7 @@ export function TaskDetailBody({
       )}
       {task.recurringCadence && (
         <p className="text-xs text-moss-600 dark:text-moss-300">
-          <span aria-hidden="true" className="mr-1">
+          <span aria-hidden="true" className="me-1">
             {"\u21BB"}
           </span>
           {t(

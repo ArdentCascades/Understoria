@@ -155,9 +155,9 @@ export function BottomNav() {
                  border-moss-200 bg-white/95 pb-[env(safe-area-inset-bottom)]
                  backdrop-blur supports-[backdrop-filter]:bg-white/70
                  dark:border-moss-800 dark:bg-moss-950/95
-                 lg:flex lg:w-20 lg:flex-col lg:border-r lg:border-t-0 lg:pb-0
+                 lg:flex lg:w-20 lg:flex-col lg:border-e lg:border-t-0 lg:pb-0
                  landscape-short:flex landscape-short:w-[calc(3.5rem+env(safe-area-inset-left))] landscape-short:flex-col
-                 landscape-short:overflow-y-auto landscape-short:border-r
+                 landscape-short:overflow-y-auto landscape-short:border-e
                  landscape-short:border-t-0 landscape-short:pb-0
                  landscape-short:pl-[env(safe-area-inset-left)]"
     >

@@ -137,7 +137,7 @@ export default function PrintOfflineKitPage() {
           {host}
         </p>
 
-        <ol className="mx-auto mt-6 flex max-w-md flex-col gap-6 text-left">
+        <ol className="mx-auto mt-6 flex max-w-md flex-col gap-6 text-start">
           <li>
             <p className="text-base font-semibold print:text-black">
               {t("print.kit.poster.step1")}
@@ -196,7 +196,7 @@ export default function PrintOfflineKitPage() {
             only when the member provided some — absent honestly
             otherwise. */}
         {backups.length > 0 && (
-          <div className="mx-auto mt-8 max-w-md text-left">
+          <div className="mx-auto mt-8 max-w-md text-start">
             <p className="text-base font-semibold print:text-black">
               {t("print.kit.poster.backupsTitle")}
             </p>

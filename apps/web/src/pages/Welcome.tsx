@@ -412,14 +412,14 @@ export default function WelcomePage() {
         icon={step.icon}
         title={t("welcome.installedArrival.title")}
         body={
-          <div className="flex flex-col gap-3 text-left">
+          <div className="flex flex-col gap-3 text-start">
             <p className="text-center text-sm text-moss-600 dark:text-moss-300">
               {t("welcome.installedArrival.intro")}
             </p>
             <button
               type="button"
               onClick={() => navigate("/pair-device?samePhone=1")}
-              className="card flex flex-col gap-1 border-canopy-300 text-left hover:border-canopy-500 dark:border-canopy-700"
+              className="card flex flex-col gap-1 border-canopy-300 text-start hover:border-canopy-500 dark:border-canopy-700"
             >
               <span className="font-semibold text-canopy-900 dark:text-canopy-100">
                 {t("welcome.installedArrival.bringTitle")}
@@ -431,7 +431,7 @@ export default function WelcomePage() {
             <button
               type="button"
               onClick={() => setStepIndex(stepIndex + 1)}
-              className="card flex flex-col gap-1 text-left hover:border-moss-400"
+              className="card flex flex-col gap-1 text-start hover:border-moss-400"
             >
               <span className="font-semibold">
                 {t("welcome.installedArrival.newTitle")}
@@ -466,7 +466,7 @@ export default function WelcomePage() {
         icon={step.icon}
         title={t("install.step.title")}
         body={
-          <div className="space-y-3 text-left">
+          <div className="space-y-3 text-start">
             <p className="text-center text-sm text-moss-600 dark:text-moss-300">
               {t("install.step.intro")}
             </p>
@@ -500,7 +500,7 @@ export default function WelcomePage() {
       icon={step.icon}
       title={t("welcome.profileSetup.title")}
       body={
-        <div className="space-y-4 text-left">
+        <div className="space-y-4 text-start">
           <p className="text-center text-sm text-moss-600 dark:text-moss-300">
             {currentMember
               ? t("welcome.profileSetup.introExisting", {
@@ -649,7 +649,7 @@ function InviteOnlyLanding({ loading = false }: { loading?: boolean }) {
       <h1 className="text-2xl font-semibold">
         {t("welcome.inviteOnly.title")}
       </h1>
-      <div className="space-y-3 text-left text-sm text-moss-700 dark:text-moss-200">
+      <div className="space-y-3 text-start text-sm text-moss-700 dark:text-moss-200">
         <p>{t("welcome.inviteOnly.body1")}</p>
         <p>{t("welcome.inviteOnly.body2")}</p>
       </div>

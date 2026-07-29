@@ -106,7 +106,7 @@ export function AudioPostPlayer({
       className="btn-secondary min-h-[44px] text-sm"
       onClick={() => setState({ phase: "loading" })}
     >
-      <span aria-hidden="true" className="mr-1">
+      <span aria-hidden="true" className="me-1">
         🎙️
       </span>
       {t("voicePost.load", { seconds })}

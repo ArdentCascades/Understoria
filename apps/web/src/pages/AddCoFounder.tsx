@@ -402,7 +402,7 @@ export default function AddCoFounderPage() {
       )}
 
       {step.kind === "done" && (
-        <section className="card border-l-4 border-canopy-500">
+        <section className="card border-s-4 border-canopy-500">
           <h2 className="text-base font-semibold text-canopy-800 dark:text-canopy-200">
             {t("cofounder.done.title")}
           </h2>

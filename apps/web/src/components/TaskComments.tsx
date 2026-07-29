@@ -404,7 +404,7 @@ export function TaskComments({
                     >
                       <button
                         type="button"
-                        className={`block w-full px-3 py-1.5 text-left ${
+                        className={`block w-full px-3 py-1.5 text-start ${
                           idx === suggestionIdx
                             ? "bg-canopy-50 text-canopy-900 dark:bg-canopy-950/60 dark:text-canopy-100"
                             : "hover:bg-moss-50 dark:hover:bg-moss-800"

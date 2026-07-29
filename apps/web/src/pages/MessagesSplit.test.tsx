@@ -230,7 +230,7 @@ describe("MessagesShell — sideways split regime", () => {
     expect(container.querySelector('input[type="search"]')).not.toBeNull();
     expect(container.querySelector("textarea")).not.toBeNull();
     expect(listPane().className).not.toContain("hidden");
-    expect(listPane().className).toContain("border-r");
+    expect(listPane().className).toContain("border-e");
     expect(container.firstElementChild!.className).toContain("grid-cols-");
 
     // The open conversation's row carries the selected state.

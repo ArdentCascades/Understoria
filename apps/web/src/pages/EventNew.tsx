@@ -913,7 +913,7 @@ export default function EventNewPage() {
         <p className="text-sm font-medium text-canopy-900 dark:text-canopy-100">
           {t("events.new.signingMeansTitle")}
         </p>
-        <ul className="mt-1 list-disc pl-5 text-sm text-canopy-900 dark:text-canopy-100">
+        <ul className="mt-1 list-disc ps-5 text-sm text-canopy-900 dark:text-canopy-100">
           <li>{t("events.new.signingMeansOrganizer")}</li>
           <li>{t("events.new.signingMeansPublic")}</li>
           <li>{t("events.new.signingMeansPermanent")}</li>
@@ -922,7 +922,7 @@ export default function EventNewPage() {
         <p className="mt-3 text-sm font-medium text-canopy-900 dark:text-canopy-100">
           {t("events.new.signingNotTitle")}
         </p>
-        <ul className="mt-1 list-disc pl-5 text-sm text-canopy-900 dark:text-canopy-100">
+        <ul className="mt-1 list-disc ps-5 text-sm text-canopy-900 dark:text-canopy-100">
           <li>{t("events.new.signingNotEditable")}</li>
           <li>{t("events.new.signingNotPrivate")}</li>
         </ul>
@@ -965,7 +965,7 @@ export default function EventNewPage() {
       <header className="mb-4 landscape-short:mb-2">
         <button
           type="button"
-          className="btn-ghost -ml-2 text-sm"
+          className="btn-ghost -ms-2 text-sm"
           onClick={() => navigate(-1)}
         >
           {t("common.back")}
@@ -1024,7 +1024,7 @@ export default function EventNewPage() {
             {!pickerExpanded && (
               <button
                 type="button"
-                className="flex w-full items-center justify-between gap-3 rounded-lg border border-moss-200 bg-white px-4 py-3 text-left text-sm shadow-sm dark:border-moss-700 dark:bg-moss-900 lg:hidden"
+                className="flex w-full items-center justify-between gap-3 rounded-lg border border-moss-200 bg-white px-4 py-3 text-start text-sm shadow-sm dark:border-moss-700 dark:bg-moss-900 lg:hidden"
                 aria-expanded={false}
                 aria-controls="event-template-picker"
                 onClick={() => setPickerExpanded(true)}

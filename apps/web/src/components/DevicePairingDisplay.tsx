@@ -205,7 +205,7 @@ export function DevicePairingDisplay({
           {t("addDevice.display.copyHatchToggle")}
         </button>
         {hatchOpen && (
-          <div className="mt-2 flex flex-col gap-3 rounded-xl border border-bark-200 bg-bark-100/60 p-4 text-left text-sm text-bark-800 dark:border-bark-700 dark:bg-bark-800/60 dark:text-bark-100">
+          <div className="mt-2 flex flex-col gap-3 rounded-xl border border-bark-200 bg-bark-100/60 p-4 text-start text-sm text-bark-800 dark:border-bark-700 dark:bg-bark-800/60 dark:text-bark-100">
             {/* Ordered steps with write-down-the-words FIRST: on the
                 same-phone journey the member leaves this tab to paste
                 into the installed app, and if the browser reloads the
@@ -213,7 +213,7 @@ export function DevicePairingDisplay({
                 from a stale screen then fail with "wrong passphrase".
                 Paper survives the app switch; the clipboard carries
                 only the envelope half. */}
-            <ol className="ml-5 list-decimal space-y-1">
+            <ol className="ms-5 list-decimal space-y-1">
               <li>{t("addDevice.display.copyHatchStep1")}</li>
               <li>{t("addDevice.display.copyHatchStep2")}</li>
               <li>{t("addDevice.display.copyHatchStep3")}</li>

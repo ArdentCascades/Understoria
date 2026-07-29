@@ -330,7 +330,7 @@ export default function ProjectNewPage() {
       <header className="mb-4 landscape-short:mb-2">
         <button
           type="button"
-          className="btn-ghost -ml-2 text-sm"
+          className="btn-ghost -ms-2 text-sm"
           onClick={() => navigate(-1)}
         >
           {t("common.back")}
@@ -383,7 +383,7 @@ export default function ProjectNewPage() {
           {!pickerExpanded && (
             <button
               type="button"
-              className="flex w-full items-center justify-between gap-3 rounded-lg border border-moss-200 bg-white px-4 py-3 text-left text-sm shadow-sm dark:border-moss-700 dark:bg-moss-900 lg:hidden"
+              className="flex w-full items-center justify-between gap-3 rounded-lg border border-moss-200 bg-white px-4 py-3 text-start text-sm shadow-sm dark:border-moss-700 dark:bg-moss-900 lg:hidden"
               aria-expanded={false}
               aria-controls="project-template-picker"
               onClick={() => setPickerExpanded(true)}

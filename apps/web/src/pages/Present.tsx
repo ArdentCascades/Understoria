@@ -330,7 +330,7 @@ function CustomizePanel({
         : "bg-white/10 text-white hover:bg-white/20"
     }`;
   return (
-    <details className="mt-6 rounded-xl bg-white/5 p-4 text-left">
+    <details className="mt-6 rounded-xl bg-white/5 p-4 text-start">
       <summary className="cursor-pointer text-sm font-semibold text-white/90">
         {t("present.customize.summary")}
       </summary>
@@ -401,7 +401,7 @@ function CustomizePanel({
           {candidates.length === 0 ? (
             <p className="text-white/50">{t("present.customize.itemsEmpty")}</p>
           ) : (
-            <ul className="flex max-h-56 flex-col gap-1 overflow-y-auto pr-1">
+            <ul className="flex max-h-56 flex-col gap-1 overflow-y-auto pe-1">
               {candidates.map((c) => {
                 const id = slideId(c);
                 const pinned = config.pinnedIds.includes(id);

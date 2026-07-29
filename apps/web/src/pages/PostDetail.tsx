@@ -315,7 +315,7 @@ export default function PostDetailPage() {
       {!inDockedColumn && (
         <button
           type="button"
-          className="btn-ghost -ml-2 mb-3 text-sm"
+          className="btn-ghost -ms-2 mb-3 text-sm"
           onClick={() => navigate(-1)}
         >
           {t("common.back")}

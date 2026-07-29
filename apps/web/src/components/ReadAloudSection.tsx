@@ -42,7 +42,7 @@ export function ReadAloudSection() {
         id="read-aloud-title"
         className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
       >
-        <span aria-hidden="true" className="mr-1">
+        <span aria-hidden="true" className="me-1">
           🔊
         </span>
         {t("profile.readAloud.title")}

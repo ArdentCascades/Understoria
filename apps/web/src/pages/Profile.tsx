@@ -1172,7 +1172,7 @@ function EmergencySection() {
           {/* The 🆘 glyph is deliberate (#476): a fixed, language-free
               marker so a non-reader can find the emergency section by
               icon alone. */}
-          <span aria-hidden="true" className="mr-1">
+          <span aria-hidden="true" className="me-1">
             🆘
           </span>
           {t("profile.emergency.title")}
@@ -1349,7 +1349,7 @@ function BalanceCard({
             </p>
           )}
         </div>
-        <div className="text-right text-xs text-moss-600 dark:text-moss-300">
+        <div className="text-end text-xs text-moss-600 dark:text-moss-300">
           <div>
             {t("profile.balance.seed", { hours: formatHours(seed) })}
             <WhyTooltip principleId="asking-never-gated" />
@@ -1448,7 +1448,7 @@ function ProfileEditor({
             and a utility element on desktop (left-aligned, smaller);
             Member Detail is where the avatar gets the ceremonial
             full-size treatment. */}
-        <div className="my-4 flex flex-col items-center gap-2 text-center lg:my-0 lg:items-start lg:text-left [&>svg]:lg:size-24">
+        <div className="my-4 flex flex-col items-center gap-2 text-center lg:my-0 lg:items-start lg:text-start [&>svg]:lg:size-24">
           <MemberAvatar publicKey={member.publicKey} size={128} framed />
           <p className="text-title font-semibold">{member.displayName}</p>
           {/* Canonical identity spot — key visible, tap explains
@@ -1575,7 +1575,7 @@ function MemberSwitcher({
             <button
               type="button"
               onClick={() => onSwitch(m.publicKey)}
-              className={`w-full rounded-xl border px-3 py-2 text-left text-sm transition-colors ${
+              className={`w-full rounded-xl border px-3 py-2 text-start text-sm transition-colors ${
                 m.publicKey === currentMember.publicKey
                   ? "border-canopy-600 bg-canopy-50 text-canopy-900 dark:bg-canopy-950/40 dark:text-canopy-100"
                   : "border-moss-200 hover:bg-moss-50 dark:border-moss-800 dark:hover:bg-moss-900"

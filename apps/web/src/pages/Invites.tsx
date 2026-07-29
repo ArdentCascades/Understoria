@@ -176,7 +176,7 @@ export default function InvitesPage() {
       <header className="mb-4 landscape-short:mb-2">
         <button
           type="button"
-          className="btn-ghost -ml-2 text-sm"
+          className="btn-ghost -ms-2 text-sm"
           onClick={() => navigate(-1)}
         >
           {t("invitesPage.back")}

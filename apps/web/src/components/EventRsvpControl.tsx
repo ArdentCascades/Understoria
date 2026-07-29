@@ -136,7 +136,7 @@ export function EventRsvpControl({
               </p>
               <WhyTooltip principleId="privacy-precondition" />
             </div>
-            <ul className="mt-1 list-disc pl-5 text-canopy-900 dark:text-canopy-100">
+            <ul className="mt-1 list-disc ps-5 text-canopy-900 dark:text-canopy-100">
               <li>{t("events.rsvp.signingBodyGoing")}</li>
               <li>{t("events.rsvp.signingBodyNotGoing")}</li>
               <li>{t("events.rsvp.signingBodyLocalOnly")}</li>
