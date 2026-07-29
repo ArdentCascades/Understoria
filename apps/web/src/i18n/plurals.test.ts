@@ -59,6 +59,27 @@ function flatKeys(obj: unknown, prefix = ""): string[] {
   return out;
 }
 
+function flatEntries(obj: unknown, prefix = ""): Array<[string, unknown]> {
+  if (obj === null || typeof obj !== "object" || Array.isArray(obj)) {
+    return [[prefix, obj]];
+  }
+  const out: Array<[string, unknown]> = [];
+  for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+    out.push(...flatEntries(v, prefix ? `${prefix}.${k}` : k));
+  }
+  return out;
+}
+
+/** The CLDR categories i18next appends as key suffixes. */
+const CLDR_CATEGORIES = [
+  "zero",
+  "one",
+  "two",
+  "few",
+  "many",
+  "other",
+] as const;
+
 /** Base names of genuine plural families. A family is plural only if
  *  its `_other` form exists — i18next requires _other for count keys,
  *  and the guard keeps literal key names that merely END in a suffix
@@ -107,6 +128,48 @@ describe("plural-suffix completeness", () => {
         }
       }
       expect(missing).toEqual([]);
+    });
+  }
+
+  /**
+   * Every form of a count-driven family must interpolate {{count}} —
+   * never a hardcoded numeral.
+   *
+   * This looks harmless in English, whose `one` category is exactly
+   * n=1, so "1 open task" always renders truthfully. It is not
+   * harmless anywhere else. Russian's `one` also covers 21, 31, 101…
+   * and Hindi's, French's and Portuguese's also cover 0 — so a
+   * hardcoded "1" tells a Russian member with 21 open tasks that
+   * they have one, and a French member with none that they have one.
+   *
+   * Worse, the source file dictates the ceiling: parity.test.ts
+   * requires each locale to use exactly the interpolation variables
+   * en uses, so a `_one` string without {{count}} in en actively
+   * FORBIDS every translation from having it. That is how nine such
+   * strings shipped, and why the Russian translator had to drop the
+   * number from three of them rather than get it right.
+   */
+  for (const { code, data } of LOCALES) {
+    it(`${code}.json interpolates {{count}} in every count-driven plural form`, () => {
+      const entries = flatEntries(data);
+      const byKey = new Map(entries);
+      const offenders: string[] = [];
+      for (const base of families) {
+        // A family is count-driven when its _other form takes the
+        // count; families that never show a number are exempt.
+        const other = byKey.get(`${base}_other`);
+        if (typeof other !== "string" || !other.includes("{{count}}")) {
+          continue;
+        }
+        for (const category of CLDR_CATEGORIES) {
+          const key = `${base}_${category}`;
+          const value = byKey.get(key);
+          if (typeof value === "string" && !value.includes("{{count}}")) {
+            offenders.push(`${key}: ${JSON.stringify(value)}`);
+          }
+        }
+      }
+      expect(offenders).toEqual([]);
     });
   }
 });
