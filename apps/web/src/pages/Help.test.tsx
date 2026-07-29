@@ -31,8 +31,9 @@ import { getFaqSections } from "@/content/faq";
 let container: HTMLDivElement;
 let root: Root;
 
-(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT =
-  true;
+(
+  globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 beforeEach(() => {
   container = document.createElement("div");
@@ -81,13 +82,13 @@ describe("HelpPage — locale-aware FAQ", () => {
   });
 
   it("FAQ content falls back to English for locales without content translations", async () => {
-    // Exercised with ru — a shipped UI language whose content
-    // corpus hasn't landed yet (content: "ui-only"): the selector
-    // must fall through to the English source rather than render an
-    // empty page. When ru content ships, move this probe to a code
-    // the registry doesn't know at all.
-    expect(getFaqSections("ru")).toBe(getFaqSections("en"));
-    await i18n.changeLanguage("ru");
+    // Every SHIPPED language now has translated content (Phase 2
+    // complete), so the honest-fallback path is exercised with a
+    // locale the registry doesn't know at all: the selector must
+    // fall through to the English source rather than render an
+    // empty page.
+    expect(getFaqSections("sw")).toBe(getFaqSections("en"));
+    await i18n.changeLanguage("sw");
     render(<HelpPage />);
     expect(container.textContent).toContain("Posts and exchanges");
   });
@@ -140,9 +141,7 @@ describe("HelpPage — accordion, filter, deep links", () => {
   it("collapses answers by default and expands on tap", () => {
     render(<HelpPage />);
     // Answer prose is NOT in the DOM until its question is opened.
-    expect(container.textContent).not.toContain(
-      "The credit only moves once",
-    );
+    expect(container.textContent).not.toContain("The credit only moves once");
     const btn = questionButton("How does confirming an exchange work?");
     expect(btn.getAttribute("aria-expanded")).toBe("false");
     act(() => {
@@ -154,9 +153,7 @@ describe("HelpPage — accordion, filter, deep links", () => {
     act(() => {
       btn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    expect(container.textContent).not.toContain(
-      "The credit only moves once",
-    );
+    expect(container.textContent).not.toContain("The credit only moves once");
   });
 
   it("auto-expands the entry a deep link points at", () => {
@@ -226,9 +223,7 @@ describe("HelpPage — accordion, filter, deep links", () => {
     act(() => {
       collapse.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    expect(container.textContent).not.toContain(
-      "The credit only moves once",
-    );
+    expect(container.textContent).not.toContain("The credit only moves once");
   });
 
   it("renders a jump chip per section", () => {
@@ -243,9 +238,7 @@ describe("HelpPage — accordion, filter, deep links", () => {
   // jsdom can't evaluate the media query, so pin the class contract.
   it("the section list carries the landscape-short two-column classes", () => {
     render(<HelpPage />);
-    const list = container.querySelector(
-      "#faq-section-posts",
-    )!.parentElement!;
+    const list = container.querySelector("#faq-section-posts")!.parentElement!;
     for (const cls of [
       "landscape-short:grid",
       "landscape-short:grid-cols-2",

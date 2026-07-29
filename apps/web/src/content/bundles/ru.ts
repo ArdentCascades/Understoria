@@ -18,16 +18,15 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import "fake-indexeddb/auto";
 
-// Translated content bundles are lazy in production (content/registry
-// gates rendering on them); tests exercise real translated content
-// synchronously all over the suite, so preload them here once.
-import { ensureContent } from "@/content/registry";
-await ensureContent("es");
-await ensureContent("fr");
-await ensureContent("pt");
-await ensureContent("zh");
-await ensureContent("hi");
-await ensureContent("vi");
-await ensureContent("ru");
+// The Russian content bundle — loaded lazily by content/registry.ts
+// (its own `lazy-content-ru` chunk, excluded from the service-worker
+// precache and runtime-cached after first use). Never import this
+// statically from app code: a static import anywhere drags the whole
+// bundle back into first load for every member.
+export { PROJECT_TEMPLATES_RU as PROJECT_TEMPLATES } from "../projectTemplates.ru";
+export { TASK_STEPS_RU as TASK_STEPS } from "../taskSteps.ru";
+export { TASK_TIPS_RU as TASK_TIPS } from "../taskTips.ru";
+export { EVENT_TEMPLATES_RU as EVENT_TEMPLATES } from "../eventTemplates.ru";
+export { FAQ_SECTIONS_RU as FAQ_SECTIONS } from "../faq.ru";
+export { START_COMMUNITY_RU as START_COMMUNITY } from "../startCommunity.ru";

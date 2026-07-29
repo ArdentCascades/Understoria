@@ -12,6 +12,7 @@ import { START_COMMUNITY_PT } from "./startCommunity.pt";
 import { START_COMMUNITY_ZH } from "./startCommunity.zh";
 import { START_COMMUNITY_HI } from "./startCommunity.hi";
 import { START_COMMUNITY_VI } from "./startCommunity.vi";
+import { START_COMMUNITY_RU } from "./startCommunity.ru";
 
 // Guardrail against translation drift, same discipline as
 // faq.parity.test.ts — plus one rule the FAQ doesn't need: the
@@ -25,6 +26,7 @@ describe.each([
   ["Chinese", START_COMMUNITY_ZH],
   ["Hindi", START_COMMUNITY_HI],
   ["Vietnamese", START_COMMUNITY_VI],
+  ["Russian", START_COMMUNITY_RU],
 ] as const)("Start-a-community guide parity — English ↔ %s", (_localeName, GUIDE_TR) => {
   it("has the same step ids in the same order", () => {
     expect(GUIDE_TR.steps.map((s) => s.id)).toEqual(
