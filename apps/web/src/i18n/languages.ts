@@ -92,7 +92,7 @@ export const LANGUAGES = [
     dir: "ltr",
     speakLang: "hi",
     reviewStatus: "new",
-    content: "ui-only",
+    content: "full",
   },
   {
     code: "vi",
