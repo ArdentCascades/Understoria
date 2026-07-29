@@ -34,8 +34,8 @@ import * as enBundle from "./bundles/en";
 
 export type ContentBundle = typeof enBundle;
 
-// One loader per language WITH translated content — as of Phase 2b
-// that is every shipped language. A future ui-only language (UI
+// One loader per language WITH translated content — as of Phase 2
+// that is every shipped language (all nine). A future ui-only language (UI
 // strings translated, content not yet) simply has no entry here: it
 // falls back to English below, which is exactly what a registry
 // entry's `content: "ui-only"` discloses in Settings. When its
@@ -48,6 +48,7 @@ const LOADERS: Record<string, () => Promise<ContentBundle>> = {
   zh: () => import("./bundles/zh"),
   hi: () => import("./bundles/hi"),
   vi: () => import("./bundles/vi"),
+  ru: () => import("./bundles/ru"),
 };
 
 const cache = new Map<string, ContentBundle>([["en", enBundle]]);

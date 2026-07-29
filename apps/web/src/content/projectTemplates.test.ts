@@ -31,6 +31,7 @@ import { PROJECT_TEMPLATES_PT } from "./projectTemplates.pt";
 import { PROJECT_TEMPLATES_ZH } from "./projectTemplates.zh";
 import { PROJECT_TEMPLATES_HI } from "./projectTemplates.hi";
 import { PROJECT_TEMPLATES_VI } from "./projectTemplates.vi";
+import { PROJECT_TEMPLATES_RU } from "./projectTemplates.ru";
 
 // Canonical category mapping per the design decision. If you change a
 // template's defaultCategory and don't update this map, the test will
@@ -143,6 +144,10 @@ describe("projectTemplates", () => {
     expect(PROJECT_TEMPLATES_VI.length).toBe(64);
   });
 
+  it("ships exactly 64 templates in Russian", () => {
+    expect(PROJECT_TEMPLATES_RU.length).toBe(64);
+  });
+
   it.each([
     ["es", PROJECT_TEMPLATES_ES] as const,
     ["fr", PROJECT_TEMPLATES_FR] as const,
@@ -150,6 +155,7 @@ describe("projectTemplates", () => {
     ["zh", PROJECT_TEMPLATES_ZH] as const,
     ["hi", PROJECT_TEMPLATES_HI] as const,
     ["vi", PROJECT_TEMPLATES_VI] as const,
+    ["ru", PROJECT_TEMPLATES_RU] as const,
   ])("en and %s share the same id set in the same order", (_, list) => {
     const enIds = PROJECT_TEMPLATES_EN.map((t) => t.id);
     expect(list.map((t) => t.id)).toEqual(enIds);
@@ -169,6 +175,7 @@ describe("projectTemplates", () => {
     ["zh", PROJECT_TEMPLATES_ZH] as const,
     ["hi", PROJECT_TEMPLATES_HI] as const,
     ["vi", PROJECT_TEMPLATES_VI] as const,
+    ["ru", PROJECT_TEMPLATES_RU] as const,
   ])("%s templates use the same default categories as English", (_, list) => {
     for (const tpl of list) {
       expect(tpl.defaultCategory).toBe(EXPECTED_CATEGORY[tpl.id]);
@@ -183,6 +190,7 @@ describe("projectTemplates", () => {
     ["zh", PROJECT_TEMPLATES_ZH] as const,
     ["hi", PROJECT_TEMPLATES_HI] as const,
     ["vi", PROJECT_TEMPLATES_VI] as const,
+    ["ru", PROJECT_TEMPLATES_RU] as const,
   ])("[%s] every template has non-empty copy and at least one task", (_, list) => {
     for (const tpl of list) {
       expect(tpl.name.length).toBeGreaterThan(0);
@@ -201,6 +209,7 @@ describe("projectTemplates", () => {
     ["zh", PROJECT_TEMPLATES_ZH] as const,
     ["hi", PROJECT_TEMPLATES_HI] as const,
     ["vi", PROJECT_TEMPLATES_VI] as const,
+    ["ru", PROJECT_TEMPLATES_RU] as const,
   ])("[%s] every task has positive hours and non-empty copy", (_, list) => {
     for (const tpl of list) {
       for (const task of tpl.tasks) {
@@ -219,6 +228,7 @@ describe("projectTemplates", () => {
     ["zh", PROJECT_TEMPLATES_ZH] as const,
     ["hi", PROJECT_TEMPLATES_HI] as const,
     ["vi", PROJECT_TEMPLATES_VI] as const,
+    ["ru", PROJECT_TEMPLATES_RU] as const,
   ])("[%s] sum of task hours per template is positive", (_, list) => {
     for (const tpl of list) {
       const total = tpl.tasks.reduce((s, t) => s + t.hours, 0);
@@ -234,6 +244,7 @@ describe("projectTemplates", () => {
     ["zh", PROJECT_TEMPLATES_ZH] as const,
     ["hi", PROJECT_TEMPLATES_HI] as const,
     ["vi", PROJECT_TEMPLATES_VI] as const,
+    ["ru", PROJECT_TEMPLATES_RU] as const,
   ])("[%s] every recurring task uses a known cadence enum value", (_, list) => {
     for (const tpl of list) {
       for (const task of tpl.tasks) {
@@ -251,6 +262,7 @@ describe("projectTemplates", () => {
     ["zh", PROJECT_TEMPLATES_ZH] as const,
     ["hi", PROJECT_TEMPLATES_HI] as const,
     ["vi", PROJECT_TEMPLATES_VI] as const,
+    ["ru", PROJECT_TEMPLATES_RU] as const,
   ])("en and %s templates have matching task counts per id", (code, list) => {
     for (const enTpl of PROJECT_TEMPLATES_EN) {
       const tpl = list.find((t) => t.id === enTpl.id);
@@ -266,6 +278,7 @@ describe("projectTemplates", () => {
     ["zh", PROJECT_TEMPLATES_ZH] as const,
     ["hi", PROJECT_TEMPLATES_HI] as const,
     ["vi", PROJECT_TEMPLATES_VI] as const,
+    ["ru", PROJECT_TEMPLATES_RU] as const,
   ])("en and %s recurring-cadence positions match within each template", (_, list) => {
     // Recurring tasks should line up so the cadence-suffix UI is
     // identical in every locale — otherwise one language would tag
@@ -304,6 +317,7 @@ describe("getProjectTemplates", () => {
     expect(getProjectTemplates("zh")).toBe(PROJECT_TEMPLATES_ZH);
     expect(getProjectTemplates("hi")).toBe(PROJECT_TEMPLATES_HI);
     expect(getProjectTemplates("vi")).toBe(PROJECT_TEMPLATES_VI);
+    expect(getProjectTemplates("ru")).toBe(PROJECT_TEMPLATES_RU);
     expect(getProjectTemplates("zh-CN")).toBe(PROJECT_TEMPLATES_ZH);
   });
 
@@ -311,8 +325,8 @@ describe("getProjectTemplates", () => {
     expect(getProjectTemplates("en")).toBe(PROJECT_TEMPLATES_EN);
   });
 
-  it("falls back to English for a locale without content", () => {
-    expect(getProjectTemplates("ru")).toBe(PROJECT_TEMPLATES_EN);
+  it("falls back to English for an unknown locale", () => {
+    expect(getProjectTemplates("sw")).toBe(PROJECT_TEMPLATES_EN);
   });
 });
 

@@ -10,6 +10,22 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The full authored-content library now exists in Russian — and
+  with it, in every language the app ships.** All 64 project
+  templates with their tips and starter steps, the 14 event
+  templates, the FAQ, and the start-a-community walkthrough, in the
+  same warm plain Russian as the UI and bound by its glossary — вы
+  always lowercase, ё always written, «день общих дел» for work
+  days, взаимопомощь, no officialese, no debt vocabulary, and none
+  of the Soviet- or war-marked words the glossary rules out (the
+  tenant-union template is «объединение съёмщиков», never a союз;
+  a go-bag is «сумка на экстренный случай», never a «тревожный
+  чемоданчик»). FAQ answers quote the shipped Russian buttons
+  word-for-word. The Settings note about authored content
+  appearing in English is now gone for every one of the nine
+  languages; each language's content still loads as its own lazy
+  chunk only when that language is chosen, so nobody downloads a
+  corpus they don't read.
 - **The full authored-content library now exists in Vietnamese.** All
   64 project templates with their tips and starter steps, the 14
   event templates, the FAQ, and the start-a-community walkthrough,

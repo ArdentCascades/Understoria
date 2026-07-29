@@ -40,10 +40,11 @@ reconciliation unified device-lock to разблокировать (contacts kee
 заблокировать unambiguously). Wave 2 surfaced an upstream en defect
 worth a follow-up: several `_one` strings hardcode the digit 1
 ("1 open", "1 task waiting") with no {{count}}, which mis-renders at
-21/101 in every _one-category language. PHASE 2 WAVE-2 CONTENT IN
-PROGRESS: **Hindi (hi) and Vietnamese (vi) content SHIPPED** (full
-corpora, registries flipped to `content: "full"`; ru next — see
-Phase 2 below).
+21/101 in every _one-category language. **PHASE 2 COMPLETE: Hindi
+(hi), Vietnamese (vi) and Russian (ru) content all SHIPPED** — every
+one of the nine shipped languages now carries the full authored
+corpus and no registry entry is `content: "ui-only"` (see Phase 2
+below).
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from
@@ -219,12 +220,26 @@ repo's disclosed AI-assisted posture:
    Spanish FAQ's identity section had install-app three positions
    from its English slot, invisible to the parity gate because it
    compared entry ids sorted; both fixed (es reordered, gate now
-   enforces order). The English-fallback probes moved from `vi` to
-   `ru` — the last remaining ui-only locale; when ru content ships
-   they move to a code the registry doesn't know. Both hi and vi
-   registry entries are `content: "full"`; ru content is next, then
-   the disclosure mechanism idles until a new ui-only language
-   ships.
+   enforces order). **Russian content SHIPPED — Phase 2 is
+   complete.** Register notes: вы stays lowercase throughout and
+   the fleet's own validators caught the one slip (an idiomatic
+   «плати сколько можешь» on a pay-what-you-can sign, rewritten to
+   the вы-form); tax "credits" became **налоговые вычеты**, the
+   native term, rather than a paraphrase around the banned кредит;
+   "union" resolved to «объединение съёмщиков» after союз /
+   профсоюз / товарищество / коллектив / община were each
+   independently disqualified; disaster vocabulary avoided сводка
+   and тревога-as-noun and left «огонёк в бурю» reserved for the
+   storm-hub feature. Reconciliation unified 64 skill tags with an
+   injectivity check, took a **shipped-UI tie-break over a clean
+   in-fleet consensus** (carpentry → «столярное дело», because
+   ru.json's skills placeholder teaches members that exact string
+   and skills-matching compares exact strings), and repointed a
+   cross-template reference that named the wrong sibling template.
+   All nine registry entries are now `content: "full"`, so the
+   English-fallback probes moved to `sw` — a code the registry does
+   not know at all — and the Settings content-disclosure mechanism
+   idles until a new ui-only language ships.
 3. **Honest fallback while in flight:** a language may ship complete
    UI + FAQ while templates are still English, with a visible "not yet
    translated" line on English-fallback content — never silent mixed-
