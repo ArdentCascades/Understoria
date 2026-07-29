@@ -9,6 +9,21 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **Counts no longer lie in languages whose grammar groups more than
+  one number as "singular."** Nine strings hardcoded the digit 1
+  instead of the live count. English never showed the seam — its
+  singular form only ever covers exactly one — but Russian's covers
+  21, 31, 101 and more, and Hindi's, French's and Portuguese's also
+  cover zero. A Russian member with 21 open tasks was told they had
+  1; a French member with none was told the same. Because the
+  translation gates require every language to use exactly the
+  variables English uses, English's missing count had been
+  *forbidding* translators from fixing it — one had to drop the
+  number from three Russian strings entirely. All nine are fixed in
+  every language, and a new gate fails the build if any counted
+  phrase ever drops its number again.
+
 ### Added
 - **The full authored-content library now exists in Russian — and
   with it, in every language the app ships.** All 64 project

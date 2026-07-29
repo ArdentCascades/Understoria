@@ -40,7 +40,13 @@ reconciliation unified device-lock to разблокировать (contacts kee
 заблокировать unambiguously). Wave 2 surfaced an upstream en defect
 worth a follow-up: several `_one` strings hardcode the digit 1
 ("1 open", "1 task waiting") with no {{count}}, which mis-renders at
-21/101 in every _one-category language. **PHASE 2 COMPLETE: Hindi
+21/101 in every _one-category language — **now fixed**: all nine
+strings interpolate {{count}} in every locale, ru's three
+number-dropped workarounds are restored with nominative-singular
+agreement, and `plurals.test.ts` gained a gate requiring every form
+of a count-driven family to carry {{count}} (the defect persisted
+because en's variable-less `_one` made the interpolation-parity gate
+FORBID translations from adding the count). **PHASE 2 COMPLETE: Hindi
 (hi), Vietnamese (vi) and Russian (ru) content all SHIPPED** — every
 one of the nine shipped languages now carries the full authored
 corpus and no registry entry is `content: "ui-only"` (see Phase 2
