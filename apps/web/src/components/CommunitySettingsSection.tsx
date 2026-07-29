@@ -357,7 +357,7 @@ export function CommunitySettingsSection() {
               {t("profile.communitySettings.inviteOnly.label")}
             </span>
           </label>
-          <p className="pl-6 text-xs text-moss-600 dark:text-moss-300">
+          <p className="ps-6 text-xs text-moss-600 dark:text-moss-300">
             {t("profile.communitySettings.inviteOnly.helpText")}
           </p>
         </div>

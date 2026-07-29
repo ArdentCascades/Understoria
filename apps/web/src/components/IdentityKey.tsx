@@ -68,7 +68,7 @@ export function IdentityKey({
   const panel = open && (
     <span
       role="note"
-      className="mt-1 block max-w-md rounded-lg bg-moss-50 px-3 py-2 text-left font-sans text-xs font-normal text-moss-700 dark:bg-moss-900/60 dark:text-moss-200"
+      className="mt-1 block max-w-md rounded-lg bg-moss-50 px-3 py-2 text-start font-sans text-xs font-normal text-moss-700 dark:bg-moss-900/60 dark:text-moss-200"
     >
       {/* When the key is hidden chrome, the tap is what shows it. */}
       {!keyInline && (

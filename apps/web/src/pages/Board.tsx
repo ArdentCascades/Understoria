@@ -705,7 +705,7 @@ export default function BoardPage() {
                   ? t("board.tabs.offers")
                   : t("projects.tab")}
               {tt !== "PROJECTS" && (
-                <span className="ml-1 text-xs text-moss-600 dark:text-moss-300">
+                <span className="ms-1 text-xs text-moss-600 dark:text-moss-300">
                   {t("board.openCount", { count: openCount[tt] })}
                 </span>
               )}
@@ -733,17 +733,17 @@ export default function BoardPage() {
             {/* Decorative magnifying glass, always visible (not in the
                 placeholder, which vanishes once you type). aria-hidden
                 because the field already carries its accessible name
-                above; pl-9 on the input reserves its gutter. */}
+                above; ps-9 on the input reserves its gutter. */}
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm opacity-70"
+              className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-sm opacity-70"
             >
               🔍
             </span>
             <input
               ref={searchRef}
               type="search"
-              className="input pl-9"
+              className="input ps-9"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t(
@@ -880,11 +880,11 @@ export default function BoardPage() {
                   the toggle's row (board-calm pass): it IS a kind of
                   filter, though fundamental enough to stay visible
                   rather than collapse into the disclosure. One line
-                  with the Filters pill on phones; ml-auto pushes it
+                  with the Filters pill on phones; ms-auto pushes it
                   to the right edge at lg/landscape-short (the block
                   above is flex-1 there so the row spans the line). */}
               <div
-                className="flex flex-wrap gap-2 landscape-short:ml-auto lg:ml-auto"
+                className="flex flex-wrap gap-2 landscape-short:ms-auto lg:ms-auto"
                 role="group"
                 aria-label={t("projects.commons.scopeLabel")}
               >
@@ -1026,7 +1026,7 @@ export default function BoardPage() {
                     debouncedQuery,
                     showClaimed,
                   )}`}
-                  className="mt-3 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:text-left"
+                  className="mt-3 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:text-start"
                 >
                   {t("board.printView")}
                 </Link>
@@ -1062,7 +1062,7 @@ export default function BoardPage() {
                 under one quiet heading so two links to the same page
                 read as one doorway. */}
             {(carryingCount > 0 || organizingCount > 0) && (
-              <div className="mt-3 text-center lg:text-left">
+              <div className="mt-3 text-center lg:text-start">
                 <p className="text-xs font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
                   {t("board.inMyCareHeading")}
                 </p>
@@ -1094,7 +1094,7 @@ export default function BoardPage() {
                 cluster. */}
             <Link
               to="/projects/archive"
-              className="mt-3 block text-center text-xs text-moss-600 underline-offset-2 hover:text-moss-800 hover:underline dark:text-moss-300 dark:hover:text-moss-100 lg:text-left"
+              className="mt-3 block text-center text-xs text-moss-600 underline-offset-2 hover:text-moss-800 hover:underline dark:text-moss-300 dark:hover:text-moss-100 lg:text-start"
             >
               {t("projects.archive.viewArchive")}
             </Link>

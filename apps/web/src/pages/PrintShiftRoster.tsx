@@ -154,7 +154,7 @@ export default function PrintShiftRosterPage() {
               <section key={shift.id} style={{ breakInside: "avoid" }}>
                 <h2 className="text-base font-semibold print:text-black">
                   {shift.label}
-                  <span className="ml-2 font-normal text-moss-600 dark:text-moss-300 print:text-black">
+                  <span className="ms-2 font-normal text-moss-600 dark:text-moss-300 print:text-black">
                     {formatTime(shift.startsAt, locale)} –{" "}
                     {formatTime(shift.endsAt, locale)}
                   </span>

@@ -41,7 +41,7 @@ import { nominationExpired, readIncomingNomination } from "@/lib/cofounder";
 // itself is already a link and announces its label.
 function RowChevron() {
   return (
-    <span aria-hidden="true" className="ml-auto text-moss-400 dark:text-moss-300">
+    <span aria-hidden="true" className="ms-auto text-moss-400 dark:text-moss-300">
       →
     </span>
   );
@@ -53,7 +53,7 @@ function RowChevron() {
 // CATEGORY_META establishes across Board / Calendar / Dashboard.
 function KindEmoji({ kind }: { kind: keyof typeof ATTENTION_EMOJI }) {
   return (
-    <span aria-hidden="true" className="mr-1.5 inline-block">
+    <span aria-hidden="true" className="me-1.5 inline-block">
       {ATTENTION_EMOJI[kind]}
     </span>
   );
@@ -275,7 +275,7 @@ export function AttentionSection() {
         aria-expanded={mobileOpen}
         aria-controls="attention-rail"
         onClick={() => setMobileManualOpen(!mobileOpen)}
-        className="card mb-2 flex min-h-[44px] w-full items-center gap-2 border-l-4 border-canopy-500 py-2 text-left transition-colors hover:bg-moss-50 dark:hover:bg-moss-800 lg:hidden"
+        className="card mb-2 flex min-h-[44px] w-full items-center gap-2 border-s-4 border-canopy-500 py-2 text-start transition-colors hover:bg-moss-50 dark:hover:bg-moss-800 lg:hidden"
       >
         {/* Sighted-only preview of what's waiting; the label carries
             the meaning standalone for screen readers (WCAG 1.1.1). */}
@@ -294,7 +294,7 @@ export function AttentionSection() {
           every state (single render site; ids stay unique). */}
     <section
       id="attention-rail"
-      className={`card mb-3 border-l-4 border-canopy-500 ${
+      className={`card mb-3 border-s-4 border-canopy-500 ${
         mobileOpen ? "" : "hidden lg:block"
       }`}
       aria-labelledby="attention-title"
@@ -616,7 +616,7 @@ export function AttentionSection() {
                       <p className="font-medium text-moss-700 dark:text-moss-200">
                         {t("attention.coorgInvitation.accept.meansTitle")}
                       </p>
-                      <ul className="mt-1 list-disc space-y-1 pl-5">
+                      <ul className="mt-1 list-disc space-y-1 ps-5">
                         <li>{t("attention.coorgInvitation.accept.meansConfirm")}</li>
                         <li>{t("attention.coorgInvitation.accept.meansSign")}</li>
                         <li>{t("attention.coorgInvitation.accept.meansVisible")}</li>
@@ -624,7 +624,7 @@ export function AttentionSection() {
                       <p className="mt-3 font-medium text-moss-700 dark:text-moss-200">
                         {t("attention.coorgInvitation.accept.notTitle")}
                       </p>
-                      <ul className="mt-1 list-disc space-y-1 pl-5">
+                      <ul className="mt-1 list-disc space-y-1 ps-5">
                         <li>{t("attention.coorgInvitation.accept.notObligation")}</li>
                         <li>{t("attention.coorgInvitation.accept.notDeputy")}</li>
                       </ul>

@@ -73,7 +73,7 @@ export function BreadthBar({ entries, members, topN = 5 }: BreadthBarProps) {
                   style={{ width: `${Math.max(6, pct)}%` }}
                 />
               </div>
-              <span className="w-12 shrink-0 text-right text-xs text-moss-600 dark:text-moss-300">
+              <span className="w-12 shrink-0 text-end text-xs text-moss-600 dark:text-moss-300">
                 {e.uniqueHelpedCount}
               </span>
             </li>

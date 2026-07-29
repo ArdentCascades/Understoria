@@ -100,7 +100,7 @@ export function OneSmallThing({
         </h2>
         <button
           type="button"
-          className="btn-ghost -mr-2 -mt-1 text-xs"
+          className="btn-ghost -me-2 -mt-1 text-xs"
           onClick={() => setDeck(null)}
         >
           {t("board.oneSmallThing.close")}

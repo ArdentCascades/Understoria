@@ -496,7 +496,7 @@ export default function PairDevicePage() {
       <header className="mb-4 landscape-short:mb-2">
         <button
           type="button"
-          className="btn-ghost -ml-2 text-sm"
+          className="btn-ghost -ms-2 text-sm"
           onClick={handleCancelToWelcome}
         >
           {t("common.back")}
@@ -534,7 +534,7 @@ export default function PairDevicePage() {
               <h2 className="page-title text-center text-base">
                 {t("pairDevice.wait.title")}
               </h2>
-              <ol className="ml-5 list-decimal space-y-1 text-sm text-moss-700 dark:text-moss-200">
+              <ol className="ms-5 list-decimal space-y-1 text-sm text-moss-700 dark:text-moss-200">
                 <li>
                   {samePhone
                     ? t("pairDevice.wait.samePhoneStep1")
@@ -671,7 +671,7 @@ export default function PairDevicePage() {
           <p className="text-sm text-moss-600 dark:text-moss-300">
             {t("pairDevice.bootstrap.intro")}
           </p>
-          <ul className="ml-5 list-disc space-y-1 text-sm text-moss-700 dark:text-moss-200">
+          <ul className="ms-5 list-disc space-y-1 text-sm text-moss-700 dark:text-moss-200">
             <li>{t("pairDevice.bootstrap.bullets.noDms")}</li>
             <li>{t("pairDevice.bootstrap.bullets.noDrafts")}</li>
             <li>{t("pairDevice.bootstrap.bullets.noPrefs")}</li>
@@ -736,7 +736,7 @@ export default function PairDevicePage() {
               setLinkError(null);
               setStage("link-entry");
             }}
-            className="card flex flex-col gap-1 text-left hover:border-moss-400"
+            className="card flex flex-col gap-1 text-start hover:border-moss-400"
           >
             <span className="font-semibold">
               {t("pairDevice.otherWays.wordsTitle")}
@@ -748,7 +748,7 @@ export default function PairDevicePage() {
           <button
             type="button"
             onClick={() => setStage("capture")}
-            className="card flex flex-col gap-1 text-left hover:border-moss-400"
+            className="card flex flex-col gap-1 text-start hover:border-moss-400"
           >
             <span className="font-semibold">
               {t("pairDevice.otherWays.qrTitle")}
@@ -782,7 +782,7 @@ export default function PairDevicePage() {
             >
               {t("pairDevice.link.directionsTitle")}
             </h2>
-            <ol className="ml-5 list-decimal space-y-1 text-sm text-moss-700 dark:text-moss-200">
+            <ol className="ms-5 list-decimal space-y-1 text-sm text-moss-700 dark:text-moss-200">
               <li>
                 {samePhone
                   ? t("pairDevice.link.samePhoneStep1")

@@ -89,7 +89,7 @@ export function TearOffStrip({
     <div className="mt-8">
       <p
         aria-hidden="true"
-        className="border-t border-dashed border-moss-400 pt-1 text-left text-xs text-moss-600 dark:text-moss-300 print:border-black/50 print:text-black"
+        className="border-t border-dashed border-moss-400 pt-1 text-start text-xs text-moss-600 dark:text-moss-300 print:border-black/50 print:text-black"
       >
         {"✂ "}
         {t("print.tabs.cut")}
@@ -98,7 +98,7 @@ export function TearOffStrip({
         {tabs.map((tab, i) => (
           <li
             key={`${tab.value}-${i}`}
-            className="flex w-24 flex-col items-center gap-1 border-r border-dashed border-moss-400 p-2 first:border-l dark:border-moss-600 print:border-black/50"
+            className="flex w-24 flex-col items-center gap-1 border-e border-dashed border-moss-400 p-2 first:border-s dark:border-moss-600 print:border-black/50"
             style={{ breakInside: "avoid" }}
           >
             <InviteQRCode value={tab.value} size={72} ariaLabel={qrAriaLabel} />

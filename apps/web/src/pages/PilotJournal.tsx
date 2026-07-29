@@ -80,7 +80,7 @@ export default function PilotJournalPage() {
           to="/help"
           label={t("pilotJournal.back")}
           preferHistory
-          className="btn-ghost -ml-2 text-sm"
+          className="btn-ghost -ms-2 text-sm"
         />
         <h1 className="page-title mt-2">{t("pilotJournal.title")}</h1>
         <p className="page-subtitle mt-1 text-sm text-moss-600 dark:text-moss-300">

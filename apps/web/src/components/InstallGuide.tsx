@@ -188,7 +188,7 @@ function DeviceSteps({
       <p className="text-canopy-900 dark:text-canopy-100">
         {t(instructions.introKey)}
       </p>
-      <ol className="mt-2 list-decimal space-y-1 pl-5 text-canopy-900 dark:text-canopy-100">
+      <ol className="mt-2 list-decimal space-y-1 ps-5 text-canopy-900 dark:text-canopy-100">
         {instructions.stepKeys.map((key, i) =>
           device === "ios" && i === 0 ? (
             <li key={key} className="flex flex-wrap items-center gap-1">

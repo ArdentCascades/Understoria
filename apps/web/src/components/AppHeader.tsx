@@ -61,7 +61,7 @@ export function AppHeader() {
           the 44px touch-target floor bends — vertical pixels are the
           scarce resource in this regime, the menu button stays ≥44px
           wide, and 40px still clears WCAG 2.2 AA's 24px minimum. */}
-      <div className="flex h-11 items-center justify-between pl-4 pr-1 landscape-short:h-10">
+      <div className="flex h-11 items-center justify-between ps-4 pe-1 landscape-short:h-10">
         <span className="select-none text-sm font-semibold tracking-tight text-canopy-800 dark:text-canopy-200">
           {"Understoria"}
         </span>

@@ -284,7 +284,7 @@ export default function PostFormPage() {
       <header className="mb-4 landscape-short:mb-2">
         <button
           type="button"
-          className="btn-ghost -ml-2 text-sm"
+          className="btn-ghost -ms-2 text-sm"
           onClick={() => navigate(-1)}
         >
           {t("common.back")}
@@ -445,7 +445,7 @@ export default function PostFormPage() {
                 className="btn-secondary min-h-[44px] text-sm"
                 onClick={() => setRecordingVoice(true)}
               >
-                <span aria-hidden="true" className="mr-1">
+                <span aria-hidden="true" className="me-1">
                   🎙️
                 </span>
                 {t("postForm.voice.add")}

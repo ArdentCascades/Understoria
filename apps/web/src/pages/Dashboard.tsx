@@ -252,7 +252,7 @@ export default function DashboardPage() {
         <div
           aria-hidden="true"
           data-decorative="true"
-          className="pointer-events-none absolute right-3 top-3 text-canopy-700 opacity-10 dark:text-canopy-300"
+          className="pointer-events-none absolute end-3 top-3 text-canopy-700 opacity-10 dark:text-canopy-300"
         >
           <Sprig size={48} />
         </div>
@@ -429,7 +429,7 @@ export default function DashboardPage() {
               return (
                 <li key={cat} className="flex items-center gap-3">
                   <span className="w-28 shrink-0 text-sm">
-                    <span aria-hidden="true" className="mr-1">
+                    <span aria-hidden="true" className="me-1">
                       {meta.emoji}
                     </span>
                     {t(`categories.${cat}`)}
@@ -443,7 +443,7 @@ export default function DashboardPage() {
                       style={{ width: `${Math.max(4, pct)}%` }}
                     />
                   </div>
-                  <span className="w-20 shrink-0 text-right text-xs text-moss-600 dark:text-moss-300">
+                  <span className="w-20 shrink-0 text-end text-xs text-moss-600 dark:text-moss-300">
                     {formatHours(h)} ({pct}%)
                   </span>
                 </li>

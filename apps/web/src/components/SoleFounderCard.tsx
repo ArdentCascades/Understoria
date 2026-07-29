@@ -69,7 +69,7 @@ export function SoleFounderCard() {
     : null;
 
   return (
-    <section className="card mb-4 border-l-4 border-amber-500">
+    <section className="card mb-4 border-s-4 border-amber-500">
       <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
         {t("soleFounder.title")}
       </h2>

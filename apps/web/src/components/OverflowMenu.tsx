@@ -126,7 +126,7 @@ export function OverflowMenu({
                 type="button"
                 role="menuitem"
                 disabled={item.disabled}
-                className={`flex min-h-[44px] w-full items-center px-3 py-2 text-left text-sm ${toneClass}${
+                className={`flex min-h-[44px] w-full items-center px-3 py-2 text-start text-sm ${toneClass}${
                   item.disabled ? " cursor-not-allowed opacity-50" : ""
                 }`}
                 onClick={() => {

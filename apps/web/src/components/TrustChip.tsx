@@ -57,7 +57,7 @@ export function FounderChip({ compact = false }: { compact?: boolean }) {
       className={`${sizeClass} bg-moss-100 text-moss-900 dark:bg-moss-900/60 dark:text-moss-100`}
       title={t("trust.founderTooltip")}
     >
-      <span aria-hidden="true" className="mr-1">
+      <span aria-hidden="true" className="me-1">
         {"\u{1F331}"}
       </span>
       {t("trust.founder")}
@@ -85,7 +85,7 @@ export function TrustChip({ status, count, compact = false }: TrustChipProps) {
         className={`${sizeClass} bg-canopy-100 text-canopy-900 dark:bg-canopy-900/60 dark:text-canopy-100`}
         title={t("trust.trustedTooltip")}
       >
-        <span aria-hidden="true" className="mr-1">
+        <span aria-hidden="true" className="me-1">
           {"\u{2714}"}
         </span>
         {label}
@@ -104,7 +104,7 @@ export function TrustChip({ status, count, compact = false }: TrustChipProps) {
       className={`${sizeClass} bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200`}
       title={t("trust.pendingTooltip")}
     >
-      <span aria-hidden="true" className="mr-1">
+      <span aria-hidden="true" className="me-1">
         {"\u{231B}"}
       </span>
       {label}

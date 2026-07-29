@@ -58,7 +58,7 @@ export interface BackLinkProps {
    *  already starts with the arrow. */
   label: string;
   /** Override the default TaskDetail-parity classes
-   *  (`btn-ghost -ml-2 mb-3 inline-block text-sm`). */
+   *  (`btn-ghost -ms-2 mb-3 inline-block text-sm`). */
   className?: string;
   /** When true, a plain left-click goes back through in-app history
    *  when there is any, falling back to `to` on a cold entry.
@@ -77,7 +77,7 @@ export function BackLink({
   return (
     <Link
       to={to}
-      className={className ?? "btn-ghost -ml-2 mb-3 inline-block text-sm"}
+      className={className ?? "btn-ghost -ms-2 mb-3 inline-block text-sm"}
       onClick={(e) => {
         if (!preferHistory || e.defaultPrevented) return;
         // Leave modified/aux clicks to the browser (new tab/window).

@@ -267,7 +267,7 @@ describe("grouped timestamps + day separators", () => {
     await render();
     // Same sender, but the gap exceeds the window → both keep a time.
     const timeLines = Array.from(container.querySelectorAll("p")).filter(
-      (p) => p.className.includes("text-right"),
+      (p) => p.className.includes("text-end"),
     );
     expect(timeLines).toHaveLength(2);
   });

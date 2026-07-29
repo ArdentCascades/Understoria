@@ -126,7 +126,7 @@ export function ResilienceCard() {
           >
             🌳
             <span
-              className={`absolute right-1 top-1 h-2 w-2 rounded-full ${LEAF_CLASS[freshness]}`}
+              className={`absolute end-1 top-1 h-2 w-2 rounded-full ${LEAF_CLASS[freshness]}`}
             />
           </span>
         ))}
@@ -137,7 +137,7 @@ export function ResilienceCard() {
         >
           +
         </Link>
-        <span className="ml-1 text-sm font-medium text-canopy-800 dark:text-canopy-200">
+        <span className="ms-1 text-sm font-medium text-canopy-800 dark:text-canopy-200">
           {tierLabel}
         </span>
       </div>

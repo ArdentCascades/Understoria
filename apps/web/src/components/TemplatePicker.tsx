@@ -328,7 +328,7 @@ function TemplateCard({
         type="button"
         onClick={onSelect}
         aria-pressed={isSelected}
-        className={`card w-full h-full text-left p-4 flex flex-col gap-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-canopy-500 ${
+        className={`card w-full h-full text-start p-4 flex flex-col gap-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-canopy-500 ${
           isSelected
             ? "ring-2 ring-canopy-500 dark:ring-canopy-400"
             : "hover:border-canopy-300 dark:hover:border-canopy-700"
@@ -369,7 +369,7 @@ function ScratchCard({ isSelected, onSelect }: ScratchCardProps) {
       type="button"
       onClick={onSelect}
       aria-pressed={isSelected}
-      className={`w-full text-left p-3 flex flex-wrap items-baseline gap-x-2 gap-y-1 rounded-lg border-2 border-dashed transition focus:outline-none focus-visible:ring-2 focus-visible:ring-canopy-500 ${
+      className={`w-full text-start p-3 flex flex-wrap items-baseline gap-x-2 gap-y-1 rounded-lg border-2 border-dashed transition focus:outline-none focus-visible:ring-2 focus-visible:ring-canopy-500 ${
         isSelected
           ? "border-canopy-500 bg-canopy-50/40 dark:border-canopy-400 dark:bg-canopy-950/30"
           : "border-bark-300 dark:border-bark-700 hover:border-canopy-300 dark:hover:border-canopy-700"

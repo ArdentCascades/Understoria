@@ -155,7 +155,7 @@ export function BlockConfirmCard({
           <h3 className="text-sm font-semibold text-rose-900 dark:text-rose-100">
             {t("block.confirm.commitsHeading")}
           </h3>
-          <ul className="mt-1.5 list-disc pl-5 text-xs leading-snug text-moss-700 dark:text-moss-200">
+          <ul className="mt-1.5 list-disc ps-5 text-xs leading-snug text-moss-700 dark:text-moss-200">
             <li>
               {t("block.confirm.commits.cannotReach", {
                 name: blockedDisplayName,
@@ -174,7 +174,7 @@ export function BlockConfirmCard({
           <h3 className="text-sm font-semibold text-moss-800 dark:text-moss-100">
             {t("block.confirm.notCommitsHeading")}
           </h3>
-          <ul className="mt-1.5 list-disc pl-5 text-xs leading-snug text-moss-700 dark:text-moss-200">
+          <ul className="mt-1.5 list-disc ps-5 text-xs leading-snug text-moss-700 dark:text-moss-200">
             <li>{t("block.confirm.notCommits.dispute")}</li>
             <li>{t("block.confirm.notCommits.deletion")}</li>
             <li>{t("block.confirm.notCommits.otherNodes")}</li>

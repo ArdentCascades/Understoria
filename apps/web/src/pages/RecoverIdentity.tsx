@@ -130,7 +130,7 @@ export default function RecoverIdentityPage() {
           </label>
           <button
             type="button"
-            className="card flex flex-col gap-1 border-canopy-300 text-left hover:border-canopy-500 dark:border-canopy-700"
+            className="card flex flex-col gap-1 border-canopy-300 text-start hover:border-canopy-500 dark:border-canopy-700"
             onClick={() => setGuardianMode(true)}
           >
             <span className="font-semibold text-canopy-900 dark:text-canopy-100">
@@ -143,7 +143,7 @@ export default function RecoverIdentityPage() {
           {!pasteOpen ? (
             <button
               type="button"
-              className="text-left text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
+              className="text-start text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
               onClick={() => setPasteOpen(true)}
             >
               {t("recover.pasteLink")}

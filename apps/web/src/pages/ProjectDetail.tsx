@@ -556,7 +556,7 @@ export default function ProjectDetailPage() {
     <div className="px-4 pb-8 pt-4">
       <button
         type="button"
-        className="btn-ghost -ml-2 mb-3 text-sm"
+        className="btn-ghost -ms-2 mb-3 text-sm"
         onClick={() => navigate("/?tab=projects")}
       >
         {t("projects.detail.back")}
@@ -1804,7 +1804,7 @@ function CompletionChoiceDialog({
           key={o.key}
           type="button"
           onClick={o.onSelect}
-          className="rounded-xl border border-moss-200 p-3 text-left transition-colors hover:border-canopy-500 hover:bg-canopy-50 dark:border-moss-700 dark:hover:bg-canopy-950/40"
+          className="rounded-xl border border-moss-200 p-3 text-start transition-colors hover:border-canopy-500 hover:bg-canopy-50 dark:border-moss-700 dark:hover:bg-canopy-950/40"
         >
           <span className="block text-sm font-semibold">{o.title}</span>
           <span className="mt-0.5 block text-sm text-moss-600 dark:text-moss-300">
@@ -3027,7 +3027,7 @@ function CoOrganizerCapabilityCard() {
         <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wide text-moss-600 marker:hidden hover:underline">
           {t("projects.coorg.capabilitiesTitle")}
         </summary>
-        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-moss-700 dark:text-moss-200">
+        <ul className="mt-3 list-disc space-y-1 ps-5 text-sm text-moss-700 dark:text-moss-200">
           <li>{t("projects.coorg.capabilities.lifecycle")}</li>
           <li>{t("projects.coorg.capabilities.tasks")}</li>
           <li>{t("projects.coorg.capabilities.ordering")}</li>
@@ -3311,7 +3311,7 @@ export function HistoryTimeline({
                   </Link>
                 )}
                 {a.type === "announcement" && (a.data as { body?: string }).body && (
-                  <span className="ml-1 italic text-moss-600 dark:text-moss-300">
+                  <span className="ms-1 italic text-moss-600 dark:text-moss-300">
                     {`"${((a.data as { body?: string }).body ?? "").slice(0, 80)}${((a.data as { body?: string }).body ?? "").length > 80 ? "..." : ""}"`}
                   </span>
                 )}

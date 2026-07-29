@@ -169,7 +169,7 @@ export default function HelpPage() {
       <header className="mb-4 landscape-short:mb-2">
         <button
           type="button"
-          className="btn-ghost -ml-2 text-sm"
+          className="btn-ghost -ms-2 text-sm"
           onClick={() => navigate(-1)}
         >
           {t("common.back")}
@@ -253,7 +253,7 @@ export default function HelpPage() {
               })}
             </ul>
           </nav>
-          <p className="mb-4 text-right">
+          <p className="mb-4 text-end">
             <button
               type="button"
               className="text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
@@ -316,7 +316,7 @@ export default function HelpPage() {
                         <h3>
                           <button
                             type="button"
-                            className="touch-target flex w-full items-center justify-between gap-3 py-3 text-left text-base font-semibold text-moss-800 hover:text-canopy-800 dark:text-moss-100 dark:hover:text-canopy-200"
+                            className="touch-target flex w-full items-center justify-between gap-3 py-3 text-start text-base font-semibold text-moss-800 hover:text-canopy-800 dark:text-moss-100 dark:hover:text-canopy-200"
                             aria-expanded={open}
                             aria-controls={`${entry.id}-answer`}
                             onClick={() => toggleEntry(entry.id)}

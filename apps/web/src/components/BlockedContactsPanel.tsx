@@ -215,7 +215,7 @@ export function BlockedContactsPanel() {
                   >
                     ?
                   </span>
-                  <span className="flex-1 text-left">
+                  <span className="flex-1 text-start">
                     <span className="block text-sm font-medium">
                       {revealed
                         ? displayName
@@ -231,7 +231,7 @@ export function BlockedContactsPanel() {
                       })}
                     </span>
                   </span>
-                  <span aria-hidden="true" className="ml-auto text-moss-400 dark:text-moss-300">
+                  <span aria-hidden="true" className="ms-auto text-moss-400 dark:text-moss-300">
                     {revealed ? "▲" : "▼"}
                   </span>
                 </button>
@@ -374,7 +374,7 @@ export function BlockedContactsPanel() {
                   >
                     ?
                   </span>
-                  <span className="flex-1 text-left">
+                  <span className="flex-1 text-start">
                     <span className="block text-sm font-medium">
                       {revealed
                         ? displayName
@@ -398,7 +398,7 @@ export function BlockedContactsPanel() {
                       )}
                     </span>
                   </span>
-                  <span aria-hidden="true" className="ml-auto text-moss-400 dark:text-moss-300">
+                  <span aria-hidden="true" className="ms-auto text-moss-400 dark:text-moss-300">
                     {revealed ? "▲" : "▼"}
                   </span>
                 </button>

@@ -445,7 +445,7 @@ export default function AddDevicePage() {
       <header className="mb-4 landscape-short:mb-2">
         <button
           type="button"
-          className="btn-ghost -ml-2 text-sm"
+          className="btn-ghost -ms-2 text-sm"
           onClick={handleCancel}
         >
           {t("common.back")}
@@ -630,7 +630,7 @@ export default function AddDevicePage() {
             onClick={() => {
               void handleContinue();
             }}
-            className="card flex flex-col gap-1 text-left hover:border-moss-400"
+            className="card flex flex-col gap-1 text-start hover:border-moss-400"
           >
             <span className="font-semibold">
               {preparing
@@ -644,7 +644,7 @@ export default function AddDevicePage() {
           <button
             type="button"
             onClick={() => setStage("gate")}
-            className="card flex flex-col gap-1 text-left hover:border-moss-400"
+            className="card flex flex-col gap-1 text-start hover:border-moss-400"
           >
             <span className="font-semibold">
               {t("addDevice.otherWays.qrTitle")}

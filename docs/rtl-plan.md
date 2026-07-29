@@ -129,12 +129,33 @@ take.
 
 ## Implementation order
 
-**R1 — mechanical sweep + regression gate.** The ~89 unambiguous
-substitutions, plus a source-scanning guard test modeled on
-`lib/printChrome.guard.test.ts` that fails when a physical
-directional utility reappears (with a short, documented allowlist for
-the deliberate exceptions in §a and §b). Gate first, so the sweep
-lands green and stays green.
+**R1 — mechanical sweep + regression gate. ✅ SHIPPED.** 166 lines
+across 74 files converted to logical utilities, plus
+`lib/logicalProperties.guard.test.ts` — a source scanner that fails
+when a physical directional utility reappears, with an allowlist
+that requires a written reason per entry and fails on stale
+exemptions.
+
+Verified, rather than assumed:
+- **LTR is unchanged by construction**, and the built bundle proves
+  it: all ten logical properties are present, and a runtime `dir`
+  flip shows every one mirroring (`ms-1` → margin-right, `pe-1` →
+  padding-left, `border-e` → border-left, `start-0` → right, …).
+- Six routes at 375px show no horizontal overflow in LTR *or* with
+  `dir="rtl"` forced.
+- Full suite green (3,826), tsc + eslint clean.
+
+Two things the survey had classed as mechanical turned out to be R2,
+found by the guard rather than by reading:
+- **The landscape rail's safe-area padding** (`BottomNav`, `Board`,
+  `Calendar`) pairs padding with `env(safe-area-inset-left/right)` —
+  a *physical device notch*. Making the padding logical while the
+  inset stays physical is wrong in RTL; the rail's side and the edge
+  it clears have to flip together.
+- **The me-menu drawer** pairs `right-0`/`border-l` with
+  `translate-x-full` for its slide-in, and Tailwind has no logical
+  translate. Flip one without the other and the panel slides in from
+  offscreen.
 
 **R2 — the semantic cases.** Sender mirroring, the markdown default,
 dir-aware arrow keys in `BottomNav` and `Present`, and the paper

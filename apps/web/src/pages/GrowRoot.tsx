@@ -301,7 +301,7 @@ export default function GrowRootPage() {
             </p>
             <button
               type="button"
-              className="card flex flex-col gap-1 border-canopy-300 text-left hover:border-canopy-500 dark:border-canopy-700"
+              className="card flex flex-col gap-1 border-canopy-300 text-start hover:border-canopy-500 dark:border-canopy-700"
               onClick={() => setStep("needs")}
             >
               <span className="font-semibold text-canopy-900 dark:text-canopy-100">
@@ -313,7 +313,7 @@ export default function GrowRootPage() {
             </button>
             <button
               type="button"
-              className="card flex flex-col gap-1 border-canopy-300 text-left hover:border-canopy-500 dark:border-canopy-700"
+              className="card flex flex-col gap-1 border-canopy-300 text-start hover:border-canopy-500 dark:border-canopy-700"
               onClick={() => setStep("ask")}
             >
               <span className="font-semibold text-canopy-900 dark:text-canopy-100">
@@ -325,7 +325,7 @@ export default function GrowRootPage() {
             </button>
             <button
               type="button"
-              className="card flex flex-col gap-1 border-canopy-300 text-left hover:border-canopy-500 dark:border-canopy-700"
+              className="card flex flex-col gap-1 border-canopy-300 text-start hover:border-canopy-500 dark:border-canopy-700"
               onClick={() => setStep("helper")}
             >
               <span className="font-semibold text-canopy-900 dark:text-canopy-100">
@@ -495,7 +495,7 @@ export default function GrowRootPage() {
                 <p className="text-sm font-medium">
                   {t("growRoot.settings.placeholdersLead")}
                 </p>
-                <ul className="list-disc pl-5 text-sm text-moss-700 dark:text-moss-200">
+                <ul className="list-disc ps-5 text-sm text-moss-700 dark:text-moss-200">
                   <li>{t("growRoot.settings.placeholderDbKey")}</li>
                   <li>{t("growRoot.settings.placeholderFounders")}</li>
                   <li>{t("growRoot.settings.placeholderQuorum")}</li>

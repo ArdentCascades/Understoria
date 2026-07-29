@@ -75,7 +75,7 @@ export default function DisputesPage() {
           to="/profile"
           label={t("common.back")}
           preferHistory
-          className="btn-ghost -ml-2 text-sm"
+          className="btn-ghost -ms-2 text-sm"
         />
         <h1 className="page-title mt-2">
           {t("disputes.title")}
@@ -190,7 +190,7 @@ function ExchangeDisputeCard({
           : payload.postTitle}
       </h2>
       {proposal.description && (
-        <blockquote className="mt-3 border-l-4 border-rose-300 bg-rose-50 px-3 py-2 text-sm italic text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-100">
+        <blockquote className="mt-3 border-s-4 border-rose-300 bg-rose-50 px-3 py-2 text-sm italic text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-100">
           {proposal.description}
         </blockquote>
       )}
@@ -267,11 +267,11 @@ function CommentDisputeCard({
       <h2 className="text-lg font-semibold leading-snug">
         {t("disputes.commentTitle")}
       </h2>
-      <blockquote className="mt-3 border-l-4 border-bark-300 bg-bark-50 px-3 py-2 text-sm italic text-bark-800 dark:border-moss-700 dark:bg-moss-900/40 dark:text-moss-100">
+      <blockquote className="mt-3 border-s-4 border-bark-300 bg-bark-50 px-3 py-2 text-sm italic text-bark-800 dark:border-moss-700 dark:bg-moss-900/40 dark:text-moss-100">
         {payload.body}
       </blockquote>
       {proposal.description && (
-        <blockquote className="mt-3 border-l-4 border-rose-300 bg-rose-50 px-3 py-2 text-sm italic text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-100">
+        <blockquote className="mt-3 border-s-4 border-rose-300 bg-rose-50 px-3 py-2 text-sm italic text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-100">
           {proposal.description}
         </blockquote>
       )}

@@ -93,16 +93,16 @@ describe("BackLink — anchor contract", () => {
 
   it("defaults to TaskDetail's exact classes and accepts an override", () => {
     renderHarness({ to: "/fallback", label: "Back" });
-    expect(link().className).toBe("btn-ghost -ml-2 mb-3 inline-block text-sm");
+    expect(link().className).toBe("btn-ghost -ms-2 mb-3 inline-block text-sm");
     act(() => {
       root.unmount();
     });
     renderHarness({
       to: "/fallback",
       label: "Back",
-      className: "btn-ghost -ml-2 text-sm",
+      className: "btn-ghost -ms-2 text-sm",
     });
-    expect(link().className).toBe("btn-ghost -ml-2 text-sm");
+    expect(link().className).toBe("btn-ghost -ms-2 text-sm");
   });
 
   it("a plain click follows `to` when preferHistory is off", () => {

@@ -132,14 +132,14 @@ function EventTemplateCard({
       type="button"
       onClick={onSelect}
       aria-pressed={isSelected}
-      className={`card flex h-full w-full flex-col gap-2 p-4 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-canopy-500 ${
+      className={`card flex h-full w-full flex-col gap-2 p-4 text-start transition focus:outline-none focus-visible:ring-2 focus-visible:ring-canopy-500 ${
         isSelected
           ? "ring-2 ring-canopy-500 dark:ring-canopy-400"
           : "hover:border-canopy-300 dark:hover:border-canopy-700"
       }`}
     >
       <span className="font-semibold text-canopy-900 dark:text-canopy-100">
-        <span aria-hidden="true" className="mr-1.5">
+        <span aria-hidden="true" className="me-1.5">
           {template.emoji}
         </span>
         {template.name}
@@ -169,7 +169,7 @@ function ScratchCard({
       type="button"
       onClick={onSelect}
       aria-pressed={isSelected}
-      className={`flex h-full w-full flex-col gap-2 rounded-lg border-2 border-dashed p-4 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-canopy-500 ${
+      className={`flex h-full w-full flex-col gap-2 rounded-lg border-2 border-dashed p-4 text-start transition focus:outline-none focus-visible:ring-2 focus-visible:ring-canopy-500 ${
         isSelected
           ? "border-canopy-500 bg-canopy-50/40 dark:border-canopy-400 dark:bg-canopy-950/30"
           : "border-bark-300 hover:border-canopy-300 dark:border-bark-700 dark:hover:border-canopy-700"

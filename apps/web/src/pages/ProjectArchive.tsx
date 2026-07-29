@@ -64,7 +64,7 @@ export default function ProjectArchivePage() {
           to="/?tab=projects"
           label={t("projects.detail.back")}
           preferHistory
-          className="btn-ghost -ml-2 text-sm"
+          className="btn-ghost -ms-2 text-sm"
         />
         <h1 className="page-title mt-2">
           {t("projects.archive.title")}

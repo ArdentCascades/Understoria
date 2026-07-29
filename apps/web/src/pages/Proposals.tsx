@@ -217,7 +217,7 @@ export default function ProposalsPage() {
           to="/profile"
           label={t("common.back")}
           preferHistory
-          className="btn-ghost -ml-2 text-sm"
+          className="btn-ghost -ms-2 text-sm"
         />
         <h1 className="page-title mt-2">
           {t("proposals.title")}
@@ -1099,7 +1099,7 @@ function TallyDisplay({
               })}
         </span>
         {tally.affirms.length > 0 && (
-          <span className="ml-1 text-moss-600 dark:text-moss-300">
+          <span className="ms-1 text-moss-600 dark:text-moss-300">
             ({renderNames(tally.affirms)})
           </span>
         )}
@@ -1109,7 +1109,7 @@ function TallyDisplay({
           {t("proposals.vote.tally.blocks", { count: tally.blocks.length })}
         </span>
         {tally.blocks.length > 0 && (
-          <span className="ml-1 text-moss-600 dark:text-moss-300">
+          <span className="ms-1 text-moss-600 dark:text-moss-300">
             ({renderNames(tally.blocks)})
           </span>
         )}
@@ -1119,7 +1119,7 @@ function TallyDisplay({
         .map((b) => (
           <blockquote
             key={b.voterKey}
-            className="ml-3 border-l-2 border-rose-300 pl-2 italic text-rose-800 dark:border-rose-700 dark:text-rose-200"
+            className="ms-3 border-s-2 border-rose-300 ps-2 italic text-rose-800 dark:border-rose-700 dark:text-rose-200"
           >
             {nameByKey.get(b.voterKey) ?? t("common.memberFallback")}:{" "}
             {b.reason}
@@ -1132,7 +1132,7 @@ function TallyDisplay({
           })}
         </span>
         {tally.abstains.length > 0 && (
-          <span className="ml-1 text-moss-600 dark:text-moss-300">
+          <span className="ms-1 text-moss-600 dark:text-moss-300">
             ({renderNames(tally.abstains)})
           </span>
         )}

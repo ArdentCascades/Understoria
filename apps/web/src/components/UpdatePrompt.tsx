@@ -64,7 +64,7 @@ export function UpdatePrompt() {
       role="status"
       aria-live="polite"
       className="pointer-events-none fixed inset-x-0 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-20 flex print:hidden
-                 justify-center px-4 lg:inset-x-auto lg:right-6"
+                 justify-center px-4 lg:inset-x-auto lg:end-6"
     >
       <div
         className="pointer-events-auto flex max-w-md flex-wrap items-center

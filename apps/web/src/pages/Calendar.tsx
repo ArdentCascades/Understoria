@@ -529,7 +529,7 @@ export default function CalendarPage() {
           Filters pill (a compact trigger with the active count in its
           label; the controls live in the card drawer below, Done
           returns focus here) holds the left edge; the view switcher
-          keeps the right edge via ml-auto, exactly like the Board's
+          keeps the right edge via ms-auto, exactly like the Board's
           Being-built/Tended scope pills on its filter line — a second
           row saved on a phone (field report follow-up). DOM order
           matches visual order (pill → chips → switcher), so reading
@@ -550,7 +550,7 @@ export default function CalendarPage() {
         <div
           role="tablist"
           aria-label={t("calendar.title")}
-          className="ml-auto flex gap-1"
+          className="ms-auto flex gap-1"
         >
           {(["agenda", "month", "week"] as const).map((mode) => (
             <button
@@ -755,7 +755,7 @@ export default function CalendarPage() {
           like the board's print link. */}
       <Link
         to="/print/calendar"
-        className="mt-4 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:text-left"
+        className="mt-4 block text-center text-sm text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300 lg:text-start"
       >
         {t("print.calendar.link")}
       </Link>
