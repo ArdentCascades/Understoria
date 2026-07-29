@@ -45,12 +45,17 @@ describe.each([
     );
   });
 
-  it("has the same entry ids inside each section", () => {
+  it("has the same entry ids inside each section, in the same order", () => {
+    // Unsorted on purpose: a member following "see the question below"
+    // (or comparing notes with a neighbor on another language) expects
+    // the entries at the same positions. Sorted comparison let the
+    // Spanish identity section ship with install-app three slots away
+    // from its English position.
     const enBySection = new Map(
-      FAQ_SECTIONS.map((s) => [s.id, s.entries.map((e) => e.id).sort()]),
+      FAQ_SECTIONS.map((s) => [s.id, s.entries.map((e) => e.id)]),
     );
     const trBySection = new Map(
-      FAQ_SECTIONS_TR.map((s) => [s.id, s.entries.map((e) => e.id).sort()]),
+      FAQ_SECTIONS_TR.map((s) => [s.id, s.entries.map((e) => e.id)]),
     );
     for (const [sectionId, enIds] of enBySection) {
       const trIds = trBySection.get(sectionId);
