@@ -1,9 +1,11 @@
 # Phase 3 — Right-to-left support (code-verified plan)
 
-Status: PLAN. Nothing implemented yet. This document is the survey
-that has to exist before the work starts, in the same spirit as the
-router-8, React-19 and eslint-10 plan docs: every number below was
-measured against the tree at `d6d225e`, not estimated.
+Status: **R1 SHIPPED** (the logical-property sweep and its guard);
+R2–R4 outstanding. This document began as the survey that had to
+exist before the work started, in the same spirit as the router-8,
+React-19 and eslint-10 plan docs: every number below was measured
+against the tree at `d6d225e`, not estimated. It is now also the
+running record of what shipped and what each step actually taught.
 
 **Why now.** Nine languages ship with complete UI *and* complete
 authored content (docs/i18n-expansion.md Phase 2). The only thing
