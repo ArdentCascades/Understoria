@@ -41,8 +41,9 @@ reconciliation unified device-lock to разблокировать (contacts kee
 worth a follow-up: several `_one` strings hardcode the digit 1
 ("1 open", "1 task waiting") with no {{count}}, which mis-renders at
 21/101 in every _one-category language. PHASE 2 WAVE-2 CONTENT IN
-PROGRESS: **Hindi (hi) content SHIPPED** (full corpus, registry
-flipped to `content: "full"`; vi and ru next — see Phase 2 below).
+PROGRESS: **Hindi (hi) and Vietnamese (vi) content SHIPPED** (full
+corpora, registries flipped to `content: "full"`; ru next — see
+Phase 2 below).
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from
@@ -209,9 +210,21 @@ repo's disclosed AI-assisted posture:
    the skills-match feature groups tasks by exact string. Prose
    reconciliations: विकलांग over दिव्यांग (the movement's own word,
    per the no-shame register), the community-center venue unified to
-   सामुदायिक भवन. hi's registry entry is `content: "full"`; vi and
-   ru content are next, then the disclosure mechanism again idles
-   until a new ui-only language ships.
+   सामुदायिक भवन. **Vietnamese content SHIPPED** by the same
+   pipeline: NFC gate on every string, the nút/node collision held
+   (mesh hardware became điểm phát, the reserved English `node`
+   untouched), skills unified corpus-wide with an injectivity check
+   (en "design" and "graphic design" must not share a Vietnamese
+   tag), and the vi FAQ agent caught a real upstream defect — the
+   Spanish FAQ's identity section had install-app three positions
+   from its English slot, invisible to the parity gate because it
+   compared entry ids sorted; both fixed (es reordered, gate now
+   enforces order). The English-fallback probes moved from `vi` to
+   `ru` — the last remaining ui-only locale; when ru content ships
+   they move to a code the registry doesn't know. Both hi and vi
+   registry entries are `content: "full"`; ru content is next, then
+   the disclosure mechanism idles until a new ui-only language
+   ships.
 3. **Honest fallback while in flight:** a language may ship complete
    UI + FAQ while templates are still English, with a visible "not yet
    translated" line on English-fallback content — never silent mixed-

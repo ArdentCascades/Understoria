@@ -76,6 +76,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "सफ़ाई और सामान भरने की बारियाँ बनाएँ",
       "सामान देने वालों से रिश्ते बनाएँ",
       "दिक़्क़त के लिए एक संपर्क तय करें"
+    ],
+    "vi": [
+      "Tìm một nơi cho đặt nhờ có điện và có người qua lại",
+      "Kiếm một chiếc tủ lạnh và dựng mái che mưa nắng",
+      "Đặt ra vài quy ước chung và dán nhãn mọi thứ",
+      "Lập lịch thay phiên dọn dẹp và bổ sung đồ",
+      "Gây dựng mối lấy đồ đều đặn",
+      "Lập một đầu mối khi có sự cố"
     ]
   },
   "community-garden": {
@@ -132,6 +140,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "अपने इलाक़े और मौसम के हिसाब से बोएँ",
       "पानी देने और निराई की बारियाँ तय करें",
       "कटाई और बची उपज की योजना बनाएँ"
+    ],
+    "vi": [
+      "Có được mảnh đất và lời cho phép",
+      "Thử đất và vẽ sơ đồ luống",
+      "Gom vật liệu và bắt tay dựng vườn",
+      "Thống nhất cách chia sẻ vườn",
+      "Trồng theo khí hậu và mùa nơi bạn ở",
+      "Lập lịch thay phiên tưới nước và nhổ cỏ",
+      "Tính trước chuyện thu hoạch và phần dư"
     ]
   },
   "tool-lending-library": {
@@ -188,6 +205,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "देने का रिकॉर्ड बनाएँ",
       "अपने लाइब्रेरी वालों को सिखाएँ",
       "सँभालें और बढ़ाएँ"
+    ],
+    "vi": [
+      "Tìm chỗ cất đồ và định giờ mở cửa",
+      "Gom và phân loại kho đồ",
+      "Lập sổ kê từng món",
+      "Viết ra quy ước mượn đồ",
+      "Dựng cách ghi mượn đồ",
+      "Chỉ việc cho những người trực thư viện",
+      "Giữ gìn và mở rộng dần"
     ]
   },
   "neighborhood-care-network": {
@@ -244,6 +270,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "बात आगे बढ़ाने की योजना बनाएँ",
       "रोज़मर्रा की मदद का तालमेल बिठाएँ",
       "मददगारों का भी ख़याल रखें"
+    ],
+    "vi": [
+      "Nắm xem quanh mình có những ai",
+      "Tìm người góp một tay và hỏi cho kỹ",
+      "Ghép cặp cho hợp",
+      "Đặt một nhịp hỏi thăm",
+      "Vạch sẵn cách xử lý khi có chuyện",
+      "Sắp xếp những giúp đỡ thiết thực",
+      "Đừng quên đỡ đần chính những người góp tay"
     ]
   },
   "emergency-preparedness": {
@@ -300,6 +335,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "महफ़ूज़ ठिकाने तय करें",
       "एक अभ्यास या जानकारी की शाम रखें",
       "“उस दिन” के काम पहले से बाँट दें"
+    ],
+    "vi": [
+      "Vẽ ra những rủi ro của khu phố mình",
+      "Dựng một cây liên lạc",
+      "Tính cách liên lạc khi mất mạng",
+      "Gom sẵn đồ dùng chung",
+      "Tìm ra những điểm an toàn",
+      "Tổ chức một buổi diễn tập hoặc một tối chỉ dẫn",
+      "Phân vai sẵn cho “ngày có chuyện”"
     ]
   },
   "free-store": {
@@ -350,6 +394,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ऐसे सजाएँ कि लोग इज़्ज़त के साथ चुन सकें",
       "आयोजन के लिए लोग तय करें",
       "बचे हुए सामान को सँभालें"
+    ],
+    "vi": [
+      "Chọn hình thức và chỗ làm",
+      "Định rõ nhận đồ thế nào",
+      "Sắp xếp việc nhận và phân loại",
+      "Bày đồ để ai cũng chọn được một cách đàng hoàng",
+      "Chia người trực buổi mở cửa",
+      "Lo phần đồ còn thừa"
     ]
   },
   "skill-share": {
@@ -394,6 +446,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "जगह और वक़्त ढूँढें",
       "शेड्यूल बनाएँ",
       "सबकी पहुँच में रखें"
+    ],
+    "vi": [
+      "Hỏi xem mọi người có sở trường gì và muốn học gì",
+      "Mời và chuẩn bị cho những người đứng lớp",
+      "Tìm chỗ và giờ",
+      "Dựng một cuốn lịch",
+      "Làm cho ai cũng tới được"
     ]
   },
   "bulk-buying-coop": {
@@ -450,6 +509,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "डिलीवरी और छाँटने की जगह तय करें",
       "ऑर्डर बराबरी से बाँटें",
       "काम बारी-बारी बाँटें"
+    ],
+    "vi": [
+      "Tập hợp nhóm mua chung của bạn",
+      "Tìm một mối bán sỉ",
+      "Dựng cách đặt hàng",
+      "Minh bạch chuyện tiền nong",
+      "Thu xếp giao hàng và chỗ chia hàng",
+      "Chia hàng cho công bằng",
+      "Luân phiên việc cho nhau"
     ]
   },
   "repair-cafe": {
@@ -500,6 +568,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "आने वालों को दर्ज करने का तरीक़ा बनाएँ",
       "सुरक्षा और उम्मीदें सँभालें",
       "आम पुर्ज़े और ख़र्च होने वाला सामान भरकर रखें"
+    ],
+    "vi": [
+      "Rủ người sửa đồ theo từng mảng",
+      "Dựng các bàn sửa đồ",
+      "Chốt một ngày lặp lại đều đặn",
+      "Lập cách tiếp nhận đồ",
+      "Lo phần an toàn và nói trước điều làm được",
+      "Trữ sẵn phụ tùng và vật tư hay dùng"
     ]
   },
   "rides-transportation": {
@@ -556,6 +632,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "तय करें कि क्या-क्या शामिल है",
       "ख़र्च का हिसाब सँभालें",
       "सवारी और गाड़ी वाले, दोनों सुरक्षित रहें"
+    ],
+    "vi": [
+      "Rủ người lái xe và xét kỹ từng người",
+      "Giải quyết chuyện bảo hiểm và trách nhiệm",
+      "Lập cách nhận lời nhờ chở",
+      "Dựng nếp điều chuyến",
+      "Nói rõ những chuyến nào nhận",
+      "Lo phần chi phí",
+      "Giữ an toàn cho cả người đi xe lẫn người lái"
     ]
   },
   "tenant-union": {
@@ -612,6 +697,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "“अपने हक़ जानें” वर्कशॉप रखें",
       "बेदख़ली आने पर क्या करना है, यह तय करें",
       "क़ानूनी मदद और लगातार साथ से जुड़ें"
+    ],
+    "vi": [
+      "Lập một ban nòng cốt đứng ra tổ chức",
+      "Vẽ bản đồ các tòa nhà và những chuyện người thuê đang gặp",
+      "Gom thông tin chính xác về quyền của người thuê nhà",
+      "Dựng cách liên lạc ứng phó thật nhanh",
+      "Tổ chức buổi “biết quyền của mình”",
+      "Lập quy ước ứng phó khi bị đuổi nhà",
+      "Nối với trợ giúp pháp lý và chỗ dựa lâu dài"
     ]
   },
   "childcare-collective": {
@@ -668,6 +762,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "सेहत, एलर्जी और आपात हालात के नियम बनाएँ",
       "देखभाल करने वालों को बुनियादी बातें सिखाएँ",
       "एक आज़माइशी बैठक करें और राय लें"
+    ],
+    "vi": [
+      "Tụ các gia đình sáng lập và thống nhất cách làm",
+      "Đặt chuẩn an toàn và cách xét người",
+      "Tìm một chỗ và làm cho an toàn với trẻ nhỏ",
+      "Lập cách xếp lịch và ghi giờ",
+      "Đặt quy ước về sức khỏe, dị ứng và lúc cấp cứu",
+      "Chỉ cho người trông trẻ những điều căn bản",
+      "Chạy một buổi thử và hỏi lại mọi người"
     ]
   },
   "community-composting": {
@@ -724,6 +827,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "साफ़ बताएँ कि क्या डाल सकते हैं",
       "देखभाल की बारियाँ बनाएँ और सिखाएँ",
       "तैयार खाद बाँटें"
+    ],
+    "vi": [
+      "Tìm một chỗ để ủ phân",
+      "Chọn cách ủ",
+      "Kiếm thùng và đồ nghề",
+      "Lập cách gom rác nhà bếp",
+      "Nói rõ thứ gì được nhận",
+      "Lập nhóm thay phiên chăm nom và chỉ họ cách làm",
+      "Chia phân ủ đã xong"
     ]
   },
   "free-little-library": {
@@ -768,6 +880,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "शुरुआती किताबें जुटाएँ",
       "एक तख़्ती और कुछ सादे नियम लगाएँ",
       "देखभाल के लिए कोई चुनें"
+    ],
+    "vi": [
+      "Đóng hoặc kiếm một tủ sách chịu được mưa nắng",
+      "Chọn và dọn chỗ đặt",
+      "Gom số sách ban đầu",
+      "Gắn một tấm bảng và vài quy ước đơn giản",
+      "Tìm một người chăm nom"
     ]
   },
   "community-first-aid-training": {
@@ -818,6 +937,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "हिस्सा लेने वाले जुटाएँ",
       "ट्रेनिंग की बैठकें चलाएँ",
       "किट बाँटें और दोहराने की बैठकें रखें"
+    ],
+    "vi": [
+      "Bắt tay với người dạy có chứng chỉ",
+      "Kiếm vật tư",
+      "Tìm chỗ và xếp lịch các buổi",
+      "Rủ người tới học",
+      "Chạy các buổi học",
+      "Phát hộp sơ cứu và mở buổi ôn lại"
     ]
   },
   "time-bank": {
@@ -874,6 +1001,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "कौन क्या दे सकता है, उसकी डायरेक्टरी बनाएँ",
       "अदला-बदलियों में तालमेल बिठाएँ",
       "भरोसे और सुरक्षा के तौर-तरीक़े बनाएँ"
+    ],
+    "vi": [
+      "Rủ thành viên sáng lập và ghi lại sở trường của từng người",
+      "Chọn một cách ghi chép",
+      "Thống nhất các quy ước",
+      "Đón thành viên mới vào",
+      "Mở danh bạ ai giúp được việc gì",
+      "Điều phối và ghép các lần trao đổi",
+      "Dựng nếp giữ an toàn và lòng tin"
     ]
   },
   "solidarity-fund": {
@@ -930,6 +1066,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "चंदा जुटाने का इंतज़ाम करें",
       "फ़ैसले और भुगतान का तरीक़ा बनाएँ",
       "हिसाब खुलकर सबके सामने रखें"
+    ],
+    "vi": [
+      "Lập một nhóm nhỏ trông coi quỹ",
+      "Lo cách giữ tiền minh bạch",
+      "Định ra tiêu chí xin và trao tiền",
+      "Làm một mẫu đơn xin ngắn gọn, ít rào cản",
+      "Bắt đầu gây quỹ",
+      "Dựng cách quyết định và chi tiền",
+      "Báo lại minh bạch cho mọi người"
     ]
   },
   "diaper-hygiene-bank": {
@@ -974,6 +1119,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "साइज़ और क़िस्म के हिसाब से छाँटें और गिनती रखें",
       "बाँटने का इंसाफ़ भरा तरीक़ा तय करें",
       "बाँटने के दिन तय करें और लोग जुटाएँ"
+    ],
+    "vi": [
+      "Tìm chỗ cất trữ và một điểm phát",
+      "Gây dựng nguồn hàng",
+      "Phân loại và đếm theo cỡ, theo món",
+      "Đặt ra cách chia công bằng",
+      "Xếp lịch phát và bố trí người"
     ]
   },
   "community-bike-workshop": {
@@ -1024,6 +1176,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "हाथ बँटाने वाले मिस्त्री जोड़ें",
       "खुले घंटे और “कमाकर साइकिल पाएँ” का तरीक़ा तय करें",
       "सुरक्षा के तौर-तरीक़े तय करें"
+    ],
+    "vi": [
+      "Tìm một chỗ làm xưởng",
+      "Gom đồ nghề và một giá đỡ sửa xe",
+      "Nhận xe đạp và phụ tùng được cho",
+      "Rủ người biết sửa xe đến chỉ nghề",
+      "Định giờ mở cửa và cách tự sửa lấy xe",
+      "Dựng nếp làm việc an toàn"
     ]
   },
   "newcomer-translation-network": {
@@ -1074,6 +1234,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "राह दिखाने वाली सामग्री बनाएँ",
       "मुलाक़ातों पर साथ जाने की पेशकश करें",
       "निजी बातों और हिफ़ाज़त के तौर-तरीक़े तय करें"
+    ],
+    "vi": [
+      "Rủ người biết hai thứ tiếng trở lên",
+      "Lập bản đồ những nơi giúp được ở địa phương",
+      "Dựng cách tiếp nhận và ghép người",
+      "Làm tài liệu chỉ dẫn cho người mới",
+      "Đi cùng khi có lịch hẹn",
+      "Đặt nếp giữ kín và giữ an toàn"
     ]
   },
   "community-meal": {
@@ -1130,6 +1298,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "पकाने और परोसने की टोली जुटाएँ",
       "दिन-वक़्त तय करें और बात फैलाएँ",
       "भोजन चलाएँ और सफ़ाई करें"
+    ],
+    "vi": [
+      "Tìm một cái bếp và chỗ dọn ăn",
+      "Lo an toàn thực phẩm và giấy phép",
+      "Dựng nguồn thực phẩm đều đặn",
+      "Lên thực đơn hợp số đông, hợp kiêng khem và dị ứng",
+      "Rủ nhóm nấu và nhóm dọn ăn",
+      "Chốt lịch và loan tin",
+      "Nấu bữa ăn và dọn dẹp"
     ]
   },
   "seed-library": {
@@ -1174,6 +1351,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "पूरे ज़ख़ीरे को छाँटें और लेबल लगाएँ",
       "लेने और बाँटने के दस्तूर तय करें",
       "बीज की जान बनाए रखें और भरते रहें"
+    ],
+    "vi": [
+      "Tìm nơi đặt tủ và cách cất hạt",
+      "Kiếm lứa hạt giống đầu tiên",
+      "Sắp xếp và dán nhãn cả bộ sưu tập",
+      "Đặt lệ mượn và chia lại",
+      "Giữ hạt còn nảy mầm và bù thêm hàng"
     ]
   },
   "digital-literacy": {
@@ -1230,6 +1414,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "नए सीखने वालों के लिए पाठ तैयार करें",
       "क्लास और खुली मदद के वक़्त तय करें",
       "जानकारी की हिफ़ाज़त और लौटाने के नियम तय करें"
+    ],
+    "vi": [
+      "Gom và tân trang thiết bị",
+      "Dựng cách cho mượn",
+      "Lo đường mạng",
+      "Rủ và tập cho người kèm",
+      "Soạn bài học cho người mới bắt đầu",
+      "Xếp lịch lớp và giờ ghé hỏi",
+      "Đặt lệ về dữ liệu và về việc trả máy"
     ]
   },
   "weatherization-brigade": {
@@ -1280,6 +1473,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "सामान और औज़ार जुटाएँ",
       "सुरक्षा और ज़िम्मेदारी की बात सुलझाएँ",
       "श्रमदान तय करें और चलाएँ"
+    ],
+    "vi": [
+      "Rủ những người có tay nghề",
+      "Vạch ranh giới công việc",
+      "Dựng cách nhận lời nhờ và đi khảo sát",
+      "Kiếm vật tư và đồ nghề",
+      "Lo an toàn và trách nhiệm",
+      "Xếp lịch và chạy những ngày chung tay"
     ]
   },
   "pet-food-bank": {
@@ -1324,6 +1525,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "जानवर और आकार के हिसाब से छाँटें और गिनती रखें",
       "बाँटने का नियम तय करें",
       "बाँटने का दिन तय करें और लोग जुटाएँ"
+    ],
+    "vi": [
+      "Tìm chỗ chứa và một điểm phát",
+      "Gây dựng nguồn thức ăn đều đặn",
+      "Phân loại và kiểm đếm theo loài và cỡ con vật",
+      "Đặt ra quy tắc phát thức ăn",
+      "Xếp lịch và cắt cử người cho buổi phát"
     ]
   },
   "youth-mentorship": {
@@ -1380,6 +1588,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "दाख़िला, एलर्जी और आपात जानकारी सँभालें",
       "नाश्ता और सामान जुटाएँ",
       "बैठकें चलाएँ और परिवारों से हाल लेते रहें"
+    ],
+    "vi": [
+      "Giữ được một chỗ an toàn và định giờ giấc",
+      "Đặt chuẩn an toàn cho trẻ và cách kiểm tra người lớn",
+      "Rủ và tập huấn cho những người dìu dắt",
+      "Lên chương trình sinh hoạt",
+      "Lo phần ghi danh, dị ứng và thông tin khẩn cấp",
+      "Kiếm đồ ăn nhẹ và vật dụng",
+      "Chạy các buổi sinh hoạt và giữ liên lạc với gia đình"
     ]
   },
   "gleaning-network": {
@@ -1436,6 +1653,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ज़िम्मेदारी और खाने की सुरक्षा तय करें",
       "बाँटने के रास्ते बनाएँ",
       "तुड़ाई कराएँ और वज़न लिखें"
+    ],
+    "vi": [
+      "Tìm nguồn rau trái",
+      "Gom một đội thu hái",
+      "Lo xe chở và chỗ trữ",
+      "Dựng cách xếp lịch và báo tin",
+      "Giải quyết trách nhiệm và an toàn thực phẩm",
+      "Dựng các đầu ra để chia",
+      "Tổ chức các buổi thu hái và ghi lại số kg"
     ]
   },
   "community-mediation": {
@@ -1492,6 +1718,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "राज़दारी और बुनियादी नियम तय करें",
       "इस मदद की ख़बर फैलाएँ",
       "नतीजे लिखें और मध्यस्थों का ख़याल रखें"
+    ],
+    "vi": [
+      "Rủ và tập huấn cho những người hòa giải",
+      "Dựng cách nhận yêu cầu và hỏi chuyện ban đầu",
+      "Tìm những chỗ gặp trung lập",
+      "Xác định phạm vi và giới hạn",
+      "Đặt quy ước giữ kín và các quy tắc chung",
+      "Cho mọi người biết là có chỗ hòa giải",
+      "Theo dõi kết quả và chăm cho người hòa giải"
     ]
   },
   "reentry-support": {
@@ -1548,6 +1783,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "काम और रहने की जगह से जोड़ें",
       "साथी रहनुमाई का इंतज़ाम करें",
       "निजता और हदों के तौर-तरीक़े तय करें"
+    ],
+    "vi": [
+      "Dựng danh bạ nguồn giúp đỡ và các nơi cùng làm",
+      "Rủ và tập huấn cho những người góp một tay",
+      "Làm một buổi đón và hỏi xem cần gì nhất",
+      "Giúp làm giấy tờ và xin trợ cấp",
+      "Nối với việc làm và chỗ ở",
+      "Ghép người dìu dắt cùng cảnh ngộ",
+      "Đặt nếp giữ kín và giữ ranh giới"
     ]
   },
   "community-wood-bank": {
@@ -1604,6 +1848,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "माँग और पहुँचाने का इंतज़ाम बनाएँ",
       "बाँटने की कसौटी तय करें",
       "श्रमदान और सुखाई का वक़्त तय करें"
+    ],
+    "vi": [
+      "Kiếm một nguồn củi",
+      "Tìm chỗ xử lý và trữ củi",
+      "Lo đồ nghề và đồ bảo hộ",
+      "Gom và tập huấn cho tổ làm củi",
+      "Dựng cách nhận yêu cầu và giao củi",
+      "Đặt tiêu chí chia củi",
+      "Xếp lịch những ngày chung tay và việc hong khô"
     ]
   },
   "community-wifi-mesh": {
@@ -1660,6 +1913,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "उपकरण लगाने के लिए जगहें ढूँढें",
       "इस्तेमाल और निजता के नियम तय करें",
       "नेटवर्क सँभालें और बढ़ाएँ"
+    ],
+    "vi": [
+      "Vẽ bản đồ nơi cần sóng và nơi còn trống",
+      "Kiếm một đường truyền gốc",
+      "Rủ những người góp một tay rành kỹ thuật",
+      "Kiếm và cấu hình thiết bị",
+      "Tìm nhà cho đặt điểm phát",
+      "Đặt lệ dùng mạng và nếp riêng tư",
+      "Bảo dưỡng và mở rộng mạng"
     ]
   },
   "mental-health-peer-support": {
@@ -1716,6 +1978,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "राज़दारी और मंडली के नियम तय करें",
       "बैठकें तय करें और उनकी ख़बर फैलाएँ",
       "चलाने वालों का सहारा बनें और थकान रोकें"
+    ],
+    "vi": [
+      "Rủ và tập huấn cho những người dẫn dắt",
+      "Xác định phạm vi và ranh giới của vòng tròn",
+      "Dựng kế hoạch chuyển tiếp khi có khủng hoảng",
+      "Tìm một chỗ kín đáo và an toàn",
+      "Đặt quy ước giữ kín và các quy tắc chung",
+      "Xếp lịch và cho mọi người biết",
+      "Đỡ lưng cho người dẫn dắt và giữ họ khỏi kiệt sức"
     ]
   },
   "community-cleanup": {
@@ -1760,6 +2031,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "सामान और सुरक्षा के इंतज़ाम जुटाएँ",
       "मददगार जुटाएँ और टोलियाँ बनाएँ",
       "सफ़ाई या सँवारने का दिन चलाएँ"
+    ],
+    "vi": [
+      "Tìm và xếp thứ tự các điểm cần dọn",
+      "Xin phép và lo kế hoạch đổ rác",
+      "Gom dụng cụ và đồ bảo hộ",
+      "Rủ người và sắp xếp đội hình",
+      "Chạy ngày dọn dẹp hoặc hồi sinh khu đất"
     ]
   },
   "free-tax-prep": {
@@ -1816,6 +2094,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "हक़दार पड़ोसियों तक बात पहुँचाएँ",
       "डेटा की हिफ़ाज़त और प्राइवेसी पक्की करें",
       "पैसों की समझ बढ़ाने वाली आगे की मदद दें"
+    ],
+    "vi": [
+      "Cho người khai thuế đi tập huấn và lấy chứng nhận",
+      "Kết nối với một chương trình khai thuế miễn phí được công nhận",
+      "Lo chỗ làm việc và máy móc",
+      "Dựng cách hẹn lịch và tiếp nhận",
+      "Báo tin tới những hàng xóm đủ điều kiện",
+      "Bảo vệ an toàn và riêng tư cho dữ liệu",
+      "Mời thêm phần đồng hành về tài chính"
     ]
   },
   "community-market": {
@@ -1872,6 +2159,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "मददगार जुटाएँ और उनकी पारियाँ तय करें",
       "बात फैलाएँ और पक्का दिन-समय तय करें",
       "ठेला चलाएँ और बचा हुआ सामान ठिकाने लगाएँ"
+    ],
+    "vi": [
+      "Lo nguồn rau trái và hàng hóa",
+      "Kiếm chỗ đứng và dựng sạp",
+      "Chốt cách làm",
+      "Lo bày hàng, cất giữ và an toàn thực phẩm",
+      "Rủ người và xếp lịch cho các buổi chợ",
+      "Báo tin và chốt một lịch cố định",
+      "Chạy buổi chợ và lo phần còn dư"
     ]
   },
   "welcome-wagon": {
@@ -1916,6 +2212,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "स्वागत की टोकरियाँ तैयार करें",
       "स्वागत करने वाले जुटाएँ और उन्हें तैयार करें",
       "नाम पहुँचाने और ख़ुद जुड़ने का तरीक़ा बनाएँ"
+    ],
+    "vi": [
+      "Chốt sẽ chào đón ai và chào đón kiểu gì",
+      "Làm một tập thông tin về khu mình",
+      "Sắp các giỏ chào đón",
+      "Rủ và chỉ việc cho người đi chào đón",
+      "Dựng cách giới thiệu và cách tự ghi tên"
     ]
   },
   "library-of-things": {
@@ -1972,6 +2275,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ले जाने-लौटाने के नियम और भरोसे की नीति लिखें",
       "देने-लौटाने का तरीक़ा बनाएँ और लाइब्रेरियन को तैयार करें",
       "सामान सँभालें, साफ़ रखें और बढ़ाएँ"
+    ],
+    "vi": [
+      "Hỏi cộng đồng muốn mượn những gì",
+      "Kiếm chỗ cất đồ và chốt giờ mở cửa",
+      "Gom, lau chùi và thử từng món",
+      "Vào danh mục và chụp ảnh kho đồ",
+      "Viết lệ mượn đồ và cách đặt lòng tin",
+      "Dựng cách ghi mượn và chỉ việc cho người trông thư viện",
+      "Giữ gìn, làm sạch và nuôi lớn bộ sưu tập"
     ]
   },
   "laundry-shower-access": {
@@ -2022,6 +2334,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "साफ़-सफ़ाई और सुरक्षा के तौर-तरीक़े तय करें",
       "मददगार जुटाएँ और उन्हें तैयार करें",
       "समय तय करें और बात फैलाएँ"
+    ],
+    "vi": [
+      "Lo chỗ giặt giũ và tắm rửa",
+      "Kiếm đồ dùng",
+      "Dựng cách ghi tên và chia khung giờ",
+      "Đặt quy ước vệ sinh và an toàn",
+      "Rủ và chỉ việc cho người góp một tay",
+      "Chốt lịch và báo cho mọi người biết"
     ]
   },
   "voter-registration": {
@@ -2072,6 +2392,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "भीड़ वाली जगहें और मौक़े चुनें",
       "नाम जुड़वाने की मेज़ चलाएँ",
       "आगे के क़दमों में मदद करें"
+    ],
+    "vi": [
+      "Học cho rõ luật lệ về các đợt đăng ký cử tri",
+      "Chỉ việc cho những người góp một tay giữ thế phi đảng phái",
+      "Gom giấy tờ và thông tin chính xác",
+      "Chọn chỗ đông người qua lại và các sự kiện",
+      "Đứng bàn đăng ký",
+      "Giúp cả những bước tiếp theo"
     ]
   },
   "health-navigation": {
@@ -2128,6 +2456,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "डॉक्टर का समय लेने और दवाओं में मदद दें",
       "सेहत की जानकारी के लिए प्राइवेसी के तौर-तरीक़े तय करें",
       "क्लिनिक और डॉक्टरों से रिश्ता बनाएँ"
+    ],
+    "vi": [
+      "Làm một cuốn danh bạ các nơi chữa bệnh",
+      "Rủ và chỉ việc cho người dẫn đường",
+      "Dựng cách nhận lời nhờ và tiếp nhận",
+      "Giúp việc bảo hiểm và đăng ký",
+      "Giúp chuyện lịch hẹn và thuốc men",
+      "Đặt nếp giữ riêng tư cho thông tin sức khỏe",
+      "Kết thân với các phòng khám và cơ sở y tế"
     ]
   },
   "toy-library": {
@@ -2172,6 +2509,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "सूची बनाएँ और पूरे टुकड़ों के साथ थैली में भरें",
       "घर ले जाने के नियम लिखें",
       "देने-लौटाने का तरीक़ा बनाएँ और सँभालने वालों को सिखाएँ"
+    ],
+    "vi": [
+      "Tìm chỗ cất giữ và giờ mở cửa",
+      "Gom, rửa và soi lại an toàn của đồ chơi",
+      "Ghi danh mục và cho vào túi đủ mảnh",
+      "Viết quy ước mượn đồ",
+      "Lập sổ mượn và chỉ việc cho người trực"
     ]
   },
   "food-preservation": {
@@ -2228,6 +2572,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "मिलकर डिब्बाबंदी के सेशन तय करें",
       "सेशन सुरक्षित तरीक़े से सिखाएँ और चलाएँ",
       "सहेजा हुआ खाना बाँटें और हिसाब रखें"
+    ],
+    "vi": [
+      "Mượn được một gian bếp phù hợp",
+      "Học cho biết cách bảo quản an toàn",
+      "Gom dụng cụ và hũ",
+      "Tìm nguồn nông sản",
+      "Lên kế hoạch cho các buổi đóng hũ chung",
+      "Chỉ việc và giữ cho buổi làm an toàn",
+      "Chia đồ đã bảo quản và ghi lại"
     ]
   },
   "free-haircut": {
@@ -2272,6 +2625,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "औज़ार और सामान जुटाएँ",
       "सफ़ाई और लाइसेंस के नियम पक्के करें",
       "सँवरने के दिन चलाएँ"
+    ],
+    "vi": [
+      "Mời thợ tóc có giấy phép hành nghề",
+      "Tìm một chỗ đủ điều kiện vệ sinh",
+      "Lo đồ nghề và vật dụng",
+      "Lo khâu khử trùng và đúng quy định hành nghề",
+      "Tổ chức những ngày chăm chút vẻ ngoài"
     ]
   },
   "mutual-aid-moving-crew": {
@@ -2328,6 +2688,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "तारीख़ें और टोली भेजना तय करें",
       "दायरा और हदें तय करें",
       "काम पूरा करें और ख़बर लेते रहें"
+    ],
+    "vi": [
+      "Gom một đội và những chiếc xe",
+      "Gom đồ đạc để chuyển nhà",
+      "Dựng cách nhận lời nhờ và ước lượng công việc",
+      "Lo chuyện an toàn và trách nhiệm",
+      "Sắp lịch và điều người",
+      "Định rõ làm gì và không làm gì",
+      "Chuyển nhà và hỏi thăm sau đó"
     ]
   },
   "disability-support-network": {
@@ -2384,6 +2753,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "सामान का साझा भंडार बनाएँ",
       "पैरवी और राह दिखाने में साथ दें",
       "हर इवेंट के लिए पहुँच के पैमाने तय करें"
+    ],
+    "vi": [
+      "Đặt người khuyết tật vào vai dẫn dắt",
+      "Dựng cách liên lạc ai cũng dùng được",
+      "Vẽ ra điều mọi người cần và nguồn giúp đỡ",
+      "Mở một chỗ trao đổi nâng đỡ lẫn nhau",
+      "Lập kho thiết bị cho mượn",
+      "Đi cùng và lên tiếng giúp khi cần",
+      "Đặt chuẩn tiếp cận cho mọi buổi của chương trình"
     ]
   },
   "books-to-prisoners": {
@@ -2434,6 +2812,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "मददगार जोड़ें और सिखाएँ",
       "डाक ख़र्च और आना-जाना सँभालें",
       "चिट्ठी-दोस्ती का कार्यक्रम चलाएँ"
+    ],
+    "vi": [
+      "Nắm quy định nhận thư của từng trại",
+      "Gom sách và một chỗ làm",
+      "Dựng cách nhận và theo dõi thư xin sách",
+      "Mời người góp một tay và chỉ việc",
+      "Lo tiền cước và khâu gửi đi",
+      "Mở chương trình viết thư cho nhau"
     ]
   },
   "community-music": {
@@ -2484,6 +2870,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "सीखने और जैम के लिए जगह ढूँढ़ें",
       "सीखने के सेशन और जैम तय करें",
       "रख-रखाव और लौटाने की उम्मीदें तय करें"
+    ],
+    "vi": [
+      "Gom và sửa nhạc cụ",
+      "Lập cách cho mượn nhạc cụ",
+      "Mời những người chịu dạy",
+      "Tìm chỗ để dạy và chơi nhạc chung",
+      "Xếp lịch buổi học và buổi chơi nhạc chung",
+      "Nói rõ chuyện giữ gìn và trả đồ"
     ]
   },
   "school-supply-program": {
@@ -2528,6 +2922,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "क्लास के हिसाब से छाँटें और बस्ते भरें",
       "रखने की जगह और बाँटने की जगह तय करें",
       "बाँटने का दिन और हाथ तय करें"
+    ],
+    "vi": [
+      "Xin danh sách đồ dùng và ước lượng cần bao nhiêu",
+      "Mở đợt quyên góp và mua sỉ",
+      "Phân loại và soạn theo khối lớp",
+      "Lo chỗ cất giữ và một điểm phát",
+      "Xếp lịch và bố trí người cho buổi phát"
     ]
   },
   "legal-aid-clinic": {
@@ -2584,6 +2985,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "“अपने हक़ जानें” की सामग्री और वर्कशॉप तैयार करें",
       "शिविरों का प्रचार करें और तारीख़ें तय करें",
       "राज़दारी बनाए रखें और टकराव जाँचें"
+    ],
+    "vi": [
+      "Bắt tay với luật sư và nơi trợ giúp pháp lý",
+      "Vạch rõ phạm vi và đường chuyển tiếp",
+      "Lo chỗ ngồi và cách tiếp nhận",
+      "Làm cách đặt hẹn kín đáo",
+      "Soạn tài liệu và buổi học Biết quyền của mình",
+      "Loan tin và xếp lịch các buổi tư vấn",
+      "Giữ kín chuyện riêng và soát xung đột lợi ích"
     ]
   },
   "resource-hub-dispatch": {
@@ -2640,6 +3050,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "तालमेल करने वाले जोड़ें और सिखाएँ",
       "जानकारी की निजता और आगे ख़बर लेने के तरीक़े तय करें",
       "अधूरी रह गई ज़रूरतें और कमियाँ दर्ज करें"
+    ],
+    "vi": [
+      "Làm một cửa tiếp nhận duy nhất cho việc cần giúp và lời ngỏ",
+      "Lập danh sách người giúp và nguồn lực",
+      "Dựng cách ghép việc và chuyển việc",
+      "Giữ một danh bạ nguồn lực gốc",
+      "Mời và tập cho những người điều phối",
+      "Đặt nếp giữ riêng tư và theo tới cùng",
+      "Ghi lại những việc chưa lo được và chỗ còn thiếu"
     ]
   },
   "harm-reduction-supplies": {
@@ -2690,6 +3109,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "किट भरें और उनमें आसान भाषा की पर्ची रखें",
       "बाँटने के चक्कर और पक्के ठिकाने तय करें",
       "सामान भरते रहें, हिसाब रखें और ट्रेनिंग ताज़ा रखें"
+    ],
+    "vi": [
+      "Đi tập và tìm một nơi giảm tác hại cùng phối hợp",
+      "Kiểm tra luật chỗ mình về các món đồ",
+      "Tìm nguồn naloxone và đồ đóng gói",
+      "Đóng gói kèm tờ hướng dẫn dễ hiểu",
+      "Sắp các vòng đi phát và các điểm cố định",
+      "Bù hàng, ghi chép và giữ cho phần tập luôn mới"
     ]
   },
   "court-support": {
@@ -2740,6 +3167,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "साथ जाने वाले मददगारों को सिखाएँ",
       "सुनवाई के दिन सवारी और बच्चों की देखभाल जुटाएँ",
       "बचाव पक्ष माँगे तो साथ देने वाली चिट्ठियाँ जुटाएँ"
+    ],
+    "vi": [
+      "Bắt liên lạc với luật sư bào chữa công và các nhóm đã ở tòa",
+      "Viết ra quy tắc nền: tiếp sức, không làm luật",
+      "Làm cách tiếp nhận và cuốn lịch phiên tòa",
+      "Tập cho những người đi cùng",
+      "Lo xe đưa đón và người trông trẻ cho các phiên tòa",
+      "Gom thư ủng hộ khi luật sư bào chữa cần"
     ]
   },
   "cooling-warming-center": {
@@ -2796,6 +3231,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "पारियों की बारियाँ बनाएँ",
       "मौसम आने से पहले बात फैलाएँ",
       "हर बार खोलें, मेज़बानी करें और फिर सब दुरुस्त करें"
+    ],
+    "vi": [
+      "Tìm một nơi cho mượn chỗ có máy lạnh và lò sưởi",
+      "Định mốc mở cửa và cách báo tin",
+      "Gom đủ đồ dùng",
+      "Mời và tập cho người trực ca",
+      "Dựng lịch ca thay phiên",
+      "Loan tin trước khi vào mùa",
+      "Mở cửa, trực và dọn lại sau mỗi đợt"
     ]
   },
   "community-oral-history": {
@@ -2834,6 +3278,12 @@ export const TEMPLATE_TASK_NAMES: Record<
       "सामान और सवालों की सूची जुटाएँ",
       "कहानी की बैठकें रिकॉर्ड करें",
       "सँभालकर रखें और उन्हीं की शर्तों पर लौटाएँ"
+    ],
+    "vi": [
+      "Viết một tờ giấy đồng ý bằng lời dễ hiểu",
+      "Chuẩn bị đồ nghề và một danh sách câu hỏi",
+      "Ghi lại những buổi kể chuyện",
+      "Cất giữ và gửi lại, theo ý người kể"
     ]
   },
   "community-solar-coop": {
@@ -2890,6 +3340,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "लगाने वालों और सप्लाई करने वालों से हाथ मिलाएँ",
       "बिल में क्रेडिट और सदस्यता का इंतज़ाम बनाएँ",
       "सदस्यों को बिजली की खपत समझाएँ"
+    ],
+    "vi": [
+      "Gom thành viên và đo mức quan tâm",
+      "Học các mô hình và luật lệ ở địa phương",
+      "Tìm một chỗ đặt hoặc một chương trình để tham gia",
+      "Gỡ chuyện vốn liếng và cơ cấu pháp lý",
+      "Bắt tay với thợ lắp đặt và nhà cung cấp",
+      "Dựng cách trừ tiền điện và cách vào hợp tác xã",
+      "Chỉ cho thành viên cách dùng điện"
     ]
   },
   "worker-coop-incubator": {
@@ -2946,6 +3405,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "शुरुआती मदद से जोड़ें",
       "राह दिखाने वाले जोड़ें",
       "नए कारोबारों के बीच आपसी साथ बनाएँ"
+    ],
+    "vi": [
+      "Xem sở trường và mong muốn của thành viên",
+      "Mở lớp sẵn sàng đi làm và luyện tay nghề",
+      "Dạy về lối làm ăn hợp tác xã",
+      "Đỡ một tay khi hợp tác xã hình thành",
+      "Nối với các nguồn giúp lúc khởi đầu",
+      "Sắp người dìu dắt",
+      "Dựng chỗ dựa giữa các nhóm làm ăn"
     ]
   },
   "elder-meal-delivery": {
@@ -3002,6 +3470,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "खाने-पीने, एलर्जी और आपात जानकारी दर्ज करें",
       "हालचाल जाँचने का तरीक़ा तय करें",
       "मददगारों का साथ दें और राय लेते रहें"
+    ],
+    "vi": [
+      "Tìm ra những người cao tuổi không ra khỏi nhà được",
+      "Mời và tìm hiểu kỹ người góp một tay",
+      "Lo một nơi làm ra bữa ăn",
+      "Lên tuyến đưa cơm và lịch đi",
+      "Ghi lại chuyện ăn kiêng, dị ứng và liên lạc khi có chuyện",
+      "Định sẵn cách xử lý khi thấy có gì bất thường",
+      "Chăm sóc người góp một tay và lắng nghe góp ý"
     ]
   },
   "disaster-relief-hub": {
@@ -3058,6 +3535,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "फ़ौरन पहुँचने वाली मददगार टोली जुटाएँ और सिखाएँ",
       "बाक़ी राहत टोलियों से तालमेल बिठाएँ",
       "संपर्क और सुरक्षा की योजना बनाएँ"
+    ],
+    "vi": [
+      "Chọn sẵn mặt bằng và chỗ dự phòng",
+      "Dựng sẵn các mối lấy hàng",
+      "Sắp đặt khâu nhận, phân loại và theo dõi hàng",
+      "Dựng cách phân phát hàng",
+      "Lập và huấn luyện đội ứng cứu nhanh",
+      "Bắt nhịp với các lực lượng ứng cứu khác",
+      "Tính trước chuyện liên lạc và an toàn"
     ]
   },
   "recovery-peer-support": {
@@ -3114,6 +3600,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "राज़दारी और समूह के नियम तय करें",
       "बैठकों का वक़्त तय करें और ख़बर फैलाएँ",
       "बैठक चलाने वालों का साथ दें और थकान रोकें"
+    ],
+    "vi": [
+      "Mời và tập huấn người dẫn nhóm cùng cảnh",
+      "Vạch rõ phạm vi và ranh giới",
+      "Dựng đường chuyển tiếp và đường xử lý khủng hoảng",
+      "Tìm một chỗ an toàn, kín đáo, không có chất gây nghiện",
+      "Đặt lệ giữ kín và nếp sinh hoạt của nhóm",
+      "Xếp lịch và loan tin về các buổi gặp",
+      "Nâng đỡ người dẫn nhóm và giữ họ khỏi kiệt sức"
     ]
   },
   "community-fitness": {
@@ -3170,6 +3665,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "सुरक्षा और सेहत का ध्यान रखें",
       "समय तय करें और बात फैलाएँ",
       "अपनापन और नियमितता बनाएँ"
+    ],
+    "vi": [
+      "Hỏi xem mọi người thích gì và vận động được tới đâu",
+      "Mời người đứng ra dẫn buổi tập",
+      "Tìm chỗ tập an toàn",
+      "Soạn buổi tập hợp với mọi người, mọi mức sức",
+      "Lo chuyện an toàn và sức khỏe",
+      "Chốt lịch và loan tin",
+      "Gây dựng tình thân và sự đều đặn"
     ]
   },
   "urban-orchard": {
@@ -3226,6 +3730,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "पौधे लगाने के दिन रखें",
       "लंबे वक़्त की देखभाल तय करें",
       "फ़सल बाँटने की योजना बनाएँ"
+    ],
+    "vi": [
+      "Chốt quyền dùng đất lâu dài",
+      "Vẽ bản thiết kế vườn",
+      "Tìm nguồn cây giống",
+      "Dọn đất cho sẵn sàng",
+      "Tổ chức những ngày chung tay trồng cây",
+      "Sắp xếp việc chăm nom lâu dài",
+      "Bàn trước chuyện chia trái"
     ]
   },
   "new-parent-support": {
@@ -3282,6 +3795,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "साथी सहारे के घेरे बनाएँ",
       "सुरक्षा और हदों के तरीक़े तय करें",
       "दूसरे प्रोजेक्टों से जोड़ें"
+    ],
+    "vi": [
+      "Mời người góp một tay và người đồng cảnh",
+      "Dựng cách sắp lịch góp bữa ăn",
+      "Ngỏ lời giúp những việc rất thực",
+      "Lập cuốn danh bạ chỗ cần tìm",
+      "Mở những vòng tròn cùng cảnh",
+      "Đặt nếp an toàn và ranh giới",
+      "Nối với các dự án khác"
     ]
   },
   "foster-kinship-support": {
@@ -3338,6 +3860,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "साथी सहारे के समूह चलाएँ",
       "कहाँ क्या मिलेगा, उसकी सूची बनाएँ",
       "बच्चों की सुरक्षा और निजता के तरीक़े तय करें"
+    ],
+    "vi": [
+      "Kết nối với các gia đình đang nuôi trẻ",
+      "Gây dựng kho quần áo và đồ dùng",
+      "Dựng cách đưa đồ tới thật nhanh",
+      "Tổ chức việc trông trẻ để người nuôi được nghỉ",
+      "Mở nhóm cùng cảnh cho người nuôi trẻ",
+      "Lập cuốn danh bạ chỗ cần tìm",
+      "Đặt nếp giữ an toàn và giữ kín cho trẻ"
     ]
   },
   "weather-survival-outreach": {
@@ -3394,6 +3925,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "बाँटने और रास्तों की योजना बनाएँ",
       "लोगों को रैन-बसेरों और सुविधाओं से जोड़ें",
       "आफ़त के लिए तैयार रहें"
+    ],
+    "vi": [
+      "Gói sẵn túi đồ theo từng mùa",
+      "Gom nguồn đồ dùng",
+      "Vẽ bản đồ chỗ gặp được bà con",
+      "Mời và tập huấn người đi phát đồ",
+      "Lên kế hoạch tuyến đi và cách phát đồ",
+      "Nối bà con với nơi trú tạm và chỗ trợ giúp",
+      "Chuẩn bị cho tình huống cấp cứu"
     ]
   }
 };

@@ -17,6 +17,7 @@ import { EVENT_TEMPLATES_FR } from "./eventTemplates.fr";
 import { EVENT_TEMPLATES_PT } from "./eventTemplates.pt";
 import { EVENT_TEMPLATES_ZH } from "./eventTemplates.zh";
 import { EVENT_TEMPLATES_HI } from "./eventTemplates.hi";
+import { EVENT_TEMPLATES_VI } from "./eventTemplates.vi";
 import { PROJECT_CATEGORY_META } from "@/lib/categories";
 
 // Every category a template may use: the new event-specific strings plus
@@ -33,6 +34,7 @@ const BOTH: Array<[string, readonly EventTemplate[]]> = [
   ["pt", EVENT_TEMPLATES_PT],
   ["zh", EVENT_TEMPLATES_ZH],
   ["hi", EVENT_TEMPLATES_HI],
+  ["vi", EVENT_TEMPLATES_VI],
 ];
 
 describe("eventTemplates — vocabulary", () => {
@@ -60,6 +62,7 @@ describe("eventTemplates — set shape and parity", () => {
     ["pt", EVENT_TEMPLATES_PT] as const,
     ["zh", EVENT_TEMPLATES_ZH] as const,
     ["hi", EVENT_TEMPLATES_HI] as const,
+    ["vi", EVENT_TEMPLATES_VI] as const,
   ])("en and %s share the same id set in the same order", (_, set) => {
     expect(set.map((t) => t.id)).toEqual(EVENT_TEMPLATES_EN.map((t) => t.id));
   });
@@ -94,6 +97,7 @@ describe("eventTemplates — set shape and parity", () => {
     ["pt", EVENT_TEMPLATES_PT] as const,
     ["zh", EVENT_TEMPLATES_ZH] as const,
     ["hi", EVENT_TEMPLATES_HI] as const,
+    ["vi", EVENT_TEMPLATES_VI] as const,
   ])("keeps locale-invariant fields identical across en and %s", (_, set) => {
     const byId = new Map(set.map((t) => [t.id, t]));
     for (const en of EVENT_TEMPLATES_EN) {
@@ -147,7 +151,8 @@ describe("eventTemplates — accessors", () => {
     expect(getEventTemplates("hi")).toBe(EVENT_TEMPLATES_HI);
     expect(getEventTemplates("zh-CN")).toBe(EVENT_TEMPLATES_ZH);
     expect(getEventTemplates("en")).toBe(EVENT_TEMPLATES_EN);
-    expect(getEventTemplates("vi")).toBe(EVENT_TEMPLATES_EN);
+    expect(getEventTemplates("vi")).toBe(EVENT_TEMPLATES_VI);
+    expect(getEventTemplates("ru")).toBe(EVENT_TEMPLATES_EN);
   });
 
   it("looks up a template by id, locale-aware", () => {
