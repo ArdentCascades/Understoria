@@ -69,8 +69,13 @@ Baseline numbers below refreshed 2026-07-27.
 - Dates/numbers already flow through `Intl` with the active language;
   `lib/speak.ts` (read-aloud, spoken panic confirm) already takes a
   language tag and honestly reports missing voices.
-- **No RTL support anywhere** (no `dir` handling, physical `ml-/mr-`
-  Tailwind utilities throughout).
+- **RTL is unimplemented but smaller than this line long claimed.**
+  (Corrected 2026-07-29 by the survey in `docs/rtl-plan.md`: `dir`
+  handling DOES ship — `i18n/index.ts` sets `<html dir>` from the
+  registry — and physical utilities are 98 occurrences across 46
+  files, not "throughout". Tailwind 3.4.19 already emits logical
+  properties, so the work does not block on the Tailwind 4
+  migration.)
 
 ## Which languages, and why these
 
@@ -85,7 +90,7 @@ into a broken layout.
 | shipped | English, Spanish | today's lockstep pair |
 | **1** | Chinese (Simplified) `zh-Hans`, French `fr`, Portuguese `pt` | three of the largest global + diaspora reaches; LTR; simple plural rules; proves the pipeline |
 | **2** | Hindi `hi`, Vietnamese `vi`, Russian `ru` | large communities; exercises Devanagari, Vietnamese diacritics, and Slavic 3-form plurals — the hardest LTR plural case |
-| **3 (after RTL phase)** | Arabic `ar`, Urdu `ur` | top-ten languages that REQUIRE the RTL work first |
+| **3 (after RTL phase)** | Arabic `ar`, Urdu `ur` | top-ten languages that REQUIRE the RTL work first — see `docs/rtl-plan.md` |
 | demand-driven | Tagalog, Haitian Creole, Korean, Bengali, Indonesian, Swahili… | once Phase 0 lands, adding a language is cheap — communities can request or contribute their own |
 
 ## Phase 0 — Infrastructure (SHIPPED)
