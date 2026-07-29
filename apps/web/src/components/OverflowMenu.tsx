@@ -46,15 +46,20 @@ export interface OverflowMenuItem {
 export function OverflowMenu({
   items,
   label,
-  align = "right",
+  align = "end",
 }: {
   /** Actions to render. An empty array renders no trigger at all —
    *  callers may pass `[]` when the viewer has no available actions. */
   items: OverflowMenuItem[];
   /** aria-label for the trigger button. */
   label: string;
-  /** Which edge the popover aligns to. Defaults to "right". */
-  align?: "left" | "right";
+  /** Which edge the popover aligns to, in READING terms rather than
+   *  physical ones: "end" is the right edge in English and the left
+   *  edge in Arabic. Defaults to "end", under the trigger's outer
+   *  corner. A physical vocabulary here would have quietly undone the
+   *  logical classes below — align="right" placing a menu on the left
+   *  (docs/rtl-plan.md R2). */
+  align?: "start" | "end";
 }): React.JSX.Element | null {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -112,7 +117,7 @@ export function OverflowMenu({
           ref={menuRef}
           role="menu"
           aria-orientation="vertical"
-          className={`absolute ${align === "right" ? "right-0" : "left-0"} z-20 mt-1 w-56 overflow-hidden rounded-lg border border-moss-200 bg-white shadow-lg dark:border-moss-700 dark:bg-moss-900`}
+          className={`absolute ${align === "end" ? "end-0" : "start-0"} z-20 mt-1 w-56 overflow-hidden rounded-lg border border-moss-200 bg-white shadow-lg dark:border-moss-700 dark:bg-moss-900`}
         >
           {items.map((item) => {
             const tone = item.tone ?? "default";

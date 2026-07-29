@@ -16,6 +16,7 @@ import { useApp } from "@/state/AppContext";
 import { shareOrigin } from "@/lib/appOrigin";
 import { InviteQRCode } from "@/components/InviteQRCode";
 import { formatAbsoluteDateTime } from "@/lib/format";
+import { inlineStep, isRtl } from "@/lib/direction";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 import { useSlideshow } from "@/lib/useSlideshow";
 import { useWakeLock } from "@/lib/useWakeLock";
@@ -157,10 +158,17 @@ export default function PresentPage() {
     if (!presenting) return;
     const onKey = (e: KeyboardEvent) => {
       bumpControls();
-      if (e.key === "ArrowRight") {
+      // Slides advance in READING order, so which arrow means "next"
+      // mirrors with the layout: an Arabic deck moves leftward, the
+      // same way its pages turn (docs/rtl-plan.md R2). Only the
+      // horizontal pair is bound — a deck has one axis, and Up/Down
+      // stay free rather than quietly gaining a meaning here.
+      const horizontal = e.key === "ArrowLeft" || e.key === "ArrowRight";
+      const step = horizontal ? inlineStep(e.key, isRtl(document.body)) : 0;
+      if (step === 1) {
         e.preventDefault();
         next();
-      } else if (e.key === "ArrowLeft") {
+      } else if (step === -1) {
         e.preventDefault();
         prev();
       } else if (e.key === " ") {

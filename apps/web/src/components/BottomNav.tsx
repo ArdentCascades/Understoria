@@ -30,6 +30,7 @@ import {
   type IconProps,
 } from "@/components/visual";
 import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
+import { inlineStep, isRtl } from "@/lib/direction";
 
 interface NavItem {
   to: string;
@@ -68,32 +69,28 @@ const ITEMS: NavItem[] = [
 // whole document. Standard pattern for nav menubars.
 function handleArrowNav(e: KeyboardEvent<HTMLAnchorElement>) {
   const key = e.key;
-  if (
-    key !== "ArrowRight" &&
-    key !== "ArrowLeft" &&
-    key !== "ArrowUp" &&
-    key !== "ArrowDown" &&
-    key !== "Home" &&
-    key !== "End"
-  ) {
-    return;
-  }
+  const isEdgeKey = key === "Home" || key === "End";
+  // Both axes always work. The bar is horizontal on mobile and a
+  // vertical rail at lg+, and honoring both pairs everywhere beats
+  // trying to detect the rendered orientation from inside a key
+  // handler. Which way Right/Left point depends on the reading
+  // direction — under RTL the next item is to the LEFT (see
+  // lib/direction.ts).
+  const step = isEdgeKey ? 0 : inlineStep(key, isRtl(e.currentTarget));
+  if (!isEdgeKey && step === 0) return;
   const list = e.currentTarget.closest("ul");
   if (!list) return;
   const links = Array.from(list.querySelectorAll<HTMLAnchorElement>("a"));
   if (links.length === 0) return;
   const idx = links.indexOf(e.currentTarget);
   e.preventDefault();
+  // Home/End are the FIRST and LAST item in reading order, which is
+  // also what the DOM order is — no mirroring, the same way a text
+  // caret's Home goes to the start of the line in either direction.
   let next: HTMLAnchorElement;
-  // Both axes always work: Right/Down advance, Left/Up go back. The
-  // bar is horizontal on mobile and a vertical rail at lg+, and
-  // honoring both pairs everywhere beats trying to detect the
-  // rendered orientation from inside a key handler.
   if (key === "Home") next = links[0];
   else if (key === "End") next = links[links.length - 1];
-  else if (key === "ArrowRight" || key === "ArrowDown")
-    next = links[(idx + 1) % links.length];
-  else next = links[(idx - 1 + links.length) % links.length];
+  else next = links[(idx + step + links.length) % links.length];
   next.focus();
 }
 
@@ -124,12 +121,11 @@ export function BottomNav() {
   // tailwind.config.js) gets the SAME rail, but compact: 3.5rem of
   // CONTENT, ICONS ONLY (there's no room for labels at 390px tall —
   // each link keeps its name via aria-label below, so hiding the text
-  // never strips the accessible name), left safe-area padding for the
-  // notch, and overflow-y-auto so all five items survive a 320px-tall
-  // screen.
+  // never strips the accessible name), safe-area padding for the notch,
+  // and overflow-y-auto so all five items survive a 320px-tall screen.
   //
-  // The rail's width is calc(3.5rem + env(safe-area-inset-left)), NOT
-  // a fixed w-14: with border-box a fixed width would let the notch
+  // The rail's width is calc(3.5rem + <the inset it clears>), NOT a
+  // fixed w-14: with border-box a fixed width would let the notch
   // padding EAT the content box — on an installed PWA in landscape
   // (viewport-fit=cover, inset ≈ 47–59px on notched iPhones) that
   // left a blank 56px strip with every icon clipped by the rail's own
@@ -137,6 +133,16 @@ export function BottomNav() {
   // Padding must ADD to the dimension it protects, exactly like the
   // portrait bar's pb-[env(safe-area-inset-bottom)] adds height to an
   // auto-height bar.
+  //
+  // WHICH inset is a direction question, and the only one in the app
+  // that CSS logical properties can't answer (docs/rtl-plan.md R2).
+  // env(safe-area-inset-left) names a physical edge of the device;
+  // the rail sits at the reading START, which is the left edge in LTR
+  // and the right edge in RTL. So the padding and the width both go
+  // through ltr:/rtl: variants — a matched pair, never both applying,
+  // so there is no cascade to reason about. Making the padding
+  // logical while the inset stayed physical would clear the wrong
+  // edge in Arabic: a rail hugging the notch with its icons under it.
   // No pinned Settings slot here either — it left the lg rail for the
   // me-menu (see the note at the bottom), and landscape-short has even
   // less height to spend than lg does.
@@ -156,10 +162,13 @@ export function BottomNav() {
                  backdrop-blur supports-[backdrop-filter]:bg-white/70
                  dark:border-moss-800 dark:bg-moss-950/95
                  lg:flex lg:w-20 lg:flex-col lg:border-e lg:border-t-0 lg:pb-0
-                 landscape-short:flex landscape-short:w-[calc(3.5rem+env(safe-area-inset-left))] landscape-short:flex-col
+                 landscape-short:flex landscape-short:flex-col
+                 landscape-short:ltr:w-[calc(3.5rem+env(safe-area-inset-left))]
+                 landscape-short:rtl:w-[calc(3.5rem+env(safe-area-inset-right))]
                  landscape-short:overflow-y-auto landscape-short:border-e
                  landscape-short:border-t-0 landscape-short:pb-0
-                 landscape-short:pl-[env(safe-area-inset-left)]"
+                 landscape-short:ltr:pl-[env(safe-area-inset-left)]
+                 landscape-short:rtl:pr-[env(safe-area-inset-right)]"
     >
       <ul className="mx-auto flex max-w-screen-md items-stretch justify-around lg:mx-0 lg:max-w-none lg:flex-col lg:justify-start lg:gap-1 lg:pt-4 landscape-short:mx-0 landscape-short:max-w-none landscape-short:flex-col landscape-short:justify-start landscape-short:gap-1 landscape-short:pt-2">
         {ITEMS.map((item) => (

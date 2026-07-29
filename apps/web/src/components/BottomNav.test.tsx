@@ -93,8 +93,15 @@ describe("BottomNav", () => {
     const nav = container.querySelector("nav")!;
     expect(nav.className).toContain("landscape-short:flex-col");
     expect(nav.className).toContain("landscape-short:overflow-y-auto");
+    // A MATCHED pair, not a physical leftover: the rail sits at the
+    // reading start, so it clears the LEFT device inset in LTR and the
+    // RIGHT one in RTL (docs/rtl-plan.md R2). env() names a physical
+    // edge, so this is the one place a logical property can't answer.
     expect(nav.className).toContain(
-      "landscape-short:pl-[env(safe-area-inset-left)]",
+      "landscape-short:ltr:pl-[env(safe-area-inset-left)]",
+    );
+    expect(nav.className).toContain(
+      "landscape-short:rtl:pr-[env(safe-area-inset-right)]",
     );
   });
 
@@ -111,7 +118,12 @@ describe("BottomNav", () => {
     render();
     const nav = container.querySelector("nav")!;
     expect(nav.className).toContain(
-      "landscape-short:w-[calc(3.5rem+env(safe-area-inset-left))]",
+      "landscape-short:ltr:w-[calc(3.5rem+env(safe-area-inset-left))]",
+    );
+    // …and by the mirrored inset when the rail moves to the other
+    // edge, or an Arabic-speaking member gets the clipped strip back.
+    expect(nav.className).toContain(
+      "landscape-short:rtl:w-[calc(3.5rem+env(safe-area-inset-right))]",
     );
     // The fixed-width form must not return alongside the padding.
     expect(nav.className).not.toContain("landscape-short:w-14");
@@ -131,5 +143,75 @@ describe("BottomNav", () => {
       expect(ariaLabel).not.toBe("");
       expect(ariaLabel).toBe(span?.textContent);
     }
+  });
+});
+
+// Roving arrow navigation, and the direction it roves in. An arrow key
+// carries a PHYSICAL meaning, so unlike everything else in the RTL
+// program CSS can't resolve it: in a right-to-left layout the item to
+// the member's right is the one BEFORE them, and ArrowRight has to go
+// back (WAI-ARIA authoring practices for menubars; docs/rtl-plan.md
+// R2). Up/Down never mirror — the rail is vertical at lg+ and reads
+// top-down in every language.
+describe("BottomNav — arrow navigation follows the reading direction", () => {
+  function links(): HTMLAnchorElement[] {
+    return Array.from(container.querySelectorAll<HTMLAnchorElement>("ul a"));
+  }
+
+  function press(el: HTMLElement, key: string) {
+    act(() => {
+      el.dispatchEvent(
+        new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }),
+      );
+    });
+  }
+
+  afterEach(() => {
+    document.documentElement.removeAttribute("dir");
+  });
+
+  it("LTR: ArrowRight advances, ArrowLeft goes back", () => {
+    document.documentElement.dir = "ltr";
+    render();
+    const [board, dashboard] = links();
+    board.focus();
+    press(board, "ArrowRight");
+    expect(document.activeElement).toBe(dashboard);
+    press(dashboard, "ArrowLeft");
+    expect(document.activeElement).toBe(board);
+  });
+
+  it("RTL: ArrowRight goes back, ArrowLeft advances", () => {
+    document.documentElement.dir = "rtl";
+    render();
+    const [board, dashboard] = links();
+    board.focus();
+    press(board, "ArrowLeft");
+    expect(document.activeElement).toBe(dashboard);
+    press(dashboard, "ArrowRight");
+    expect(document.activeElement).toBe(board);
+  });
+
+  it("wraps around in whichever direction is forward", () => {
+    document.documentElement.dir = "rtl";
+    render();
+    const all = links();
+    const last = all[all.length - 1];
+    last.focus();
+    press(last, "ArrowLeft"); // forward under RTL
+    expect(document.activeElement).toBe(all[0]);
+  });
+
+  it("Up/Down and Home/End do not mirror", () => {
+    document.documentElement.dir = "rtl";
+    render();
+    const all = links();
+    all[0].focus();
+    press(all[0], "ArrowDown");
+    expect(document.activeElement).toBe(all[1]);
+    press(all[1], "End");
+    expect(document.activeElement).toBe(all[all.length - 1]);
+    press(all[all.length - 1], "Home");
+    expect(document.activeElement).toBe(all[0]);
   });
 });

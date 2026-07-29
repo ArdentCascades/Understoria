@@ -193,6 +193,37 @@ describe("Markdown — SAFE block rendering", () => {
     expect(tds[1].className).toContain("text-right");
   });
 
+  // An UNMARKED column has no author intent behind it, so it follows
+  // the reading direction like any other prose — unlike an explicit
+  // `:---`/`---:`, which is a visual choice and stays physical
+  // (docs/rtl-plan.md R2). Before R2 the default was `text-left`, which
+  // would have stranded every plain table in an Arabic document.
+  it("defaults an unaligned column to the reading direction, not to the left", () => {
+    render({ text: "| A | B |\n| --- | --- |\n| a | b |" });
+    const cells = Array.from(
+      container.querySelectorAll<HTMLElement>("thead th, tbody td"),
+    );
+    expect(cells).toHaveLength(4);
+    for (const cell of cells) {
+      expect(cell.className).toContain("text-start");
+      expect(cell.className).not.toContain("text-left");
+    }
+  });
+
+  // Two text-align utilities of equal specificity on one element let
+  // Tailwind's emission order decide the winner. A header cell must
+  // carry exactly the one its column asked for.
+  it("gives a header cell exactly one alignment utility", () => {
+    render({ text: "| L | R | P |\n| :--- | ---: | --- |\n| a | b | c |" });
+    const ths = Array.from(
+      container.querySelectorAll<HTMLElement>("thead th"),
+    );
+    const alignments = ths.map((th) =>
+      th.className.split(/\s+/).filter((c) => /^text-(left|right|center|start|end)$/.test(c)),
+    );
+    expect(alignments).toEqual([["text-left"], ["text-right"], ["text-start"]]);
+  });
+
   it("renders a task list with a disabled, read-only checkbox per item", () => {
     render({ text: "- [x] done\n- [ ] todo" });
     const ul = container.querySelector("ul");

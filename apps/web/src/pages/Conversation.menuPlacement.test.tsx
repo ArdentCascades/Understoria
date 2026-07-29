@@ -284,13 +284,14 @@ describe("ConversationPage — long-press menu placement", () => {
     expect(m).not.toBeNull();
     expect(m!.className).toContain("bottom-full");
     expect(m!.className).toContain("absolute");
-    // Their bubble anchors the overlay to its left edge.
-    expect(m!.className).toContain("left-0");
+    // Their bubble anchors the overlay to its outer edge — the
+    // inline start, which is the left in an LTR locale.
+    expect(m!.className).toContain("start-0");
     // The overlay is a readable card, not transparent over bubbles.
     expect(m!.className).toContain("bg-white");
   });
 
-  it("my own bottom bubble anchors the overlay to the right edge", async () => {
+  it("my own bottom bubble anchors the overlay to the inline-end edge", async () => {
     setInnerHeight(390);
     mockMessages = [
       makeMessage({ id: "m1" }),
@@ -307,7 +308,7 @@ describe("ConversationPage — long-press menu placement", () => {
     setRect(last, 320, 365);
     await openViaContextMenu(last);
     expect(menu()!.className).toContain("bottom-full");
-    expect(menu()!.className).toContain("right-0");
+    expect(menu()!.className).toContain("end-0");
   });
 
   it("a bubble with room below keeps the in-flow downward menu", async () => {
