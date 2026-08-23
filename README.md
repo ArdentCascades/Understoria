@@ -69,6 +69,18 @@ Understoria is a platform where communities exchange help, tracked through **tim
 - **Federation** — Each community runs its own node. Nodes can peer with each other to share needs and offers across groups. No central server, no single point of failure.
 - **Organizing Tools** *(planned)* — Campaign trackers, one-on-one conversation logs, power mapping, and meeting facilitation — connecting mutual aid to collective action. The Organizing Integration module is a future workstream (Agent 7 on the roadmap).
 
+<p align="center">
+  <img src="docs/images/start-a-project-mobile.png"
+       alt="Starting a project on a phone: a gallery of ready-made playbooks to pick from"
+       width="300" />
+</p>
+
+<p align="center">
+  <em>Starting a project from one of 64 playbooks — each arrives with its own
+  task list, hour estimates and suggested first steps, so nobody begins at an
+  empty page.</em>
+</p>
+
 ## Why It Exists
 
 Mutual aid networks are powerful, but they're often held together by spreadsheets, group chats, and the sheer willpower of a few overworked organizers. Understoria gives communities a dedicated tool that's designed for solidarity — not engagement metrics, not ad revenue, not data extraction.
