@@ -94,6 +94,18 @@ The software is built around a few core beliefs:
 - **Privacy is a precondition for organizing.** Workers face real retaliation. The platform protects membership lists, communication patterns, and activity history.
 - **Communities should own their infrastructure.** Federated, self-hosted, open source, cooperatively governed.
 
+<p align="center">
+  <img src="docs/images/gathering-screen.gif"
+       alt="The gathering screen rotating through community slides, each a headline and a QR code to scan"
+       width="720" />
+</p>
+
+<p align="center">
+  <em>Understoria's members are often in the same room. The gathering screen is
+  built for that: a TV in the corner, and every slide one thing someone present
+  can do, with the QR code to do it.</em>
+</p>
+
 ## Quick Start
 
 ### Run locally (development)
