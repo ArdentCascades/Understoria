@@ -86,6 +86,18 @@ Understoria is a platform where communities exchange help, tracked through **tim
 
 Mutual aid networks are powerful, but they're often held together by spreadsheets, group chats, and the sheer willpower of a few overworked organizers. Understoria gives communities a dedicated tool that's designed for solidarity — not engagement metrics, not ad revenue, not data extraction.
 
+<p align="center">
+  <img src="docs/images/calendar-views.gif"
+       alt="The community calendar cycling through its agenda, month and week views, with potlucks, hikes and game nights on it"
+       width="320" />
+</p>
+
+<p align="center">
+  <em>Agenda, month, week. Potlucks, hikes, welcome gatherings, game nights —
+  the shared occasions that turn a list of neighbours into people who know each
+  other.</em>
+</p>
+
 The software is built around a few core beliefs:
 
 - **All labor has equal value.** Emotional support counts as much as plumbing.
