@@ -77,15 +77,32 @@ Understoria is a platform where communities exchange help, tracked through **tim
 
 **Post what you need. Offer what you can. Build collective power.**
 
+<!-- Grouped by the question an organizer is actually asking —
+     what members do with it, what holds the group together, what it
+     takes to run. Twelve equal-weight bullets answered none of those
+     in order (docs/readme-plan.md R3). -->
+
+### What people do with it
+
 - **Community Board** — Post needs and offers across categories like transport, food, childcare, skilled labor, emotional support, education, and more.
 - **Community Projects** — Collective efforts with task lists, starter templates, co-organizer invitations, task ordering and soft dependencies, and a page per task for its discussion thread. The **In my care** tab (`/my-work`) gathers every task you're carrying, shift you've signed up for, need you've claimed, and project in your care, across projects.
 - **Timebank Credits** — Every exchange earns and spends time credits. New members start with seed credits so asking for help is never gated. Project-task credit records the hours actually given, not the estimate.
-- **Collective Dashboard** — See your community's total hours exchanged, active members, solidarity streaks, and milestones. The unit of progress is *us*, not *me*.
+
+### What holds a group together
+
 - **Community Calendar** — Project deadlines, post expiries, and federated events (skillshares, potlucks, work days) in one agenda / month / week view, with event templates for common gatherings and a per-event "Add to calendar" `.ics` export.
+- **Collective Dashboard** — See your community's total hours exchanged, active members, solidarity streaks, and milestones. The unit of progress is *us*, not *me*.
 - **Gathering Screen** — A fullscreen display for a shared screen in the room: a TV in the corner of a repair café, a laptop propped on a table at a skillshare. It rotates through upcoming events, claimable tasks, and open needs and offers, and puts a QR code on every slide so anyone present can RSVP, claim the task, or message whoever posted — from their own phone, in one scan.
+- **Achievements as Roles** — Earn community roles like Connector, Bridge
+  Builder and Listener. These are not scores and there is no leaderboard:
+  `no-leaderboards` is one of the twelve named design principles the app
+  holds itself to, and tapping "why" on a surface that could have shown a
+  ranking explains what happened to the platforms that did.
 - **Member Blocking** — A local-only personal-relief surface for stopping unwanted contact, parallel to (and independent of) the community dispute process.
+
+### Who can join, and who runs it
+
 - **Invite-only mode** — Operators can flip the node from open-onboarding to invite-only at any time; the existing signed-invite redemption path stays the only way in.
-- **Achievements as Roles** — Earn community roles like Connector, Bridge Builder, and Listener — recognition without ranking.
 <!-- Eight languages: apps/web/src/i18n/languages.ts (LANGUAGES).
      Six carry reviewStatus: "new". Guarded by
      apps/web/src/lib/readme.guard.test.ts — update both together. -->
@@ -95,6 +112,9 @@ Understoria is a platform where communities exchange help, tracked through **tim
   templates. Six are newly translated and have not yet been read by a native
   speaker — the app says so in Settings rather than pretending otherwise.
 - **Federation** — Each community runs its own node. Nodes can peer with each other to share needs and offers across groups. No central server, no single point of failure.
+
+### Not built yet
+
 - **Organizing Tools** *(planned)* — Campaign trackers, one-on-one conversation logs, power mapping, and meeting facilitation — connecting mutual aid to collective action. Not built yet; it is a named workstream on the [roadmap](docs/roadmap.md).
 
 <p align="center">
@@ -170,6 +190,27 @@ The software is built around a few core beliefs:
 - **Collective progress matters more than individual scores.** The dashboard celebrates the community, not the top contributors.
 - **Privacy is a precondition for organizing.** Workers face real retaliation. The platform protects membership lists, communication patterns, and activity history.
 - **Communities should own their infrastructure.** Federated, self-hosted, open source, cooperatively governed.
+
+<!-- Twelve principles: apps/web/src/content/design-principles.ts.
+     The five beliefs above are the prose version of five of them.
+     Guarded by apps/web/src/lib/readme.guard.test.ts — if the count
+     changes, change it here too. -->
+
+Those five are the prose version of something more specific. The app
+holds itself to **twelve named design principles** — `equal-time`,
+`no-leaderboards`, `no-notifications`, `solidarity-not-shame`,
+`asking-never-gated`, `privacy-precondition` and six more — each with a
+statement and a piece of history behind it. They are not a manifesto
+filed somewhere. Thirty-one screens carry a **"why"** control, and where
+a surface could plausibly have shown a score, a ranking or a read
+receipt, tapping it tells the member what happened to the platforms that
+did. The `no-leaderboards` entry, for
+instance, cites Couchsurfing's reputation score and who it froze out.
+
+They live in
+[`apps/web/src/content/design-principles.ts`](apps/web/src/content/design-principles.ts),
+which is where to change them — the list above is prose, that file is
+the source of truth.
 
 <p align="center">
   <img src="docs/images/gathering-screen.gif"

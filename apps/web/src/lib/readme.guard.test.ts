@@ -47,10 +47,20 @@ const WORDS = [
   "eight",
   "nine",
   "ten",
+  "eleven",
+  "twelve",
 ] as const;
 
+/** Counts above the small-number range the README spells out in words. */
+const BIG_WORDS: Record<number, string> = {
+  30: "thirty",
+  31: "thirty-one",
+  32: "thirty-two",
+  33: "thirty-three",
+};
+
 function word(n: number): string {
-  return WORDS[n] ?? String(n);
+  return WORDS[n] ?? BIG_WORDS[n] ?? String(n);
 }
 
 /** Every package.json in the workspace, as one dependency name set. */
@@ -115,6 +125,36 @@ describe("README: claims the code decides", () => {
   it("states the vouch threshold correctly", () => {
     expect(README).toContain(
       `${word(MINIMUM_VOUCHES_FOR_TRUST)} vouches`,
+    );
+  });
+
+  it("states the number of design principles correctly", () => {
+    const src = readFileSync(
+      join(ROOT, "apps", "web", "src", "content", "design-principles.ts"),
+      "utf8",
+    );
+    const count = (src.match(/^ {4}id: "/gm) ?? []).length;
+    expect(count, "no principles found — did the file move?").toBeGreaterThan(0);
+    expect(README).toContain(`${word(count)} named design principles`);
+  });
+
+  it("states how many screens carry the why control correctly", () => {
+    // The member-facing half of the principles claim: a "why" control on
+    // the surfaces that could have shown a score or a ranking.
+    const webSrc = join(ROOT, "apps", "web", "src");
+    let screens = 0;
+    const walk = (dir: string) => {
+      for (const name of readdirSync(dir, { withFileTypes: true })) {
+        const full = join(dir, name.name);
+        if (name.isDirectory()) walk(full);
+        else if (name.name.endsWith(".tsx") && readFileSync(full, "utf8").includes("WhyTooltip"))
+          screens += 1;
+      }
+    };
+    walk(webSrc);
+    // Case-insensitive: prose may open a sentence with the number.
+    expect(README.toLowerCase()).toContain(
+      `${word(screens)} screens carry`.toLowerCase(),
     );
   });
 
