@@ -66,9 +66,17 @@ Understoria is a platform where communities exchange help, tracked through **tim
 - **Member Blocking** — A local-only personal-relief surface for stopping unwanted contact, parallel to (and independent of) the community dispute process. Blocks never federate, never aggregate, never signal anything to the blocked party.
 - **Invite-only mode** — Operators can flip the node from open-onboarding to invite-only at any time; the existing signed-invite redemption path stays the only way in.
 - **Achievements as Roles** — Earn community roles like Connector, Bridge Builder, and Listener — recognition without ranking.
+<!-- Eight languages: apps/web/src/i18n/languages.ts (LANGUAGES).
+     Six carry reviewStatus: "new". Guarded by
+     apps/web/src/lib/readme.guard.test.ts — update both together. -->
+- **Eight languages** — English, Spanish, French, Portuguese, Chinese, Hindi,
+  Vietnamese and Russian, each with the whole authored corpus translated, not
+  just the buttons: the help pages, the project playbooks, the event
+  templates. Six are newly translated and have not yet been read by a native
+  speaker — the app says so in Settings rather than pretending otherwise.
 - **End-to-End Encryption** — Key-pair identity, signed transactions, encrypted messaging. No email or phone number required.
 - **Federation** — Each community runs its own node. Nodes can peer with each other to share needs and offers across groups. No central server, no single point of failure.
-- **Organizing Tools** *(planned)* — Campaign trackers, one-on-one conversation logs, power mapping, and meeting facilitation — connecting mutual aid to collective action. The Organizing Integration module is a future workstream (Agent 7 on the roadmap).
+- **Organizing Tools** *(planned)* — Campaign trackers, one-on-one conversation logs, power mapping, and meeting facilitation — connecting mutual aid to collective action. Not built yet; it is a named workstream on the [roadmap](docs/roadmap.md).
 
 <p align="center">
   <img src="docs/images/start-a-project-mobile.png"
@@ -175,29 +183,19 @@ and full env-var reference are in the
 
 ### Other ways in
 
-- **Linux desktop app (AppImage)** — the same member app in one
-  carryable file, no installed browser required. Because it loads
-  from local disk it can join a node that has never been online —
-  a laptop-sized dent in the born-offline gap. Built by CI on every
-  change; design and security posture in
-  [docs/desktop-appimage.md](docs/desktop-appimage.md).
-- **Install from a flash drive** — `scripts/make-flash-drive.sh`
-  packs images, source, docs, and (optionally) the node's sealed
-  keys onto a USB drive; `START-HERE.sh` on the drive provisions or
-  restores a node with no internet at install time. Runbook:
-  [docs/flash-drive-install.md](docs/flash-drive-install.md).
+Understoria also ships as a **Linux desktop AppImage** (one carryable
+file, no browser required, able to join a node that has never been
+online) and can be **installed from a flash drive** with no internet at
+install time. Both have their own runbooks:
+[desktop-appimage.md](docs/desktop-appimage.md) and
+[flash-drive-install.md](docs/flash-drive-install.md).
 
-The Node.js community server is shipped: signed-record ingestion
-with verification, the federation pull loop between peer nodes,
-and Docker deployment (see the operator guide above and
-[deploy-linode.md](docs/deploy-linode.md) for the full runbook).
-Prefer rootless Podman, bare metal + systemd, or a proxy other than
-Caddy? See [deploy-alternatives.md](docs/deploy-alternatives.md).
-Every deployed node also serves its own source code at `/source/`
-(AGPL §13 with no third-party dependency — operator guide §7a), so
-communities can inspect, mirror, and bootstrap from each other even
-if this repository's host disappears — the step-by-step walkthrough
-is [bootstrap-from-a-node.md](docs/bootstrap-from-a-node.md).
+Every deployed node serves its own source at `/source/` (AGPL §13, no
+third-party dependency), so communities can inspect, mirror and bootstrap
+from each other even if this repository's host disappears —
+[bootstrap-from-a-node.md](docs/bootstrap-from-a-node.md) walks it
+through. Deploying without Docker is covered in
+[deploy-alternatives.md](docs/deploy-alternatives.md).
 
 ## Architecture
 
@@ -234,38 +232,11 @@ is [bootstrap-from-a-node.md](docs/bootstrap-from-a-node.md).
 - **Federation** — Nodes peer voluntarily. Shared needs/offers broadcast across the network. Cross-node exchanges recorded on both sides.
 - **Sync** — CRDT-based data model. Nodes operate independently when disconnected, reconcile when reconnected.
 
-### Tech Stack
+### Tech stack and repository layout
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React, TypeScript, Tailwind CSS, Workbox (PWA) |
-| Local Storage | IndexedDB (Dexie.js) |
-| Backend | Node.js (Fastify) |
-| Database | SQLite + SQLCipher |
-| Crypto | tweetnacl / libsodium.js (Ed25519, X25519, XSalsa20-Poly1305) |
-| Federation | ActivityPub-inspired protocol, CRDTs |
-| Deployment | Docker, single-command deploy |
-
-## Project Structure
-
-```
-understoria/
-├── apps/
-│   ├── web/                 # React PWA (main client)
-│   └── server/              # Node.js community server
-├── packages/
-│   └── shared/              # Shared types, crypto (signing,
-│                            #   E2E encryption), canonical payloads
-├── docs/
-│   ├── member-guide.md      # How to use the app
-│   ├── operator-guide.md    # How to deploy a node
-│   ├── organizer-guide.md   # How to introduce to a group
-│   ├── threat-model.md      # Security analysis
-│   └── political-education/ # History of mutual aid + timebanking
-├── docker-compose.yml
-├── LICENSE                  # AGPL-3.0-or-later
-└── README.md
-```
+Both live in the [Developer Guide](docs/developer-guide.md) — §1 Project
+layout and §2 Tech stack — which is the canonical copy and stays current
+with the code.
 
 ## Documentation
 
@@ -299,8 +270,10 @@ Sign off every commit with `git commit -s`.
 
 - **Frontend development** — React, TypeScript, accessibility, responsive design
 - **Cryptography review** — Audit the identity and encryption implementations
-- **Federation protocol** — Design and test node-to-node communication (Agent 3)
-- **Documentation** — Guides, tutorials, and translations (especially Spanish)
+- **Federation protocol** — Design and test node-to-node communication
+- **Documentation** — Guides, tutorials, and translation review. The app
+  ships in eight languages; six of them have not yet been read by a native
+  speaker, and that review is some of the most useful work going
 - **Community testing** — If you're part of a mutual aid network or organizing group and want to pilot Understoria, we want to hear from you
 - **Design** — UI/UX, illustrations, iconography that signals solidarity without being cheesy
 
@@ -314,64 +287,32 @@ We make decisions through modified consensus. Major decisions go through a commu
 
 ## Roadmap
 
-The full agent-by-agent decomposition, including ordering rationale
-and open design questions, lives in [`docs/roadmap.md`](docs/roadmap.md).
-The phase view below is a public summary.
+<!-- Deliberately a summary. The phase-by-phase breakdown, the ordering
+     rationale and the open design questions live in docs/roadmap.md,
+     which is the single source of truth — do not re-expand it here. A
+     second copy is how this section came to claim the app had one
+     translation while it shipped eight. -->
 
-### Phase 1: Foundations
-- [x] Project plan and architecture
-- [x] Core PWA with community board, exchange flow, and credits
-- [x] Threat model and security hardening plan
-- [x] Code of Conduct and governance draft
-- [ ] Paper prototype testing with pilot communities
+The work is decomposed into numbered workstreams; what each one owns,
+what is done, and in what order it unblocks the rest is in
+[`docs/roadmap.md`](docs/roadmap.md). In outline:
 
-### Phase 2: Hardening *(active)*
-- [x] Ed25519 key-pair identity and signed exchange transactions
-- [x] Cryptographic invites + web-of-trust vouching
-- [x] Passphrase-wrapped private keys
-- [x] Panic button (soft + hard purge)
-- [x] Anti-gaming safeguards
-- [x] Milestones, achievements, solidarity streaks
-- [x] Member guide and operator guide drafts
-- [x] End-to-end encrypted messaging
-- [x] Device pairing — same-identity transfer to a second device via local QR + one-time passphrase, with fingerprint verification and a paired-device inventory on Profile
-- [x] Community calendar — agenda / month / week view aggregating project deadlines, post expiries, and exchange density (5th bottom-nav tab)
-- [x] Community events — federated signed `Event` + `EventCancellation` records, RSVPs as signed records that sync through your own community's node (never relayed to peers), comparison-card create flow, attention-rail integration, and an "Events only" calendar filter
-- [x] Member blocking — local-only personal-relief surface with informed-consent comparison card, per-block governance-visibility toggle, paired-device transfer, and tap-to-reveal Settings panel
-- [x] Invite-only mode — `nodeConfig.inviteOnly` flag with first-member bootstrap exception for fresh deployments
-- [x] Task ordering + soft-block dependencies — drag / Move buttons / Reorder modal for organisers; `Follows:` framing + claimant ack line + chip suppression for structurally-blocked tasks; ordering and dependencies ride the signed `TaskState` records, so they sync between members' devices like the rest of the task row
-
-### Phase 3: Federation *(active)*
-- [x] Community node server with Docker deployment
-- [x] Signed-exchange verification on the server
-- [x] Spanish translation
-- [x] Federation protocol and cross-node exchanges (server endpoints, pull loop, PWA surfacing done; full lifecycle sync pending)
-- [x] Posts / vouches / redemption-receipt endpoints on the server (the earlier invites endpoint was deliberately removed — open invites never cross any wire; redemption receipts replaced it)
-- [x] Per-task comment threads + federation (signed, tombstone-merge soft delete) + community flag-for-review via the existing disputes surface
-- [ ] Organizing module: campaigns, power mapping, meeting tools
-
-### Phase 4: Launch
-- [ ] Pilot deployment with 3 communities
-- [ ] Workshop curriculum and training sessions
-- [ ] v1.0 release
-
-### Phase 5: Commons governance *(planned)*
-
-Staged additions based on Elinor Ostrom's design principles for
-governing the commons, plus standalone additions drawn from the
-Kerala model and the potlatch tradition. See
-[`docs/roadmap.md`](docs/roadmap.md#agents-11--15-ostrom-commons-extension)
-for the full breakdown, the items that were absorbed into existing
-agents, and the items that are deferred behind explicit gates.
-
-- [x] Per-node configuration + operator transparency (Agent 11)
-- [x] In-app onboarding & political literacy (Agent 16)
-- [x] Breadth & reciprocity Dashboard additions (Agent 18a)
-- [x] Shared "Decisions" surface for proposals, disputes, and recall (Agents 13 + 14, with reversibility tiers folded in)
-- [ ] Moderation queue and graduated sanctions (Agent 12)
-- [ ] Per-peer federation agreements (Agent 15)
-
-Phase 5 does not block Phase 4 — a v1.0 pilot can ship with Agents 11 and 16 only.
+- **Foundations** — *shipped.* Core PWA, community board, exchange flow,
+  time credits, threat model, governance draft.
+- **Hardening** — *shipped.* Key-pair identity, signed exchanges,
+  cryptographic invites and web-of-trust vouching, passphrase-wrapped
+  keys, the panic button, end-to-end encrypted messaging, device
+  pairing, the calendar and community events, member blocking.
+- **Federation** — *active.* Community node server, signed-record
+  verification, the pull loop between peer nodes, per-task comment
+  threads. Full lifecycle sync and the organizing module (campaigns,
+  power mapping, meeting tools) are the open pieces.
+- **Launch** — *next.* Pilot deployment with three communities, workshop
+  curriculum, v1.0.
+- **Commons governance** — *staged,* following Elinor Ostrom's design
+  principles. Per-node configuration, in-app political literacy and the
+  shared Decisions surface have shipped; the moderation queue and
+  per-peer federation agreements have not. It does not block Launch.
 
 ## Ethical Use
 
@@ -385,7 +326,11 @@ While the AGPL license grants broad usage rights, we ask that anyone who deploys
 
 Understoria stands on the shoulders of movements and thinkers who came before: from Peter Kropotkin's *Mutual Aid* to the Black Panther Party's survival programs, from Edgar Cahn's timebanking work to the countless mutual aid networks that emerged during the COVID-19 pandemic. This software is a small contribution to a very old tradition.
 
-We also owe a debt to the open-source projects that make this possible: [Matrix](https://matrix.org), [Mastodon](https://joinmastodon.org), [Signal](https://signal.org), [Automerge](https://automerge.org), and many others.
+We also owe a debt to the open-source projects that make this possible:
+[Matrix](https://matrix.org), [Mastodon](https://joinmastodon.org) and
+[Signal](https://signal.org), and to [Automerge](https://automerge.org),
+whose work on convergent data shaped how this project thinks about sync
+even though the convergent records here are its own.
 
 ## License
 
