@@ -26,6 +26,12 @@
   <img src="https://img.shields.io/badge/built%20with-solidarity-e34c4c" alt="Built with solidarity" />
 </p>
 
+<p align="center">
+  <img src="docs/images/board-tabs.gif"
+       alt="The community board cycling through its Needs, Offers and Projects tabs, each showing the posts a neighbour would see"
+       width="720" />
+</p>
+
 ---
 
 ## Project Status
