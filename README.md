@@ -11,9 +11,11 @@
 
 <p align="center">
   <a href="#project-status">Project Status</a> •
+  <a href="#start-here">Start Here</a> •
   <a href="#what-it-does">What It Does</a> •
+  <a href="#what-protects-you">What Protects You</a> •
   <a href="#why-it-exists">Why It Exists</a> •
-  <a href="#quick-start">Quick Start</a> •
+  <a href="#run-it-yourself">Run It Yourself</a> •
   <a href="#architecture">Architecture</a> •
   <a href="#contributing">Contributing</a> •
   <a href="#community">Community</a> •
@@ -51,19 +53,37 @@
 > Per the [AGPL-3.0-or-later license](LICENSE), the software is provided
 > **without warranty of any kind**.
 
+<!-- The router. Three audiences, one file, because GitHub renders one
+     README: an organizer README that is not README.md goes unread.
+     Keep these three rows in this order — an organizer is the reader
+     the tagline claims, and used to reach `git clone` before anything
+     addressed to them (docs/readme-plan.md). -->
+
+## Start here
+
+| If you are… | Go to |
+|---|---|
+| **Running a mutual aid group** and wondering whether this fits — or how to introduce it without wrecking the trust you already have | [Organizer's Guide](docs/organizer-guide.md) |
+| **Hosting a node** for a community | [Node Operator Guide](docs/operator-guide.md), or [Quickstart](docs/quickstart.md) for a first VM |
+| **Writing code**, reviewing the crypto, or translating | [Developer Guide](docs/developer-guide.md) and [CONTRIBUTING.md](CONTRIBUTING.md) |
+
+Already a member of a community that uses Understoria? The
+[Member Guide](docs/member-guide.md) is the one for you, and the app
+itself has a Help tab that says the same things.
+
 ## What It Does
 
 Understoria is a platform where communities exchange help, tracked through **time credits**. One hour of help equals one hour of help — regardless of the type of work. No market pricing, no hierarchy, no algorithms deciding who gets support.
 
 **Post what you need. Offer what you can. Build collective power.**
 
-- **Community Board** — Post needs and offers across categories like transport, food, childcare, skilled labor, emotional support, education, and more. Descriptions and comments render a safe Markdown subset (bold, lists, links, tables) with no HTML injection path by construction.
+- **Community Board** — Post needs and offers across categories like transport, food, childcare, skilled labor, emotional support, education, and more.
 - **Community Projects** — Collective efforts with task lists, starter templates, co-organizer invitations, task ordering and soft dependencies, and a page per task for its discussion thread. The **In my care** tab (`/my-work`) gathers every task you're carrying, shift you've signed up for, need you've claimed, and project in your care, across projects.
 - **Timebank Credits** — Every exchange earns and spends time credits. New members start with seed credits so asking for help is never gated. Project-task credit records the hours actually given, not the estimate.
 - **Collective Dashboard** — See your community's total hours exchanged, active members, solidarity streaks, and milestones. The unit of progress is *us*, not *me*.
-- **Community Calendar** — Project deadlines, post expiries, and federated events (skillshares, potlucks, work days) in one agenda / month / week view, with event templates for common gatherings and a per-event "Add to calendar" `.ics` export (client-side only — no subscription URLs, ever). RSVPs stay on the node where they happen; nothing federates a member-attendance graph.
-- **Gathering Screen** — A fullscreen display for a shared screen in the room: a TV in the corner of a repair café, a laptop propped on a table at a skillshare. It rotates through upcoming events, claimable tasks, and open needs and offers, and puts a QR code on every slide so anyone present can RSVP, claim the task, or message whoever posted — from their own phone, in one scan. Read-only by design: the screen never changes anything, and shows only what is already public.
-- **Member Blocking** — A local-only personal-relief surface for stopping unwanted contact, parallel to (and independent of) the community dispute process. Blocks never federate, never aggregate, never signal anything to the blocked party.
+- **Community Calendar** — Project deadlines, post expiries, and federated events (skillshares, potlucks, work days) in one agenda / month / week view, with event templates for common gatherings and a per-event "Add to calendar" `.ics` export.
+- **Gathering Screen** — A fullscreen display for a shared screen in the room: a TV in the corner of a repair café, a laptop propped on a table at a skillshare. It rotates through upcoming events, claimable tasks, and open needs and offers, and puts a QR code on every slide so anyone present can RSVP, claim the task, or message whoever posted — from their own phone, in one scan.
+- **Member Blocking** — A local-only personal-relief surface for stopping unwanted contact, parallel to (and independent of) the community dispute process.
 - **Invite-only mode** — Operators can flip the node from open-onboarding to invite-only at any time; the existing signed-invite redemption path stays the only way in.
 - **Achievements as Roles** — Earn community roles like Connector, Bridge Builder, and Listener — recognition without ranking.
 <!-- Eight languages: apps/web/src/i18n/languages.ts (LANGUAGES).
@@ -74,7 +94,6 @@ Understoria is a platform where communities exchange help, tracked through **tim
   just the buttons: the help pages, the project playbooks, the event
   templates. Six are newly translated and have not yet been read by a native
   speaker — the app says so in Settings rather than pretending otherwise.
-- **End-to-End Encryption** — Key-pair identity, signed transactions, encrypted messaging. No email or phone number required.
 - **Federation** — Each community runs its own node. Nodes can peer with each other to share needs and offers across groups. No central server, no single point of failure.
 - **Organizing Tools** *(planned)* — Campaign trackers, one-on-one conversation logs, power mapping, and meeting facilitation — connecting mutual aid to collective action. Not built yet; it is a named workstream on the [roadmap](docs/roadmap.md).
 
@@ -89,6 +108,44 @@ Understoria is a platform where communities exchange help, tracked through **tim
   task list, hour estimates and suggested first steps, so nobody begins at an
   empty page.</em>
 </p>
+
+## What protects you
+
+<!-- These facts were each buried at the end of a feature bullet, where
+     they read as jargon rather than as the reassurance they are. One
+     copy only — the technical statement of the same posture lives in
+     docs/threat-model.md, which this points at rather than repeats. -->
+
+"Privacy is a precondition for organizing" is one of the beliefs below,
+and workers face real retaliation. These are the specific things the
+software does about it, in plain terms:
+
+- **No email, no phone number, no account with anyone.** Your identity
+  is a key pair generated on your device. There is nothing to hand over
+  because there is nothing collected.
+- **Messages are end-to-end encrypted,** and every exchange is signed by
+  both parties, so a record can be verified without trusting the server
+  that stored it.
+- **The node keeps no IP addresses.** Rate limiting only ever hashes
+  them. The one exception is the reverse proxy's own rotating access
+  log, which operators are told to keep short-lived.
+- **No attendance graph, anywhere.** RSVPs stay on the node where they
+  happen and are never relayed to peer nodes. Who showed up to what is
+  not a thing this software assembles.
+- **Blocking is yours alone.** Blocks never federate, never aggregate,
+  and never signal anything to the person blocked.
+- **The screen in the room can't leak.** The gathering screen is
+  read-only and shows only what is already public — it never changes
+  anything and never displays private data.
+- **Member-authored text cannot inject anything.** Descriptions and
+  comments render a safe Markdown subset — bold, lists, links, tables —
+  with no HTML path by construction.
+- **Data is encrypted at rest** (SQLCipher), and there is a panic button
+  for emergency purge, soft or hard.
+
+None of this has had an independent security audit yet — see Project
+Status above. The full analysis, including what is *not* protected, is
+in the [Threat Model](docs/threat-model.md).
 
 ## Why It Exists
 
@@ -126,7 +183,12 @@ The software is built around a few core beliefs:
   can do, with the QR code to do it.</em>
 </p>
 
-## Quick Start
+## Run it yourself
+
+> For developers and node operators. If you are deciding whether to
+> bring Understoria to a community, the [Organizer's
+> Guide](docs/organizer-guide.md) is the better door — you do not need
+> to run any of this to make that decision.
 
 ### Run locally (development)
 
@@ -228,7 +290,9 @@ through. Deploying without Docker is covered in
 - **Identity** — Ed25519 key pairs. No email, no phone number, no external identity provider. Your public key is your identity.
 - **Trust** — Web-of-trust vouching. New members need two vouches from existing members. Mirrors how real organizing works.
 - **Transactions** — Every exchange is signed by both parties. Verifiable by any node without a central authority.
-- **Data** — Encrypted at rest (SQLCipher). Minimal logging. The app server stores no IP addresses (rate limiting only ever hashes them); the one exception is the reverse proxy's rotating access log, which operators keep short-lived — see the privacy policy §5. Panic button for emergency data purge.
+- **Data** — Encrypted at rest (SQLCipher), minimal logging, no stored IP
+  addresses. Stated plainly under [What protects you](#what-protects-you);
+  the reverse-proxy log exception is privacy policy §5.
 - **Federation** — Nodes peer voluntarily. Shared needs/offers broadcast across the network. Cross-node exchanges recorded on both sides.
 - **Sync** — CRDT-based data model. Nodes operate independently when disconnected, reconcile when reconnected.
 
