@@ -178,6 +178,26 @@ describe("README: structure that keeps it maintainable", () => {
     expect(broken).toEqual([]);
   });
 
+  it("every in-page anchor points at a heading that exists", () => {
+    // The table of contents at the top is hand-maintained, and renaming
+    // a section silently breaks it — "Quick Start" became "Run it
+    // yourself" and the link kept pointing at nothing. GitHub's slug
+    // rule: lowercase, spaces to hyphens, punctuation dropped.
+    const slugs = new Set(
+      [...README.matchAll(/^#{2,3} (.+)$/gm)].map((m) =>
+        m[1]
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, "")
+          .trim()
+          .replace(/\s+/g, "-"),
+      ),
+    );
+    const dangling = [...README.matchAll(/href="#([a-z0-9-]+)"/g)]
+      .map((m) => m[1])
+      .filter((a) => !slugs.has(a));
+    expect(dangling).toEqual([]);
+  });
+
   it("keeps the roadmap a summary rather than a second copy", () => {
     // docs/roadmap.md is the source of truth. The README's roadmap was
     // once a 61-line paste of it, which is exactly where the stale
