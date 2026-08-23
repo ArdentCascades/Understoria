@@ -62,6 +62,7 @@ Understoria is a platform where communities exchange help, tracked through **tim
 - **Timebank Credits** — Every exchange earns and spends time credits. New members start with seed credits so asking for help is never gated. Project-task credit records the hours actually given, not the estimate.
 - **Collective Dashboard** — See your community's total hours exchanged, active members, solidarity streaks, and milestones. The unit of progress is *us*, not *me*.
 - **Community Calendar** — Project deadlines, post expiries, and federated events (skillshares, potlucks, work days) in one agenda / month / week view, with event templates for common gatherings and a per-event "Add to calendar" `.ics` export (client-side only — no subscription URLs, ever). RSVPs stay on the node where they happen; nothing federates a member-attendance graph.
+- **Gathering Screen** — A fullscreen display for a shared screen in the room: a TV in the corner of a repair café, a laptop propped on a table at a skillshare. It rotates through upcoming events, claimable tasks, and open needs and offers, and puts a QR code on every slide so anyone present can RSVP, claim the task, or message whoever posted — from their own phone, in one scan. Read-only by design: the screen never changes anything, and shows only what is already public.
 - **Member Blocking** — A local-only personal-relief surface for stopping unwanted contact, parallel to (and independent of) the community dispute process. Blocks never federate, never aggregate, never signal anything to the blocked party.
 - **Invite-only mode** — Operators can flip the node from open-onboarding to invite-only at any time; the existing signed-invite redemption path stays the only way in.
 - **Achievements as Roles** — Earn community roles like Connector, Bridge Builder, and Listener — recognition without ranking.
@@ -92,6 +93,18 @@ The software is built around a few core beliefs:
 - **Collective progress matters more than individual scores.** The dashboard celebrates the community, not the top contributors.
 - **Privacy is a precondition for organizing.** Workers face real retaliation. The platform protects membership lists, communication patterns, and activity history.
 - **Communities should own their infrastructure.** Federated, self-hosted, open source, cooperatively governed.
+
+<p align="center">
+  <img src="docs/images/gathering-screen.gif"
+       alt="The gathering screen rotating through community slides, each a headline and a QR code to scan"
+       width="720" />
+</p>
+
+<p align="center">
+  <em>Understoria's members are often in the same room. The gathering screen is
+  built for that: a TV in the corner, and every slide one thing someone present
+  can do, with the QR code to do it.</em>
+</p>
 
 ## Quick Start
 
