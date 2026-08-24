@@ -14,6 +14,7 @@
   <a href="#start-here">Start Here</a> •
   <a href="#what-it-does">What It Does</a> •
   <a href="#what-protects-you">What Protects You</a> •
+  <a href="#why-nothing-buzzes">Why Nothing Buzzes</a> •
   <a href="#why-it-exists">Why It Exists</a> •
   <a href="#run-it-yourself">Run It Yourself</a> •
   <a href="#architecture">Architecture</a> •
@@ -101,11 +102,10 @@ Understoria is a platform where communities exchange help, tracked through **tim
 - **Member Blocking** — A local-only personal-relief surface for stopping unwanted contact, parallel to (and independent of) the community dispute process.
 - **The attention rail** — Open the app and the top of the board says what
   needs you: a task someone finished and is waiting on you to confirm, a
-  thing you claimed a while back that you can quietly hand back. It is the
-  reason there are no push notifications to turn off. `no-notifications` is
-  one of the principles below, and the rail is what makes keeping it safe —
-  nothing chases you, and nothing is lost while you are away. Releasing
-  something you can no longer carry leaves no record.
+  thing you claimed a while back that you can quietly hand back. It is what
+  the app does instead of notifying you — see
+  [Why nothing buzzes](#why-nothing-buzzes) for what that buys and what it
+  costs. Releasing something you can no longer carry leaves no record.
 
 <p align="center">
   <img src="docs/images/attention-rail.gif"
@@ -114,9 +114,8 @@ Understoria is a platform where communities exchange help, tracked through **tim
 </p>
 
 <p align="center">
-  <em>What needs you, when you open the app — and nothing when you don't.
-  The "why?" beside the heading explains why there are no notifications
-  here, and what happened to the platforms that had them.</em>
+  <em>What needs you, when you open the app. The "why?" beside the heading
+  explains why nothing buzzed to get you here.</em>
 </p>
 
 
@@ -186,6 +185,71 @@ software does about it, in plain terms:
 None of this has had an independent security audit yet — see Project
 Status above. The full analysis, including what is *not* protected, is
 in the [Threat Model](docs/threat-model.md).
+
+## Why nothing buzzes
+
+<!-- The honest version. Enforced by apps/web/src/lib/noNotifications.guard.test.ts,
+     which fails if a Notification/push/badge/vibrate call site or a push
+     dependency appears. The costs below are real and were found by
+     auditing the code, not by asking the code to agree with us. -->
+
+Most software of this kind reaches for your phone. Understoria doesn't,
+and that is the single biggest way it departs from what you are used to.
+It's worth being precise about what that means, because the polite
+version would be marketing.
+
+**What it does instead.** The top of the board is a rail listing what
+actually needs you — someone finished work and is waiting on you to
+confirm it, a thing you claimed a while ago and might want to hand back.
+It has no count badge on it, deliberately; the code says so at the spot
+where a badge would have gone. You see it when you open the app, and
+that is the only time you see it.
+
+**Why.** The project's bet is that notification-driven tools burn out
+the most committed organizers first — the people a community can least
+afford to lose — and that a badge is a claim on your attention that you
+never agreed to. That is a belief this project holds, not a finding it
+can cite; the principle behind it is `no-notifications`, and you can read
+it in the app, on the surfaces where a notification would otherwise have
+been.
+
+**What it does not mean.** The app does hold an open connection to your
+community's node while you're using it. That connection carries no
+record, no sender and no subject — it is a content-free "something
+changed" tap that makes the screen you're already looking at refresh.
+There are no push notifications; there is server push. Those are
+different sentences, and the second one is also true.
+
+### What it costs
+
+Four things, plainly, because an organizer deciding whether to trust
+this deserves them before they find out the hard way.
+
+**It is not a rapid-response tool.** How fast someone learns about
+something is exactly how soon they next open the app, which for a
+quieter member can be days. If your community needs to reach people
+within hours — an eviction defence, a raid response, a shift that just
+lost its only cover — keep the phone tree and the group thread.
+Understoria is the layer underneath that, not the alarm.
+
+**Screen-reader users are announced to.** The rail is a live region, so
+a new item arriving while the app is open is spoken. "You only see it
+when you open the app" is a sighted person's description of this
+software; for someone using assistive technology, items arrive.
+
+**Silence eventually gets resolved without you.** When someone marks
+work complete and you never confirm it, the node closes the record on
+its own after a window your community sets — seven days by default —
+and the credit moves. Nothing is lost while you're away in part because
+your chance to say *that didn't happen* has a deadline.
+
+**Absence can become visible.** A task you claimed and went quiet on
+will, after a while, show the community that it *could use more hands*.
+It is never framed as late and it never names you as the reason. It is
+still a mark that your absence made, and you were not asked first.
+
+None of these are arguments for adding notifications. They are the price
+of not having them, and a community should get to weigh it knowingly.
 
 ## Why It Exists
 
