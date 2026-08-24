@@ -99,6 +99,26 @@ Understoria is a platform where communities exchange help, tracked through **tim
   holds itself to, and tapping "why" on a surface that could have shown a
   ranking explains what happened to the platforms that did.
 - **Member Blocking** — A local-only personal-relief surface for stopping unwanted contact, parallel to (and independent of) the community dispute process.
+- **The attention rail** — Open the app and the top of the board says what
+  needs you: a task someone finished and is waiting on you to confirm, a
+  thing you claimed a while back that you can quietly hand back. It is the
+  reason there are no push notifications to turn off. `no-notifications` is
+  one of the principles below, and the rail is what makes keeping it safe —
+  nothing chases you, and nothing is lost while you are away. Releasing
+  something you can no longer carry leaves no record.
+
+<p align="center">
+  <img src="docs/images/attention-rail.gif"
+       alt="The top of the board listing what needs you: two finished tasks waiting to be confirmed, and one you claimed a week ago with the option to hand it back"
+       width="320" />
+</p>
+
+<p align="center">
+  <em>What needs you, when you open the app — and nothing when you don't.
+  The "why?" beside the heading explains why there are no notifications
+  here, and what happened to the platforms that had them.</em>
+</p>
+
 
 ### Who can join, and who runs it
 
