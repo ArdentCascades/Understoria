@@ -1,7 +1,7 @@
 # Phase 3 — Right-to-left support (code-verified plan)
 
-Status: **R1 SHIPPED** (the logical-property sweep and its guard);
-R2–R4 outstanding. This document began as the survey that had to
+Status: **R1 and R2 SHIPPED** (the logical-property sweep and its
+guard; then the semantic cases); R3–R4 outstanding. This document began as the survey that had to
 exist before the work started, in the same spirit as the router-8,
 React-19 and eslint-10 plan docs: every number below was measured
 against the tree at `d6d225e`, not estimated. It is now also the
@@ -88,10 +88,22 @@ isMine ? "-left-2" : "-right-2"     // reaction button on the bubble
 isMine ? "right-0" : "left-0"       // message menu alignment
 ```
 
-In an RTL layout "mine" moves to the other side, so these must become
-`start`/`end` with the **operands swapped**, not substituted in place.
-A blind `left→start` rewrite here produces a subtly wrong UI that
-still looks plausible in screenshots — worth reviewing by hand.
+In an RTL layout "mine" moves to the other side, so this reads at
+first like it needs the operands **swapped** rather than substituted.
+
+> **Correction (R2, from the code).** It does not. The survey got this
+> wrong, and the wrong version is the one that breaks. Both affordances
+> are placed relative to the bubble, and the bubble's own alignment
+> already mirrors: `isMine` bubbles carry `self-end` inside a
+> `flex-col` container, and a column flex container's cross axis *is*
+> the inline axis, so "end" is the right edge in English and the left
+> edge in Arabic without anyone's help. The reaction button hangs off
+> the bubble's INWARD side so it never overhangs the screen; for a
+> bubble at the inline end, inward is `start`. Substituting in place —
+> `isMine ? "-start-2" : "-end-2"` and `isMine ? "end-0" : "start-0"`
+> — is therefore correct in both directions, and *swapping* is what
+> would have pushed the button off the edge in Arabic. Shipped as the
+> substitution, with the derivation written into the code beside it.
 
 > **Constraint.** The scroll/anchoring machinery in
 > `pages/Conversation.tsx` is off-limits and stays that way. This work
@@ -116,9 +128,21 @@ function alignClass(a) { return a ? ALIGN_CLASS[a] : "text-left"; }
 The **default** (`null` → `text-left`) is a bug for RTL and becomes
 `text-start`. The *explicit* cases are a real question: GFM's `:---`
 is visual, so an author who wrote "right" arguably means the right
-edge of the page in any direction. Recommendation: keep explicit
-`left`/`right` physical, flip only the default. Flagged for the
-operator rather than decided here.
+edge of the page in any direction.
+
+**Settled in R2 as recommended:** explicit `left`/`right` stay
+physical, only the default flips. An author who marked a column
+`---:` was lining up numbers at an edge of the page, and that reading
+holds in Arabic; an *unmarked* column carries no intent at all, so it
+follows the reading direction like every other block of prose. One
+line, and reversible if a community says otherwise.
+
+R2 also found a latent bug the survey had only flagged as fragility:
+the `<th>` carried a hardcoded left-aligning utility *alongside*
+`alignClass()`, so two text-align classes of equal specificity landed
+on one element and Tailwind's emission order decided. It happened to
+render correctly. The base class is gone and a test now asserts each
+header cell carries exactly one alignment.
 
 ### c. Paper surfaces
 
@@ -160,9 +184,69 @@ found by the guard rather than by reading:
   translate. Flip one without the other and the panel slides in from
   offscreen.
 
-**R2 — the semantic cases.** Sender mirroring, the markdown default,
-dir-aware arrow keys in `BottomNav` and `Present`, and the paper
-surfaces. Small, reviewable, one PR.
+**R2 — the semantic cases. ✅ SHIPPED.** Every allowlist entry R1
+deferred is now either resolved or reasoned about in its final form:
+
+- **Sender mirroring** — substitution, not a swap (see the correction
+  in §a above).
+- **The two pairs Tailwind can't express logically.** The landscape
+  rail's notch padding and the me-menu drawer's slide both needed a
+  *physical* value chosen by direction. Tailwind 3.4.19's `ltr:`/`rtl:`
+  variants do exist (verified by compiling, same as the logical
+  utilities above) and emit `:where([dir="rtl"], [dir="rtl"] *)` — zero
+  added specificity. The rail and the two floating action pills use
+  them directly: exactly one of the pair ever matches, so there is no
+  cascade to reason about. The **drawer could not**: every transform
+  utility compiles to the same `--tw-translate-x` declaration, so a
+  dir-variant transform would have outranked the plain
+  `motion-reduce:translate-x-0` override on source order alone and
+  quietly given reduced-motion members the slide back. It sets a custom
+  property instead (`ltr:[--slide-out:100%] rtl:[--slide-out:-100%]`
+  with `translate-x-[var(--slide-out)]`), which is a different property
+  and competes with nothing. That ordering hazard was found by reading
+  the compiled CSS, not by reasoning about it.
+- **`OverflowMenu`'s `align` prop** now speaks `start`/`end`. A
+  physical vocabulary in front of logical classes would have undone
+  them: `align="right"` placing a menu on the left in Arabic.
+- **Dir-aware arrow keys**, via a new `lib/direction.ts`. This is the
+  one place CSS cannot help — an arrow key means a physical direction,
+  and in RTL the item to the member's right is the one *before* them
+  (WAI-ARIA's rule for menubars). `BottomNav`'s roving tabindex and
+  `Present`'s slides both go through it. Up/Down and Home/End
+  deliberately do **not** mirror.
+- **`dir="auto"`** on the two containers that carry member-authored
+  text at length: the `Markdown` content root and the message bubble.
+  So an Arabic note in an English community lays itself out
+  right-to-left inside an otherwise left-to-right card.
+- **Paper surfaces** needed no further change — R1's sweep already
+  made them logical, and nothing in them pairs a physical value with a
+  logical one. They remain to be *verified* by print preview in R3.
+
+The guard grew a rule to match: a physical utility scoped to `ltr:` or
+`rtl:` is exempt **by construction**, because it is already a
+direction-aware decision — plus a new assertion that every `ltr:` has
+an `rtl:` counterpart in the same file, since a lone half is worse
+than the physical utility it replaced. Its allowlist went from 17
+entries to 5.
+
+Verified in a real browser rather than reasoned about — 33 checks over
+the demo build, LTR and with `dir="rtl"` forced:
+
+- The drawer anchors to the **right** edge in LTR with its border on
+  the left, and to the **left** edge in RTL with its border on the
+  right; `--slide-out` reads `100%` and `-100%` respectively, caught
+  mid-transition.
+- With `prefers-reduced-motion: reduce`, the drawer is at
+  `matrix(1,0,0,1,0,0)` on the first frame in **both** directions —
+  the custom-property route did keep the override working.
+- `-start-2`, `-end-2`, `start-0`, `end-0` each land on the expected
+  physical edge and swap when the direction flips.
+- The landscape rail's notch padding reads `safe-area-inset-left` in
+  LTR and `safe-area-inset-right` in RTL, and the floating pills on
+  the board and the calendar mirror the same way. `env()` insets are
+  zero in a headless browser, so these are read from which stylesheet
+  rule actually matches the element rather than from the box.
+- Six routes at 375px: zero horizontal overflow in either direction.
 
 **R3 — mirrored-surface verification.** A pseudo-locale is the honest
 way to test this before any Arabic string exists: add a dev-only
@@ -185,8 +269,11 @@ rather than a hand-written list, so it needs no change.
 ## What this program does not include
 
 - Bidirectional *text* handling inside member-authored content
-  (mixed Arabic/Latin runs). The browser's UBA handles this; we add
-  `dir="auto"` on user-content containers in R2 and stop there.
+  (mixed Arabic/Latin runs). The browser's UBA handles this; R2 added
+  `dir="auto"` on the containers that hold member prose at length and
+  stopped there. Short interpolated strings — a display name inside a
+  translated sentence — are left to the UBA on purpose: wrapping each
+  one would fight the surrounding sentence more often than it helped.
 - Font work. Arabic and Urdu shaping is a system-font concern; the
   app ships no custom face for them and should not start.
 - Any registry `rtl` entry before R3 verification passes. That gate
@@ -194,10 +281,10 @@ rather than a hand-written list, so it needs no change.
 
 ## Estimated shape
 
-R1 is a day of mechanical work with a gate. R2 is the interesting
-half-day. R3 is the real cost — building the pseudo-locale and
-reading every mirrored surface honestly. R4 is two ordinary
-translation runs at the playbook's known cost.
+R1 was a day of mechanical work with a gate; R2 the interesting
+half-day, and it held to that. R3 is the real cost — building the
+pseudo-locale and reading every mirrored surface honestly. R4 is two
+ordinary translation runs at the playbook's known cost.
 
 The headline for planning: **this is a much smaller program than the
 docs implied.** 98 tokens, no CSS debt, no directional JavaScript, and

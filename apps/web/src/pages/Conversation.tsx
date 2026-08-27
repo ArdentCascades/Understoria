@@ -1114,7 +1114,12 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                       durationMs={m.voice.durationMs}
                     />
                   ) : (
-                    <p className="whitespace-pre-wrap">
+                    // dir="auto" so a message lays itself out by its own
+                    // language: an Arabic reply inside an English
+                    // thread reads right-to-left in its bubble, and the
+                    // bubble itself keeps the thread's alignment
+                    // (docs/rtl-plan.md R2).
+                    <p dir="auto" className="whitespace-pre-wrap">
                       {m.plaintext === null ? (
                         t("messages.decryptionFailed")
                       ) : isSearching ? (
@@ -1142,8 +1147,18 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                       if (reactFor === m.id) setReactFor(null);
                       else openMenuFor(m.id);
                     }}
+                    // Placed on the bubble's INWARD side, so it never
+                    // hangs off the screen edge. `isMine` bubbles are
+                    // self-end (the cross axis of a column flex
+                    // container IS the inline axis, so "end" already
+                    // mirrors), which puts their inward side at the
+                    // inline START — and theirs at the inline END. A
+                    // plain start/end substitution therefore holds in
+                    // both directions; swapping the operands is what
+                    // would push the button off the edge in Arabic
+                    // (docs/rtl-plan.md R2).
                     className={`absolute -top-2 ${
-                      isMine ? "-left-2" : "-right-2"
+                      isMine ? "-start-2" : "-end-2"
                     } rounded-full border border-moss-200 bg-white px-1.5 py-0.5 text-xs opacity-0 shadow-sm transition-opacity focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-canopy-400 group-hover:opacity-100 dark:border-moss-600 dark:bg-moss-700`}
                   >
                     🙂+
@@ -1221,7 +1236,14 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                       className={
                         menuUp
                           ? `absolute bottom-full ${
-                              isMine ? "right-0" : "left-0"
+                              // Same inward reasoning as the reaction
+                              // button: anchor the overlay to the
+                              // bubble's outer edge so it unfolds back
+                              // across the thread rather than off the
+                              // screen. isMine bubbles sit at the
+                              // inline end, so end-0 is their outer
+                              // edge in either direction.
+                              isMine ? "end-0" : "start-0"
                             } z-10 mb-1 flex w-max max-w-[min(20rem,calc(100vw_-_2rem))] flex-col gap-1 rounded-xl border border-moss-200 bg-white p-2 shadow-lg dark:border-moss-600 dark:bg-moss-800`
                           : "mt-1 flex flex-col gap-1"
                       }

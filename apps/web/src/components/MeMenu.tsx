@@ -101,8 +101,23 @@ export function MeMenu({
         role="dialog"
         aria-modal="true"
         aria-label={t("menu.title")}
-        className={`absolute right-0 top-0 flex h-dvh w-80 max-w-[85vw] flex-col border-l border-moss-200 bg-white pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] shadow-xl transition-transform duration-200 motion-reduce:transition-none dark:border-moss-800 dark:bg-moss-950 ${
-          entered ? "translate-x-0" : "translate-x-full motion-reduce:translate-x-0"
+        // The panel is anchored at the reading END (end-0/border-s),
+        // and slides in from that same edge — so in Arabic it enters
+        // from the left, mirroring the drawer instead of stranding it.
+        //
+        // Tailwind has no LOGICAL translate, so the offscreen offset
+        // has to be direction-aware some other way. It goes through a
+        // custom property rather than a pair of dir-scoped translate
+        // utilities, because every transform utility compiles to the
+        // same `--tw-translate-x` declaration at the same specificity:
+        // a dir-scoped transform would then outrank the plain
+        // `motion-reduce:` override on source order alone, quietly
+        // giving reduced-motion members the slide back. Setting
+        // --slide-out is a different property, so nothing competes.
+        className={`absolute end-0 top-0 flex h-dvh w-80 max-w-[85vw] flex-col border-s border-moss-200 bg-white pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] shadow-xl transition-transform duration-200 ltr:[--slide-out:100%] rtl:[--slide-out:-100%] motion-reduce:transition-none dark:border-moss-800 dark:bg-moss-950 ${
+          entered
+            ? "translate-x-0"
+            : "translate-x-[var(--slide-out)] motion-reduce:translate-x-0"
         }`}
       >
         <div className="flex items-center justify-between border-b border-moss-200 p-3 dark:border-moss-800">

@@ -22,6 +22,16 @@
 // Anything genuinely physical belongs in ALLOWLIST below, WITH a reason.
 // "It was already there" is not a reason.
 //
+// One exemption is granted by CONSTRUCTION rather than by name: a physical
+// utility scoped to Tailwind's `ltr:` or `rtl:` variant is already a
+// direction-aware decision — `rtl:pr-[env(safe-area-inset-right)]` says
+// "in a right-to-left layout, clear the right-hand notch", which is
+// precisely the thought this test exists to require. Those pairs are how
+// R2 handled the two things CSS logical properties cannot express: a
+// device notch (env() names physical edges) and a translate (Tailwind has
+// no logical translate). The pairing assertion below keeps a lone `ltr:`
+// from sneaking through as a half-answer.
+//
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -57,6 +67,24 @@ const PHYSICAL = new RegExp(
   "g",
 );
 
+/** Whether a matched token is scoped to a reading direction, e.g.
+ *  `landscape-short:rtl:pr-[env(safe-area-inset-right)]`. */
+function directionScoped(token: string): boolean {
+  return /(?:^|:)(?:ltr|rtl):/.test(token);
+}
+
+/** Collapses a physical utility onto its mirror, so `pl-[…left…]` and
+ *  `pr-[…right…]` share a key and can be checked for pairing. Arbitrary
+ *  values are erased because the two sides differ inside them by design. */
+function mirrorKey(token: string): string {
+  return token
+    .replace(/^(?:[a-z-]+:)*/, "")
+    .replace(/\[[^\]]*\]/g, "[]")
+    .replace(/(^|-)(?:left|right)(-|$)/g, "$1?$2")
+    .replace(/^(-?)([mp])[lr]-/, "$1$2?-")
+    .replace(/^(border|rounded|divide|space)-[lr]/, "$1-?");
+}
+
 /**
  * Deliberate physical usages, each with the reason it must stay physical.
  * Keyed by file, valued by the exact substring that licenses the line —
@@ -68,108 +96,37 @@ const ALLOWLIST: ReadonlyArray<{
   why: string;
 }> = [
   {
-    file: "components/BottomNav.tsx",
-    contains: "safe-area-inset-left",
-    why:
-      "env(safe-area-inset-left) is a PHYSICAL device notch, not a reading " +
-      "direction. Pairing it with a logical padding would be wrong in RTL: " +
-      "the rail's side and the inset it reads have to be decided together " +
-      "(docs/rtl-plan.md R2).",
-  },
-  {
-    file: "components/BottomNav.test.tsx",
-    contains: "safe-area-inset-left",
-    why:
-      "Asserts the BottomNav rail's physical notch padding, so it stays " +
-      "physical for exactly the same reason the source line does.",
-  },
-  {
-    file: "pages/Board.tsx",
-    contains: "safe-area-inset-right",
-    why:
-      "env(safe-area-inset-right) is the PHYSICAL opposite edge from the " +
-      "landscape rail: the padding exists to clear a notch, not to follow " +
-      "reading order. Which edge it clears flips with the rail, so both " +
-      "move together in R2 (docs/rtl-plan.md).",
-  },
-  {
-    file: "pages/Calendar.tsx",
-    contains: "safe-area-inset-right",
-    why:
-      "Same landscape-rail inset as Board.tsx above — physical device edge, " +
-      "flips with the rail in R2 (docs/rtl-plan.md).",
-  },
-  {
-    file: "components/MeMenu.tsx",
-    contains: "h-dvh w-80",
-    why:
-      "The drawer's anchor (right-0 + border-l) is inseparable from the " +
-      "translate-x-full slide on the next line, and Tailwind has no logical " +
-      "translate — flipping one without the other slides the panel in from " +
-      "offscreen (docs/rtl-plan.md R2).",
-  },
-  {
-    file: "components/Markdown.tsx",
-    contains: "ALIGN_CLASS",
-    why:
-      "GFM's per-column `:---` alignment is visual and author-chosen, so an " +
-      "explicit left/right stays physical. Only the DEFAULT became logical " +
-      "(docs/rtl-plan.md R2 — awaiting the operator's call).",
-  },
-  {
     file: "components/Markdown.tsx",
     contains: 'left: "text-left"',
     why:
-      "The ALIGN_CLASS table's own left entry — author-chosen visual " +
-      "alignment, physical by design until R2 settles it.",
+      "GFM's per-column `:---` is a VISUAL, author-chosen alignment: a " +
+      "column of numbers marked `---:` should line up at its right edge in " +
+      "Arabic exactly as in English. Settled in R2 — explicit alignment " +
+      "stays physical, only the unmarked default became logical.",
   },
   {
     file: "components/Markdown.tsx",
     contains: 'right: "text-right"',
     why:
-      "The ALIGN_CLASS table's own right entry — author-chosen visual " +
-      "alignment, physical by design until R2 settles it.",
-  },
-  {
-    file: "components/Markdown.tsx",
-    contains: "font-semibold text-left",
-    why:
-      "A <th>'s base text-left sits alongside alignClass(), which appends " +
-      "its own alignment — so both land on the element and source order " +
-      "decides. Latent fragility worth fixing WITH the ALIGN_CLASS call " +
-      "in R2, not half-changed here (docs/rtl-plan.md R2).",
-  },
-  {
-    file: "components/MeMenu.tsx",
-    contains: "translate-x-full",
-    why:
-      "The drawer pairs right-0/border-l with translate-x-full for its " +
-      "slide-in, and Tailwind has NO logical translate. Anchor side and " +
-      "transform must flip together or the panel slides in from offscreen " +
-      "(docs/rtl-plan.md R2).",
+      "The mirror of the left entry above, and physical for the same " +
+      "reason: the author asked for that edge of the page, not for the " +
+      "edge their reader's language happens to end at.",
   },
   {
     file: "components/Markdown.test.tsx",
     contains: "text-left",
     why:
-      "Asserts GFM's explicit column alignment, which stays physical until " +
-      "the ALIGN_CLASS question is settled in R2.",
+      "Asserts GFM's EXPLICIT column alignment, which R2 settled as " +
+      "physical. The same file also locks the unmarked default to " +
+      "text-start — the half that did have to change.",
   },
   {
     file: "components/Markdown.test.tsx",
     contains: "text-right",
     why:
-      "Asserts GFM's explicit column alignment, which stays physical until " +
-      "the ALIGN_CLASS question is settled in R2.",
-  },
-  {
-    file: "pages/Conversation.tsx",
-    contains: "isMine ?",
-    why:
-      "Message affordances are placed by AUTHOR, not by layout. Under RTL " +
-      '"mine" changes sides, so these need their operands swapped rather ' +
-      "than substituted — a semantic change, not a mechanical one " +
-      "(docs/rtl-plan.md R2).",
+      "Asserts GFM's explicit right-aligned column — physical by the same " +
+      "settled reasoning as the left one, and as the source table it " +
+      "mirrors.",
   },
   {
     file: "pages/Conversation.tsx",
@@ -177,28 +134,6 @@ const ALLOWLIST: ReadonlyArray<{
     why:
       "Centering idiom (left-1/2 with -translate-x-1/2) is symmetric: it " +
       "already lands in the middle in either direction.",
-  },
-  {
-    file: "pages/Conversation.menuPlacement.test.tsx",
-    contains: "left-0",
-    why:
-      "Asserts the author-dependent menu placement, so it moves with that " +
-      "ternary when R2 swaps its operands.",
-  },
-  {
-    file: "pages/Conversation.menuPlacement.test.tsx",
-    contains: "right-0",
-    why:
-      "Asserts the author-dependent menu placement, so it moves with that " +
-      "ternary when R2 swaps its operands.",
-  },
-  {
-    file: "components/OverflowMenu.tsx",
-    contains: 'align === "right"',
-    why:
-      "The `align` prop's own vocabulary is physical. Making the classes " +
-      'logical without renaming the prop would leave align="right" ' +
-      "placing a menu on the left in RTL (docs/rtl-plan.md R2).",
   },
 ];
 
@@ -219,23 +154,57 @@ function licensed(rel: string, line: string): boolean {
   return ALLOWLIST.some((a) => a.file === rel && line.includes(a.contains));
 }
 
-describe("RTL: logical horizontal properties only", () => {
-  it("no physical horizontal utility outside the documented allowlist", () => {
-    const offenders: string[] = [];
-    for (const abs of walk(SRC)) {
-      const rel = abs.slice(SRC.length + 1).replace(/\\/g, "/");
-      // This file spells the physical patterns out as literals.
-      if (rel === "lib/logicalProperties.guard.test.ts") continue;
-      const lines = readFileSync(abs, "utf8").split("\n");
-      lines.forEach((line, i) => {
+/** Every physical hit in the tree, with where it came from. */
+function scan(): Array<{ rel: string; line: number; token: string }> {
+  const hits: Array<{ rel: string; line: number; token: string }> = [];
+  for (const abs of walk(SRC)) {
+    const rel = abs.slice(SRC.length + 1).replace(/\\/g, "/");
+    // This file spells the physical patterns out as literals.
+    if (rel === "lib/logicalProperties.guard.test.ts") continue;
+    readFileSync(abs, "utf8")
+      .split("\n")
+      .forEach((line, i) => {
         if (licensed(rel, line)) return;
-        const hits = line.match(PHYSICAL);
-        if (hits) {
-          offenders.push(`${rel}:${i + 1}  ${hits.join(" ")}`);
+        for (const token of line.match(PHYSICAL) ?? []) {
+          hits.push({ rel, line: i + 1, token });
         }
       });
-    }
+  }
+  return hits;
+}
+
+describe("RTL: logical horizontal properties only", () => {
+  it("no physical horizontal utility outside the documented allowlist", () => {
+    const offenders = scan()
+      // A `ltr:`/`rtl:`-scoped utility IS the direction-aware answer.
+      .filter((h) => !directionScoped(h.token))
+      .map((h) => `${h.rel}:${h.line}  ${h.token}`);
     expect(offenders).toEqual([]);
+  });
+
+  it("every ltr:-scoped utility has an rtl: counterpart in the same file", () => {
+    // The construction exemption above is only sound if both halves are
+    // written. `ltr:pl-[env(safe-area-inset-left)]` on its own is worse
+    // than the physical utility it replaced: it looks considered while
+    // leaving right-to-left with no padding at all.
+    const byFile = new Map<string, Map<string, { ltr: number; rtl: number }>>();
+    for (const h of scan()) {
+      if (!directionScoped(h.token)) continue;
+      const side = h.token.includes("rtl:") ? "rtl" : "ltr";
+      const key = mirrorKey(h.token);
+      const perFile = byFile.get(h.rel) ?? new Map();
+      byFile.set(h.rel, perFile);
+      const counts = perFile.get(key) ?? { ltr: 0, rtl: 0 };
+      counts[side] += 1;
+      perFile.set(key, counts);
+    }
+    const unpaired: string[] = [];
+    for (const [rel, perFile] of byFile) {
+      for (const [key, { ltr, rtl }] of perFile) {
+        if (ltr !== rtl) unpaired.push(`${rel}  ${key}  ltr=${ltr} rtl=${rtl}`);
+      }
+    }
+    expect(unpaired).toEqual([]);
   });
 
   it("every allowlist entry still applies (no stale exemptions)", () => {

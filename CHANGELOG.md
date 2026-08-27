@@ -30,6 +30,19 @@ include breaking changes.
   principle stands on.
 
 ### Changed
+- Right-to-left groundwork, step two (docs/rtl-plan.md R2): the parts
+  of the interface that had to be *reasoned* about rather than
+  rewritten. Message affordances, the me-menu drawer, the landscape
+  navigation rail and the floating action pills now mirror correctly
+  instead of stranding themselves at a physical edge; arrow keys follow
+  the reading direction, so in a right-to-left layout the item to your
+  right is the one before you; an unmarked markdown table column
+  follows the reading direction instead of always sitting left; and
+  member-authored notes carry `dir="auto"`, so an Arabic message reads
+  right-to-left inside an otherwise left-to-right card. Nothing changes
+  for the nine languages shipping today — every one of them reads
+  left-to-right, and these are the same pixels. What changes is that
+  Arabic and Urdu now have somewhere to land.
 - **Groundwork for right-to-left languages.** Every horizontal margin,
   padding, border, alignment and edge-anchor in the app now uses the
   direction-aware form (`ms`/`me`, `ps`/`pe`, `start`/`end`,

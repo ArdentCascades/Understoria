@@ -274,7 +274,18 @@ const HEADING_CLASS: Record<number, string> = {
   6: "mt-2 text-sm font-semibold text-moss-600 dark:text-moss-300",
 };
 
-// Per-column text alignment class for a table cell. `null` → default (left).
+// Per-column text alignment class for a table cell.
+//
+// GFM's `:---` markers are VISUAL and author-chosen: someone who wrote
+// `---:` on a column of numbers means the numbers should line up at
+// their right edge, and that reading holds in Arabic exactly as it does
+// in English. So an explicit alignment stays PHYSICAL — the only place
+// in the app that does (docs/rtl-plan.md R2).
+//
+// The DEFAULT is a different question, and it was a bug: an unmarked
+// column has no author intent behind it, so it should follow the
+// reading direction like every other block of prose. `null` →
+// `text-start`.
 const ALIGN_CLASS: Record<"left" | "center" | "right", string> = {
   left: "text-left",
   center: "text-center",
@@ -282,7 +293,7 @@ const ALIGN_CLASS: Record<"left" | "center" | "right", string> = {
 };
 
 function alignClass(a: MdTableAlign): string {
-  return a ? ALIGN_CLASS[a] : "text-left";
+  return a ? ALIGN_CLASS[a] : "text-start";
 }
 
 /** Render one list (recursively, so nested lists nest). A list whose items
@@ -415,7 +426,15 @@ function renderBlock(block: MdBlock, key: number): ReactNode {
                 {block.header.map((cell, c) => (
                   <th
                     key={c}
-                    className={`border border-moss-200 px-2 py-1 font-semibold text-left dark:border-moss-700 ${alignClass(
+                    // No base alignment here: alignClass() is the ONLY
+                    // text-align on the cell. A hardcoded left-aligning
+                    // utility used to sit alongside it, putting two
+                    // competing text-align classes of equal specificity
+                    // on one element — which one won came down to
+                    // Tailwind's emission order. It happened to render
+                    // right-aligned headers correctly; nothing in the
+                    // code said so.
+                    className={`border border-moss-200 px-2 py-1 font-semibold dark:border-moss-700 ${alignClass(
                       block.align[c] ?? null,
                     )}`}
                   >
@@ -499,11 +518,22 @@ export function Markdown({
     .join(" ");
   const content = blocks.map(renderBlock);
 
+  // `dir="auto"` is how member-authored text gets to disagree with the
+  // interface around it: the browser reads the first strong directional
+  // character and lays the block out accordingly, so an Arabic note in
+  // an English community reads right-to-left inside an otherwise
+  // left-to-right card, and vice versa. Mixed runs inside a paragraph
+  // are the Unicode bidi algorithm's job and need nothing from us
+  // (docs/rtl-plan.md — bidi text is explicitly out of scope beyond
+  // this attribute).
+  //
   // Non-collapsible, or short enough to never need a toggle: render plainly.
   if (!collapsible || text.length <= COLLAPSE_THRESHOLD) {
     return (
       <PendingAuthorLinkContext.Provider value={authorPending}>
-        <div className={wrapperClass}>{content}</div>
+        <div dir="auto" className={wrapperClass}>
+          {content}
+        </div>
       </PendingAuthorLinkContext.Provider>
     );
   }
@@ -514,7 +544,13 @@ export function Markdown({
   return (
     <PendingAuthorLinkContext.Provider value={authorPending}>
       <div className={wrapperClass}>
-        <div className={expanded ? undefined : "max-h-32 overflow-hidden"}>
+        {/* dir="auto" goes on the CONTENT, not the wrapper: the
+            Show-more button below is interface text and belongs to the
+            interface's direction. */}
+        <div
+          dir="auto"
+          className={expanded ? undefined : "max-h-32 overflow-hidden"}
+        >
           {content}
         </div>
         <button
