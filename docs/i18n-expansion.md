@@ -48,7 +48,7 @@ of a count-driven family to carry {{count}} (the defect persisted
 because en's variable-less `_one` made the interpolation-parity gate
 FORBID translations from adding the count). **PHASE 2 COMPLETE: Hindi
 (hi), Vietnamese (vi) and Russian (ru) content all SHIPPED** — every
-one of the nine shipped languages now carries the full authored
+one of the eight shipped languages now carries the full authored
 corpus and no registry entry is `content: "ui-only"` (see Phase 2
 below).
 Baseline numbers below refreshed 2026-07-27.

@@ -7,8 +7,9 @@ React-19 and eslint-10 plan docs: every number below was measured
 against the tree at `d6d225e`, not estimated. It is now also the
 running record of what shipped and what each step actually taught.
 
-**Why now.** Nine languages ship with complete UI *and* complete
-authored content (docs/i18n-expansion.md Phase 2). The only thing
+**Why now.** Eight languages ship with complete UI *and* complete
+authored content (docs/i18n-expansion.md Phase 2; the registry in
+`apps/web/src/i18n/languages.ts` is the count's source of truth). The only thing
 standing between the app and Wave 3 — Arabic (`ar`) and Urdu (`ur`),
 two of the ten most-spoken languages on earth — is that no surface has
 ever been rendered right-to-left. The language registry refuses to
