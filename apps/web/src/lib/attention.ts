@@ -86,6 +86,18 @@ export type AttentionItem =
       createdAt: number;
     }
   | {
+      kind: "task_ready";
+      projectId: string;
+      taskId: string;
+      projectTitle: string;
+      taskTitle: string;
+      /** The moment the last incomplete dependency completed — when
+       *  the task page's "You'll be reminded when it's ready" became
+       *  payable. Doubles as the sort cursor. */
+      readySince: number;
+      createdAt: number;
+    }
+  | {
       kind: "post_claimed";
       postId: string;
       postTitle: string;
@@ -218,6 +230,8 @@ export type AttentionItem =
 //   1  coorganizer_invitation_received — a decision is waiting on
 //      you, and it expires.
 //   2  task_check_in — a response is wanted (private, no shame).
+//      task_ready shares the tier: the work a member was waiting
+//      on is open, and the two never co-occur for one task.
 //   3  event_today — time-sensitive today; after today it's moot.
 //   4  event_cancelled — a plan change you should see before you
 //      show up somewhere.
@@ -235,6 +249,7 @@ export const KIND_PRIORITY: Record<AttentionItem["kind"], number> = {
   coorganizer_invitation_received: 1,
   project_adoption_proposed: 1,
   task_check_in: 2,
+  task_ready: 2,
   event_today: 3,
   event_cancelled: 4,
   post_claimed: 5,
@@ -441,6 +456,59 @@ export function computeAttentionItems(
         createdAt: anchor,
       });
     }
+  }
+
+  // The promised reminder (task-ordering §6.2, #409). A member may
+  // claim a task while it still follows an incomplete one, and the
+  // task page tells them "You'll be reminded when it's ready." This
+  // item IS that reminder: it surfaces once every dependency is
+  // complete, only to the claimer, and only when the claim PREDATES
+  // the unblock — claiming an already-workable task needs no
+  // reminder. It stands down once the check-in ladder takes over
+  // (config present and past the private window) or once the member
+  // has acknowledged a check-in since the unblock, so a task never
+  // shows two rail items at once. Pull-only like everything here:
+  // nothing buzzes; the reminder waits for the member to open the
+  // app (no-notifications).
+  for (const t of projectTasks) {
+    if (t.assignedTo !== currentMember.publicKey) continue;
+    if (t.status !== "claimed") continue;
+    if (t.claimedAt === null) continue;
+    if (t.dependencies.length === 0) continue;
+    const siblings = projectTasks.filter(
+      (pt) => pt.projectId === t.projectId,
+    );
+    if (!canClaimTask(t, siblings)) continue;
+    let readySince = 0;
+    for (const depId of t.dependencies) {
+      const dep = siblings.find((pt) => pt.id === depId);
+      if (dep?.completedAt != null && dep.completedAt > readySince) {
+        readySince = dep.completedAt;
+      }
+    }
+    // readySince <= claimedAt covers two cases at once: the task was
+    // already workable when claimed (no reminder was promised), and a
+    // completed dep missing its completedAt stamp (legacy row — no
+    // honest "became ready" moment to anchor to).
+    if (readySince <= t.claimedAt) continue;
+    if ((t.checkInAcknowledgedAt ?? 0) >= readySince) continue;
+    if (
+      input.config &&
+      taskCheckInState(t, input.config, siblings, input.now) !== "fresh"
+    ) {
+      continue;
+    }
+    const project = projectByKey.get(t.projectId);
+    if (!project) continue;
+    items.push({
+      kind: "task_ready",
+      projectId: project.id,
+      taskId: t.id,
+      projectTitle: project.title,
+      taskTitle: t.title,
+      readySince,
+      createdAt: readySince,
+    });
   }
 
   // Your post was claimed — a helper is incoming (NEED) or someone

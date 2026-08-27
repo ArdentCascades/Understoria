@@ -2272,6 +2272,10 @@
       "release": "Trả lại cho người khác nhận",
       "openProject": "Mở dự án"
     },
+    "taskReady": {
+      "line": "“{{task}}” của {{project}} đã sẵn sàng — việc đứng trước nó đã xong.",
+      "hint": "Bạn đã nhận việc này khi nó còn đang chờ. Cứ bắt đầu khi nào thuận tiện."
+    },
     "postClaimed": {
       "needLine": "{{name}} đã nhận việc bạn cần giúp: {{title}}",
       "offerLine": "{{name}} đã nhận lời ngỏ giúp đỡ của bạn: {{title}}",

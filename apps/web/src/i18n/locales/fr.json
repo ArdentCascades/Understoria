@@ -2272,6 +2272,10 @@
       "release": "La libérer pour quelqu'un d'autre",
       "openProject": "Ouvrir le projet"
     },
+    "taskReady": {
+      "line": "« {{task}} » pour {{project}} est prête : la tâche qu’elle suit est terminée.",
+      "hint": "Tu l’as prise quand elle était encore en attente. Commence quand ça t’arrange."
+    },
     "postClaimed": {
       "needLine": "{{name}} a pris ton besoin : {{title}}",
       "offerLine": "{{name}} a accepté ton offre : {{title}}",
