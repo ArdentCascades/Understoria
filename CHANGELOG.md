@@ -17,45 +17,6 @@ include breaking changes.
   your attention" the next time you open the app: ready to start,
   whenever suits you. Like everything on that list, it waits for you —
   nothing buzzes.
-
-### Changed
-- **The "why?" note about notifications now says exactly what the app
-  holds.** It used to say "no badge counts," while a few screens
-  honestly show in-place counts of the work in front of you — three
-  proposals open, two things in your outbox. The principle now draws
-  the real line: no counts *chasing you* from screen to screen, no
-  alerts, no urgency theater. Its historical note also stops implying
-  a study it never cited: the burnout of COVID-era organizers on
-  notification-driven tools is named as the lived experience this
-  principle stands on.
-
-### Changed
-- Right-to-left groundwork, step two (docs/rtl-plan.md R2): the parts
-  of the interface that had to be *reasoned* about rather than
-  rewritten. Message affordances, the me-menu drawer, the landscape
-  navigation rail and the floating action pills now mirror correctly
-  instead of stranding themselves at a physical edge; arrow keys follow
-  the reading direction, so in a right-to-left layout the item to your
-  right is the one before you; an unmarked markdown table column
-  follows the reading direction instead of always sitting left; and
-  member-authored notes carry `dir="auto"`, so an Arabic message reads
-  right-to-left inside an otherwise left-to-right card. Nothing changes
-  for the nine languages shipping today — every one of them reads
-  left-to-right, and these are the same pixels. What changes is that
-  Arabic and Urdu now have somewhere to land.
-- **Groundwork for right-to-left languages.** Every horizontal margin,
-  padding, border, alignment and edge-anchor in the app now uses the
-  direction-aware form (`ms`/`me`, `ps`/`pe`, `start`/`end`,
-  `text-start`/`text-end`, `border-s`/`border-e`) instead of naming a
-  physical side. Nothing moves for anyone reading left to right — the
-  browser resolves these to exactly the properties they replaced — but
-  Arabic and Urdu now have a layout that can mirror instead of one
-  wedged the wrong way round. A guard test keeps physical sides from
-  creeping back, and the handful of genuinely physical spots (a device
-  notch inset, a table's author-chosen column alignment) are listed
-  with their reasons rather than quietly tolerated.
-
-### Fixed
 - **Counts no longer lie in languages whose grammar groups more than
   one number as "singular."** Nine strings hardcoded the digit 1
   instead of the live count. English never showed the seam — its
@@ -70,6 +31,41 @@ include breaking changes.
   every language, and a new gate fails the build if any counted
   phrase ever drops its number again.
 
+### Changed
+- **The "why?" note about notifications now says exactly what the app
+  holds.** It used to say "no badge counts," while a few screens
+  honestly show in-place counts of the work in front of you — three
+  proposals open, two things in your outbox. The principle now draws
+  the real line: no counts *chasing you* from screen to screen, no
+  alerts, no urgency theater. Its historical note also stops implying
+  a study it never cited: the burnout of COVID-era organizers on
+  notification-driven tools is named as the lived experience this
+  principle stands on.
+- Right-to-left groundwork, step two (docs/rtl-plan.md R2): the parts
+  of the interface that had to be *reasoned* about rather than
+  rewritten. Message affordances, the me-menu drawer, the landscape
+  navigation rail and the floating action pills now mirror correctly
+  instead of stranding themselves at a physical edge; arrow keys follow
+  the reading direction, so in a right-to-left layout the item to your
+  right is the one before you; an unmarked markdown table column
+  follows the reading direction instead of always sitting left; and
+  member-authored notes carry `dir="auto"`, so an Arabic message reads
+  right-to-left inside an otherwise left-to-right card. Nothing changes
+  for the eight languages shipping today — every one of them reads
+  left-to-right, and these are the same pixels. What changes is that
+  Arabic and Urdu now have somewhere to land.
+- **Groundwork for right-to-left languages.** Every horizontal margin,
+  padding, border, alignment and edge-anchor in the app now uses the
+  direction-aware form (`ms`/`me`, `ps`/`pe`, `start`/`end`,
+  `text-start`/`text-end`, `border-s`/`border-e`) instead of naming a
+  physical side. Nothing moves for anyone reading left to right — the
+  browser resolves these to exactly the properties they replaced — but
+  Arabic and Urdu now have a layout that can mirror instead of one
+  wedged the wrong way round. A guard test keeps physical sides from
+  creeping back, and the handful of genuinely physical spots (a device
+  notch inset, a table's author-chosen column alignment) are listed
+  with their reasons rather than quietly tolerated.
+
 ### Added
 - **The full authored-content library now exists in Russian — and
   with it, in every language the app ships.** All 64 project
@@ -83,7 +79,7 @@ include breaking changes.
   a go-bag is «сумка на экстренный случай», never a «тревожный
   чемоданчик»). FAQ answers quote the shipped Russian buttons
   word-for-word. The Settings note about authored content
-  appearing in English is now gone for every one of the nine
+  appearing in English is now gone for every one of the eight
   languages; each language's content still loads as its own lazy
   chunk only when that language is chosen, so nobody downloads a
   corpus they don't read.
