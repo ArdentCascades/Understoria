@@ -158,7 +158,7 @@ export function AttentionSection() {
   // the collapsed summary row previews WHAT kinds of things await
   // (e.g. "📅 ✅ 🤝") so glanceability survives the collapse. These
   // carry the preview; there is deliberately NO count badge
-  // (no-notifications: no badge counts).
+  // (no-notifications: no counts chasing you from screen to screen).
   const summaryEmojis = [
     ...new Set([
       ...(cofounderNomination ? ["🌳"] : []),

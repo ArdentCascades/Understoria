@@ -26,7 +26,8 @@ import { useTranslation } from "react-i18next";
 // keep applied state visible while collapsed, so collapsing costs a
 // click only when actually CHANGING filters — never visibility. The
 // count rides the label as plain text ("Filters · 2 active") — no
-// badge pill, no dot (no-notifications principle: no badge counts).
+// badge pill, no dot (no-notifications: no counts chasing you from
+// screen to screen).
 // aria-expanded/aria-controls carry the disclosure semantics; Done
 // returns focus to the pill so keyboard / screen-reader members land
 // back on the trigger rather than at the top of <body>.

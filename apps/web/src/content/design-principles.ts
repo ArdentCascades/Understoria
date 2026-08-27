@@ -38,9 +38,9 @@ export const DESIGN_PRINCIPLES: readonly DesignPrinciple[] = [
     id: "no-notifications",
     title: "No push notifications",
     statement:
-      "We show what needs your attention when you open the app. No buzzing, no badge counts, no urgency theater.",
+      "We show what needs your attention when you open the app. No buzzing, no counts chasing you from screen to screen, no urgency theater.",
     example:
-      "Studies of mutual aid groups during COVID showed that notification-driven platforms burned out the most active organizers first — the people communities could least afford to lose.",
+      "COVID-era mutual aid organizers widely described notification-driven tools as burning out their most committed members first — the people communities could least afford to lose. That experience, not a formal study, is what this principle stands on.",
   },
   {
     id: "solidarity-not-shame",
