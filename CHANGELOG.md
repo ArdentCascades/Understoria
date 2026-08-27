@@ -10,6 +10,17 @@ include breaking changes.
 ## [Unreleased]
 
 ### Changed
+- **The "why?" note about notifications now says exactly what the app
+  holds.** It used to say "no badge counts," while a few screens
+  honestly show in-place counts of the work in front of you — three
+  proposals open, two things in your outbox. The principle now draws
+  the real line: no counts *chasing you* from screen to screen, no
+  alerts, no urgency theater. Its historical note also stops implying
+  a study it never cited: the burnout of COVID-era organizers on
+  notification-driven tools is named as the lived experience this
+  principle stands on.
+
+### Changed
 - **Groundwork for right-to-left languages.** Every horizontal margin,
   padding, border, alignment and edge-anchor in the app now uses the
   direction-aware form (`ms`/`me`, `ps`/`pe`, `start`/`end`,
