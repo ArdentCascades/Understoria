@@ -1468,3 +1468,111 @@ describe("grow_a_root (docs/capacity-forecast.md §5.2)", () => {
     expect(grow).toMatchObject({ pressure: "amber", growthRecommended: false });
   });
 });
+
+// ─── task_ready: the promised reminder ─────────────────────────────
+// TaskDetailBody tells the claimer of a dependency-blocked task
+// "You'll be reminded when it's ready." These tests are that promise's
+// contract: the reminder exists, goes only to the claimer, only when
+// the claim predated the unblock, and stands down when the check-in
+// ladder (or an acknowledgment) takes over.
+describe("computeAttentionItems — task_ready", () => {
+  const me = member("alice");
+  const CONFIG = {
+    taskCheckInDays: 7,
+    taskNeedsHelpDays: 21,
+    taskCheckInGraceDays: 3,
+  };
+  const DAY = 24 * 60 * 60 * 1000;
+
+  function scenario(overrides: {
+    dep?: Partial<ProjectTask>;
+    blocked?: Partial<ProjectTask>;
+    now?: number;
+    config?: typeof CONFIG | undefined;
+  }) {
+    const dep = task({
+      id: "t_dep",
+      title: "Find a host site",
+      status: "completed",
+      completedAt: 2_000,
+      ...overrides.dep,
+    });
+    const blocked = task({
+      id: "t_blocked",
+      title: "Source a fridge",
+      assignedTo: "alice",
+      status: "claimed",
+      claimedAt: 1_000,
+      dependencies: ["t_dep"],
+      ...overrides.blocked,
+    });
+    return computeAttentionItems({
+      currentMember: me,
+      posts: [],
+      projects: [project({})],
+      projectTasks: [dep, blocked],
+      members: [me],
+      config: overrides.config,
+      now: overrides.now ?? 3_000,
+    }).filter((i) => i.kind === "task_ready");
+  }
+
+  it("surfaces once every dependency completes, anchored at the unblock", () => {
+    const items = scenario({});
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({
+      kind: "task_ready",
+      taskId: "t_blocked",
+      readySince: 2_000,
+      createdAt: 2_000,
+    });
+  });
+
+  it("stays silent while any dependency is incomplete", () => {
+    expect(
+      scenario({ dep: { status: "claimed", completedAt: null } }),
+    ).toHaveLength(0);
+  });
+
+  it("goes only to the claimer", () => {
+    expect(scenario({ blocked: { assignedTo: "bob" } })).toHaveLength(0);
+  });
+
+  it("needs no reminder when the task was claimed AFTER the unblock", () => {
+    // Claiming an already-workable task: the member saw it was ready.
+    expect(scenario({ blocked: { claimedAt: 2_500 } })).toHaveLength(0);
+  });
+
+  it("stays silent for a task with no dependencies at all", () => {
+    expect(scenario({ blocked: { dependencies: [] } })).toHaveLength(0);
+  });
+
+  it("skips a completed dep with no completedAt stamp (legacy row)", () => {
+    // No honest "became ready" moment exists to anchor the reminder to.
+    expect(scenario({ dep: { completedAt: null } })).toHaveLength(0);
+  });
+
+  it("stands down once an acknowledgment postdates the unblock", () => {
+    expect(
+      scenario({ blocked: { checkInAcknowledgedAt: 2_500 } }),
+    ).toHaveLength(0);
+  });
+
+  it("hands off to the check-in ladder past the private window", () => {
+    // 8 days after the unblock with a 7-day window: check_in_due owns
+    // the task now, and a task never shows two rail items at once.
+    const now = 2_000 + 8 * DAY;
+    expect(scenario({ config: CONFIG, now })).toHaveLength(0);
+  });
+
+  it("still surfaces inside the check-in window when config is present", () => {
+    const now = 2_000 + 2 * DAY;
+    expect(scenario({ config: CONFIG, now })).toHaveLength(1);
+  });
+
+  it("does not surface for a released (open) task", () => {
+    expect(
+      scenario({ blocked: { status: "open", assignedTo: null } }),
+    ).toHaveLength(0);
+  });
+});

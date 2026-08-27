@@ -2272,6 +2272,10 @@
       "release": "放回去，让别人接手",
       "openProject": "打开项目"
     },
+    "taskReady": {
+      "line": "{{project}}的“{{task}}”可以开始了——它前面的任务已经完成。",
+      "hint": "你在它还没解锁时就认领了。什么时候开始都可以。"
+    },
     "postClaimed": {
       "needLine": "{{name}}认领了你的需求：{{title}}",
       "offerLine": "{{name}}接受了你的提供：{{title}}",

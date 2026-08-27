@@ -9,6 +9,15 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **The promised reminder now exists.** A task claimed while it still
+  followed an unfinished one told its claimer "You'll be reminded when
+  it's ready" — and nothing ever reminded them. Now, the moment the
+  task ahead of it is completed, the claimed task appears in "Needs
+  your attention" the next time you open the app: ready to start,
+  whenever suits you. Like everything on that list, it waits for you —
+  nothing buzzes.
+
 ### Changed
 - **The "why?" note about notifications now says exactly what the app
   holds.** It used to say "no badge counts," while a few screens

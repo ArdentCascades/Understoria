@@ -2272,6 +2272,10 @@
       "release": "Liberar para outra pessoa",
       "openProject": "Abrir projeto"
     },
+    "taskReady": {
+      "line": "“{{task}}” de {{project}} está pronta: a tarefa anterior foi concluída.",
+      "hint": "Você assumiu essa tarefa enquanto ainda estava em espera. Comece quando for melhor para você."
+    },
     "postClaimed": {
       "needLine": "{{name}} assumiu a sua necessidade: {{title}}",
       "offerLine": "{{name}} aceitou a sua oferta: {{title}}",

@@ -193,6 +193,12 @@ export function TaskDetailBody({
   // Claimer-side note: visible only to the claimant when the task is
   // structurally blocked. canClaimTask reads the full task list to
   // include not-yet-loaded dep titles that have completed.
+  //
+  // The note promises "You'll be reminded when it's ready" — the
+  // reminder is the `task_ready` attention item (lib/attention.ts),
+  // which surfaces on the rail once every dependency completes. If
+  // that item's conditions ever change, this promise must move with
+  // them.
   const isClaimant = task.assignedTo === currentKey;
   const isStructurallyBlocked = !canClaimTask(task, allTasks);
   const showClaimerNote =

@@ -551,6 +551,35 @@ export function AttentionSection() {
             </li>
           );
           }
+          // task_ready — the promised reminder for a task claimed
+          // while it still followed an incomplete one (the task page
+          // says "You'll be reminded when it's ready"; this is that
+          // reminder arriving). Plain link — the action IS the task
+          // page — in the canopy good-news tone, not amber: nothing
+          // is asked of the member beyond starting when they choose.
+          if (item.kind === "task_ready") {
+            return (
+              <li key={`ready_${item.taskId}`}>
+                <Link
+                  to={`/project/${item.projectId}/task/${item.taskId}`}
+                  className="flex min-h-[44px] items-center gap-2 rounded-lg bg-canopy-50 px-3 py-1.5 transition-colors hover:bg-moss-50 focus-visible:bg-moss-50 dark:bg-canopy-950/40 dark:hover:bg-canopy-950/60"
+                >
+                  <span className="flex-1">
+                    <span className="block text-sm font-medium">
+                      <KindEmoji kind={item.kind} />
+                      {t("attention.taskReady.line", {
+                        task: item.taskTitle,
+                        project: item.projectTitle,
+                      })}
+                    </span>
+                    <span className="block text-xs text-moss-600 dark:text-moss-300">
+                      {t("attention.taskReady.hint")}
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            );
+          }
           // Co-organizer invitation addressed to the current member.
           // Per §7 the consequences are named in a comparison card
           // (same discipline as device pairing) before signing. BOTH

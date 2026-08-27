@@ -36,6 +36,7 @@ export const ATTENTION_EMOJI: Record<AttentionItem["kind"], string> = {
   project_deadline_approaching: "⏰", // ⏰
   project_paused_long: "\u{1F343}", // 🍃
   task_check_in: "\u{1F4CB}", // 📋
+  task_ready: "\u{1F513}", // 🔓
   coorganizer_invitation_received: "\u{1F33F}", // 🌿
   event_today: "\u{1F4C5}", // 📅
   event_cancelled: "\u{1F6AB}", // 🚫

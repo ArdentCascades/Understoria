@@ -21,6 +21,7 @@ describe("ATTENTION_EMOJI", () => {
     "project_deadline_approaching",
     "project_paused_long",
     "task_check_in",
+    "task_ready",
     "coorganizer_invitation_received",
     "event_today",
     "event_cancelled",

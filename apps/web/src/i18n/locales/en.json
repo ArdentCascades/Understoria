@@ -2272,6 +2272,10 @@
       "release": "Release it for someone else",
       "openProject": "Open project"
     },
+    "taskReady": {
+      "line": "“{{task}}” for {{project}} is ready — the task it follows is done.",
+      "hint": "You claimed it while it was waiting. Start whenever suits you."
+    },
     "postClaimed": {
       "needLine": "{{name}} picked up your need: {{title}}",
       "offerLine": "{{name}} accepted your offer: {{title}}",
