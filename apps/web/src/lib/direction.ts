@@ -58,10 +58,15 @@ export function isRtl(from?: Element | null): boolean {
  * How far an arrow key moves along the inline axis: +1 forward (toward
  * the reading end), -1 back, 0 for a key that isn't an inline arrow.
  *
- * Up/Down are inline arrows here too, because both of the app's
- * arrow-navigable surfaces render as a horizontal bar at one width and
- * a vertical rail at another. Vertical order never mirrors, so they
- * are direction-independent.
+ * Up/Down are inline arrows here too, for BottomNav's sake: it renders
+ * as a horizontal bar at one width and a vertical rail at another, and
+ * honoring both pairs everywhere beats detecting the rendered
+ * orientation from inside a key handler. Vertical order never mirrors,
+ * so they are direction-independent.
+ *
+ * A surface with no vertical axis must filter Up/Down out BEFORE
+ * calling — Present.tsx does exactly that for its one-axis slide deck,
+ * so keys it never bound don't quietly gain a meaning there.
  */
 export function inlineStep(key: string, rtl: boolean): -1 | 0 | 1 {
   switch (key) {

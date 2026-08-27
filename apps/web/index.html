@@ -1,5 +1,10 @@
 <!doctype html>
-<html lang="en">
+<!-- dir: i18n stamps this from init onward (i18n/index.ts follows the
+     active language). The default here only matters before init — or on
+     the render-anyway path if init fails — but without it no ltr:-scoped
+     utility (safe-area pairs, the drawer slide) would match at all,
+     since those variants require a literal dir attribute. -->
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />

@@ -113,8 +113,8 @@ first like it needs the operands **swapped** rather than substituted.
 > horizontal coordinate.
 
 One centering idiom in the same file (`left-1/2` with
-`-translate-x-1/2`, line 1370) is symmetric and correct as written —
-leave it.
+`-translate-x-1/2`) is symmetric and correct as written — leave it.
+The guard's allowlist pins it by substring, so no line number to rot.
 
 ### b. Markdown table alignment
 
@@ -196,7 +196,11 @@ deferred is now either resolved or reasoned about in its final form:
   utilities above) and emit `:where([dir="rtl"], [dir="rtl"] *)` — zero
   added specificity. The rail and the two floating action pills use
   them directly: exactly one of the pair ever matches, so there is no
-  cascade to reason about. The **drawer could not**: every transform
+  cascade to reason about. (One unstated invariant, made explicit by
+  the post-merge theory review: the pair only matches while `<html>`
+  carries a literal `dir` attribute. i18n stamps it from init onward,
+  and `index.html` now ships `dir="ltr"` so no pre-init frame — or the
+  render-anyway path after a failed init — is ever left unmatched.) The **drawer could not**: every transform
   utility compiles to the same `--tw-translate-x` declaration, so a
   dir-variant transform would have outranked the plain
   `motion-reduce:translate-x-0` override on source order alone and
