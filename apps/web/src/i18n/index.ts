@@ -24,12 +24,15 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 
 import en from "./locales/en.json";
-import { languageInfo, SUPPORTED_LANGUAGES } from "./languages";
+import { languageInfo, SELECTABLE_LANGUAGES } from "./languages";
 import { ensureContent } from "@/content/registry";
 
 export {
   LANGUAGES,
   languageInfo,
+  RTL_PSEUDO,
+  RTL_PSEUDO_AVAILABLE,
+  SELECTABLE_LANGUAGES,
   speakLangFor,
   SUPPORTED_LANGUAGES,
   type LanguageInfo,
@@ -100,7 +103,10 @@ export const i18nReady: Promise<unknown> = i18n
     // en above is bundled; everything else arrives via the backend.
     partialBundledLanguages: true,
     fallbackLng: "en",
-    supportedLngs: SUPPORTED_LANGUAGES as readonly string[],
+    // Selectable, not just shipped: includes the dev-only "rtl"
+    // preview when the build carries it (languages.ts). Its empty
+    // locale bundle falls through to English per key.
+    supportedLngs: SELECTABLE_LANGUAGES.map((l) => l.code),
     interpolation: {
       // React already escapes by default.
       escapeValue: false,
@@ -117,24 +123,36 @@ export const i18nReady: Promise<unknown> = i18n
   // never rejects on unknown locales — English is the fallback.
   .then(() => ensureContent(i18n.resolvedLanguage));
 
-// <html lang> / <html dir> follow the active language. lang feeds
-// screen readers and the read-aloud voice pick; dir is the RTL
-// program's future hook (every registry entry is ltr until the
-// Phase 3 logical-property sweep lands — see languages.ts).
-function applyDocumentLanguage(lng: string | undefined): void {
+// <html lang> / <html dir> follow the active language — but each
+// follows a different notion of "active", deliberately:
+//
+//   dir  follows the language the member ASKED for (i18n.language).
+//        Layout mirrors even while strings fall back to English —
+//        that asymmetry is what makes the dev-only "rtl" preview
+//        pseudo-locale possible at all: its code never has resources,
+//        so it never becomes the RESOLVED language, yet its whole
+//        point is the mirrored layout (docs/rtl-plan.md R3).
+//
+//   lang follows what is actually rendering (i18n.resolvedLanguage):
+//        it feeds screen readers and the read-aloud voice pick, so it
+//        must name the language of the text on screen — English
+//        during any fallback, the real code once its bundle lands.
+//        Under the pseudo-locale this honestly reads lang="en".
+function applyDocumentLanguage(): void {
   if (typeof document === "undefined") return;
-  const info = languageInfo(lng);
-  document.documentElement.lang = info.code;
-  document.documentElement.dir = info.dir;
+  document.documentElement.dir = languageInfo(i18n.language).dir;
+  document.documentElement.lang = languageInfo(
+    i18n.resolvedLanguage ?? i18n.language,
+  ).code;
 }
 i18n.on("languageChanged", (lng) => {
-  applyDocumentLanguage(lng);
+  applyDocumentLanguage();
   // Safety net for changeLanguage calls that bypass setLanguage
   // (tests, future callers): start the content load; the render that
   // races it falls back to English until the bundle lands.
   void ensureContent(lng);
 });
-void i18nReady.then(() => applyDocumentLanguage(i18n.resolvedLanguage));
+void i18nReady.then(() => applyDocumentLanguage());
 
 export function setLanguage(lang: string): void {
   // The content bundle loads BEFORE i18next switches, so the

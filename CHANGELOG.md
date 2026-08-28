@@ -41,6 +41,19 @@ include breaking changes.
   a study it never cited: the burnout of COVID-era organizers on
   notification-driven tools is named as the lived experience this
   principle stands on.
+- Right-to-left groundwork, step three (docs/rtl-plan.md R3): the
+  mirrored interface has now been *seen*, not just reasoned about. A
+  developer-only "English (RTL preview)" language walks every screen
+  right-to-left before a single Arabic or Urdu string exists, and a
+  verification pass drives the built app through eight surfaces in
+  both directions at phone width — 36 checks on mirroring and
+  overflow, all passing, with side-by-side screenshots for human
+  review. Members see none of this: the preview is compiled out of
+  member builds, and the registry's rule that no right-to-left
+  language ships before its layout is verified is now enforced by a
+  test. One real fix fell out: the app now keeps the layout direction
+  and the announced text language as separate facts, so a screen
+  reader is always told the language of the words actually on screen.
 - Right-to-left groundwork, step two (docs/rtl-plan.md R2): the parts
   of the interface that had to be *reasoned* about rather than
   rewritten. Message affordances, the me-menu drawer, the landscape

@@ -1,7 +1,8 @@
 # Phase 3 — Right-to-left support (code-verified plan)
 
-Status: **R1 and R2 SHIPPED** (the logical-property sweep and its
-guard; then the semantic cases); R3–R4 outstanding. This document began as the survey that had to
+Status: **R1–R3 SHIPPED** (the logical-property sweep and its
+guard; the semantic cases; the pseudo-locale and its mirrored-surface
+verification); R4 outstanding. This document began as the survey that had to
 exist before the work started, in the same spirit as the router-8,
 React-19 and eslint-10 plan docs: every number below was measured
 against the tree at `d6d225e`, not estimated. It is now also the
@@ -252,14 +253,49 @@ the demo build, LTR and with `dir="rtl"` forced:
   rule actually matches the element rather than from the box.
 - Six routes at 375px: zero horizontal overflow in either direction.
 
-**R3 — mirrored-surface verification.** A pseudo-locale is the honest
-way to test this before any Arabic string exists: add a dev-only
-registry entry with `dir: "rtl"` (English text, mirrored layout) so
-the whole app can be walked in RTL without waiting on translation.
-Playwright pass at 375px over board, dashboard, conversation,
-calendar, profile, settings, help and one print surface, asserting no
-horizontal overflow and correct mirroring. Screenshots side by side
-with LTR for review.
+**R3 — mirrored-surface verification. ✅ SHIPPED.** A pseudo-locale is
+the honest way to test this before any Arabic string exists: an RTL
+preview entry (`code: "rtl"`, English text, mirrored layout) so the
+whole app can be walked in RTL without waiting on translation.
+
+How it shipped, and what it taught:
+
+- **The pseudo-locale lives OUTSIDE `LANGUAGES`** (`RTL_PSEUDO` /
+  `SELECTABLE_LANGUAGES` in `i18n/languages.ts`), because that array
+  is the shipped-languages source of truth the parity gates, plural
+  gates and README language count all derive from — an entry there
+  would have broken every one of them. It appears in Settings only
+  when the build carries it: dev servers always, plus builds made
+  with `VITE_RTL_PSEUDO=1`; member builds compile it out. The
+  registry's no-`rtl`-before-R4 rule is now a test
+  (`i18n/languages.test.ts`), not just a comment.
+- **`<html dir>` and `<html lang>` deliberately follow different
+  notions of "active language"** — the real finding of this step. The
+  pseudo-locale has no resources, so it never becomes i18next's
+  RESOLVED language; stamping both attributes from
+  `resolvedLanguage` (the old code) silently un-mirrored the layout
+  right after init. Now `dir` follows the language the member asked
+  for (`i18n.language` — layout mirrors even while strings fall
+  back) and `lang` follows what is actually rendering
+  (`resolvedLanguage` — so screen readers and the voice pick hear
+  the truth: under the preview that is honestly `lang="en"`).
+- **The pass itself** is `apps/web/scripts/rtl-verify.mjs`
+  (`npm run rtl:verify` from apps/web): builds with
+  `VITE_DEMO=1 VITE_RTL_PSEUDO=1`, serves the bundle, and walks
+  board, dashboard, calendar, messages, profile, settings, help and
+  `/print/board` at 375px in BOTH directions — 36 checks: `<html
+  dir>` correct and zero horizontal overflow on every surface, the
+  first nav tab at the reading start, and the me-menu drawer settled
+  at the reading END edge (its offscreen start is itself observed
+  mirrored, ±100% by direction — the `--slide-out` custom property
+  doing its job). Screenshots land beside the script's `--out` as
+  LTR/RTL pairs plus a contact sheet. All 36 pass.
+- **One known pseudo-locale artifact, not a bug:** trailing English
+  punctuation jumps to the line's far side (".and nothing is sent
+  anywhere"). That is the Unicode bidi algorithm handling LTR text in
+  an RTL paragraph, exactly as specified; real Arabic/Urdu text is
+  RTL script and keeps its punctuation where it belongs. Do not
+  "fix" this — any fix would break the real languages later.
 
 **R4 — Wave 3 translation.** Only now does `ar`/`ur` become a
 translation problem, and it runs the ordinary playbook: glossary

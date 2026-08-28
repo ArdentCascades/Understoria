@@ -117,13 +117,49 @@ export type SupportedLanguage = (typeof LANGUAGES)[number]["code"];
 export const SUPPORTED_LANGUAGES: readonly SupportedLanguage[] =
   LANGUAGES.map((l) => l.code);
 
+// The RTL preview pseudo-locale (docs/rtl-plan.md R3). English text,
+// mirrored layout: it exists so every surface can be walked
+// right-to-left and verified BEFORE any Arabic or Urdu string ships —
+// the honest order, since a translation must never land in a layout
+// nobody has seen mirrored. It deliberately lives OUTSIDE the LANGUAGES
+// registry: that array is the shipped-languages source of truth that
+// the parity gates, the plural gates and the README count all derive
+// from, and this entry is a scaffold, not a language. The registry's
+// own rule stands — no `dir: "rtl"` entry ships in LANGUAGES until R3
+// verification passes and R4 brings real translations.
+//
+// The code "rtl" is registry-internal, not BCP-47; it needs no locale
+// file (the i18n backend answers unknown codes with an empty bundle
+// and every key falls through to English) and no content bundle
+// (contentLocale("rtl") resolves to English). The one cosmetic cost:
+// <html lang="rtl"> while previewing — acceptable for a surface that
+// never reaches a member.
+export const RTL_PSEUDO: LanguageInfo = {
+  code: "rtl",
+  endonym: "English (RTL preview)",
+  dir: "rtl",
+  speakLang: "en",
+  content: "full",
+};
+
+/** Whether this build carries the RTL preview: dev servers always,
+ *  plus builds made with VITE_RTL_PSEUDO=1 (the rtl-verify script's
+ *  production-fidelity build). Never a shipped member build. */
+export const RTL_PSEUDO_AVAILABLE: boolean =
+  import.meta.env.DEV || Boolean(import.meta.env.VITE_RTL_PSEUDO);
+
+/** What a member of THIS build can pick in Settings: the shipped
+ *  registry, plus the RTL preview when the build carries it. */
+export const SELECTABLE_LANGUAGES: readonly LanguageInfo[] =
+  RTL_PSEUDO_AVAILABLE ? [...LANGUAGES, RTL_PSEUDO] : LANGUAGES;
+
 /** Registry record for a resolved i18next language, tolerating
  *  regioned tags ("es-MX" → es). Unknown tags resolve to English —
  *  the same fallback i18next itself applies. */
 export function languageInfo(lang: string | undefined): LanguageInfo {
   const base = (lang ?? "en").toLowerCase();
   return (
-    LANGUAGES.find((l) => {
+    SELECTABLE_LANGUAGES.find((l) => {
       const code = l.code.toLowerCase();
       return base === code || base.startsWith(`${code}-`);
     }) ?? LANGUAGES[0]

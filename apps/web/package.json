@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "rtl:verify": "node scripts/rtl-verify.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
