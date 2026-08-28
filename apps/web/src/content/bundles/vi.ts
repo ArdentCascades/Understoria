@@ -30,3 +30,4 @@ export { TASK_TIPS_VI as TASK_TIPS } from "../taskTips.vi";
 export { EVENT_TEMPLATES_VI as EVENT_TEMPLATES } from "../eventTemplates.vi";
 export { FAQ_SECTIONS_VI as FAQ_SECTIONS } from "../faq.vi";
 export { START_COMMUNITY_VI as START_COMMUNITY } from "../startCommunity.vi";
+export { DESIGN_PRINCIPLES_VI as DESIGN_PRINCIPLES } from "../design-principles.vi";

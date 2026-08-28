@@ -30,3 +30,4 @@ export { TASK_TIPS_HI as TASK_TIPS } from "../taskTips.hi";
 export { EVENT_TEMPLATES_HI as EVENT_TEMPLATES } from "../eventTemplates.hi";
 export { FAQ_SECTIONS_HI as FAQ_SECTIONS } from "../faq.hi";
 export { START_COMMUNITY_HI as START_COMMUNITY } from "../startCommunity.hi";
+export { DESIGN_PRINCIPLES_HI as DESIGN_PRINCIPLES } from "../design-principles.hi";

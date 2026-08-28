@@ -30,3 +30,4 @@ export { TASK_TIPS_RU as TASK_TIPS } from "../taskTips.ru";
 export { EVENT_TEMPLATES_RU as EVENT_TEMPLATES } from "../eventTemplates.ru";
 export { FAQ_SECTIONS_RU as FAQ_SECTIONS } from "../faq.ru";
 export { START_COMMUNITY_RU as START_COMMUNITY } from "../startCommunity.ru";
+export { DESIGN_PRINCIPLES_RU as DESIGN_PRINCIPLES } from "../design-principles.ru";

@@ -67,6 +67,18 @@ include breaking changes.
   with their reasons rather than quietly tolerated.
 
 ### Added
+- **The twelve design principles now read in the member's own
+  language.** Tapping "why" on a surface that could have shown a
+  score, a ranking or a read receipt — and the full principles
+  reading in Profile → Learn — used to answer in English no matter
+  which of the eight languages the member had chosen. All twelve
+  principles (title, statement, and the piece of history behind
+  each) are now translated into Spanish, French, Portuguese,
+  Chinese, Hindi, Vietnamese and Russian, each following its
+  language's glossary and register, loaded with the same lazy
+  per-language content chunk as the rest of the authored corpus. A
+  parity gate holds every translation to the English file's ids and
+  order, and fails the build on any untranslated placeholder.
 - **The full authored-content library now exists in Russian — and
   with it, in every language the app ships.** All 64 project
   templates with their tips and starter steps, the 14 event

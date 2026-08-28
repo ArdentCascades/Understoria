@@ -17,6 +17,13 @@ export interface DesignPrinciple {
   example: string;
 }
 
+// The canonical English list. Members read these through
+// getDesignPrinciples() below, which serves the active language's
+// translation (design-principles.<lang>.ts via the content bundles);
+// this list is also the fallback for any untranslated locale. IDs are
+// stable and shared across languages — WhyTooltip anchors on them and
+// code comments cite them — so never translate or reorder them; the
+// parity test holds every translation to this file's ids and order.
 export const DESIGN_PRINCIPLES: readonly DesignPrinciple[] = [
   {
     id: "equal-time",
@@ -115,3 +122,14 @@ export const DESIGN_PRINCIPLES: readonly DesignPrinciple[] = [
       "Project management tools that label tasks 'blocked' create a blame dynamic — someone is 'blocking' someone else. 'Follows' frames the same dependency as a natural sequence, removing the interpersonal friction.",
   },
 ];
+
+import { getContentBundle } from "./registry";
+
+/** The design principles in the given UI locale, English for any
+ *  locale without a translated bundle. Synchronous by the same gate
+ *  every content selector relies on (see content/registry.ts). */
+export function getDesignPrinciples(
+  locale: string | undefined,
+): readonly DesignPrinciple[] {
+  return getContentBundle(locale).DESIGN_PRINCIPLES;
+}

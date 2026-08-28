@@ -12,12 +12,16 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { DESIGN_PRINCIPLES } from "@/content/design-principles";
+import { getDesignPrinciples } from "@/content/design-principles";
 
 export function WhyTooltip({ principleId }: { principleId: string }) {
-  const { t } = useTranslation();
+  // useTranslation subscribes this component to language changes, so
+  // the principle re-resolves in the new language on switch.
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
-  const principle = DESIGN_PRINCIPLES.find((p) => p.id === principleId);
+  const principle = getDesignPrinciples(i18n.resolvedLanguage).find(
+    (p) => p.id === principleId,
+  );
   if (!principle) return null;
 
   return (

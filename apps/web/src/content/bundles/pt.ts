@@ -30,3 +30,4 @@ export { TASK_TIPS_PT as TASK_TIPS } from "../taskTips.pt";
 export { EVENT_TEMPLATES_PT as EVENT_TEMPLATES } from "../eventTemplates.pt";
 export { FAQ_SECTIONS_PT as FAQ_SECTIONS } from "../faq.pt";
 export { START_COMMUNITY_PT as START_COMMUNITY } from "../startCommunity.pt";
+export { DESIGN_PRINCIPLES_PT as DESIGN_PRINCIPLES } from "../design-principles.pt";
