@@ -28,3 +28,4 @@ export { TASK_TIPS_EN as TASK_TIPS } from "../taskTips.en";
 export { EVENT_TEMPLATES_EN as EVENT_TEMPLATES } from "../eventTemplates.en";
 export { FAQ_SECTIONS } from "../faq";
 export { START_COMMUNITY } from "../startCommunity";
+export { DESIGN_PRINCIPLES } from "../design-principles";

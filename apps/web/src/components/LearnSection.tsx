@@ -12,7 +12,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
-import { DESIGN_PRINCIPLES } from "@/content/design-principles";
+import { getDesignPrinciples } from "@/content/design-principles";
 import { MEMBER_GUIDE } from "@/content/member-guide";
 import { OPSEC_GUIDE } from "@/content/opsec-guide";
 import { promptShareText, STUDY_PROMPTS } from "@/content/study-prompts";
@@ -29,7 +29,7 @@ type Panel = "none" | "guide" | "opsec" | "principles" | "prompts" | "install";
 // reference material, not every-visit material. The panel buttons
 // and their content are unchanged inside the disclosure.
 export function LearnSection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const reduced = useReducedMotion();
   const detailsRef = useRef<HTMLDetailsElement | null>(null);
@@ -192,7 +192,7 @@ export function LearnSection() {
             <p className="text-xs text-moss-600 dark:text-moss-300">
               {t("profile.learn.principlesIntro")}
             </p>
-            {DESIGN_PRINCIPLES.map((p, i) => (
+            {getDesignPrinciples(i18n.resolvedLanguage).map((p, i) => (
               <Fragment key={p.id}>
                 {i > 0 && <LeafDivider variant="short" />}
                 <article id={`principle-${p.id}`}>

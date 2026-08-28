@@ -35,7 +35,7 @@ import * as enBundle from "./bundles/en";
 export type ContentBundle = typeof enBundle;
 
 // One loader per language WITH translated content — as of Phase 2
-// that is every shipped language (all nine). A future ui-only language (UI
+// that is every shipped language (all eight). A future ui-only language (UI
 // strings translated, content not yet) simply has no entry here: it
 // falls back to English below, which is exactly what a registry
 // entry's `content: "ui-only"` discloses in Settings. When its

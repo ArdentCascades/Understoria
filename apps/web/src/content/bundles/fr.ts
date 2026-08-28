@@ -30,3 +30,4 @@ export { TASK_TIPS_FR as TASK_TIPS } from "../taskTips.fr";
 export { EVENT_TEMPLATES_FR as EVENT_TEMPLATES } from "../eventTemplates.fr";
 export { FAQ_SECTIONS_FR as FAQ_SECTIONS } from "../faq.fr";
 export { START_COMMUNITY_FR as START_COMMUNITY } from "../startCommunity.fr";
+export { DESIGN_PRINCIPLES_FR as DESIGN_PRINCIPLES } from "../design-principles.fr";

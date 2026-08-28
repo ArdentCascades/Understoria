@@ -30,3 +30,4 @@ export { TASK_TIPS_ZH as TASK_TIPS } from "../taskTips.zh";
 export { EVENT_TEMPLATES_ZH as EVENT_TEMPLATES } from "../eventTemplates.zh";
 export { FAQ_SECTIONS_ZH as FAQ_SECTIONS } from "../faq.zh";
 export { START_COMMUNITY_ZH as START_COMMUNITY } from "../startCommunity.zh";
+export { DESIGN_PRINCIPLES_ZH as DESIGN_PRINCIPLES } from "../design-principles.zh";
