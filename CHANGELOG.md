@@ -80,6 +80,23 @@ include breaking changes.
   with their reasons rather than quietly tolerated.
 
 ### Added
+- **The app now speaks Arabic — its first right-to-left language.**
+  All ~2,900 UI strings in warm, plain pan-Arab فصحى, guided by a new
+  binding glossary (docs/i18n-glossary/ar.md): التعاضد in its
+  Kropotkin lineage for mutual aid, بنك الوقت for the timebank,
+  المشاع for the commons, «يوم العون» for work days, masdar-form
+  buttons and suffix-pronoun phrasing that keep the written second
+  person gender-neutral, and none of the debt, charity, or
+  security-state vocabulary the glossary bans by name. The whole
+  interface mirrors right-to-left — the layout work verified in the
+  three RTL groundwork steps before a single Arabic string shipped.
+  Arabic's six plural forms (zero, one, two, few, many, other) are
+  carried correctly everywhere counts appear, dual included —
+  «ساعتان», never «2 ساعة» — with the translation gates taught
+  exactly when a correct dual may omit the digit. العربية appears in
+  Settings → Language with the new-translation review note; authored
+  content shows in English for now with the honest disclosure, and
+  follows on the same rails as every other language.
 - **The twelve design principles now read in the member's own
   language.** Tapping "why" on a surface that could have shown a
   score, a ranking or a read receipt — and the full principles
