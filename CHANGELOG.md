@@ -9,6 +9,26 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **The app now speaks Tibetan.** All ~2,900 UI strings in བོད་ཡིག,
+  expedited past the planned language queue for communities
+  responding to the 2026 Tibet flood. The translation follows a new
+  binding glossary (docs/i18n-glossary/bo.md): warm plain written
+  register with ཁྱེད་རང་ address, plain-verb buttons closed with the
+  shad, ཕན་ཚུན་རོགས་རེས་ for mutual aid in its solidarity sense, and
+  none of the corvée-labor, alms, debt, or petition-to-authority
+  vocabulary the glossary bans by name. A rendering spike ran before
+  the first string: tsheg-aware line breaking works natively, but
+  Tibetan's stacked consonants and vowel signs overflow the Latin
+  line box — so the stylesheet now carries a Tibetan font stack
+  covering every major platform and a line-height floor that keeps
+  tight leading from ever colliding two Tibetan lines. Tibetan's
+  single plural category is carried on the same rails the gates
+  already hold Chinese to. བོད་ཡིག appears in Settings → Language
+  with the new-translation review note; authored content shows in
+  English for now with the honest disclosure, and follows on the
+  same rails as every other language.
+
 ### Fixed
 - **The promised reminder now exists.** A task claimed while it still
   followed an unfinished one told its claimer "You'll be reminded when
