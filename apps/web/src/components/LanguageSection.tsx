@@ -19,11 +19,15 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useTranslation } from "react-i18next";
-import { LANGUAGES, languageInfo, setLanguage } from "@/i18n";
+import { SELECTABLE_LANGUAGES, languageInfo, setLanguage } from "@/i18n";
 
 export function LanguageSection() {
   const { t, i18n } = useTranslation();
-  const current = languageInfo(i18n.resolvedLanguage);
+  // language, not resolvedLanguage: the RTL preview pseudo-locale has
+  // no resources of its own, so it never "resolves" — but it is still
+  // the member's active pick, and its button should show selected.
+  // For every real language the two agree once its bundle is loaded.
+  const current = languageInfo(i18n.language);
   return (
     <section className="card mb-4" aria-labelledby="language-section-title">
       <h2
@@ -40,7 +44,10 @@ export function LanguageSection() {
         aria-labelledby="language-section-title"
         className="flex flex-wrap gap-2"
       >
-        {LANGUAGES.map((lang) => {
+        {/* SELECTABLE, not LANGUAGES: dev builds append the RTL
+            preview pseudo-locale (docs/rtl-plan.md R3); member builds
+            render exactly the shipped registry. */}
+        {SELECTABLE_LANGUAGES.map((lang) => {
           const selected = current.code === lang.code;
           return (
             <button
