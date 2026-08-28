@@ -31,3 +31,4 @@ await ensureContent("zh");
 await ensureContent("hi");
 await ensureContent("vi");
 await ensureContent("ru");
+await ensureContent("ar");

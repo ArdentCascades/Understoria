@@ -80,6 +80,16 @@ include breaking changes.
   with their reasons rather than quietly tolerated.
 
 ### Added
+- **The whole authored library now exists in Arabic.** The app began
+  speaking Arabic in the last entry — every button and message — and
+  now everything the app *hands you to read* speaks it too: all 64
+  project playbooks with their starter steps and field-tested tips,
+  the event templates, the help pages, the start-a-community guide,
+  and the twelve design principles. Nothing falls back to English
+  any more, so the Settings note that disclosed the gap is gone.
+  Every parity gate that keeps the other eight languages honest —
+  same playbooks, same structure, terminal commands byte-identical —
+  now holds for Arabic too.
 - **The app now speaks Arabic — its first right-to-left language.**
   All ~2,900 UI strings in warm, plain pan-Arab فصحى, guided by a new
   binding glossary (docs/i18n-glossary/ar.md): التعاضد in its

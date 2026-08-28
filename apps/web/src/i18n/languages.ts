@@ -115,15 +115,15 @@ export const LANGUAGES = [
   // logical-property sweep, R2's semantic cases, and R3's mirrored-
   // surface verification all landed and are guarded before any dir:
   // "rtl" was allowed here (languages.test.ts holds that order).
-  // Content is ui-only for now — the authored corpus follows on the
-  // Phase 2 rails, and Settings discloses the fallback honestly.
+  // The full authored corpus shipped on the Phase 2 rails
+  // (content/bundles/ar.ts), so content is "full" like the others.
   {
     code: "ar",
     endonym: "العربية",
     dir: "rtl",
     speakLang: "ar",
     reviewStatus: "new",
-    content: "ui-only",
+    content: "full",
   },
 ] as const satisfies readonly LanguageInfo[];
 
