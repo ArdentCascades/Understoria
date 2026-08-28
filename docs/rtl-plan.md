@@ -297,14 +297,24 @@ How it shipped, and what it taught:
   RTL script and keeps its punctuation where it belongs. Do not
   "fix" this — any fix would break the real languages later.
 
-**R4 — Wave 3 translation.** Only now does `ar`/`ur` become a
-translation problem, and it runs the ordinary playbook: glossary
-first, then the UI fleet, then the content fleet. Arabic also brings
-a plural system with **six** categories (`zero`/`one`/`two`/`few`/
-`many`/`other`) — the parity gate's sanctioned plural-suffix
-relaxation, added for Russian, already covers that case, and
-`plurals.test.ts` derives required categories from `Intl.PluralRules`
-rather than a hand-written list, so it needs no change.
+**R4 — Wave 3 translation. IN PROGRESS: Arabic glossary shipped.**
+Only now does `ar`/`ur` become a translation problem, and it runs the
+ordinary playbook: glossary first, then the UI fleet, then the
+content fleet. The Arabic glossary is `docs/i18n-glossary/ar.md` —
+warm plain فصحى (the pan-Arab middle register), masdar buttons and
+suffix-pronoun constructions keeping the written second person
+gender-neutral, تعاضد for mutual aid, and a politically-marked ban
+list sized for an audience that spans the region's live borders.
+Arabic also brings a plural system with **six** categories
+(`zero`/`one`/`two`/`few`/`many`/`other`) — the parity gate's
+sanctioned plural-suffix relaxation, added for Russian, already
+covers that case, and `plurals.test.ts` derives required categories
+from `Intl.PluralRules` rather than a hand-written list, so it needs
+no change. One amendment the UI fleet must carry: correct Arabic
+omits `{{count}}` in the `_zero`/`_one`/`_two` forms («ساعتان», never
+«2 ساعة»), and those categories each pin a single integer, so the
+interpolation-parity gate should sanction dropping `{{count}}`
+exactly where the category admits one number — nowhere else.
 
 ## What this program does not include
 
