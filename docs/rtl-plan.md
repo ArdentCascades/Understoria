@@ -297,7 +297,8 @@ How it shipped, and what it taught:
   RTL script and keeps its punctuation where it belongs. Do not
   "fix" this — any fix would break the real languages later.
 
-**R4 — Wave 3 translation. IN PROGRESS: Arabic UI fleet SHIPPED**
+**R4 — Wave 3 translation. IN PROGRESS: Arabic SHIPPED IN FULL —
+UI fleet and the whole authored-content corpus**
 (glossary, all ~2,900 UI strings, the registry's first `dir: "rtl"`
 entry, and the gates taught Arabic's six plural categories — the
 single-integer {{count}} amendment below landed in both parity and
@@ -305,10 +306,12 @@ plurals gates, computed from `Intl.PluralRules`, never hand-listed).
 Verified against the built bundle: `dir="rtl"` + `lang="ar"` on every
 probed surface, zero horizontal overflow, mirrored layout with real
 Arabic text keeping its punctuation (the pseudo-locale's bidi
-artifact gone, as predicted). Remaining in R4: the Arabic authored
-content (Phase 2 rails; the registry entry is `content: "ui-only"`
-with the honest Settings note until then), then Urdu on the same
-path.
+artifact gone, as predicted). The authored corpus followed on the
+Phase 2 rails — all 64 playbooks, starter steps, tips, event
+templates, FAQ, the start-a-community guide and the design
+principles, `content/bundles/ar.ts`, registry flipped to
+`content: "full"` — with every content parity gate extended to `ar`.
+Remaining in R4: Urdu on the same path.
 Only now does `ar`/`ur` become a translation problem, and it runs the
 ordinary playbook: glossary first, then the UI fleet, then the
 content fleet. The Arabic glossary is `docs/i18n-glossary/ar.md` —

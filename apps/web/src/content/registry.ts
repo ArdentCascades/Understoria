@@ -49,6 +49,7 @@ const LOADERS: Record<string, () => Promise<ContentBundle>> = {
   hi: () => import("./bundles/hi"),
   vi: () => import("./bundles/vi"),
   ru: () => import("./bundles/ru"),
+  ar: () => import("./bundles/ar"),
 };
 
 const cache = new Map<string, ContentBundle>([["en", enBundle]]);

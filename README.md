@@ -138,11 +138,10 @@ Understoria is a platform where communities exchange help, tracked through **tim
      apps/web/src/lib/readme.guard.test.ts — update both together. -->
 - **Nine languages** — English, Spanish, French, Portuguese, Chinese, Hindi,
   Vietnamese, Russian, and Arabic — the app's first right-to-left language,
-  with the whole interface mirrored. Eight carry the whole authored corpus
-  translated, not just the buttons: the help pages, the project playbooks,
-  the event templates; Arabic's authored content is being translated next,
-  and Settings says so honestly meanwhile. Seven are newly translated and
-  have not yet been read by a native speaker — the app says that too.
+  with the whole interface mirrored. All nine carry the whole authored
+  corpus translated, not just the buttons: the help pages, the project
+  playbooks, the event templates. Seven are newly translated and have not
+  yet been read by a native speaker — the app says that too.
 - **Federation** — Each community runs its own node. Nodes can peer with each other to share needs and offers across groups. No central server, no single point of failure.
 
 ### Not built yet
