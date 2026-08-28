@@ -125,6 +125,22 @@ export const LANGUAGES = [
     reviewStatus: "new",
     content: "full",
   },
+  // Tibetan was expedited past the planned Wave-3 order in response to
+  // the 2026 Tibet flood (bo is LTR, so it rides ahead of Urdu without
+  // touching the RTL program's gates). The rendering spike and the
+  // typography guards it demanded — a :lang(bo) font stack and a
+  // line-height floor for the tall vowel signs — are recorded in
+  // docs/i18n-glossary/bo.md and live in index.css. CLDR Tibetan has a
+  // single plural category, so bo.json follows the zh precedent:
+  // _one/_other both exist with identical strings.
+  {
+    code: "bo",
+    endonym: "བོད་ཡིག",
+    dir: "ltr",
+    speakLang: "bo",
+    reviewStatus: "new",
+    content: "ui-only",
+  },
 ] as const satisfies readonly LanguageInfo[];
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]["code"];

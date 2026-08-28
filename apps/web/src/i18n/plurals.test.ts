@@ -29,6 +29,7 @@ import hi from "./locales/hi.json";
 import vi from "./locales/vi.json";
 import ru from "./locales/ru.json";
 import ar from "./locales/ar.json";
+import bo from "./locales/bo.json";
 
 // CLDR plural-suffix completeness for every shipped locale
 // (docs/i18n-expansion.md Phase 0), plus the original Spanish
@@ -48,6 +49,7 @@ const LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   { code: "vi", data: vi },
   { code: "ru", data: ru },
   { code: "ar", data: ar },
+  { code: "bo", data: bo },
 ];
 
 function flatKeys(obj: unknown, prefix = ""): string[] {

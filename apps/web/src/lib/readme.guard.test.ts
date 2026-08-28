@@ -106,6 +106,7 @@ describe("README: claims the code decides", () => {
       Vietnamese: "vi",
       Russian: "ru",
       Arabic: "ar",
+      Tibetan: "bo",
       Urdu: "ur",
     };
     const shipped = new Set<string>(LANGUAGES.map((l) => l.code));

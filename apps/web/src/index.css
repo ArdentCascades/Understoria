@@ -458,3 +458,39 @@
   details[open] > summary::after { content: " \25B4"; }  /* ▴ */
 }
 
+
+/* Tibetan typography (docs/i18n-glossary/bo.md, "Script, typography,
+ * rendering"). Two facts from the rendering spike drive this block:
+ *
+ * 1. The app's font stack (Inter → system fallbacks) has no Tibetan
+ *    coverage, so without an explicit stack the script renders in
+ *    whatever the OS falls back to — or tofu. Named Tibetan faces
+ *    cover macOS/iOS (Kailasa), Windows (Microsoft Himalaya), and
+ *    Android/Linux (Noto).
+ *
+ * 2. Tibetan vowel signs and stacked consonants extend well past the
+ *    Latin CSS line box: at line-height 1 two Tibetan lines collide.
+ *    The floor below overrides Tailwind's leading-none/tight/snug
+ *    (all decorative-emoji or Latin-only today, but a floor keeps
+ *    every future use safe) wherever the content language is Tibetan.
+ */
+:lang(bo) {
+  font-family:
+    "Noto Serif Tibetan",
+    Kailasa,
+    "Noto Sans Tibetan",
+    "Microsoft Himalaya",
+    "Tibetan Machine Uni",
+    Inter,
+    system-ui,
+    sans-serif;
+}
+
+:lang(bo) .leading-none,
+:lang(bo) .leading-tight,
+:lang(bo) .leading-snug,
+:lang(bo).leading-none,
+:lang(bo).leading-tight,
+:lang(bo).leading-snug {
+  line-height: 1.6;
+}
