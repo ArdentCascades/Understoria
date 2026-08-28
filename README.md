@@ -10,13 +10,13 @@
 </p>
 
 <p align="center">
-  <a href="#project-status">Project Status</a> •
-  <a href="#start-here">Start Here</a> •
-  <a href="#what-it-does">What It Does</a> •
-  <a href="#what-protects-you">What Protects You</a> •
-  <a href="#why-nothing-buzzes">Why Nothing Buzzes</a> •
-  <a href="#why-it-exists">Why It Exists</a> •
-  <a href="#run-it-yourself">Run It Yourself</a> •
+  <a href="#project-status">Project status</a> •
+  <a href="#start-here">Start here</a> •
+  <a href="#what-it-does">What it does</a> •
+  <a href="#what-protects-you">What protects you</a> •
+  <a href="#why-nothing-buzzes">Why nothing buzzes</a> •
+  <a href="#why-it-exists">Why it exists</a> •
+  <a href="#run-it-yourself">Run it yourself</a> •
   <a href="#architecture">Architecture</a> •
   <a href="#contributing">Contributing</a> •
   <a href="#community">Community</a> •
@@ -37,7 +37,7 @@
 
 ---
 
-## Project Status
+## Project status
 
 > **Understoria is beta software, and much of its code was written with AI
 > tools and reviewed by people.** It has not yet had an independent security
@@ -72,7 +72,7 @@ Already a member of a community that uses Understoria? The
 [Member Guide](docs/member-guide.md) is the one for you, and the app
 itself has a Help tab that says the same things.
 
-## What It Does
+## What it does
 
 Understoria is a platform where communities exchange help, tracked through **time credits**. One hour of help equals one hour of help — regardless of the type of work. No market pricing, no hierarchy, no algorithms deciding who gets support.
 
@@ -86,8 +86,21 @@ Understoria is a platform where communities exchange help, tracked through **tim
 ### What people do with it
 
 - **Community Board** — Post needs and offers across categories like transport, food, childcare, skilled labor, emotional support, education, and more.
-- **Community Projects** — Collective efforts with task lists, starter templates, co-organizer invitations, task ordering and soft dependencies, and a page per task for its discussion thread. The **In my care** tab (`/my-work`) gathers every task you're carrying, shift you've signed up for, need you've claimed, and project in your care, across projects.
+- **Community Projects** — Collective efforts with task lists, starter templates, co-organizer invitations, task ordering and soft dependencies, and a page per task for its discussion thread.
+- **In my care** — One tab (`/my-work`) gathers every task you're carrying, shift you've signed up for, need you've claimed, and project in your care, across all of your projects.
 - **Timebank Credits** — Every exchange earns and spends time credits. New members start with seed credits so asking for help is never gated. Project-task credit records the hours actually given, not the estimate.
+
+<p align="center">
+  <img src="docs/images/start-a-project-mobile.png"
+       alt="Starting a project on a phone: a gallery of ready-made playbooks to pick from"
+       width="300" />
+</p>
+
+<p align="center">
+  <em>Starting a project on a phone. 64 playbooks ship — each arrives with
+  its own task list, hour estimates and suggested first steps, so nobody
+  begins at an empty page.</em>
+</p>
 
 ### What holds a group together
 
@@ -95,11 +108,9 @@ Understoria is a platform where communities exchange help, tracked through **tim
 - **Collective Dashboard** — See your community's total hours exchanged, active members, solidarity streaks, and milestones. The unit of progress is *us*, not *me*.
 - **Gathering Screen** — A fullscreen display for a shared screen in the room: a TV in the corner of a repair café, a laptop propped on a table at a skillshare. It rotates through upcoming events, claimable tasks, and open needs and offers, and puts a QR code on every slide so anyone present can RSVP, claim the task, or message whoever posted — from their own phone, in one scan.
 - **Achievements as Roles** — Earn community roles like Connector, Bridge
-  Builder and Listener. These are not scores and there is no leaderboard:
-  `no-leaderboards` is one of the twelve named design principles the app
-  holds itself to, and tapping "why" on a surface that could have shown a
-  ranking explains what happened to the platforms that did.
-- **Member Blocking** — A local-only personal-relief surface for stopping unwanted contact, parallel to (and independent of) the community dispute process.
+  Builder and Listener. They are roles, not scores: no points, no ranking,
+  no leaderboard — [Why it exists](#why-it-exists) has the principle
+  behind that.
 - **The attention rail** — Open the app and the top of the board says what
   needs you: a task someone finished and is waiting on you to confirm, a
   thing you claimed a while back that you can quietly hand back. It is what
@@ -121,7 +132,7 @@ Understoria is a platform where communities exchange help, tracked through **tim
 
 ### Who can join, and who runs it
 
-- **Invite-only mode** — Operators can flip the node from open-onboarding to invite-only at any time; the existing signed-invite redemption path stays the only way in.
+- **Invite-only mode** — Operators can flip the node from open-onboarding to invite-only at any time; invites are signed, and an invite is then the only way in.
 <!-- Eight languages: apps/web/src/i18n/languages.ts (LANGUAGES).
      Six carry reviewStatus: "new". Guarded by
      apps/web/src/lib/readme.guard.test.ts — update both together. -->
@@ -135,18 +146,6 @@ Understoria is a platform where communities exchange help, tracked through **tim
 ### Not built yet
 
 - **Organizing Tools** *(planned)* — Campaign trackers, one-on-one conversation logs, power mapping, and meeting facilitation — connecting mutual aid to collective action. Not built yet; it is a named workstream on the [roadmap](docs/roadmap.md).
-
-<p align="center">
-  <img src="docs/images/start-a-project-mobile.png"
-       alt="Starting a project on a phone: a gallery of ready-made playbooks to pick from"
-       width="300" />
-</p>
-
-<p align="center">
-  <em>Starting a project from one of 64 playbooks — each arrives with its own
-  task list, hour estimates and suggested first steps, so nobody begins at an
-  empty page.</em>
-</p>
 
 ## What protects you
 
@@ -172,7 +171,8 @@ software does about it, in plain terms:
   happen and are never relayed to peer nodes. Who showed up to what is
   not a thing this software assembles.
 - **Blocking is yours alone.** Blocks never federate, never aggregate,
-  and never signal anything to the person blocked.
+  and never signal anything to the person blocked. Blocking is personal
+  relief, separate from the community's dispute process.
 - **The screen in the room can't leak.** The gathering screen is
   read-only and shows only what is already public — it never changes
   anything and never displays private data.
@@ -183,7 +183,7 @@ software does about it, in plain terms:
   for emergency purge, soft or hard.
 
 None of this has had an independent security audit yet — see Project
-Status above. The full analysis, including what is *not* protected, is
+status above. The full analysis, including what is *not* protected, is
 in the [Threat Model](docs/threat-model.md).
 
 ## Why nothing buzzes
@@ -251,7 +251,7 @@ still a mark that your absence made, and you were not asked first.
 None of these are arguments for adding notifications. They are the price
 of not having them, and a community should get to weigh it knowingly.
 
-## Why It Exists
+## Why it exists
 
 Mutual aid networks are powerful, but they're often held together by spreadsheets, group chats, and the sheer willpower of a few overworked organizers. Understoria gives communities a dedicated tool that's designed for solidarity — not engagement metrics, not ad revenue, not data extraction.
 
@@ -317,7 +317,7 @@ the source of truth.
 
 ### Run locally (development)
 
-Requires Node 20+. On a fresh Debian/Ubuntu host you may also need
+Requires Node 20+ (CI runs Node 22). On a fresh Debian/Ubuntu host you may also need
 `build-essential` and `python3` so the optional community-node
 workspace can compile its native SQLite binding — see
 [Operator Guide §3](docs/operator-guide.md#3-build-from-source) for
@@ -345,10 +345,10 @@ To also run the optional community node (Fastify + SQLite, port 8787):
 npm run dev:server
 ```
 
-Then in the PWA, **Profile → Settings (gear icon) → Community
-node** → paste `http://localhost:8787` and tick "Mirror finalized
-exchanges to this node." Finalized exchanges mirror to the node and the outbox status
-chip shows delivery progress.
+Then in the PWA, open the **menu** (top right) → **Settings →
+Community node**, paste `http://localhost:8787`, and turn on "Mirror
+(send a copy of) finalized exchanges to this node." Finalized exchanges
+mirror to the node and the outbox status chip shows delivery progress.
 
 `npm test` runs the full vitest suite across all workspaces.
 `npm run build` produces the PWA static bundle that a community node
@@ -410,7 +410,7 @@ through. Deploying without Docker is covered in
 └─────────────────┘    └─────────────────┘
 ```
 
-### Key Design Decisions
+### Key design decisions
 
 - **Identity** — Ed25519 key pairs. No email, no phone number, no external identity provider. Your public key is your identity.
 - **Trust** — Web-of-trust vouching. New members need two vouches from existing members. Mirrors how real organizing works.
@@ -503,7 +503,7 @@ what is done, and in what order it unblocks the rest is in
   shared Decisions surface have shipped; the moderation queue and
   per-peer federation agreements have not. It does not block Launch.
 
-## Ethical Use
+## Ethical use
 
 Understoria was built for mutual aid, labor organizing, and community solidarity. It is specifically designed to protect the people who use it from surveillance and retaliation.
 
