@@ -133,14 +133,16 @@ Understoria is a platform where communities exchange help, tracked through **tim
 ### Who can join, and who runs it
 
 - **Invite-only mode** — Operators can flip the node from open-onboarding to invite-only at any time; invites are signed, and an invite is then the only way in.
-<!-- Eight languages: apps/web/src/i18n/languages.ts (LANGUAGES).
-     Six carry reviewStatus: "new". Guarded by
+<!-- Nine languages: apps/web/src/i18n/languages.ts (LANGUAGES).
+     Seven carry reviewStatus: "new". Guarded by
      apps/web/src/lib/readme.guard.test.ts — update both together. -->
-- **Eight languages** — English, Spanish, French, Portuguese, Chinese, Hindi,
-  Vietnamese and Russian, each with the whole authored corpus translated, not
-  just the buttons: the help pages, the project playbooks, the event
-  templates. Six are newly translated and have not yet been read by a native
-  speaker — the app says so in Settings rather than pretending otherwise.
+- **Nine languages** — English, Spanish, French, Portuguese, Chinese, Hindi,
+  Vietnamese, Russian, and Arabic — the app's first right-to-left language,
+  with the whole interface mirrored. Eight carry the whole authored corpus
+  translated, not just the buttons: the help pages, the project playbooks,
+  the event templates; Arabic's authored content is being translated next,
+  and Settings says so honestly meanwhile. Seven are newly translated and
+  have not yet been read by a native speaker — the app says that too.
 - **Federation** — Each community runs its own node. Nodes can peer with each other to share needs and offers across groups. No central server, no single point of failure.
 
 ### Not built yet
@@ -461,7 +463,7 @@ Sign off every commit with `git commit -s`.
 - **Cryptography review** — Audit the identity and encryption implementations
 - **Federation protocol** — Design and test node-to-node communication
 - **Documentation** — Guides, tutorials, and translation review. The app
-  ships in eight languages; six of them have not yet been read by a native
+  ships in nine languages; seven of them have not yet been read by a native
   speaker, and that review is some of the most useful work going
 - **Community testing** — If you're part of a mutual aid network or organizing group and want to pilot Understoria, we want to hear from you
 - **Design** — UI/UX, illustrations, iconography that signals solidarity without being cheesy

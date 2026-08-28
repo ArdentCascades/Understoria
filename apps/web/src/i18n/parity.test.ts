@@ -27,6 +27,7 @@ import zh from "./locales/zh.json";
 import hi from "./locales/hi.json";
 import vi from "./locales/vi.json";
 import ru from "./locales/ru.json";
+import ar from "./locales/ar.json";
 import { LANGUAGES } from "./languages";
 
 // Every shipped locale, keyed for the gates below. Locale files are
@@ -42,7 +43,28 @@ const SHIPPED_LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   { code: "hi", data: hi },
   { code: "vi", data: vi },
   { code: "ru", data: ru },
+  { code: "ar", data: ar },
 ];
+
+/** Plural categories that match exactly ONE integer for a locale —
+ *  e.g. Arabic's zero {0}, one {1}, two {2}. In those forms correct
+ *  grammar carries the count in the word itself («ساعتان» IS "two
+ *  hours"), so dropping {{count}} loses nothing: the category pins
+ *  the number, and nothing can lie. The variable-parity gate below
+ *  sanctions exactly that omission, nowhere else. (French's "one"
+ *  covers 0 AND 1, Russian's covers 1, 21, 31…, so neither may
+ *  drop it — the set is computed, not hand-listed.) */
+function singleIntegerCategories(code: string): ReadonlySet<string> {
+  const rules = new Intl.PluralRules(code);
+  const counts = new Map<string, number>();
+  for (let n = 0; n <= 1000; n++) {
+    const cat = rules.select(n);
+    counts.set(cat, (counts.get(cat) ?? 0) + 1);
+  }
+  return new Set(
+    [...counts].filter(([, hits]) => hits === 1).map(([cat]) => cat),
+  );
+}
 
 type JsonValue =
   | string
@@ -154,6 +176,7 @@ describe("i18n locale parity", () => {
      * variables, any order.
      */
     it(`${code}.json keeps every interpolation variable from en.json`, () => {
+      const singletons = singleIntegerCategories(code);
       const mismatches: string[] = [];
       for (const [key, value] of flattenEntries(data as JsonValue)) {
         // Extra plural variants (see the key-set test) have no exact
@@ -163,9 +186,22 @@ describe("i18n locale parity", () => {
         if (typeof value !== "string" || typeof enValue !== "string") continue;
         const a = [...interpolationVars(enValue)].sort();
         const b = [...interpolationVars(value)].sort();
-        if (a.join(",") !== b.join(",")) {
-          mismatches.push(`${key}: en={{${a}}} ${code}={{${b}}}`);
-        }
+        if (a.join(",") === b.join(",")) continue;
+        // The one sanctioned difference: a plural form whose CLDR
+        // category admits a single integer may omit {{count}} —
+        // see singleIntegerCategories above. Every other variable,
+        // and {{count}} everywhere else, stays mandatory.
+        const missing = a.filter((v) => !b.includes(v));
+        const extra = b.filter((v) => !a.includes(v));
+        const suffix = key.match(/_(zero|one|two|few|many|other)$/)?.[1];
+        const sanctioned =
+          extra.length === 0 &&
+          missing.length === 1 &&
+          missing[0] === "count" &&
+          suffix !== undefined &&
+          singletons.has(suffix);
+        if (sanctioned) continue;
+        mismatches.push(`${key}: en={{${a}}} ${code}={{${b}}}`);
       }
       expect(mismatches).toEqual([]);
     });

@@ -25,11 +25,16 @@ import {
 // derive from it, so the RTL preview pseudo-locale must never leak in.
 
 describe("language registry — the RTL gate", () => {
-  it("ships no rtl entry in LANGUAGES until R4 lands real translations", () => {
-    // When Arabic or Urdu ships (R4), this assertion is the one to
-    // retire — deliberately, with the mirrored-surface verification
-    // in hand, not by accident.
-    expect(LANGUAGES.every((l) => l.dir === "ltr")).toBe(true);
+  it("ships rtl only for languages the RTL program earned", () => {
+    // R4 retired the original all-ltr assertion deliberately — with
+    // R1–R3's verification in hand, exactly as its comment required.
+    // The gate's successor: every dir:"rtl" entry must be on this
+    // explicit list, so the NEXT rtl language (Urdu) is added here
+    // consciously, alongside its translation, never by accident.
+    const rtlShipped = LANGUAGES.filter((l) => l.dir === "rtl").map(
+      (l) => l.code,
+    );
+    expect(rtlShipped).toEqual(["ar"]);
   });
 
   it("keeps the pseudo-locale out of the shipped registry and its counts", () => {

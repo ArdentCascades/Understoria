@@ -110,6 +110,21 @@ export const LANGUAGES = [
     reviewStatus: "new",
     content: "full",
   },
+  // The app's first right-to-left language (docs/rtl-plan.md R4).
+  // This entry ships only because the RTL program earned it: R1's
+  // logical-property sweep, R2's semantic cases, and R3's mirrored-
+  // surface verification all landed and are guarded before any dir:
+  // "rtl" was allowed here (languages.test.ts holds that order).
+  // Content is ui-only for now — the authored corpus follows on the
+  // Phase 2 rails, and Settings discloses the fallback honestly.
+  {
+    code: "ar",
+    endonym: "العربية",
+    dir: "rtl",
+    speakLang: "ar",
+    reviewStatus: "new",
+    content: "ui-only",
+  },
 ] as const satisfies readonly LanguageInfo[];
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]["code"];

@@ -21,6 +21,7 @@
 import { describe, expect, it } from "vitest";
 import enRaw from "./locales/en.json?raw";
 import esRaw from "./locales/es.json?raw";
+import arRaw from "./locales/ar.json?raw";
 
 /**
  * Scan raw JSON source for duplicate keys within the same object, at any
@@ -107,6 +108,7 @@ describe("i18n locale duplicate keys", () => {
   for (const [locale, source] of [
     ["en", enRaw],
     ["es", esRaw],
+    ["ar", arRaw],
   ] as const) {
     it(`${locale}.json declares every key exactly once`, () => {
       expect(

@@ -28,6 +28,7 @@ import zh from "./locales/zh.json";
 import hi from "./locales/hi.json";
 import vi from "./locales/vi.json";
 import ru from "./locales/ru.json";
+import ar from "./locales/ar.json";
 
 // CLDR plural-suffix completeness for every shipped locale
 // (docs/i18n-expansion.md Phase 0), plus the original Spanish
@@ -46,6 +47,7 @@ const LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   { code: "hi", data: hi },
   { code: "vi", data: vi },
   { code: "ru", data: ru },
+  { code: "ar", data: ar },
 ];
 
 function flatKeys(obj: unknown, prefix = ""): string[] {
@@ -148,11 +150,31 @@ describe("plural-suffix completeness", () => {
    * FORBIDS every translation from having it. That is how nine such
    * strings shipped, and why the Russian translator had to drop the
    * number from three of them rather than get it right.
+   *
+   * The one exemption is computed, not hand-listed: a category that
+   * admits a SINGLE integer for the locale (Arabic's zero {0}, one
+   * {1}, two {2}) may omit {{count}}, because there the grammar IS
+   * the number — the dual «ساعتان» cannot lie about being two, while
+   * «2 ساعة» is simply wrong Arabic. French's `one` covers 0 and 1
+   * and Russian's covers 21, 31…, so neither qualifies — exactly the
+   * lie this test exists to prevent. parity.test.ts sanctions the
+   * same omission and nothing else.
    */
   for (const { code, data } of LOCALES) {
     it(`${code}.json interpolates {{count}} in every count-driven plural form`, () => {
       const entries = flatEntries(data);
       const byKey = new Map(entries);
+      const rules = new Intl.PluralRules(code);
+      const hitsPerCategory = new Map<string, number>();
+      for (let n = 0; n <= 1000; n++) {
+        const cat = rules.select(n);
+        hitsPerCategory.set(cat, (hitsPerCategory.get(cat) ?? 0) + 1);
+      }
+      const singleIntegerCategories = new Set(
+        [...hitsPerCategory]
+          .filter(([, hits]) => hits === 1)
+          .map(([cat]) => cat),
+      );
       const offenders: string[] = [];
       for (const base of families) {
         // A family is count-driven when its _other form takes the
@@ -162,6 +184,7 @@ describe("plural-suffix completeness", () => {
           continue;
         }
         for (const category of CLDR_CATEGORIES) {
+          if (singleIntegerCategories.has(category)) continue;
           const key = `${base}_${category}`;
           const value = byKey.get(key);
           if (typeof value === "string" && !value.includes("{{count}}")) {
