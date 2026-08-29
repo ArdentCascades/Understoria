@@ -132,14 +132,16 @@ export const LANGUAGES = [
   // line-height floor for the tall vowel signs — are recorded in
   // docs/i18n-glossary/bo.md and live in index.css. CLDR Tibetan has a
   // single plural category, so bo.json follows the zh precedent:
-  // _one/_other both exist with identical strings.
+  // _one/_other both exist with identical strings. The authored corpus
+  // (templates, tips, steps, FAQ, guides, principles) shipped on the
+  // same rails as Arabic's, so content is "full".
   {
     code: "bo",
     endonym: "བོད་ཡིག",
     dir: "ltr",
     speakLang: "bo",
     reviewStatus: "new",
-    content: "ui-only",
+    content: "full",
   },
 ] as const satisfies readonly LanguageInfo[];
 
