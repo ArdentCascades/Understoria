@@ -139,9 +139,9 @@ Understoria is a platform where communities exchange help, tracked through **tim
 - **Ten languages** — English, Spanish, French, Portuguese, Chinese, Hindi,
   Vietnamese, Russian, Arabic — the app's first right-to-left language,
   with the whole interface mirrored — and Tibetan, expedited for
-  communities responding to the 2026 Tibet flood. Nine carry the whole
+  communities responding to the 2026 Tibet flood. All ten carry the whole
   authored corpus translated, not just the buttons: the help pages, the
-  project playbooks, the event templates (Tibetan's corpus is next).
+  project playbooks, the event templates.
   Eight are newly translated and have not yet been read by a native
   speaker — the app says that too.
 - **Federation** — Each community runs its own node. Nodes can peer with each other to share needs and offers across groups. No central server, no single point of failure.

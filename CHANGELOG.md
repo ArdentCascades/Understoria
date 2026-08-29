@@ -10,6 +10,20 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The whole authored library now exists in Tibetan — and with it,
+  in every language the app ships.** The app began speaking Tibetan
+  in the last entry — every button and message — and now everything
+  the app *hands you to read* speaks it too: all 64 project playbooks
+  with their starter steps and field-tested tips, the event
+  templates, the help pages, the start-a-community guide, and the
+  twelve design principles, in the same warm plain register the
+  glossary binds the UI to. FAQ answers quote the shipped Tibetan
+  buttons word-for-word, Western digits ride inside Tibetan prose per
+  the glossary, and terminal commands stay byte-identical to English.
+  Nothing falls back to English any more, so the Settings note that
+  disclosed the gap is gone; the corpus loads as its own lazy chunk
+  only when བོད་ཡིག is chosen, and every parity gate that keeps the
+  other nine languages honest now holds for Tibetan too.
 - **The app now speaks Tibetan.** All ~2,900 UI strings in བོད་ཡིག,
   expedited past the planned language queue for communities
   responding to the 2026 Tibet flood. The translation follows a new
@@ -30,6 +44,16 @@ include breaking changes.
   same rails as every other language.
 
 ### Fixed
+- **The Arabic corpus and locale no longer ride in everyone's first
+  download.** Every language's translations are meant to load as
+  their own lazily-fetched chunks, but the build config was never
+  taught Arabic's names: the Arabic UI strings were precached for
+  every member on install, and the whole Arabic authored corpus was
+  swept into the eager content chunk — about 1.9 MB of first-load
+  and install weight paid by members who never chose العربية.
+  Both now split and cache exactly like every other language's
+  chunks (Tibetan's were wired the same way from the start), and
+  the service-worker precache shrank by roughly forty percent.
 - **The promised reminder now exists.** A task claimed while it still
   followed an unfinished one told its claimer "You'll be reminded when
   it's ready" — and nothing ever reminded them. Now, the moment the
