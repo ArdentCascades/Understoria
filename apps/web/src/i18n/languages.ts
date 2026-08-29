@@ -143,6 +143,22 @@ export const LANGUAGES = [
     reviewStatus: "new",
     content: "full",
   },
+  // Urdu resumes the RTL program where it paused for the Tibetan
+  // expedite: the second right-to-left language, riding the rails
+  // Arabic proved (docs/rtl-plan.md R1-R3 + the ar fleet). What ur
+  // adds is the Nastaliq script style — the R5 rendering spike's
+  // font stack and 2.0 line-height floor live in index.css under
+  // :lang(ur), and the glossary is docs/i18n-glossary/ur.md. CLDR
+  // Urdu uses plain one/other plurals, so ur.json mirrors en's key
+  // shape exactly.
+  {
+    code: "ur",
+    endonym: "اردو",
+    dir: "rtl",
+    speakLang: "ur",
+    reviewStatus: "new",
+    content: "ui-only",
+  },
 ] as const satisfies readonly LanguageInfo[];
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]["code"];

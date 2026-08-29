@@ -10,6 +10,27 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The app now speaks Urdu — its second right-to-left language.**
+  All ~2,900 UI strings in اردو, resuming the RTL program where it
+  paused for the Tibetan expedite, on the rails Arabic proved: the
+  whole interface mirrors right-to-left with zero directional
+  control characters in any string. The translation follows a new
+  binding glossary (docs/i18n-glossary/ur.md): warm plain Urdu with
+  آپ address everywhere, gender-neutral by construction (polite
+  imperatives on buttons, the ergative perfective in prose, never
+  slashed forms), برادری for the community, تائید for vouching —
+  and none of the debt (including the shop-credit کھاتہ), charity,
+  or politically-marked vocabulary the glossary bans by name
+  (بیگار for work days, سفارش for vouching, checkpoint and
+  informer registers). A rendering spike ran before the first
+  string: Nastaliq is the tallest script the app ships — its font
+  line box measures 2.5× the font size — so the stylesheet now
+  carries a Nastaliq-first font stack and a 2.0 line-height floor
+  under :lang(ur), stronger than Tibetan's. اردو appears in
+  Settings → Language with the new-translation review note;
+  authored content shows in English for now with the honest
+  disclosure, and follows on the same rails as every other
+  language.
 - **The whole authored library now exists in Tibetan — and with it,
   in every language the app ships.** The app began speaking Tibetan
   in the last entry — every button and message — and now everything

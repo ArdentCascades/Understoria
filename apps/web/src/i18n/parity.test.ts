@@ -29,6 +29,7 @@ import vi from "./locales/vi.json";
 import ru from "./locales/ru.json";
 import ar from "./locales/ar.json";
 import bo from "./locales/bo.json";
+import ur from "./locales/ur.json";
 import { LANGUAGES } from "./languages";
 
 // Every shipped locale, keyed for the gates below. Locale files are
@@ -46,6 +47,7 @@ const SHIPPED_LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   { code: "ru", data: ru },
   { code: "ar", data: ar },
   { code: "bo", data: bo },
+  { code: "ur", data: ur },
 ];
 
 /** Plural categories that match exactly ONE integer for a locale —
