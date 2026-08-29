@@ -34,7 +34,7 @@ describe("language registry — the RTL gate", () => {
     const rtlShipped = LANGUAGES.filter((l) => l.dir === "rtl").map(
       (l) => l.code,
     );
-    expect(rtlShipped).toEqual(["ar"]);
+    expect(rtlShipped).toEqual(["ar", "ur"]);
   });
 
   it("keeps the pseudo-locale out of the shipped registry and its counts", () => {

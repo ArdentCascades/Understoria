@@ -494,3 +494,42 @@
 :lang(bo).leading-snug {
   line-height: 1.6;
 }
+
+/* Urdu typography (docs/i18n-glossary/ur.md, "Script, typography and
+ * rendering"). Nastaliq is the tallest script the app ships — the R5
+ * rendering spike measured a font line box of 2.5x the font size
+ * (ascent 1.93em + descent 0.57em) with ordinary words carrying ink
+ * to ~2em above the baseline:
+ *
+ * 1. The shared stack has no Nastaliq coverage. Named faces cover
+ *    Android/iOS and the Google webfont (Noto Nastaliq Urdu),
+ *    Windows (Urdu Typesetting), and the face most Pakistani
+ *    desktops carry (Jameel Noori Nastaleeq); Naskh-capable Arabic
+ *    faces come before the shared stack because Urdu in Naskh is
+ *    legible everywhere while Urdu in tofu is not.
+ *
+ * 2. At leading-none/tight two Nastaliq lines visibly collide, and
+ *    clean separation only starts around 1.8. The floor below is
+ *    2.0 — deliberately stronger than Tibetan's 1.6 — wherever the
+ *    content language is Urdu.
+ */
+:lang(ur) {
+  font-family:
+    "Noto Nastaliq Urdu",
+    "Urdu Typesetting",
+    "Jameel Noori Nastaleeq",
+    "Noto Naskh Arabic",
+    "Geeza Pro",
+    Inter,
+    system-ui,
+    sans-serif;
+}
+
+:lang(ur) .leading-none,
+:lang(ur) .leading-tight,
+:lang(ur) .leading-snug,
+:lang(ur).leading-none,
+:lang(ur).leading-tight,
+:lang(ur).leading-snug {
+  line-height: 2;
+}

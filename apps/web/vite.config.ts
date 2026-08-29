@@ -191,6 +191,10 @@ export default defineConfig({
               name: "locale-bo",
               test: /src[\\/]i18n[\\/]locales[\\/]bo\.json/,
             },
+            {
+              name: "locale-ur",
+              test: /src[\\/]i18n[\\/]locales[\\/]ur\.json/,
+            },
             // Lazy per-language CONTENT bundles (templates, tips,
             // steps, FAQ — i18n Phase 2a): the distinct "lazy-"
             // prefix keeps the SW globs below from ever colliding
@@ -232,6 +236,10 @@ export default defineConfig({
             {
               name: "lazy-content-bo",
               test: /src[\\/]content[\\/](?:[^\\/]+\.bo\.ts|bundles[\\/]bo\.ts)/,
+            },
+            {
+              name: "lazy-content-ur",
+              test: /src[\\/]content[\\/](?:[^\\/]+\.ur\.ts|bundles[\\/]ur\.ts)/,
             },
             // Authored content (templates, tips, starter steps) is pure
             // data and grew the main chunk past workbox's 2 MiB per-file
