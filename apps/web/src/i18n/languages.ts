@@ -157,7 +157,7 @@ export const LANGUAGES = [
     dir: "rtl",
     speakLang: "ur",
     reviewStatus: "new",
-    content: "ui-only",
+    content: "full",
   },
 ] as const satisfies readonly LanguageInfo[];
 

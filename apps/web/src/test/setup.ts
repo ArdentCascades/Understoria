@@ -33,3 +33,4 @@ await ensureContent("vi");
 await ensureContent("ru");
 await ensureContent("ar");
 await ensureContent("bo");
+await ensureContent("ur");
