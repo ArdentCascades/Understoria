@@ -10,6 +10,25 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The whole authored library now exists in Urdu — the language
+  program's eleventh and, for now, final full corpus.** The app began
+  speaking Urdu in the last entry — every button and message — and now
+  everything the app *hands you to read* speaks it too: all 64 project
+  playbooks with their starter steps and field-tested tips, the event
+  templates, the help pages, the start-a-community guide, and the
+  twelve design principles, in the same warm plain اردو the glossary
+  binds the UI to — آپ address throughout, gender-neutral by
+  construction, and none of the debt, charity, or surveillance
+  vocabulary the glossary bans by name. FAQ answers quote the shipped
+  Urdu buttons word-for-word, Western digits ride inside Urdu prose
+  per the glossary, terminal commands stay byte-identical to English,
+  and no string carries a single Unicode directional control — the
+  bidi holds by structure alone. Nothing falls back to English any
+  more, so the Settings note that disclosed the gap is gone; the
+  corpus loads as its own lazy chunk only when اردو is chosen, and
+  every parity gate that keeps the other ten languages honest now
+  holds for Urdu too. With it, all eleven shipped languages carry the
+  full authored corpus.
 - **The app now speaks Urdu — its second right-to-left language.**
   All ~2,900 UI strings in اردو, resuming the RTL program where it
   paused for the Tibetan expedite, on the rails Arabic proved: the

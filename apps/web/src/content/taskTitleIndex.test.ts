@@ -33,6 +33,7 @@ import { PROJECT_TEMPLATES_VI } from "./projectTemplates.vi";
 import { PROJECT_TEMPLATES_RU } from "./projectTemplates.ru";
 import { PROJECT_TEMPLATES_AR } from "./projectTemplates.ar";
 import { PROJECT_TEMPLATES_BO } from "./projectTemplates.bo";
+import { PROJECT_TEMPLATES_UR } from "./projectTemplates.ur";
 
 // The title index is GENERATED from the per-language template tables
 // and must never drift from them: it is what resolves a stored
@@ -55,6 +56,7 @@ describe("taskTitleIndex drift lock", () => {
     { code: "ru", templates: PROJECT_TEMPLATES_RU },
     { code: "ar", templates: PROJECT_TEMPLATES_AR },
     { code: "bo", templates: PROJECT_TEMPLATES_BO },
+    { code: "ur", templates: PROJECT_TEMPLATES_UR },
   ];
 
   for (const { code, templates } of tables) {
