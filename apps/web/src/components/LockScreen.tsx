@@ -67,6 +67,10 @@ export function LockScreen() {
         setError(t("lockScreen.wrongPassphrase"));
       } else if (result === "nothing_to_unlock") {
         setError(t("lockScreen.nothingToUnlock"));
+      } else if (result === "no_passphrase") {
+        // Passkey-first device (V5 #475): there is no passphrase to
+        // guess against — point honestly at the passkey button.
+        setError(t("lockScreen.noPassphrase"));
       } else {
         setPassphrase("");
       }

@@ -70,11 +70,21 @@ export type LockState = "unprotected" | "locked" | "unlocked";
  * (and every row) is untouched, and vice versa. The wrappers record
  * lives in `settings` (small, device-local, never exported).
  *
- * Invariant the UI relies on: a passkey is never the ONLY unlock
- * method — `disablePassphrase` refuses while a passkey is enrolled,
- * and enrollment requires passphrase protection already on. A lost
- * or platform-reset passkey therefore never locks anyone out of
- * their own identity.
+ * Invariant, amended for passkey-first onboarding (V5 #475): the
+ * device must never end up with ZERO ways in while protected. Two
+ * legal shapes —
+ *
+ *   - passphrase (+ optional passkey): the original layout;
+ *     `disablePassphrase` still refuses while a passkey is enrolled.
+ *   - passkey ONLY (`enrollPasskeyFirst`, the onboarding path for
+ *     members who never type): allowed deliberately —
+ *     `removePasskeyWrapper` then refuses until a passphrase is
+ *     added, and the onboarding flow walks straight into the
+ *     recovery-kit backup, because on this shape a platform-reset
+ *     passkey is the DEVICE-LOSS story: the recovery ladder
+ *     (recovery kit / paired device / guardians), not a typed
+ *     fallback, is what brings the member back. The alternative for
+ *     a non-reader was no protection at all (threat-model §7).
  */
 export interface DeviceKeyWrappers {
   v: 1;
@@ -200,10 +210,16 @@ export async function getSecretKey(publicKey: string): Promise<string> {
  */
 export async function unlockSession(
   passphrase: string,
-): Promise<"unlocked" | "wrong_passphrase" | "nothing_to_unlock"> {
+): Promise<
+  "unlocked" | "wrong_passphrase" | "nothing_to_unlock" | "no_passphrase"
+> {
   // v2 envelope: the passphrase opens the DMK's passphrase wrapper,
   // never the rows directly.
   const wrappers = await readWrappers();
+  // Passkey-only device (V5 #475): there is no passphrase to check a
+  // guess against — say so instead of pretending every guess is
+  // wrong. The lock screen points at the passkey button.
+  if (wrappers && !wrappers.passphrase) return "no_passphrase";
   if (wrappers?.passphrase) {
     const kek = await deriveMasterKey(
       passphrase,
@@ -396,6 +412,10 @@ export async function enrollPasskeyWrapper(
  * (The platform credential itself can't be deleted from JS; the
  * member removes it from their OS password manager, and without the
  * wrapper it opens nothing.)
+ *
+ * On a passkey-ONLY device (enrollPasskeyFirst) this refuses — the
+ * inverse of disablePassphrase's refusal: whichever method is the
+ * last way in cannot be removed while the device stays protected.
  */
 export async function removePasskeyWrapper(): Promise<void> {
   if (!isUnlocked()) {
@@ -403,8 +423,69 @@ export async function removePasskeyWrapper(): Promise<void> {
   }
   const wrappers = await readWrappers();
   if (!wrappers?.passkey) return;
+  if (!wrappers.passphrase) {
+    throw new Error(
+      "Add a passphrase first — right now the passkey is the only way to unlock this device.",
+    );
+  }
   const { passkey: _removed, ...rest } = wrappers;
   await writeWrappers(rest);
+}
+
+/**
+ * Passkey-FIRST protection for a fresh, unprotected device — the
+ * onboarding path (V5 #475) for members who never type. Mints the
+ * DMK, wraps every plaintext row under it, and stores the DMK under
+ * the passkey KEK alone. A passphrase can be added later
+ * (enablePassphrase) and becomes removable protection's fallback;
+ * until then removePasskeyWrapper refuses. Refuses on any device
+ * that already has protection — those go through the Settings flows.
+ */
+export async function enrollPasskeyFirst(
+  kek: Uint8Array,
+  meta: PasskeyEnrollmentMeta,
+): Promise<void> {
+  const wrappers = await readWrappers();
+  if (wrappers) {
+    throw new Error(
+      "Protection is already on — add the passkey from Settings → Security instead.",
+    );
+  }
+  const rows = await db.secretKeys.toArray();
+  if (rows.some((r) => r.wrapped)) {
+    throw new Error(
+      "This device already has passphrase protection — unlock it and add the passkey from Settings → Security.",
+    );
+  }
+
+  const dmk = randomBytes(32);
+  const dmkB64 = b64encode(dmk);
+  await db.transaction("rw", [db.secretKeys, db.settings], async () => {
+    for (const row of rows) {
+      if (!row.secretKey) continue;
+      await db.secretKeys.put({
+        publicKey: row.publicKey,
+        wrapped: wrapDirect(row.secretKey, dmk),
+      });
+    }
+    const next: DeviceKeyWrappers = {
+      v: 1,
+      passkey: { ...meta, blob: wrapDirect(dmkB64, kek) },
+    };
+    await db.settings.put({
+      key: SETTING_KEYS.deviceKeyWrappers,
+      value: JSON.stringify(next),
+    });
+  });
+  session.dmk = dmk;
+}
+
+/** True when the passkey is the ONLY unlock method (passkey-first
+ *  device without a passphrase fallback yet) — Settings uses it to
+ *  offer "add a passphrase" instead of "enable protection". */
+export async function passkeyIsOnlyMethod(): Promise<boolean> {
+  const wrappers = await readWrappers();
+  return !!wrappers?.passkey && !wrappers.passphrase;
 }
 
 export async function enablePassphrase(
@@ -415,9 +496,26 @@ export async function enablePassphrase(
 
   const wrappers = await readWrappers();
   if (wrappers) {
-    throw new Error(
-      "Passphrase protection is already on — use Change instead.",
-    );
+    if (wrappers.passphrase) {
+      throw new Error(
+        "Passphrase protection is already on — use Change instead.",
+      );
+    }
+    // Passkey-only device (V5 #475): ADD the passphrase as the
+    // fallback wrapper on the existing DMK — rows and the passkey
+    // wrapper untouched, exactly the envelope's design.
+    if (!session.dmk) {
+      throw new Error(
+        "Unlock with your passkey before adding a passphrase.",
+      );
+    }
+    const salt = newSalt();
+    const key = await deriveMasterKey(passphrase, salt, DEFAULT_ITERATIONS);
+    await writeWrappers({
+      ...wrappers,
+      passphrase: wrap(b64encode(session.dmk), key, salt, DEFAULT_ITERATIONS),
+    });
+    return;
   }
 
   const rows = await db.secretKeys.toArray();

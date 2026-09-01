@@ -20,6 +20,13 @@ import type { ConceptIllustrationName } from "@/components/visual";
 import { AvailabilityChipPicker } from "@/components/AvailabilityChipPicker";
 import { markOnboarded } from "@/db/onboarding";
 import { updateMemberProfile } from "@/db/actions";
+import {
+  currentLockState,
+  enablePassphrase,
+  enrollPasskeyFirst,
+} from "@/db/secrets";
+import { supportsPasskeys } from "@/lib/passkeyUnlock";
+import { humanizeError } from "@/lib/humanizeError";
 import { currentInstallEnvironment } from "@/lib/installGuide";
 import { isOurNode } from "@/lib/nodeIdentity";
 import { db } from "@/db/database";
@@ -58,6 +65,12 @@ type Step =
     }
   | { kind: "install"; key: "install"; icon: string }
   | { kind: "profileSetup"; key: "profileSetup"; icon: string }
+  /** "Protect your key" (V5 #475) — right after the identity mints,
+   *  one decision, three doors: lock with the device's own
+   *  fingerprint/face/PIN (leads, when supported — a non-reader
+   *  never faces a typed passphrase), create a passphrase instead,
+   *  or skip (today's unprotected default, reachable honestly). */
+  | { kind: "protect"; key: "protect"; icon: string }
   /** First screen ONLY when launched as an installed app with no
    *  identity: "are you new, or do you already use Understoria in
    *  this phone's browser?" — the installed copy has its own
@@ -125,6 +138,11 @@ const STEPS: readonly Step[] = [
     kind: "profileSetup",
     key: "profileSetup",
     icon: "\u{1F331}",
+  },
+  {
+    kind: "protect",
+    key: "protect",
+    icon: "\u{1F510}",
   },
 ];
 
@@ -271,13 +289,16 @@ export default function WelcomePage() {
     navigate("/", { replace: true });
   }
 
-  // The ONLY route to "onboarded". Runs from the profileSetup step and
-  // requires a valid display name, so the flag can never be true
-  // without an identity behind it: with no current member it MINTS the
-  // real Ed25519 identity (fresh device on an open node, or the
-  // invite-only bootstrap); with one it UPDATES that member's profile
-  // (invited member arriving from InviteAccept, or the dev seed's
-  // founder) — never a second identity for the same person.
+  // Runs from the profileSetup step and requires a valid display
+  // name, so "onboarded" can never be true without an identity behind
+  // it: with no current member it MINTS the real Ed25519 identity
+  // (fresh device on an open node, or the invite-only bootstrap);
+  // with one it UPDATES that member's profile (invited member
+  // arriving from InviteAccept, or the dev seed's founder) — never a
+  // second identity for the same person. After the save, an
+  // UNPROTECTED device advances to the protect step (V5 #475) —
+  // whose three doors each end in finish() — while a revisit or an
+  // already-protected identity finishes directly, as before.
   async function saveProfileAndFinish() {
     validation.markAllTouched();
     if (validation.hasErrors) {
@@ -322,10 +343,73 @@ export default function WelcomePage() {
         );
         await setCurrentMember(member.publicKey);
       }
-      await finish();
+      const lockState = await currentLockState();
+      if (!revisit && lockState === "unprotected") {
+        setStepIndex(
+          visibleSteps.findIndex((s) => s.kind === "protect"),
+        );
+      } else {
+        await finish();
+      }
     } finally {
       setSaving(false);
     }
+  }
+
+  // ---- The protect step's three doors (V5 #475). --------------------
+  const [protectPhase, setProtectPhase] = useState<
+    "choice" | "passphrase" | "working" | "donePasskey" | "donePassphrase"
+  >("choice");
+  const [protectError, setProtectError] = useState<string | null>(null);
+  const [protectPass, setProtectPass] = useState("");
+  const passkeySupported = useMemo(() => supportsPasskeys(), []);
+
+  async function handleProtectPasskey() {
+    setProtectError(null);
+    setProtectPhase("working");
+    try {
+      const { enrollPasskey } = await import("@/lib/passkeyUnlock");
+      const result = await enrollPasskey({
+        displayName: displayName.trim() || "Understoria member",
+      });
+      if (!result.ok) {
+        setProtectPhase("choice");
+        if (result.error === "cancelled") return; // their call, no scolding
+        setProtectError(
+          result.error === "prf_unsupported"
+            ? t("profile.security.passkey.prfUnsupported")
+            : t("profile.security.passkey.failed"),
+        );
+        return;
+      }
+      await enrollPasskeyFirst(result.kek, {
+        credentialId: result.credentialId,
+        prfSalt: result.prfSalt,
+        createdAt: Date.now(),
+      });
+      setProtectPhase("donePasskey");
+    } catch (err) {
+      setProtectPhase("choice");
+      setProtectError(humanizeError(err));
+    }
+  }
+
+  async function handleProtectPassphrase() {
+    setProtectError(null);
+    setProtectPhase("working");
+    try {
+      await enablePassphrase(protectPass);
+      setProtectPass("");
+      setProtectPhase("donePassphrase");
+    } catch (err) {
+      setProtectPhase("passphrase");
+      setProtectError(humanizeError(err));
+    }
+  }
+
+  async function finishProtect(goToSettings: boolean) {
+    await finish();
+    if (goToSettings) navigate("/settings", { replace: true });
   }
 
   const step = visibleSteps[stepIndex];
@@ -343,7 +427,12 @@ export default function WelcomePage() {
   // unchanged; only Skip differs for revisitors.
   const handleSkip = revisit
     ? () => navigate("/", { replace: true })
-    : () => setStepIndex(visibleSteps.length - 1);
+    : () =>
+        // Land on profileSetup, not the last step: the protect step
+        // sits after it and is meaningless before an identity exists.
+        setStepIndex(
+          visibleSteps.findIndex((s) => s.kind === "profileSetup"),
+        );
 
   if (step.kind === "concept") {
     // On the FIRST concept screen only, surface a small affordance
@@ -483,6 +572,173 @@ export default function WelcomePage() {
     );
   }
 
+  // "Protect your key" (V5 #475). Reached only from a successful
+  // profile save on an unprotected device. One idea per screen: the
+  // choice explains only "your key can be locked"; the
+  // this-is-not-an-account explanation waits until AFTER enrollment,
+  // when it's about something the member just did. Every door ends
+  // in finish() — nobody gets trapped ahead of the board.
+  if (step.kind === "protect") {
+    const doorButton =
+      "w-full rounded-xl border border-moss-300 p-4 text-start hover:bg-moss-50 dark:border-moss-700 dark:hover:bg-moss-900";
+    return (
+      <OnboardingScreen
+        icon={step.icon}
+        title={t("welcome.protect.title")}
+        body={
+          protectPhase === "donePasskey" ? (
+            <div className="space-y-3 text-start">
+              <p className="font-medium">{t("welcome.protect.doneTitle")}</p>
+              <p className="text-sm text-moss-600 dark:text-moss-300">
+                {t("welcome.protect.doneNotAnAccount")}
+              </p>
+              <p className="text-sm text-moss-600 dark:text-moss-300">
+                {t("welcome.protect.doneBackup")}
+              </p>
+              <div className="flex flex-col gap-2 pt-2">
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => void finishProtect(true)}
+                >
+                  {t("welcome.protect.backupNow")}
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => void finishProtect(false)}
+                >
+                  {t("welcome.protect.backupLater")}
+                </button>
+              </div>
+            </div>
+          ) : protectPhase === "donePassphrase" ? (
+            <div className="space-y-3 text-start">
+              <p className="font-medium">
+                {t("welcome.protect.doneTitlePassphrase")}
+              </p>
+              <p className="text-sm text-moss-600 dark:text-moss-300">
+                {t("welcome.protect.doneBackup")}
+              </p>
+              <div className="flex flex-col gap-2 pt-2">
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => void finishProtect(false)}
+                >
+                  {t("welcome.start")}
+                </button>
+              </div>
+            </div>
+          ) : protectPhase === "passphrase" ? (
+            <div className="space-y-3 text-start">
+              <p className="text-sm text-moss-600 dark:text-moss-300">
+                {t("profile.security.passphraseHint")}
+              </p>
+              <input
+                className="input w-full"
+                type="password"
+                value={protectPass}
+                onChange={(e) => setProtectPass(e.target.value)}
+                aria-label={t("welcome.protect.passphraseLabel")}
+                placeholder={t("welcome.protect.passphraseLabel")}
+              />
+              {protectError && (
+                <p role="alert" className="text-sm text-rose-600">
+                  {protectError}
+                </p>
+              )}
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => void handleProtectPassphrase()}
+                >
+                  {t("welcome.protect.passphraseConfirm")}
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => {
+                    setProtectError(null);
+                    setProtectPhase("choice");
+                  }}
+                >
+                  {t("common.back")}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3 text-start">
+              <p className="text-sm text-moss-600 dark:text-moss-300">
+                {t("welcome.protect.intro")}
+              </p>
+              {protectError && (
+                <p role="alert" className="text-sm text-rose-600">
+                  {protectError}
+                </p>
+              )}
+              {passkeySupported && (
+                <button
+                  type="button"
+                  className={doorButton}
+                  disabled={protectPhase === "working"}
+                  onClick={() => void handleProtectPasskey()}
+                >
+                  <span className="block font-medium">
+                    {protectPhase === "working"
+                      ? t("common.working")
+                      : t("welcome.protect.passkeyDoor")}
+                  </span>
+                  <span className="block text-sm text-moss-600 dark:text-moss-300">
+                    {t("welcome.protect.passkeyDoorBody")}
+                  </span>
+                </button>
+              )}
+              <button
+                type="button"
+                className={doorButton}
+                disabled={protectPhase === "working"}
+                onClick={() => {
+                  setProtectError(null);
+                  setProtectPhase("passphrase");
+                }}
+              >
+                <span className="block font-medium">
+                  {t("welcome.protect.passphraseDoor")}
+                </span>
+                <span className="block text-sm text-moss-600 dark:text-moss-300">
+                  {t("welcome.protect.passphraseDoorBody")}
+                </span>
+              </button>
+              <button
+                type="button"
+                className={doorButton}
+                disabled={protectPhase === "working"}
+                onClick={() => void finish()}
+              >
+                <span className="block font-medium">
+                  {t("welcome.protect.skipDoor")}
+                </span>
+                <span className="block text-sm text-moss-600 dark:text-moss-300">
+                  {t("welcome.protect.skipDoorBody")}
+                </span>
+              </button>
+            </div>
+          )
+        }
+        stepIndex={stepIndex}
+        stepCount={visibleSteps.length}
+        // No Back (the identity is already minted — re-running the
+        // profile save would be the only thing behind), no Next/Skip:
+        // the doors ARE the navigation, like installedArrival.
+        onBack={null}
+        onNext={null}
+        onSkip={null}
+      />
+    );
+  }
+
   // profileSetup — but first, gate it on `inviteOnly`. Concept screens
   // above always render; only the FINAL step is replaced when the gate
   // is active. Visitors who navigated through the concept screens still
@@ -610,7 +866,15 @@ export default function WelcomePage() {
       // it. Back / leaving the page remain available — nobody is
       // trapped, the device just stays un-onboarded.
       onSkip={null}
-      nextLabel={saving ? t("common.working") : t("welcome.start")}
+      // A fresh device continues to the protect step, so the button
+      // says Next; a revisit finishes here and keeps "Open the board".
+      nextLabel={
+        saving
+          ? t("common.working")
+          : revisit
+            ? t("welcome.start")
+            : t("welcome.next")
+      }
       busy={saving}
     />
   );

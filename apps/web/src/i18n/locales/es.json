@@ -1826,7 +1826,8 @@
     "passkeyButton": "Desbloquear con llave de acceso",
     "passkeyFailed": "La llave de acceso — el desbloqueo por rostro, huella o PIN de tu dispositivo — no pudo abrir esto. Tu frase de abajo siempre funciona.",
     "or": "o",
-    "noRecoveryNote": "Las frases de acceso olvidadas no se pueden restablecer aquí — nadie tiene una llave maestra. Pero esto no tiene por qué significar empezar de cero: otro dispositivo vinculado aún guarda tu identidad, y si creaste un kit de recuperación o elegiste guardianes (Ajustes → Kit de recuperación / Guardianes), puedes borrar esta app (Perfil → Emergencia → Purga total) y restaurar desde ellos al empezar de nuevo. Sin ninguno de esos, una identidad nueva es el último recurso."
+    "noRecoveryNote": "Las frases de acceso olvidadas no se pueden restablecer aquí — nadie tiene una llave maestra. Pero esto no tiene por qué significar empezar de cero: otro dispositivo vinculado aún guarda tu identidad, y si creaste un kit de recuperación o elegiste guardianes (Ajustes → Kit de recuperación / Guardianes), puedes borrar esta app (Perfil → Emergencia → Purga total) y restaurar desde ellos al empezar de nuevo. Sin ninguno de esos, una identidad nueva es el último recurso.",
+    "noPassphrase": "Este dispositivo no tiene frase secreta — se desbloquea con tu huella, tu cara o tu PIN. Usa el botón de la llave de acceso."
   },
   "invite": {
     "reading": "Leyendo invitación…",
@@ -3023,9 +3024,12 @@
         "prfUnsupported": "Este dispositivo creó una llave de acceso, pero su hardware de seguridad no puede usarla para desbloquear aquí (le falta una función necesaria llamada PRF). Nada cambió — puedes borrar la llave sin usar desde el administrador de contraseñas de tu dispositivo.",
         "failed": "No se pudo configurar la llave de acceso. No se cambió nada — tu frase sigue funcionando.",
         "successAdd": "Llave de acceso añadida. La próxima vez que este dispositivo se bloquee, un toque lo desbloquea — y tu frase siempre funciona también.",
-        "successRemove": "La llave de acceso ya no desbloquea este dispositivo. También puedes borrarla del gestor de contraseñas de tu dispositivo."
+        "successRemove": "La llave de acceso ya no desbloquea este dispositivo. También puedes borrarla del gestor de contraseñas de tu dispositivo.",
+        "removeOnlyMethod": "La llave de acceso no se puede quitar mientras sea la única forma de desbloquear este dispositivo — añade antes una frase secreta."
       },
-      "whenAsked": "Se te pedirá la frase cada vez que abras la aplicación tras haberla cerrado o recargado, y justo después de bloquearla tú misma con el botón «Bloquear ahora» de aquí abajo — nunca por un temporizador mientras siga abierta."
+      "whenAsked": "Se te pedirá la frase cada vez que abras la aplicación tras haberla cerrado o recargado, y justo después de bloquearla tú misma con el botón «Bloquear ahora» de aquí abajo — nunca por un temporizador mientras siga abierta.",
+      "summaryPasskeyOnly": "Tu llave está bloqueada con tu huella, tu cara o el PIN del dispositivo — por ahora la única forma de entrar en este dispositivo. Añadir una frase secreta te da una vía de respaldo para desbloquear.",
+      "addFallback": "Añadir una frase secreta (vía de respaldo)"
     },
     "emergency": {
       "title": "Emergencia",
@@ -3340,6 +3344,24 @@
       "title": "Understoria es solo por invitación",
       "body1": "Esta comunidad funciona con invitaciones personales de las personas que ya son parte de ella.",
       "body2": "Si alguien te envió un enlace de invitación, sigue ese enlace en su lugar. Si no, pide a una persona miembro que te envíe uno."
+    },
+    "protect": {
+      "title": "Protege tu llave",
+      "intro": "Tu llave ya está en este teléfono. Ahora mismo, cualquiera que agarre este teléfono podría usarla. Puedes ponerle un candado.",
+      "passkeyDoor": "Bloquear con tu huella, tu cara o el PIN del teléfono",
+      "passkeyDoorBody": "Igual que desbloqueas tu teléfono. Nada que recordar, nada que escribir.",
+      "passphraseDoor": "Crear una frase secreta en su lugar",
+      "passphraseDoorBody": "Palabras que escribes para desbloquear. Elige esto si varias personas comparten la huella o el PIN de este teléfono.",
+      "skipDoor": "Saltar por ahora",
+      "skipDoorBody": "Puedes bloquearla más tarde en Ajustes → Seguridad.",
+      "passphraseLabel": "Tu frase secreta",
+      "passphraseConfirm": "Bloquear con esta frase",
+      "doneTitle": "Bloqueada. Tu huella, tu cara o tu PIN ahora abren tu llave — solo en este teléfono.",
+      "doneNotAnAccount": "Esto no es una cuenta con una empresa. La comprobación ocurre dentro de tu teléfono: no se envía nada a Apple, a Google ni a nadie — y funciona sin internet.",
+      "doneBackup": "Algo que debes saber: si este teléfono se pierde o se restablece, este candado no puede devolverte la llave — un respaldo sí. Sirven un segundo dispositivo, guardianes que tú eliges o un archivo de recuperación; cada uno toma un minuto en Ajustes.",
+      "backupNow": "Crear un respaldo ahora",
+      "backupLater": "Después",
+      "doneTitlePassphrase": "Bloqueada. Tu frase secreta ahora abre tu llave en este teléfono. No hay restablecimiento — un respaldo en Ajustes (segundo dispositivo, guardianes o archivo de recuperación) es lo que te devuelve si este teléfono se pierde."
     }
   },
   "block": {

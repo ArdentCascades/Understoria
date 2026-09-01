@@ -1826,7 +1826,8 @@
     "passkeyButton": "Mở khóa bằng khóa truy cập (passkey)",
     "passkeyFailed": "Khóa truy cập — cách mở bằng khuôn mặt, vân tay hoặc mã PIN của thiết bị — không mở được lần này. Cụm mật khẩu bên dưới luôn dùng được.",
     "or": "hoặc",
-    "noRecoveryNote": "Quên cụm mật khẩu thì không thể đặt lại ở đây — không ai giữ chìa khóa vạn năng. Nhưng vậy không có nghĩa là phải bắt đầu lại từ đầu: một thiết bị đã ghép nối khác vẫn giữ danh tính của bạn, và nếu bạn đã tạo bộ khôi phục hoặc chọn người gìn giữ (Cài đặt → Bộ khôi phục / Người gìn giữ), bạn có thể xóa sạch ứng dụng này (Hồ sơ → Khẩn cấp → Xóa sạch toàn bộ) rồi lấy lại tài khoản từ đó trên khởi đầu mới. Nếu không có gì trong số đó, tạo danh tính mới là đường cuối cùng."
+    "noRecoveryNote": "Quên cụm mật khẩu thì không thể đặt lại ở đây — không ai giữ chìa khóa vạn năng. Nhưng vậy không có nghĩa là phải bắt đầu lại từ đầu: một thiết bị đã ghép nối khác vẫn giữ danh tính của bạn, và nếu bạn đã tạo bộ khôi phục hoặc chọn người gìn giữ (Cài đặt → Bộ khôi phục / Người gìn giữ), bạn có thể xóa sạch ứng dụng này (Hồ sơ → Khẩn cấp → Xóa sạch toàn bộ) rồi lấy lại tài khoản từ đó trên khởi đầu mới. Nếu không có gì trong số đó, tạo danh tính mới là đường cuối cùng.",
+    "noPassphrase": "Thiết bị này không có cụm mật khẩu — nó mở bằng vân tay, khuôn mặt hoặc PIN. Hãy dùng nút khóa truy cập."
   },
   "invite": {
     "reading": "Đang đọc lời mời…",
@@ -3023,9 +3024,12 @@
         "prfUnsupported": "Thiết bị này đã tạo được một khóa truy cập, nhưng phần cứng bảo mật của nó không dùng được cho việc mở khóa ở đây (thiếu một tính năng cần thiết tên là PRF). Không có gì thay đổi — bạn có thể xóa khóa truy cập chưa dùng trong trình quản lý mật khẩu của thiết bị.",
         "failed": "Không thiết lập được khóa truy cập. Không có gì thay đổi — cụm mật khẩu của bạn vẫn dùng được.",
         "successAdd": "Đã thêm khóa truy cập. Lần tới khi thiết bị khóa lại, chỉ một chạm là mở — và cụm mật khẩu vẫn luôn dùng được.",
-        "successRemove": "Khóa truy cập không còn dùng để mở khóa thiết bị này. Bạn cũng có thể xóa nó khỏi trình quản lý mật khẩu của thiết bị."
+        "successRemove": "Khóa truy cập không còn dùng để mở khóa thiết bị này. Bạn cũng có thể xóa nó khỏi trình quản lý mật khẩu của thiết bị.",
+        "removeOnlyMethod": "Không thể gỡ khóa truy cập khi nó là cách duy nhất để mở thiết bị này — hãy thêm cụm mật khẩu trước."
       },
-      "whenAsked": "Bạn sẽ được hỏi cụm mật khẩu mỗi khi mở ứng dụng sau khi nó đã đóng hay tải lại, và ngay sau khi bạn tự khóa bằng nút “Khóa ngay” bên dưới — không bao giờ theo hẹn giờ khi ứng dụng còn đang mở."
+      "whenAsked": "Bạn sẽ được hỏi cụm mật khẩu mỗi khi mở ứng dụng sau khi nó đã đóng hay tải lại, và ngay sau khi bạn tự khóa bằng nút “Khóa ngay” bên dưới — không bao giờ theo hẹn giờ khi ứng dụng còn đang mở.",
+      "summaryPasskeyOnly": "Chìa khóa của bạn đang khóa bằng vân tay, khuôn mặt hoặc PIN của máy — hiện là cách vào duy nhất trên thiết bị này. Thêm cụm mật khẩu cho bạn một đường mở khóa dự phòng.",
+      "addFallback": "Thêm cụm mật khẩu (đường vào dự phòng)"
     },
     "emergency": {
       "title": "Khẩn cấp",
@@ -3340,6 +3344,24 @@
       "title": "Understoria chỉ tham gia qua lời mời",
       "body1": "Cộng đồng này vận hành bằng lời mời cá nhân từ những thành viên hiện có.",
       "body2": "Nếu một thành viên đã gửi cho bạn liên kết mời, hãy theo liên kết đó. Nếu chưa, hãy nhờ một thành viên gửi cho bạn một lời mời."
+    },
+    "protect": {
+      "title": "Bảo vệ chìa khóa của bạn",
+      "intro": "Chìa khóa của bạn giờ nằm trên điện thoại này. Ngay lúc này, ai cầm điện thoại này lên cũng có thể dùng nó. Bạn có thể khóa lại.",
+      "passkeyDoor": "Khóa bằng vân tay, khuôn mặt hoặc mã PIN điện thoại",
+      "passkeyDoorBody": "Giống như cách bạn mở khóa điện thoại. Không phải nhớ gì, không phải gõ gì.",
+      "passphraseDoor": "Tạo cụm mật khẩu thay thế",
+      "passphraseDoorBody": "Những từ bạn gõ để mở khóa. Chọn cách này nếu nhiều người dùng chung vân tay hoặc PIN của điện thoại này.",
+      "skipDoor": "Bỏ qua lúc này",
+      "skipDoorBody": "Bạn có thể khóa sau trong Cài đặt → Bảo mật.",
+      "passphraseLabel": "Cụm mật khẩu của bạn",
+      "passphraseConfirm": "Khóa bằng cụm mật khẩu này",
+      "doneTitle": "Đã khóa. Vân tay, khuôn mặt hoặc PIN của bạn giờ mở được chìa khóa — chỉ trên điện thoại này.",
+      "doneNotAnAccount": "Đây không phải tài khoản ở một công ty nào. Việc kiểm tra diễn ra ngay trong điện thoại của bạn: không gửi gì cho Apple, Google hay bất kỳ ai — và hoạt động không cần internet.",
+      "doneBackup": "Một điều cần biết: nếu điện thoại này mất hoặc bị đặt lại, ổ khóa này không đem chìa khóa về được — bản sao lưu thì có. Thiết bị thứ hai, người giám hộ bạn chọn, hoặc tệp khôi phục đều được; mỗi cách mất khoảng một phút trong Cài đặt.",
+      "backupNow": "Lập bản sao lưu ngay",
+      "backupLater": "Để sau",
+      "doneTitlePassphrase": "Đã khóa. Cụm mật khẩu của bạn giờ mở chìa khóa trên điện thoại này. Không có nút đặt lại — bản sao lưu trong Cài đặt (thiết bị thứ hai, người giám hộ hoặc tệp khôi phục) mới là thứ đưa bạn trở lại nếu điện thoại này mất."
     }
   },
   "block": {

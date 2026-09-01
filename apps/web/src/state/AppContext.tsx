@@ -216,7 +216,9 @@ export interface AppContextValue {
   lockState: LockState;
   unlock: (
     passphrase: string,
-  ) => Promise<"unlocked" | "wrong_passphrase" | "nothing_to_unlock">;
+  ) => Promise<
+    "unlocked" | "wrong_passphrase" | "nothing_to_unlock" | "no_passphrase"
+  >;
   lock: () => void;
   refreshLockState: () => Promise<void>;
   onboarded: boolean;

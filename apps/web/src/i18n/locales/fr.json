@@ -1826,7 +1826,8 @@
     "passkeyButton": "Déverrouiller avec une clé d'accès",
     "passkeyFailed": "La clé d'accès — le déverrouillage par visage, empreinte ou code de ton appareil — n'a pas réussi à ouvrir. Ta phrase secrète ci-dessous fonctionne toujours.",
     "or": "ou",
-    "noRecoveryNote": "Une phrase secrète oubliée ne peut pas être réinitialisée ici — personne ne détient de clé maîtresse. Mais ça ne veut pas forcément dire tout recommencer : un autre appareil relié garde encore ton identité, et si tu as créé un kit de récupération ou choisi des gardiennes et gardiens (Réglages → Kit de récupération / Gardiens), tu peux effacer cette app (Profil → Urgence → Purge totale) et restaurer depuis eux sur le nouveau départ. Sans rien de tout ça, une identité toute neuve est le dernier recours."
+    "noRecoveryNote": "Une phrase secrète oubliée ne peut pas être réinitialisée ici — personne ne détient de clé maîtresse. Mais ça ne veut pas forcément dire tout recommencer : un autre appareil relié garde encore ton identité, et si tu as créé un kit de récupération ou choisi des gardiennes et gardiens (Réglages → Kit de récupération / Gardiens), tu peux effacer cette app (Profil → Urgence → Purge totale) et restaurer depuis eux sur le nouveau départ. Sans rien de tout ça, une identité toute neuve est le dernier recours.",
+    "noPassphrase": "Cet appareil n'a pas de phrase secrète — il se déverrouille avec ton empreinte, ton visage ou ton PIN. Utilise le bouton de la clé d'accès."
   },
   "invite": {
     "reading": "Lecture de l'invitation…",
@@ -3023,9 +3024,12 @@
         "prfUnsupported": "Cet appareil a créé une clé d'accès, mais son matériel de sécurité ne peut pas s'en servir pour déverrouiller ici (il lui manque une fonction nécessaire appelée PRF). Rien n'a changé — tu peux supprimer la clé inutilisée depuis le gestionnaire de mots de passe de ton appareil.",
         "failed": "La clé d'accès n'a pas pu être mise en place. Rien n'a changé — ta phrase secrète marche toujours.",
         "successAdd": "Clé d'accès ajoutée. La prochaine fois que cet appareil se verrouille, un geste suffit pour le déverrouiller — et ta phrase secrète marche toujours aussi.",
-        "successRemove": "La clé d'accès ne déverrouille plus cet appareil. Tu peux aussi la supprimer du gestionnaire de mots de passe de ton appareil."
+        "successRemove": "La clé d'accès ne déverrouille plus cet appareil. Tu peux aussi la supprimer du gestionnaire de mots de passe de ton appareil.",
+        "removeOnlyMethod": "La clé d'accès ne peut pas être retirée tant qu'elle est le seul moyen de déverrouiller cet appareil — ajoute d'abord une phrase secrète."
       },
-      "whenAsked": "Ta phrase secrète te sera demandée chaque fois que tu ouvres l'appli après l'avoir fermée ou rechargée, et juste après l'avoir verrouillée toi-même avec le bouton « Verrouiller maintenant » ci-dessous — jamais sur un minuteur pendant qu'elle reste ouverte."
+      "whenAsked": "Ta phrase secrète te sera demandée chaque fois que tu ouvres l'appli après l'avoir fermée ou rechargée, et juste après l'avoir verrouillée toi-même avec le bouton « Verrouiller maintenant » ci-dessous — jamais sur un minuteur pendant qu'elle reste ouverte.",
+      "summaryPasskeyOnly": "Ta clé est verrouillée avec ton empreinte, ton visage ou le PIN de l'appareil — pour l'instant la seule façon d'entrer sur cet appareil. Ajouter une phrase secrète te donne une voie de secours pour déverrouiller.",
+      "addFallback": "Ajouter une phrase secrète (voie de secours)"
     },
     "emergency": {
       "title": "Urgence",
@@ -3340,6 +3344,24 @@
       "title": "Understoria est sur invitation uniquement",
       "body1": "Cette communauté fonctionne grâce aux invitations personnelles de ses membres.",
       "body2": "Si un membre t'a envoyé un lien d'invitation, suis ce lien-là. Sinon, demande à un membre de t'en envoyer un."
+    },
+    "protect": {
+      "title": "Protège ta clé",
+      "intro": "Ta clé est maintenant sur ce téléphone. Pour l'instant, n'importe qui prenant ce téléphone pourrait s'en servir. Tu peux la verrouiller.",
+      "passkeyDoor": "Verrouiller avec ton empreinte, ton visage ou le code PIN du téléphone",
+      "passkeyDoorBody": "Comme quand tu déverrouilles ton téléphone. Rien à retenir, rien à taper.",
+      "passphraseDoor": "Créer une phrase secrète à la place",
+      "passphraseDoorBody": "Des mots que tu tapes pour déverrouiller. Choisis ça si plusieurs personnes partagent l'empreinte ou le PIN de ce téléphone.",
+      "skipDoor": "Passer pour l'instant",
+      "skipDoorBody": "Tu pourras la verrouiller plus tard dans Réglages → Sécurité.",
+      "passphraseLabel": "Ta phrase secrète",
+      "passphraseConfirm": "Verrouiller avec cette phrase",
+      "doneTitle": "Verrouillée. Ton empreinte, ton visage ou ton PIN ouvrent maintenant ta clé — sur ce téléphone seulement.",
+      "doneNotAnAccount": "Ce n'est pas un compte chez une entreprise. La vérification se fait dans ton téléphone : rien n'est envoyé à Apple, à Google ni à personne — et ça marche sans internet.",
+      "doneBackup": "Une chose à savoir : si ce téléphone est perdu ou réinitialisé, ce verrou ne peut pas te rendre ta clé — une sauvegarde, oui. Un deuxième appareil, des gardien·nes que tu choisis ou un fichier de récupération font l'affaire ; chacun prend une minute dans Réglages.",
+      "backupNow": "Créer une sauvegarde maintenant",
+      "backupLater": "Plus tard",
+      "doneTitlePassphrase": "Verrouillée. Ta phrase secrète ouvre maintenant ta clé sur ce téléphone. Il n'y a pas de réinitialisation — une sauvegarde dans Réglages (deuxième appareil, gardien·nes ou fichier de récupération) est ce qui te ramène si ce téléphone est perdu."
     }
   },
   "block": {
