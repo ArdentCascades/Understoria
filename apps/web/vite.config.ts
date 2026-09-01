@@ -121,7 +121,13 @@ export default defineConfig({
         // Phase 0): a member downloads only the language they use.
         // The runtime route below caches a chunk on first use, so
         // offline keeps working for the language(s) actually chosen.
-        globIgnores: ["**/locale-*.js", "**/lazy-content-*.js"],
+        globIgnores: [
+          "**/locale-*.js",
+          "**/lazy-content-*.js",
+          // The 5.8 MB transcription engine: opt-in only, never in
+          // the install-time precache (docs/transcription-plan.md D6).
+          "**/lazy-vosk-*.js",
+        ],
         navigateFallback: "/index.html",
         runtimeCaching: [
           {
@@ -138,6 +144,17 @@ export default defineConfig({
             options: {
               cacheName: "understoria-locales",
               expiration: { maxEntries: 12 },
+            },
+          },
+          {
+            // The transcription engine chunk, cached on first use so
+            // transcription keeps working offline — in its own cache
+            // so its 5.8 MB never competes with locales for entries.
+            urlPattern: /\/assets\/lazy-vosk-[\w-]+\.js$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "understoria-engine",
+              expiration: { maxEntries: 1 },
             },
           },
         ],
@@ -240,6 +257,16 @@ export default defineConfig({
             {
               name: "lazy-content-ur",
               test: /src[\\/]content[\\/](?:[^\\/]+\.ur\.ts|bundles[\\/]ur\.ts)/,
+            },
+            // The transcription engine (vosk-browser, ~5.8 MB with its
+            // base64-embedded WASM worker) loads only when a member who
+            // opted in taps Transcribe (docs/transcription-plan.md D6).
+            // Its own named chunk lets the SW config exclude it from
+            // precache — it is also far past workbox's 2 MiB per-file
+            // limit, so bundling it eagerly would break the build.
+            {
+              name: "lazy-vosk",
+              test: /node_modules[\\/]vosk-browser[\\/]/,
             },
             // Authored content (templates, tips, starter steps) is pure
             // data and grew the main chunk past workbox's 2 MiB per-file

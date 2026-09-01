@@ -47,6 +47,9 @@ vi.mock("@/state/AppContext", () => ({
 // community summary, not these.
 vi.mock("@/components/LanguageSection", () => ({ LanguageSection: () => null }));
 vi.mock("@/components/ReadAloudSection", () => ({ ReadAloudSection: () => null }));
+vi.mock("@/components/TranscriptionSection", () => ({
+  TranscriptionSection: () => null,
+}));
 vi.mock("@/components/AppearanceSection", () => ({ AppearanceSection: () => null }));
 vi.mock("@/components/BlockedContactsPanel", () => ({
   BlockedContactsPanel: () => null,

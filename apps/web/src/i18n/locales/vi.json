@@ -876,7 +876,13 @@
       "discard": "Bỏ đi",
       "playerLabel": "Tin nhắn thoại, khoảng {{seconds}} giây",
       "durationLine": "Đoạn ghi âm · khoảng {{seconds}}s",
-      "playbackFailed": "Không phát được đoạn ghi âm này trên thiết bị này."
+      "playbackFailed": "Không phát được đoạn ghi âm này trên thiết bị này.",
+      "transcribe": "Chuyển thành chữ",
+      "transcribing": "Đang chuyển trên thiết bị này… có thể mất một lúc.",
+      "transcriptLine": "Bản chữ: {{text}}",
+      "transcriptEmpty": "Không nhận ra được gì — bản chữ trả về trống.",
+      "transcriptFailed": "Không chuyển được đoạn này thành chữ. Đoạn ghi âm vẫn phát bình thường.",
+      "transcriptNoModel": "Mô hình chưa có trên thiết bị này — hãy tải trước trong Cài đặt → Chuyển giọng nói thành chữ."
     }
   },
   "projects": {
@@ -2581,6 +2587,21 @@
         "off": "Tắt"
       }
     }
+  },
+  "transcription": {
+    "title": "Chuyển giọng nói thành chữ",
+    "intro": "Biến một đoạn ghi âm thành chữ để đọc — chỉ trên thiết bị này, mỗi lần một đoạn, khi bạn yêu cầu. Không gửi gì đi đâu cả. Cần tải một lần mô hình từ máy chủ của chính cộng đồng, và máy sẽ tốn pin trong lúc chạy.",
+    "turnOn": "Bật chuyển giọng nói thành chữ",
+    "turnOff": "Tắt chuyển giọng nói thành chữ",
+    "unsupported": "Thiết bị này hoặc bản triển khai này không chạy được bộ máy chuyển chữ. Trên điện thoại đời mới, thường là do phần đầu bảo mật của máy chủ chưa được cập nhật — người vận hành nút có thể sửa.",
+    "noModels": "Nút của cộng đồng này chưa cung cấp mô hình chuyển chữ. Người vận hành nút có thể tự lưu trữ — một bước cài đặt tùy chọn, chỉ làm một lần.",
+    "noModelForLanguage": "Nút chưa lưu trữ mô hình cho {{language}} — với một số ngôn ngữ hiện chưa có mô hình nào. Việc chuyển chữ sẽ im lặng ở đây cho đến khi có.",
+    "download": "Tải mô hình {{language}} ({{size}})",
+    "downloading": "Đang tải và kiểm tra mô hình ({{size}})…",
+    "downloaded": "Mô hình {{language}} ({{size}}) đã có trên thiết bị này. Các đoạn ghi âm giờ có thêm lựa chọn Chuyển thành chữ.",
+    "removeModel": "Xóa mô hình khỏi thiết bị này",
+    "verifyFailed": "Mô hình tải về không khớp với mã kiểm tra mà nút đã khai, nên bị từ chối. Hãy báo người vận hành nút — điều này lẽ ra không xảy ra.",
+    "downloadFailed": "Tải chưa xong. Kiểm tra kết nối rồi thử lại."
   },
   "betaNotice": {
     "dismiss": "Đã hiểu",

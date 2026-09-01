@@ -876,7 +876,13 @@
       "discard": "Descartar",
       "playerLabel": "Mensaje de voz, aproximadamente {{seconds}} segundos",
       "durationLine": "Nota de voz · aprox. {{seconds}}s",
-      "playbackFailed": "Esta nota de voz no se pudo reproducir en este dispositivo."
+      "playbackFailed": "Esta nota de voz no se pudo reproducir en este dispositivo.",
+      "transcribe": "Transcribir",
+      "transcribing": "Transcribiendo en este dispositivo… puede tardar un poco.",
+      "transcriptLine": "Transcripción: {{text}}",
+      "transcriptEmpty": "Nada reconocible — la transcripción volvió vacía.",
+      "transcriptFailed": "La transcripción no funcionó con este clip. La grabación se puede reproducir igual.",
+      "transcriptNoModel": "El modelo no está en este dispositivo — descárgalo primero en Ajustes → Transcripción."
     }
   },
   "projects": {
@@ -2581,6 +2587,21 @@
         "off": "Desactivado"
       }
     }
+  },
+  "transcription": {
+    "title": "Transcripción",
+    "intro": "Convierte una nota de voz en texto que puedas leer — solo en este dispositivo, un clip a la vez, cuando tú lo pidas. Nada se envía a ninguna parte. Requiere descargar una vez un modelo desde el servidor de tu comunidad, y gasta batería mientras trabaja.",
+    "turnOn": "Activar la transcripción",
+    "turnOff": "Desactivar la transcripción",
+    "unsupported": "Este dispositivo o esta instalación no puede ejecutar el motor de transcripción. En un teléfono al día, esto suele significar que las cabeceras de seguridad del servidor aún no se han actualizado — algo que quien opera el nodo puede arreglar.",
+    "noModels": "El nodo de esta comunidad todavía no ofrece modelos de transcripción. Quien opera el nodo puede alojarlos — es una configuración opcional que se hace una sola vez.",
+    "noModelForLanguage": "El nodo aún no aloja un modelo para {{language}} — para algunos idiomas no existe ninguno. La transcripción quedará en silencio aquí hasta que haya uno disponible.",
+    "download": "Descargar el modelo de {{language}} ({{size}})",
+    "downloading": "Descargando y comprobando el modelo ({{size}})…",
+    "downloaded": "El modelo de {{language}} ({{size}}) está en este dispositivo. Las notas de voz ahora muestran la opción Transcribir.",
+    "removeModel": "Quitar el modelo de este dispositivo",
+    "verifyFailed": "El modelo descargado no coincidió con la suma de verificación que declaró el nodo, así que se rechazó. Avisa a quien opera el nodo — esto no debería pasar.",
+    "downloadFailed": "La descarga no terminó. Revisa tu conexión e inténtalo de nuevo."
   },
   "betaNotice": {
     "dismiss": "Entendido",

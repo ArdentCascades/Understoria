@@ -309,6 +309,28 @@ onboard — are prioritized; the rest confirm the page is navigable.
   silence. On a browser with no speech engine at all the card
   states that instead of rendering the toggle.
 
+### Settings → Transcription (on-device captions, #477)
+
+- **Entry:** Settings, in "On this device", right after Read aloud.
+  Run on real hardware against a node whose operator hosts models
+  (operator-guide §7b) — CI locks every degradation path but cannot
+  run real inference.
+- **Steps:** turn transcription on; download the model for your
+  language (note the size is stated before you tap); open a
+  conversation with a voice note and tap Transcribe; try again in a
+  language the node hosts no model for (e.g. བོད་ཡིག); try once with
+  the device offline after the model downloaded.
+- **Expected:** the card states the download size in plain language
+  before downloading and shows "on this device" after; Transcribe
+  produces readable text below the player while the UI stays
+  responsive, and works offline once the model is local (nothing is
+  sent anywhere — verifiable in devtools' network tab: no requests
+  during transcription); a language without a model gets the honest
+  note, not a dead control; on a deployment without the V7 CSP
+  update the card says the engine can't run here; audio playback
+  works identically throughout, including after a failed
+  transcription.
+
 ### ProjectNew — create a project (core flow)
 
 - **Entry:** the "start a project" affordance, or route
