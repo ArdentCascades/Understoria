@@ -10,6 +10,19 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Bahasa Indonesia.** The twelfth language, and the first of the
+  demand-driven wave: the entire interface — every button, every
+  screen, every error message, all ~2,900 strings — now speaks
+  Indonesian, the warm kind spoken across a kitchen table (kamu,
+  never the bank-SMS Anda; help is bantuan, never layanan, because
+  nothing here is for sale; and credits are always jam — hours —
+  never "kredit", which in Indonesia means an installment loan).
+  Work days carry the word that already names them: gotong royong.
+  The help pages, project playbooks, and guides still read in
+  English for now — the Settings language card says so honestly —
+  and the full Indonesian corpus is next. As with every new
+  language, a native-speaker review is welcome and the app
+  discloses that none has happened yet.
 - **The member guide, the opsec guide, and the study-group prompts
   now read in your language.** These three were the last in-app
   content still English-only — the guides a new member is most

@@ -72,6 +72,24 @@ found during the bo corpus (locale/corpus chunks for ar/bo unnamed,
 so Arabic rode in everyone's first download) was fixed by teaching
 the build every language's chunk names; each corpus loads as its
 own lazy `lazy-content-<code>` chunk, precache-excluded.
+**DEMAND-DRIVEN WAVE BEGUN — Indonesian (id) UI SHIPPED** (2026-09):
+the first post-RTL language, riding the proven rails with no
+rendering spike (Latin script, single CLDR plural category — id.json
+follows the zh/bo precedent, _one/_other with identical strings).
+Glossary at docs/i18n-glossary/id.md: kamu uniformly (Anda is the
+1957 commerce coinage — bank-SMS register), kami banned as the app's
+voice (kita's inclusivity is a structural gift), **kredit banned
+everywhere** (in Indonesia it means installment loans; credits are
+always jam), gotong royong spent concretely on work days and banned
+as decoration, kerja bakti banned (New-Order compulsion register —
+the corvée reasoning), node and passkey kept English (simpul is a
+rope knot; "kunci sandi" is one consonant from kata sandi), Denyut
+for the dashboard, "Yang kurawat" for In my care, "tempat berteduh"
+for storm hubs. Registry entry carries `reviewStatus: "new"` +
+`content: "ui-only"` — the Settings content-fallback disclosure is
+live again for the first time since Phase 2 completed. The id corpus
+is next on the Phase 2 rails; Swahili, Tagalog and Bengali (spike
+first) follow per the wave plan.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from
