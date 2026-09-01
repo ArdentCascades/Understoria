@@ -3351,7 +3351,7 @@
       "passkeyDoor": "Lock with your fingerprint, face, or phone PIN",
       "passkeyDoorBody": "The same way you unlock your phone. Nothing to remember, nothing to type.",
       "passphraseDoor": "Create a passphrase instead",
-      "passphraseDoorBody": "Words you type to unlock. Pick this if several people share this phone's fingerprint or PIN.",
+      "passphraseDoorBody": "Words you type to unlock. Pick this if several people share this phone's fingerprint or PIN — or if someone could force your finger onto this phone. In many places, police can compel a fingerprint, but not words in your head.",
       "skipDoor": "Skip for now",
       "skipDoorBody": "You can lock it later in Settings → Security.",
       "passphraseLabel": "Your passphrase",

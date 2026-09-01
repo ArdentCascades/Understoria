@@ -3351,7 +3351,7 @@
       "passkeyDoor": "用指纹、面容或手机 PIN 码上锁",
       "passkeyDoorBody": "和你解锁手机一样。不用记，也不用输入。",
       "passphraseDoor": "改用口令",
-      "passphraseDoorBody": "输入一段词语来解锁。如果几个人共用这部手机的指纹或 PIN 码，选这个。",
+      "passphraseDoorBody": "输入一段词语来解锁。如果几个人共用这部手机的指纹或 PIN 码，选这个——或者如果有人可能强行把你的手指按到这部手机上。在很多地方，警察可以强制按指纹，却不能强制你说出脑子里的词。",
       "skipDoor": "暂时跳过",
       "skipDoorBody": "以后可以在设置 → 安全里上锁。",
       "passphraseLabel": "你的口令",

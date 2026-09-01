@@ -3351,7 +3351,7 @@
       "passkeyDoor": "Bloquear con tu huella, tu cara o el PIN del teléfono",
       "passkeyDoorBody": "Igual que desbloqueas tu teléfono. Nada que recordar, nada que escribir.",
       "passphraseDoor": "Crear una frase secreta en su lugar",
-      "passphraseDoorBody": "Palabras que escribes para desbloquear. Elige esto si varias personas comparten la huella o el PIN de este teléfono.",
+      "passphraseDoorBody": "Palabras que escribes para desbloquear. Elige esto si varias personas comparten la huella o el PIN de este teléfono — o si alguien pudiera forzar tu dedo sobre este teléfono. En muchos lugares, la policía puede obligar a poner una huella, pero no a decir las palabras que están en tu cabeza.",
       "skipDoor": "Saltar por ahora",
       "skipDoorBody": "Puedes bloquearla más tarde en Ajustes → Seguridad.",
       "passphraseLabel": "Tu frase secreta",

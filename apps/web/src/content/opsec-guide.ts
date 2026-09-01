@@ -65,6 +65,9 @@ export const OPSEC_GUIDE: readonly GuideSection[] = [
     title: "Know your rights",
     body: [
       "You do not have to answer questions from police without a lawyer present. You do not have to consent to a device search — they usually need a warrant. You do not have to identify other members. You do have the right to remain silent.",
+      "Fingerprints and faces are not words. In many places, courts treat a biometric unlock like a physical key — police can press your finger to the phone or hold it to your face — while something you know, like a passphrase, is treated as testimony you can refuse to give. This varies by country and by court, so check with a local legal organization; but if you might be detained, assume a biometric can be compelled and a passphrase cannot.",
+      "Learn your phone's hard-lock gesture before you need it. On iPhone, hold the side button and either volume button for two seconds (until the power-off screen appears) — Face ID and Touch ID are now off until the passcode is entered. On Android, hold the power button and tap Lockdown (enable it first in Settings → Display → Lock screen if it's not there). Practice it until it's muscle memory.",
+      "In Understoria itself: if compelled unlock is part of your threat model, protect your key with a passphrase instead of a fingerprint — or remove the fingerprint unlock (Profile → Settings → Security) before a protest, a border crossing, or any moment when detention is possible; you can add it back after. Only a passphrase you type carries the you-can-refuse property end to end. And remember the panic button (Profile → Emergency → Hard purge) exists for when locking is not enough.",
       "Your local legal organizations (NLG in the US, LDAN in the UK) can provide jurisdiction-specific \"Know Your Rights\" cards. Keep one in your wallet.",
     ],
   },
