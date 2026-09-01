@@ -788,6 +788,7 @@
       "emptyPane": "Pick a conversation from the list."
     },
     "emptyTitle": "No conversations yet",
+    "rowLabel": "Conversation with {{name}}, last message {{time}}",
     "empty": "No messages yet. Conversations start from a post — open someone's post and tap Message to reach out.",
     "sendMessage": "Message",
     "messageButton": "Message",
@@ -3030,7 +3031,8 @@
       "turnOff": "Turn read-aloud off",
       "spokenOn": "Read aloud is now on. Touch any button to hear its name.",
       "spokenOff": "Read aloud is now off.",
-      "unsupported": "This device's browser does not offer built-in speech, so read-aloud is not available here."
+      "unsupported": "This device's browser does not offer built-in speech, so read-aloud is not available here.",
+      "noVoice": "No {{language}} voice is installed on this device, so read-aloud can't speak here yet. Voices are added in the device's own settings, not in the app — buttons and icons keep working either way."
     }
   },
   "help": {

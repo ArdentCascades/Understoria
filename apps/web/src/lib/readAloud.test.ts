@@ -67,6 +67,27 @@ describe("startReadAloud", () => {
   });
 });
 
+describe("capture-phase contract", () => {
+  it("still speaks when a component stops pointerdown propagation", () => {
+    // Conversation's long-press bubbles call stopPropagation() on
+    // pointerdown (bubble phase, Conversation.tsx); read-aloud
+    // listens in CAPTURE phase on document, so the label has already
+    // been spoken by the time any component handler runs. This locks
+    // that ordering — read-aloud must never go quiet on exactly the
+    // controls that manage their own pointer events.
+    const stop = startReadAloud(() => "en");
+    const btn = document.createElement("button");
+    btn.textContent = "Speak this message";
+    document.body.append(btn);
+    btn.addEventListener("pointerdown", (e) => e.stopPropagation());
+
+    btn.dispatchEvent(new Event("pointerdown", { bubbles: true }));
+    expect(speak).toHaveBeenCalledWith("Speak this message", "en");
+
+    stop();
+  });
+});
+
 describe("initReadAloud + the toggle", () => {
   it("persists the preference and attaches/detaches live on toggle", () => {
     expect(isReadAloudEnabled()).toBe(false);

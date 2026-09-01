@@ -285,6 +285,30 @@ onboard — are prioritized; the rest confirm the page is navigable.
   selected state; toggles announce on/off; changing a setting
   takes effect immediately (e.g. dark mode flips live).
 
+### Settings → Read aloud (spoken interface, #473)
+
+- **Entry:** Settings, second card in "On this device" (right
+  after Language). Run this pass on a real phone — jsdom and most
+  desktop CI have no speech engine, so only hardware tells the
+  truth here.
+- **Steps:** activate "Turn read-aloud on"; then, without looking
+  at the screen if you can, touch each bottom-nav tab, a board
+  tab, a post card's primary action, and a conversation row.
+  Switch the app language to one the device has a voice for
+  (e.g. Spanish) and repeat one control. Switch to Tibetan
+  (བོད་ཡིག) and re-open the card. Turn the mode off.
+- **Expected:** the toggle speaks its own new state in the app
+  language the moment it flips; every control touched speaks a
+  short label (nav tabs speak their name in every layout,
+  conversation rows speak "Conversation with {name}, last message
+  {time}" — not the whole preview blob); activation still
+  proceeds normally (speech never gates the tap); after a
+  language switch the voice follows the language; under Tibetan
+  the card shows the honest no-voice note instead of promising
+  speech, and the toggle still operates; with the mode off,
+  silence. On a browser with no speech engine at all the card
+  states that instead of rendering the toggle.
+
 ### ProjectNew — create a project (core flow)
 
 - **Entry:** the "start a project" affordance, or route

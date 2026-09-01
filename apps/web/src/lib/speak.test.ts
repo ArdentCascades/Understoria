@@ -8,8 +8,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   SPEAK_START_TIMEOUT_MS,
   isSpeechAvailable,
+  onVoicesChanged,
   speak,
   stopSpeaking,
+  voiceAvailabilityFor,
 } from "./speak";
 
 // On-device TTS wrapper (#476). jsdom has no speechSynthesis, which
@@ -227,5 +229,59 @@ describe("isSpeechAvailable", () => {
     expect(isSpeechAvailable()).toBe(false);
     vi.stubGlobal("speechSynthesis", { cancel() {}, speak() {} });
     expect(isSpeechAvailable()).toBe(true);
+  });
+});
+
+describe("voiceAvailabilityFor", () => {
+  const voice = (lang: string) => ({ lang }) as SpeechSynthesisVoice;
+
+  it("answers unknown where the API is missing or the list is empty", () => {
+    // jsdom default: no speechSynthesis at all → "missing" (there
+    // will never be a voice), while an engine whose list hasn't
+    // populated yet → "unknown" (never a false alarm).
+    expect(voiceAvailabilityFor("ur")).toBe("missing");
+    vi.stubGlobal("speechSynthesis", { getVoices: () => [] });
+    expect(voiceAvailabilityFor("ur")).toBe("unknown");
+  });
+
+  it("matches by primary subtag — a regioned voice serves the bare code", () => {
+    vi.stubGlobal("speechSynthesis", {
+      getVoices: () => [voice("en-US"), voice("ur-PK")],
+    });
+    expect(voiceAvailabilityFor("ur")).toBe("available");
+    expect(voiceAvailabilityFor("zh-CN")).toBe("missing");
+    expect(voiceAvailabilityFor("bo")).toBe("missing");
+  });
+
+  it("never throws when the engine does", () => {
+    vi.stubGlobal("speechSynthesis", {
+      getVoices: () => {
+        throw new Error("engine broke");
+      },
+    });
+    expect(voiceAvailabilityFor("en")).toBe("unknown");
+  });
+});
+
+describe("onVoicesChanged", () => {
+  it("subscribes to voiceschanged and unsubscribes cleanly", () => {
+    const add = vi.fn();
+    const remove = vi.fn();
+    vi.stubGlobal("speechSynthesis", {
+      getVoices: () => [],
+      addEventListener: add,
+      removeEventListener: remove,
+    });
+    const cb = () => {};
+    const off = onVoicesChanged(cb);
+    expect(add).toHaveBeenCalledWith("voiceschanged", cb);
+    off();
+    expect(remove).toHaveBeenCalledWith("voiceschanged", cb);
+  });
+
+  it("no-ops where the API or the event is missing", () => {
+    expect(() => onVoicesChanged(() => {})()).not.toThrow();
+    vi.stubGlobal("speechSynthesis", { getVoices: () => [] });
+    expect(() => onVoicesChanged(() => {})()).not.toThrow();
   });
 });
