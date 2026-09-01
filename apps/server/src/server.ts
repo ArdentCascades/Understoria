@@ -26,6 +26,7 @@ import type { Database as DatabaseType } from "better-sqlite3-multiple-ciphers";
 import type { Config } from "./config.js";
 import {
   createAudioBlobStore,
+  createRemoteAudioCacheStore,
   createAwaitingTransitionStore,
   createCofounderStore,
   createDeviceLinkStore,
@@ -101,6 +102,10 @@ import {
   registerRemovedAuthorGuard,
 } from "./readAuth.js";
 import { MIRROR_INTERNAL_HEADER } from "./mirrorPull.js";
+import {
+  createRemoteAudioPuller,
+  type BlobFetcher,
+} from "./remoteAudio.js";
 import { createTrustResolver } from "./trustGate.js";
 
 /**
@@ -119,6 +124,12 @@ export interface BuildOptions {
    * or a fresh tmp path; production goes through the env-driven path.
    */
   database?: DatabaseType;
+  /**
+   * Optional injected blob fetcher for the audio pull-through leg
+   * (V8 #478) — tests simulate a peer node with it; production uses
+   * global fetch.
+   */
+  blobFetcher?: BlobFetcher;
 }
 
 export interface BuiltServer {
@@ -148,6 +159,7 @@ export interface BuiltServer {
 export async function buildServer({
   config,
   database,
+  blobFetcher,
 }: BuildOptions): Promise<BuiltServer> {
   const app = Fastify({
     logger: {
@@ -287,6 +299,22 @@ export async function buildServer({
   const proposalClosureStore = createProposalClosureStore(db);
   const messageStore = createMessageStore(db);
   const audioBlobStore = createAudioBlobStore(db);
+  // Federated audio (V8 #478): the peer-blob cache + puller exist
+  // only when the operator allows the cache (cap > 0) AND peers are
+  // configured; otherwise misses 404 exactly as before V8.
+  const remoteAudioCacheStore = createRemoteAudioCacheStore(db);
+  const remoteAudioPuller =
+    config.remoteAudioCacheMaxBytes > 0 && config.peerNodeUrls.length > 0
+      ? createRemoteAudioPuller({
+          peerUrls: config.peerNodeUrls,
+          peerTokens: config.peerReadTokens,
+          cache: remoteAudioCacheStore,
+          maxCacheBytes: config.remoteAudioCacheMaxBytes,
+          timeoutMs: config.remoteAudioFetchTimeoutMs,
+          ...(blobFetcher ? { fetcher: blobFetcher } : {}),
+          log: app.log,
+        })
+      : undefined;
   const cofounderStore = createCofounderStore(db);
 
   // Build the system signer once at boot — secret bytes are then
@@ -506,7 +534,11 @@ export async function buildServer({
   // Voice-board audio blobs (#474): the content-addressed store the
   // posts' signed `audio` references point at. PWA↔node only — blobs
   // don't ride the peer-pull legs until V8 (#478).
-  await registerAudioBlobRoutes(app, { store: audioBlobStore });
+  await registerAudioBlobRoutes(app, {
+    store: audioBlobStore,
+    remoteCache: remoteAudioCacheStore,
+    puller: remoteAudioPuller,
+  });
   // NOTE: no invite routes. `POST/GET /invites` was removed in the
   // invite-redemption Phase 1 PR — the GET served full SignedInvite
   // rows (a live-credential feed, `docs/invite-redemption.md` §10.1).
