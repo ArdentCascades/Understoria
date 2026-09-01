@@ -20,15 +20,19 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { createAudioUrl, releaseAudioUrl } from "@/lib/audioUrls";
 
 /**
  * Plays a decrypted voice note (docs/message-relay.md §10). The
  * base64 audio exists in the clear only transiently: it becomes an
  * in-memory Blob + object URL for the lifetime of this component and
  * the URL is revoked on unmount — nothing plaintext is written
- * anywhere. Native <audio controls> deliberately: familiar, keyboard
- * accessible, and it handles both codecs (Opus/WebM from most
- * platforms, AAC/MP4 from iOS Safari) without us guessing.
+ * anywhere. The URL is minted through the audio-URL registry
+ * (lib/audioUrls.ts) so a panic purge can revoke it even while the
+ * player is still mounted (#476). Native <audio controls>
+ * deliberately: familiar, keyboard accessible, and it handles both
+ * codecs (Opus/WebM from most platforms, AAC/MP4 from iOS Safari)
+ * without us guessing.
  */
 export function VoicePlayer({
   audioBase64,
@@ -47,16 +51,14 @@ export function VoicePlayer({
       const binary = atob(audioBase64);
       const bytes = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      return URL.createObjectURL(new Blob([bytes], { type: mime }));
+      return createAudioUrl(new Blob([bytes], { type: mime }));
     } catch {
       return null;
     }
   }, [audioBase64, mime]);
 
   useEffect(() => {
-    return () => {
-      if (url) URL.revokeObjectURL(url);
-    };
+    return () => releaseAudioUrl(url);
   }, [url]);
 
   const seconds = Math.max(1, Math.round(durationMs / 1000));

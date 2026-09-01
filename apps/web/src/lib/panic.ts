@@ -19,6 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { db, SETTING_KEYS, setSetting } from "@/db/database";
+import { revokeAllAudioUrls } from "./audioUrls";
 import { generateKeyPair } from "./crypto";
 
 /**
@@ -46,6 +47,9 @@ export interface PurgeResult {
   mode: "soft" | "hard";
   durationMs: number;
   tablesTouched: string[];
+  /** Live audio object URLs revoked at purge time (#476) — playable
+   *  voice-note plaintext that was still reachable in memory. */
+  audioUrlsRevoked: number;
 }
 
 /**
@@ -127,6 +131,11 @@ export const SOFT_PURGE_CLASSIFICATION: Readonly<
 export async function softPurge(): Promise<PurgeResult> {
   const start = performance.now();
   const tables: string[] = [];
+
+  // First, synchronously: kill any voice-note plaintext still
+  // reachable through a live object URL (#476). Table scrubs can
+  // take a moment; the in-memory audio must not outlive the tap.
+  const audioUrlsRevoked = revokeAllAudioUrls();
 
   await db.transaction("rw", db.members, async () => {
     const members = await db.members.toArray();
@@ -405,11 +414,18 @@ export async function softPurge(): Promise<PurgeResult> {
     mode: "soft",
     durationMs: performance.now() - start,
     tablesTouched: tables,
+    audioUrlsRevoked,
   };
 }
 
 export async function hardPurge(): Promise<PurgeResult> {
   const start = performance.now();
+
+  // Same first move as softPurge: revoke live audio object URLs
+  // before anything slower runs (#476). The post-purge reload would
+  // clear them too, but the contract must not lean on a reload that
+  // an error path might never reach.
+  const audioUrlsRevoked = revokeAllAudioUrls();
 
   // Enumerate the LIVE schema rather than hand-maintaining a table
   // list. The hand-maintained list drifted: ten tables added after it
@@ -438,6 +454,7 @@ export async function hardPurge(): Promise<PurgeResult> {
     mode: "hard",
     durationMs: performance.now() - start,
     tablesTouched: tables,
+    audioUrlsRevoked,
   };
 }
 

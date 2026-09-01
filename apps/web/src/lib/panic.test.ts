@@ -18,7 +18,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createAudioUrl, revokeAllAudioUrls } from "./audioUrls";
 import { hardPurge, softPurge } from "./panic";
 import { db } from "@/db/database";
 import { blockMember } from "@/db/blocks";
@@ -466,5 +467,59 @@ describe("softPurge covers member-authored content tables", () => {
     ]) {
       expect(result.tablesTouched).toContain(name);
     }
+  });
+});
+
+describe("purges revoke residual audio object URLs (#476)", () => {
+  // Acceptance: after a purge, no lingering object URLs — the
+  // in-memory voice-note plaintext must die with the data, without
+  // depending on a player unmounting first or on the hard purge's
+  // post-reload.
+  let revoked: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
+    await reset();
+    let serial = 0;
+    vi.stubGlobal("URL", {
+      ...URL,
+      createObjectURL: vi.fn(() => `blob:audio-${serial++}`),
+      revokeObjectURL: (revoked = vi.fn()),
+    });
+  });
+
+  afterEach(() => {
+    revokeAllAudioUrls();
+    vi.unstubAllGlobals();
+    vi.clearAllMocks();
+  });
+
+  const clip = () => new Blob(["voice bytes"], { type: "audio/webm" });
+
+  it("softPurge revokes every registered URL and reports the count", async () => {
+    const a = createAudioUrl(clip());
+    const b = createAudioUrl(clip());
+
+    const result = await softPurge();
+
+    expect(result.audioUrlsRevoked).toBe(2);
+    expect(revoked).toHaveBeenCalledWith(a);
+    expect(revoked).toHaveBeenCalledWith(b);
+    // Nothing left behind for a second purge to find.
+    expect(revokeAllAudioUrls()).toBe(0);
+  });
+
+  it("hardPurge revokes every registered URL and reports the count", async () => {
+    const a = createAudioUrl(clip());
+
+    const result = await hardPurge();
+
+    expect(result.audioUrlsRevoked).toBe(1);
+    expect(revoked).toHaveBeenCalledWith(a);
+    expect(revokeAllAudioUrls()).toBe(0);
+  });
+
+  it("reports zero honestly when no audio was live", async () => {
+    expect((await softPurge()).audioUrlsRevoked).toBe(0);
+    expect((await hardPurge()).audioUrlsRevoked).toBe(0);
   });
 });
