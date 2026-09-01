@@ -26,6 +26,7 @@ import { ToastProvider } from "@/state/ToastContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import App from "./App";
 import { initInstallCapture } from "@/lib/installGuide";
+import { installPrintThemeGuard } from "@/lib/theme";
 import { isDesktopShell } from "@/lib/desktop";
 import { primeShareOrigin } from "@/lib/appOrigin";
 import { readSubmitConfig } from "@/lib/nodeSubmit";
@@ -40,6 +41,9 @@ import "./index.css";
 // it early, so the listener must be installed at module load. See
 // lib/installGuide.ts.
 initInstallCapture();
+// Paper is always light: strip the dark class while the print dialog
+// is open so `dark:` rules can't outrank the sheets' print: styles.
+installPrintThemeGuard();
 
 // Desktop shell (app://): share links can't use this origin — prime
 // the public origin from the configured node URL before first render

@@ -3620,6 +3620,7 @@
   },
   "print": {
     "printButton": "In",
+    "nothingTitle": "Không có gì để in",
     "iosApp": {
       "explain": "Ứng dụng đã cài không mở được hộp thoại in — đây là giới hạn của iPhone và iPad, không phải bạn làm sai.",
       "screenshot": "Để đưa trang này ra giấy: chụp màn hình, nhấn vào bản xem trước rồi chọn chế độ toàn trang — từ đó có thể in hoặc lưu thành PDF.",

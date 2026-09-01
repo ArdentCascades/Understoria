@@ -18,11 +18,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { formatAbsoluteDate } from "@/lib/format";
 import { isInstalledIosApp } from "@/lib/installGuide";
 import { InviteQRCode } from "@/components/InviteQRCode";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 // Shared frame bits for the /print/... pages (desktop-power-tools
 // plan 5). The pages render as normal on-screen routes; @media print
@@ -38,10 +40,18 @@ import { InviteQRCode } from "@/components/InviteQRCode";
  *  that "doesn't seem to do anything" reads as the member's fault —
  *  so there the button gives way to what actually works: the Full
  *  Page screenshot, or Safari (named honestly as its own copy). */
-export function PrintToolbar() {
+export function PrintToolbar({
+  nothingToPrint,
+}: {
+  /** The page's own empty-state message. When set, the sheet is
+   *  empty and the Print button warns with a dialog instead of
+   *  opening a print preview of a nearly blank page. */
+  nothingToPrint?: string;
+} = {}) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const iosApp = isInstalledIosApp();
+  const [emptyWarningOpen, setEmptyWarningOpen] = useState(false);
   return (
     <div className="mb-4 print:hidden">
       <div className="flex flex-wrap gap-2">
@@ -56,7 +66,9 @@ export function PrintToolbar() {
           <button
             type="button"
             className="btn-primary"
-            onClick={() => window.print()}
+            onClick={() =>
+              nothingToPrint ? setEmptyWarningOpen(true) : window.print()
+            }
           >
             {t("print.printButton")}
           </button>
@@ -69,6 +81,15 @@ export function PrintToolbar() {
           <p className="mt-2">{t("print.iosApp.safari")}</p>
         </div>
       )}
+      <ConfirmDialog
+        open={emptyWarningOpen}
+        title={t("print.nothingTitle")}
+        description={nothingToPrint}
+        acknowledgeOnly
+        confirmLabel={t("common.close")}
+        onConfirm={() => setEmptyWarningOpen(false)}
+        onCancel={() => setEmptyWarningOpen(false)}
+      />
     </div>
   );
 }

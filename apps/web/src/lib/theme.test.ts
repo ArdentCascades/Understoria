@@ -9,6 +9,7 @@ import {
   isThemePreference,
   resolveTheme,
   THEME_PREFERENCES,
+  installPrintThemeGuard,
 } from "./theme";
 
 describe("theme — resolveTheme truth table", () => {
@@ -45,5 +46,45 @@ describe("theme — isThemePreference", () => {
     expect(isThemePreference(null)).toBe(false);
     expect(isThemePreference(0)).toBe(false);
     expect(isThemePreference({})).toBe(false);
+  });
+});
+
+describe("theme — installPrintThemeGuard", () => {
+  it("drops the dark class for the print dialog and restores it after", () => {
+    const root = document.documentElement;
+    root.classList.add("dark");
+    const uninstall = installPrintThemeGuard();
+
+    window.dispatchEvent(new Event("beforeprint"));
+    expect(root.classList.contains("dark")).toBe(false);
+
+    window.dispatchEvent(new Event("afterprint"));
+    expect(root.classList.contains("dark")).toBe(true);
+
+    uninstall();
+    root.classList.remove("dark");
+  });
+
+  it("does not force dark onto a light theme after printing", () => {
+    const root = document.documentElement;
+    root.classList.remove("dark");
+    const uninstall = installPrintThemeGuard();
+
+    window.dispatchEvent(new Event("beforeprint"));
+    window.dispatchEvent(new Event("afterprint"));
+    expect(root.classList.contains("dark")).toBe(false);
+
+    uninstall();
+  });
+
+  it("stops listening once uninstalled", () => {
+    const root = document.documentElement;
+    root.classList.add("dark");
+    const uninstall = installPrintThemeGuard();
+    uninstall();
+
+    window.dispatchEvent(new Event("beforeprint"));
+    expect(root.classList.contains("dark")).toBe(true);
+    root.classList.remove("dark");
   });
 });

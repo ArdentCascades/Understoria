@@ -3620,6 +3620,7 @@
   },
   "print": {
     "printButton": "Print",
+    "nothingTitle": "Nothing to print",
     "iosApp": {
       "explain": "The installed app can't open the print dialog — an iPhone and iPad limitation, not something you did.",
       "screenshot": "To put this page on paper: take a screenshot, tap its preview, and choose Full Page — from there you can print it or save it as a PDF.",

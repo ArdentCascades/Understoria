@@ -3620,6 +3620,7 @@
   },
   "print": {
     "printButton": "打印",
+    "nothingTitle": "没有可打印的内容",
     "iosApp": {
       "explain": "已安装的应用打不开打印窗口——这是 iPhone 和 iPad 的限制，不是你操作有误。",
       "screenshot": "想把这页落到纸上：先截屏，点开预览，选整页模式——从那里就能打印，或存成 PDF。",

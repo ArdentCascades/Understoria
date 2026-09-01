@@ -3620,6 +3620,7 @@
   },
   "print": {
     "printButton": "Imprimir",
+    "nothingTitle": "Nada para imprimir",
     "iosApp": {
       "explain": "O app instalado não consegue abrir o diálogo de impressão — uma limitação do iPhone e do iPad, não algo que você fez de errado.",
       "screenshot": "Para passar esta página ao papel: tire uma captura de tela, toque na prévia e escolha a opção de página inteira — dali dá para imprimir ou salvar como PDF.",

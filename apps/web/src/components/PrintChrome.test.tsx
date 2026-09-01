@@ -48,11 +48,11 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function render() {
+function render(props?: { nothingToPrint?: string }) {
   act(() => {
     root.render(
       <MemoryRouter>
-        <PrintToolbar />
+        <PrintToolbar {...props} />
       </MemoryRouter>,
     );
   });
@@ -75,6 +75,38 @@ describe("PrintToolbar", () => {
 
     act(() => button!.click());
     expect(printSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("warns with a dialog instead of printing when the sheet is empty", () => {
+    mockIosApp = false;
+    const printSpy = vi
+      .spyOn(window, "print")
+      .mockImplementation(() => undefined);
+    const emptyMessage = i18n.t("print.calendar.empty");
+    render({ nothingToPrint: emptyMessage });
+
+    const label = i18n.t("print.printButton");
+    const button = [...container.querySelectorAll("button")].find(
+      (b) => b.textContent === label,
+    );
+    expect(button).toBeDefined();
+    act(() => button!.click());
+
+    // No print preview of a nearly blank sheet — a dialog explains.
+    expect(printSpy).not.toHaveBeenCalled();
+    const dialog = document.querySelector('[role="dialog"]');
+    expect(dialog).not.toBeNull();
+    expect(dialog!.textContent).toContain(i18n.t("print.nothingTitle"));
+    expect(dialog!.textContent).toContain(emptyMessage);
+    // Acknowledgment mode: one Close button, no Cancel.
+    expect(dialog!.textContent).toContain(i18n.t("common.close"));
+    expect(dialog!.textContent).not.toContain(i18n.t("common.cancel"));
+
+    const close = [...dialog!.querySelectorAll("button")].find(
+      (b) => b.textContent === i18n.t("common.close"),
+    );
+    act(() => close!.click());
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
   });
 
   it("replaces the dead button with honest guidance in the installed iOS app", () => {
