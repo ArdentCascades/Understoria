@@ -28,11 +28,30 @@ vi.mock("dexie-react-hooks", () => ({
   useLiveQuery: () => mockMemberCount,
 }));
 
+// The protect step's passkey door (V5 #475): the WebAuthn ceremony is
+// lib/passkeyUnlock's seam (tested there with injected credentials) —
+// here it's mocked so jsdom can walk the flow. Default UNSUPPORTED,
+// so every pre-existing test sees the passphrase/skip doors only.
+let mockPasskeySupported = false;
+let mockEnrollResult:
+  | {
+      ok: true;
+      kek: Uint8Array;
+      credentialId: string;
+      prfSalt: string;
+    }
+  | { ok: false; error: string } = { ok: false, error: "unsupported" };
+vi.mock("@/lib/passkeyUnlock", () => ({
+  supportsPasskeys: () => mockPasskeySupported,
+  enrollPasskey: async () => mockEnrollResult,
+}));
+
 // Pull in i18n side-effects so `t()` returns translated strings, not
 // raw keys — the assertions below match on the English copy.
 import "@/i18n";
 import WelcomePage from "./Welcome";
 import { db, getSetting, SETTING_KEYS } from "@/db/database";
+import { __resetSessionForTests } from "@/db/secrets";
 import { createMember } from "@/db/seed";
 import { DEFAULT_NODE_CONFIG } from "@/types";
 import type { Member, NodeConfig } from "@/types";
@@ -73,7 +92,10 @@ beforeEach(async () => {
   mockState = blankState();
   mockMemberCount = 0;
   // The minting tests below write through the REAL Dexie layer
-  // (fake-indexeddb) — start each test from a clean store.
+  // (fake-indexeddb) — start each test from a clean store. The
+  // secrets session is module-level memory; without the reset, a
+  // protect-step test that unlocked would leak into the next mint.
+  __resetSessionForTests();
   await Promise.all([
     db.members.clear(),
     db.secretKeys.clear(),
@@ -330,6 +352,33 @@ async function clickFinish() {
   await flush();
 }
 
+// The protect doors' handlers run real async work (PBKDF2 for the
+// passphrase door) that act() doesn't await — poll for the outcome.
+async function waitForText(text: string, timeoutMs = 20_000) {
+  const startedAt = Date.now();
+  while (!container.textContent?.includes(text)) {
+    if (Date.now() - startedAt > timeoutMs) {
+      throw new Error(`timed out waiting for: ${text}`);
+    }
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+  }
+}
+
+// The protect step's doors are plain labeled buttons, not
+// .btn-primary — find one by its visible text.
+async function clickProtectDoor(label: string) {
+  const door = Array.from(container.querySelectorAll("button")).find((b) =>
+    b.textContent?.includes(label),
+  ) as HTMLButtonElement | undefined;
+  if (!door) throw new Error(`No protect door: ${label}`);
+  await act(async () => {
+    door.click();
+  });
+  await flush();
+}
+
 describe("WelcomePage — identity minting at profileSetup", () => {
   it("open node, no member: finishing with a typed name mints a real Ed25519 identity", async () => {
     mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
@@ -338,6 +387,11 @@ describe("WelcomePage — identity minting at profileSetup", () => {
     clickNextNTimes(6);
     setInput(nameInput(), "Mara");
     await clickFinish();
+
+    // The protect step (V5 #475) follows the save on an unprotected
+    // device; skipping keeps today's plaintext outcome.
+    expect(container.textContent).toContain("Protect your key");
+    await clickProtectDoor("Skip for now");
 
     const members = await db.members.toArray();
     expect(members.length).toBe(1);
@@ -377,6 +431,8 @@ describe("WelcomePage — identity minting at profileSetup", () => {
     expect(container.textContent).toContain("A little about you");
     setInput(nameInput(), "Founding Operator");
     await clickFinish();
+    expect(container.textContent).toContain("Protect your key");
+    await clickProtectDoor("Skip for now");
 
     const members = await db.members.toArray();
     expect(members.length).toBe(1);
@@ -399,6 +455,10 @@ describe("WelcomePage — identity minting at profileSetup", () => {
     expect(nameInput().value).toBe("Nadia");
     setInput(nameInput(), "Nadia R.");
     await clickFinish();
+    // The invited member's key is plaintext too — the protect step
+    // applies to them the same as a fresh mint.
+    expect(container.textContent).toContain("Protect your key");
+    await clickProtectDoor("Skip for now");
 
     const members = await db.members.toArray();
     expect(members.length).toBe(1);
@@ -699,5 +759,96 @@ describe("WelcomePage — short landscape viewports", () => {
     expect(body?.querySelector("footer")).toBeNull();
     expect(body?.querySelector("header")).toBeNull();
     expect(container.querySelector("footer")).not.toBeNull();
+  });
+});
+
+describe("WelcomePage — the protect step (V5 #475)", () => {
+  async function reachProtectStep() {
+    mockState.nodeConfig = { ...DEFAULT_NODE_CONFIG, inviteOnly: false };
+    mockMemberCount = 0;
+    render(<WelcomePage />);
+    clickNextNTimes(6);
+    setInput(nameInput(), "Mara");
+    await clickFinish();
+    expect(container.textContent).toContain("Protect your key");
+  }
+
+  beforeEach(() => {
+    mockPasskeySupported = false;
+    mockEnrollResult = { ok: false, error: "unsupported" };
+  });
+
+  it("Skip keeps the key plaintext — today's outcome stays reachable", async () => {
+    await reachProtectStep();
+    // No passkey door on an unsupported device; skip + passphrase only.
+    expect(container.textContent).not.toContain(
+      "Lock with your fingerprint, face, or phone PIN",
+    );
+    await clickProtectDoor("Skip for now");
+
+    const [member] = await db.members.toArray();
+    const row = await db.secretKeys.get(member.publicKey);
+    expect(row?.secretKey).toBeTruthy();
+    expect(row?.wrapped).toBeUndefined();
+    expect(await getSetting(SETTING_KEYS.onboarded)).toBe("1");
+  });
+
+  it("the passphrase door wraps the freshly-minted key", async () => {
+    await reachProtectStep();
+    await clickProtectDoor("Create a passphrase instead");
+    const input = container.querySelector(
+      'input[type="password"]',
+    ) as HTMLInputElement;
+    setInput(input, "orchard window kettle moss");
+    await clickProtectDoor("Lock with this passphrase");
+    await waitForText("Locked.");
+    await clickProtectDoor("Open the board");
+
+    const [member] = await db.members.toArray();
+    const row = await db.secretKeys.get(member.publicKey);
+    expect(row?.secretKey).toBeUndefined();
+    expect(row?.wrapped).toBeTruthy();
+    expect(await getSetting(SETTING_KEYS.onboarded)).toBe("1");
+  });
+
+  it("the passkey door leads and enrolls passkey-FIRST — no typed passphrase anywhere", async () => {
+    mockPasskeySupported = true;
+    mockEnrollResult = {
+      ok: true,
+      kek: new Uint8Array(32).fill(7),
+      credentialId: "AQIDBAUGBwg",
+      prfSalt: "c2FsdA",
+    };
+    await reachProtectStep();
+    await clickProtectDoor("Lock with your fingerprint");
+    await waitForText("not an account with a company");
+
+    // The unusual part is explained AFTER the act, per the approved
+    // copy: not an account, nothing sent anywhere, works offline.
+    expect(container.textContent).toContain("not an account with a company");
+    expect(container.textContent).toContain("no internet at all");
+
+    const [member] = await db.members.toArray();
+    const row = await db.secretKeys.get(member.publicKey);
+    expect(row?.secretKey).toBeUndefined();
+    expect(row?.wrapped).toBeTruthy();
+
+    await clickProtectDoor("Later");
+    expect(await getSetting(SETTING_KEYS.onboarded)).toBe("1");
+  });
+
+  it("a cancelled passkey ceremony returns to the choice without scolding", async () => {
+    mockPasskeySupported = true;
+    mockEnrollResult = { ok: false, error: "cancelled" };
+    await reachProtectStep();
+    await clickProtectDoor("Lock with your fingerprint");
+    await waitForText("Lock with your fingerprint");
+
+    // Back on the choice, no error line, nothing enrolled or locked.
+    expect(container.textContent).toContain("You can lock it.");
+    expect(container.querySelector('[role="alert"]')).toBeNull();
+    const [member] = await db.members.toArray();
+    expect((await db.secretKeys.get(member.publicKey))?.secretKey).toBeTruthy();
+    expect(await getSetting(SETTING_KEYS.onboarded)).toBeUndefined();
   });
 });

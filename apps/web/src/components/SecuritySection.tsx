@@ -18,6 +18,7 @@ import {
   enablePassphrase,
   enrollPasskeyWrapper,
   passkeyEnrollment,
+  passkeyIsOnlyMethod,
   removePasskeyWrapper,
 } from "@/db/secrets";
 import {
@@ -53,8 +54,14 @@ export function SecuritySection() {
   const [passkeyBusy, setPasskeyBusy] = useState(false);
   const [passkeyError, setPasskeyError] = useState<string | null>(null);
 
+  // Passkey-only devices (enrollPasskeyFirst, V5 #475) get different
+  // controls: "add a passphrase backup" instead of Change/Disable,
+  // and Remove disabled until a fallback exists.
+  const [passkeyOnly, setPasskeyOnly] = useState(false);
+
   const reloadEnrollment = useCallback(async () => {
     setEnrollment(await passkeyEnrollment());
+    setPasskeyOnly(await passkeyIsOnlyMethod());
   }, []);
 
   useEffect(() => {
@@ -137,6 +144,9 @@ export function SecuritySection() {
         setSuccess(t("profile.security.successDisable"));
       }
       await refreshLockState();
+      // Adding a passphrase on a passkey-only device flips the
+      // controls back to the full set — reload that state too.
+      await reloadEnrollment();
       reset();
     } catch (err) {
       setError(humanizeError(err));
@@ -154,7 +164,9 @@ export function SecuritySection() {
       </h2>
       <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
         {protectionOn
-          ? t("profile.security.summaryProtected")
+          ? passkeyOnly
+            ? t("profile.security.summaryPasskeyOnly")
+            : t("profile.security.summaryProtected")
           : t("profile.security.summaryUnprotected")}
       </p>
       {/* WHEN the passphrase gets asked for — printed from what the
@@ -191,7 +203,22 @@ export function SecuritySection() {
             {t("profile.security.enable")}
           </button>
         )}
-        {protectionOn && (
+        {protectionOn && passkeyOnly && (
+          // No passphrase exists to Change or Disable — the honest
+          // offer is adding one as the backup way in.
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => {
+              reset();
+              setMode("enable");
+              setSuccess(null);
+            }}
+          >
+            {t("profile.security.addFallback")}
+          </button>
+        )}
+        {protectionOn && !passkeyOnly && (
           <>
             <button
               type="button"
@@ -215,14 +242,16 @@ export function SecuritySection() {
             >
               {t("profile.security.disable")}
             </button>
-            <button
-              type="button"
-              className="btn bg-rose-600 text-white hover:bg-rose-700"
-              onClick={() => lock()}
-            >
-              {t("profile.security.lockNow")}
-            </button>
           </>
+        )}
+        {protectionOn && (
+          <button
+            type="button"
+            className="btn bg-rose-600 text-white hover:bg-rose-700"
+            onClick={() => lock()}
+          >
+            {t("profile.security.lockNow")}
+          </button>
         )}
       </div>
 
@@ -252,11 +281,16 @@ export function SecuritySection() {
                   type="button"
                   className="btn-secondary"
                   onClick={handleRemovePasskey}
-                  disabled={passkeyBusy || lockState === "locked"}
+                  disabled={passkeyBusy || lockState === "locked" || passkeyOnly}
                 >
                   {t("profile.security.passkey.remove")}
                 </button>
               </div>
+              {passkeyOnly && (
+                <p className="mt-1 text-xs text-moss-600 dark:text-moss-300">
+                  {t("profile.security.passkey.removeOnlyMethod")}
+                </p>
+              )}
             </>
           ) : (
             <>

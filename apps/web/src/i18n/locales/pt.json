@@ -1826,7 +1826,8 @@
     "passkeyButton": "Desbloquear com chave de acesso",
     "passkeyFailed": "A chave de acesso — o desbloqueio por rosto, impressão digital ou PIN do seu dispositivo — não conseguiu abrir isto. Sua frase secreta abaixo sempre funciona.",
     "or": "ou",
-    "noRecoveryNote": "Frases secretas esquecidas não podem ser redefinidas aqui — ninguém guarda uma chave mestra. Mas isso não precisa significar começar do zero: outro dispositivo vinculado ainda guarda sua identidade, e se você criou um kit de recuperação ou escolheu seus guardiões (Configurações → Kit de recuperação / Guardiões), pode limpar este aplicativo (Perfil → Emergência → Purga total) e restaurar a partir deles no recomeço. Sem nenhuma dessas opções, uma identidade nova é o último recurso."
+    "noRecoveryNote": "Frases secretas esquecidas não podem ser redefinidas aqui — ninguém guarda uma chave mestra. Mas isso não precisa significar começar do zero: outro dispositivo vinculado ainda guarda sua identidade, e se você criou um kit de recuperação ou escolheu seus guardiões (Configurações → Kit de recuperação / Guardiões), pode limpar este aplicativo (Perfil → Emergência → Purga total) e restaurar a partir deles no recomeço. Sem nenhuma dessas opções, uma identidade nova é o último recurso.",
+    "noPassphrase": "Este dispositivo não tem frase secreta — ele destranca com sua digital, seu rosto ou seu PIN. Use o botão da chave de acesso."
   },
   "invite": {
     "reading": "Lendo o convite…",
@@ -3023,9 +3024,12 @@
         "prfUnsupported": "Este dispositivo criou uma chave de acesso, mas o hardware de segurança dele não consegue usá-la para desbloquear aqui (falta um recurso necessário chamado PRF). Nada foi alterado — você pode apagar a chave de acesso sem uso no gerenciador de senhas do seu dispositivo.",
         "failed": "Não foi possível configurar a chave de acesso. Nada foi alterado — sua frase secreta continua funcionando.",
         "successAdd": "Chave de acesso adicionada. Na próxima vez que este dispositivo bloquear, um toque desbloqueia — e sua frase secreta também funciona sempre.",
-        "successRemove": "A chave de acesso não desbloqueia mais este dispositivo. Você também pode apagá-la do gerenciador de senhas do seu dispositivo."
+        "successRemove": "A chave de acesso não desbloqueia mais este dispositivo. Você também pode apagá-la do gerenciador de senhas do seu dispositivo.",
+        "removeOnlyMethod": "A chave de acesso não pode ser removida enquanto for a única forma de destrancar este dispositivo — adicione antes uma frase secreta."
       },
-      "whenAsked": "Sua frase secreta será pedida sempre que você abrir o aplicativo depois de ele ter sido fechado ou recarregado, e logo depois de você bloquear com o botão “Bloquear agora” abaixo — nunca por tempo enquanto ele continua aberto."
+      "whenAsked": "Sua frase secreta será pedida sempre que você abrir o aplicativo depois de ele ter sido fechado ou recarregado, e logo depois de você bloquear com o botão “Bloquear agora” abaixo — nunca por tempo enquanto ele continua aberto.",
+      "summaryPasskeyOnly": "Sua chave está trancada com sua digital, seu rosto ou o PIN do dispositivo — por enquanto a única forma de entrar neste dispositivo. Adicionar uma frase secreta dá a você um caminho reserva para destrancar.",
+      "addFallback": "Adicionar uma frase secreta (caminho reserva)"
     },
     "emergency": {
       "title": "Emergência",
@@ -3340,6 +3344,24 @@
       "title": "Understoria funciona só por convite",
       "body1": "Esta comunidade funciona com convites pessoais de quem já é membro.",
       "body2": "Se um membro enviou um link de convite para você, siga aquele link. Se não, peça a um membro que envie um."
+    },
+    "protect": {
+      "title": "Proteja sua chave",
+      "intro": "Sua chave já está neste telefone. Agora mesmo, qualquer pessoa que pegar este telefone poderia usá-la. Você pode trancá-la.",
+      "passkeyDoor": "Trancar com sua digital, seu rosto ou o PIN do telefone",
+      "passkeyDoorBody": "Do mesmo jeito que você desbloqueia o telefone. Nada para lembrar, nada para digitar.",
+      "passphraseDoor": "Criar uma frase secreta em vez disso",
+      "passphraseDoorBody": "Palavras que você digita para destrancar. Escolha isso se várias pessoas compartilham a digital ou o PIN deste telefone.",
+      "skipDoor": "Pular por enquanto",
+      "skipDoorBody": "Você pode trancar depois em Configurações → Segurança.",
+      "passphraseLabel": "Sua frase secreta",
+      "passphraseConfirm": "Trancar com esta frase",
+      "doneTitle": "Trancada. Sua digital, seu rosto ou seu PIN agora abrem sua chave — só neste telefone.",
+      "doneNotAnAccount": "Isto não é uma conta em uma empresa. A verificação acontece dentro do seu telefone: nada é enviado à Apple, ao Google nem a ninguém — e funciona sem internet nenhuma.",
+      "doneBackup": "Uma coisa para saber: se este telefone for perdido ou restaurado, esta tranca não devolve sua chave — um backup devolve. Um segundo dispositivo, guardiões que você escolhe ou um arquivo de recuperação funcionam; cada um leva um minuto em Configurações.",
+      "backupNow": "Criar um backup agora",
+      "backupLater": "Depois",
+      "doneTitlePassphrase": "Trancada. Sua frase secreta agora abre sua chave neste telefone. Não existe redefinição — um backup em Configurações (segundo dispositivo, guardiões ou arquivo de recuperação) é o que traz você de volta se este telefone se perder."
     }
   },
   "block": {

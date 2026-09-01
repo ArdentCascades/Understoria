@@ -204,9 +204,10 @@ We are not trying to protect against:
   passphrases are unrecoverable by design — this is documented in the
   UI and on the lock screen. Argon2id remains a viable future
   migration; the blob format carries a `kdf` field for that.
-- **Passkey unlock: IMPLEMENTED (an additional method, never the only
-  one).** A member can enroll a platform passkey (Settings →
-  Security) whose WebAuthn `prf` extension output — 32 high-entropy
+- **Passkey unlock: IMPLEMENTED (passkey-first at onboarding since
+  V5 #475).** A member can enroll a platform passkey (Settings →
+  Security, or the onboarding "Protect your key" step) whose
+  WebAuthn `prf` extension output — 32 high-entropy
   bytes released only after the platform's user verification
   (biometric / device PIN) — is HKDF-SHA256-derived into a key that
   wraps the device master key. Enrollment migrates the device to an
@@ -222,10 +223,24 @@ We are not trying to protect against:
   biometric replaces the knowledge factor, so anyone enrolled in the
   device's OS biometrics/PIN can unlock — the same exposure class as
   a shoulder-surfed passphrase, delegated to the platform.
-  Invariants enforced in code: enrollment requires passphrase
-  protection already on, and disabling the passphrase refuses while
-  a passkey is enrolled — a lost or platform-reset passkey can never
-  lock a member out of their own identity. The credential's user
+  Invariant, amended for the onboarding path (V5 #475): the device
+  must never end up protected with zero ways in. Originally that was
+  "a passkey is never the only method — passphrase first"; V5's
+  passkey-first onboarding deliberately relaxes it, because for a
+  member who can't type a passphrase the real-world alternative was
+  NO protection at all — plaintext keys until they someday found
+  Settings. On a passkey-only device the code refuses to remove the
+  passkey until a passphrase is added (the mirror of the old
+  refusal), and the onboarding flow states the loss story at the
+  moment of enrollment and walks straight into the backup ladder —
+  because on this shape a platform-reset passkey IS the device-loss
+  story, answered by the same recovery ladder (paired device,
+  guardians, recovery kit), not by a typed fallback. A passphrase
+  can be added later (Settings offers it as "a backup way in"), and
+  the disable-order refusals then work exactly as before. The
+  onboarding step's copy carries the honesty burden: not an account,
+  nothing sent to any platform vendor, works with no internet, and
+  what a lost phone means. The credential's user
   handle is random, deliberately NOT the member's public key, so the
   platform credential store learns nothing linking the passkey to
   the federated identity. Phase 2 — passkey-based identity RESTORE

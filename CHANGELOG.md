@@ -10,6 +10,23 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Lock your key with your fingerprint — offered the moment your key
+  is born, no typed password ever needed.** Onboarding now ends with
+  a "Protect your key" step: one screen, three honest doors. Lock
+  with your fingerprint, face, or phone PIN (the way you already
+  unlock your phone — nothing to remember, nothing to type, and it
+  works with no internet at all); create a typed passphrase instead
+  (the right choice when several people share one phone's
+  fingerprint); or skip for now. Until this, a new member's key sat
+  unprotected until they someday found Settings — and members who
+  can't comfortably type a passphrase mostly never did. Because this
+  is unusual — a lock with no account and no company behind it — the
+  flow says so plainly right after you enroll: the check happens
+  inside your phone, nothing is sent to Apple, Google, or anyone, and
+  if this phone is lost or reset the lock can't bring the key back —
+  a backup can, and the flow walks you to one. A passphrase can be
+  added later as a backup way in; the app refuses to remove whichever
+  method is your last way in. In all eleven languages.
 - **Voice posts from neighboring communities now play.** Until now a
   voice post that arrived from a peer community showed "recording
   unavailable" — the post traveled, the recording didn't. Now, when

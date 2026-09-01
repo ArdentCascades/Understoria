@@ -37,11 +37,13 @@ import {
   currentLockState,
   disablePassphrase,
   enablePassphrase,
+  enrollPasskeyFirst,
   enrollPasskeyWrapper,
   getSecretKey,
   isUnlocked,
   lockSession,
   passkeyEnrollment,
+  passkeyIsOnlyMethod,
   persistSecretKey,
   removePasskeyWrapper,
   unlockSession,
@@ -240,5 +242,92 @@ describe("passphrase-only devices never see the envelope", () => {
     lockSession();
     expect(await unlockSession(PASS2)).toBe("unlocked");
     expect(await getSecretKey(keyA.publicKey)).toBe(keyA.secretKey);
+  });
+});
+
+describe("passkey-FIRST protection (V5 #475)", () => {
+  // The onboarding path for members who never type: an unprotected
+  // device goes straight to a DMK with the passkey wrapper alone.
+  // The amended invariant: whichever method is the LAST way in
+  // cannot be removed — so removePasskeyWrapper refuses until a
+  // passphrase fallback is added.
+  async function freshUnprotectedDevice(): Promise<void> {
+    await db.secretKeys.clear();
+    await db.settings.clear();
+    __resetSessionForTests();
+    await db.secretKeys.put({ ...keyA });
+  }
+
+  it("mints the DMK with the passkey wrapper alone and unlocks", async () => {
+    await freshUnprotectedDevice();
+    await enrollPasskeyFirst(KEK, META);
+
+    const row = await db.secretKeys.get(keyA.publicKey);
+    expect(row?.secretKey).toBeUndefined();
+    expect(row?.wrapped && isDirectBlob(row.wrapped)).toBe(true);
+    const wrappers = JSON.parse(
+      (await getSetting(SETTING_KEYS.deviceKeyWrappers))!,
+    );
+    expect(wrappers.passkey.credentialId).toBe(META.credentialId);
+    expect(wrappers.passphrase).toBeUndefined();
+    expect(await passkeyIsOnlyMethod()).toBe(true);
+    expect(isUnlocked()).toBe(true);
+    expect(await getSecretKey(keyA.publicKey)).toBe(keyA.secretKey);
+
+    lockSession();
+    expect(await currentLockState()).toBe("locked");
+    // The passkey opens it; a passphrase guess is answered honestly.
+    expect(await unlockSession(PASS)).toBe("no_passphrase");
+    expect(await unlockSessionWithKek(KEK)).toBe("unlocked");
+    expect(await getSecretKey(keyA.publicKey)).toBe(keyA.secretKey);
+  });
+
+  it("refuses on a device that already has protection", async () => {
+    await freshProtectedDevice();
+    await expect(enrollPasskeyFirst(KEK, META)).rejects.toThrow(
+      /already/i,
+    );
+  });
+
+  it("the passkey cannot be removed while it is the only way in", async () => {
+    await freshUnprotectedDevice();
+    await enrollPasskeyFirst(KEK, META);
+    await expect(removePasskeyWrapper()).rejects.toThrow(/passphrase/i);
+    expect(await passkeyEnrollment()).not.toBeNull();
+  });
+
+  it("adding a passphrase later gives both ways in, then frees the passkey", async () => {
+    await freshUnprotectedDevice();
+    await enrollPasskeyFirst(KEK, META);
+    await enablePassphrase(PASS);
+    expect(await passkeyIsOnlyMethod()).toBe(false);
+
+    lockSession();
+    expect(await unlockSession(PASS)).toBe("unlocked");
+    expect(await getSecretKey(keyA.publicKey)).toBe(keyA.secretKey);
+    lockSession();
+    expect(await unlockSessionWithKek(KEK)).toBe("unlocked");
+
+    // With the fallback in place the original invariants take over:
+    // the passkey is removable, then the passphrase can come off too,
+    // returning the rows to plaintext.
+    await removePasskeyWrapper();
+    await disablePassphrase();
+    const row = await db.secretKeys.get(keyA.publicKey);
+    expect(row?.secretKey).toBe(keyA.secretKey);
+    expect(await currentLockState()).toBe("unprotected");
+  });
+
+  it("keys minted while passkey-first-unlocked wrap under the DMK", async () => {
+    await freshUnprotectedDevice();
+    await enrollPasskeyFirst(KEK, META);
+    await persistSecretKey(keyB.publicKey, keyB.secretKey);
+
+    const row = await db.secretKeys.get(keyB.publicKey);
+    expect(row?.secretKey).toBeUndefined();
+    expect(row?.wrapped && isDirectBlob(row.wrapped)).toBe(true);
+    lockSession();
+    await unlockSessionWithKek(KEK);
+    expect(await getSecretKey(keyB.publicKey)).toBe(keyB.secretKey);
   });
 });

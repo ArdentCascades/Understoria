@@ -60,11 +60,20 @@ export const MEMBER_GUIDE: readonly GuideSection[] = [
       "Your identity is a cryptographic key pair. There is no email, " +
         "phone number, or account password. Your display name is " +
         "whatever you choose — it's a label, not a credential.",
-      "You can protect your device-side keys with a passphrase. If you " +
-        "lose your passphrase, no one can recover it for you. That's " +
-        "the trade — there is no central authority who can read your " +
-        "data, and that means there is no central authority who can " +
-        "rescue it either.",
+      "You can lock your device-side keys with your fingerprint, face, " +
+        "or device PIN (a passkey — offered right in onboarding, and " +
+        "it works with no internet at all), or with a passphrase you " +
+        "type; you can also have both, with the passphrase as the " +
+        "backup way in. Nothing about the lock is sent to Apple, " +
+        "Google, or any server — the check happens on your device.",
+      "If you lose your passphrase — or your phone with its " +
+        "fingerprint lock — no one can recover it for you. That's the " +
+        "trade — there is no central authority who can read your data, " +
+        "and that means there is no central authority who can rescue " +
+        "it either. What brings you back is a backup you made while " +
+        "things were fine: a second paired device, guardians you " +
+        "chose, or a recovery kit — each takes about a minute in " +
+        "Settings.",
       "If you ever need to wipe everything fast — soft (anonymize) or " +
         "hard (start over) — there's a panic button in Profile under " +
         "Emergency.",

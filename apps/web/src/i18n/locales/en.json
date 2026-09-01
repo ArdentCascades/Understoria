@@ -1826,7 +1826,8 @@
     "passkeyButton": "Unlock with passkey",
     "passkeyFailed": "The passkey — your device's face, fingerprint, or PIN unlock — couldn't open this. Your passphrase below always works.",
     "or": "or",
-    "noRecoveryNote": "Forgotten passphrases can't be reset here — nobody holds a master key. But this doesn't have to mean starting over: another linked device still holds your identity, and if you made a recovery kit or chose guardians (Settings → Recovery kit / Guardians), you can wipe this app (Profile → Emergency → Hard purge) and restore from them on the fresh start. With none of those, a fresh identity is the last resort."
+    "noRecoveryNote": "Forgotten passphrases can't be reset here — nobody holds a master key. But this doesn't have to mean starting over: another linked device still holds your identity, and if you made a recovery kit or chose guardians (Settings → Recovery kit / Guardians), you can wipe this app (Profile → Emergency → Hard purge) and restore from them on the fresh start. With none of those, a fresh identity is the last resort.",
+    "noPassphrase": "This device has no passphrase — it unlocks with your fingerprint, face, or PIN. Use the passkey button."
   },
   "invite": {
     "reading": "Reading invite…",
@@ -3023,9 +3024,12 @@
         "prfUnsupported": "This device created a passkey, but its security hardware can't power unlocking here (it lacks a needed feature called PRF). Nothing was changed — you can delete the unused passkey from your device's password manager.",
         "failed": "The passkey couldn't be set up. Nothing was changed — your passphrase still works.",
         "successAdd": "Passkey added. Next time this device locks, one tap unlocks it — and your passphrase always works too.",
-        "successRemove": "Passkey removed from unlocking this device. You can also delete it from your device's password manager."
+        "successRemove": "Passkey removed from unlocking this device. You can also delete it from your device's password manager.",
+        "removeOnlyMethod": "The passkey can't be removed while it's the only way to unlock this device — add a passphrase first."
       },
-      "whenAsked": "You'll be asked for your passphrase whenever you open the app after it has been closed or reloaded, and right after you lock it yourself with the \"Lock now\" button below — never on a timer while it stays open."
+      "whenAsked": "You'll be asked for your passphrase whenever you open the app after it has been closed or reloaded, and right after you lock it yourself with the \"Lock now\" button below — never on a timer while it stays open.",
+      "summaryPasskeyOnly": "Your key is locked with your fingerprint, face, or device PIN — currently the only way in on this device. Adding a passphrase gives you a backup way to unlock.",
+      "addFallback": "Add a passphrase (a backup way in)"
     },
     "emergency": {
       "title": "Emergency",
@@ -3340,6 +3344,24 @@
       "title": "Understoria is invite-only",
       "body1": "This community runs on personal invitations from existing members.",
       "body2": "If a member sent you an invitation link, follow that link instead. If not, ask a member to send one."
+    },
+    "protect": {
+      "title": "Protect your key",
+      "intro": "Your key is on this phone now. Right now, anyone who picks up this phone could use it. You can lock it.",
+      "passkeyDoor": "Lock with your fingerprint, face, or phone PIN",
+      "passkeyDoorBody": "The same way you unlock your phone. Nothing to remember, nothing to type.",
+      "passphraseDoor": "Create a passphrase instead",
+      "passphraseDoorBody": "Words you type to unlock. Pick this if several people share this phone's fingerprint or PIN.",
+      "skipDoor": "Skip for now",
+      "skipDoorBody": "You can lock it later in Settings → Security.",
+      "passphraseLabel": "Your passphrase",
+      "passphraseConfirm": "Lock with this passphrase",
+      "doneTitle": "Locked. Your fingerprint, face, or PIN now opens your key — on this phone only.",
+      "doneNotAnAccount": "This is not an account with a company. The check happens inside your phone: nothing is sent to Apple, Google, or anyone — and it works with no internet at all.",
+      "doneBackup": "One thing to know: if this phone is lost or reset, this lock can't bring your key back — a backup can. A second device, guardians you choose, or a recovery file all work; each takes about a minute in Settings.",
+      "backupNow": "Set up a backup now",
+      "backupLater": "Later",
+      "doneTitlePassphrase": "Locked. Your passphrase now opens your key on this phone. There is no reset — a backup in Settings (second device, guardians, or a recovery file) is what brings you back if this phone is lost."
     }
   },
   "block": {
