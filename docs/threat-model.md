@@ -318,6 +318,24 @@ We are not trying to protect against:
   FIRST play per community still leaks to the origin — same class as
   every federated read, documented here because audio is a sharper
   signal than a feed page.
+- **On-device transcription: IMPLEMENTED (V7, #477 —
+  docs/transcription-plan.md).** A member who opts in can turn a
+  voice clip into text, one clip at a time, on their own device.
+  Posture, each property tested: the WASM engine loads only on the
+  member's tap and never at install; the speech model downloads once
+  from the community's OWN serving origin (never a third-party CDN),
+  SHA-256-verified against the operator's manifest before it is
+  trusted; inference makes no network call — structural, the engine
+  module cannot fetch — so neither the audio nor the text ever
+  leaves the device. The transcript twin is stored as NaCl-box
+  ciphertext under the member's own key (never the weaker copy of a
+  message Dexie only holds sealed), readable by that identity alone,
+  cleared by soft purge under the #476 coverage guard, excluded from
+  the export bundle and the pairing snapshot. Search reads only
+  existing twins — it never runs the engine, so search cost can't
+  become surveillance-shaped batch transcription. Spoken query was
+  evaluated and DROPPED: iOS `SpeechRecognition` routes audio
+  through Apple's servers, which the on-device-only rule forbids.
 - **Metadata leakage via federation.** Broadcast of need/offer to peers
   reveals category, zone, timing. Mitigation: opt-in per post, zone is
   already coarsened to neighborhood, no precise location.

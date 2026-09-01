@@ -279,9 +279,12 @@ Fill in:
   then shows a play button other members can tap. One thing to know:
   board posts are community content, so the recording lives on the
   community server and anyone in your community can listen — it is
-  *not* sealed the way voice notes in direct messages are. On a slow
-  connection the play button may briefly say the recording is still
-  on its way to the server.
+  *not* sealed the way voice notes in direct messages are. If your
+  community federates with neighbors and you share the post, members
+  of those communities can play it too: their server fetches a
+  verified copy from yours the first time one of them presses play.
+  On a slow connection the play button may briefly say the recording
+  is still on its way to the server.
 
 Tap **Post to the board**. Your need is live.
 
@@ -926,7 +929,14 @@ A few things worth knowing:
   end-to-end exactly like typed messages: only you and the other
   person can hear them, never the community node. If a device
   can't play a particular recording, it says so plainly instead
-  of failing silently.
+  of failing silently. If you've turned on **Transcription**
+  (Settings — optional, needs a one-time model download from your
+  community's server), a **Transcribe** option under each voice
+  note turns it into text you can read, entirely on your device —
+  nothing is sent anywhere. The transcript sticks (sealed, only
+  your signed-in identity can open it, erased by the panic
+  button), and message search then finds the words spoken in
+  clips you've transcribed.
 - **Press and hold a message** for the quick menu: an emoji row to
   **react** (your reaction travels sealed, like a message — the
   other person sees it under the bubble), plus **Reply** (a
@@ -961,9 +971,9 @@ A few things worth knowing:
   without having to navigate back to their profile. Blocking
   here behaves the same as blocking from anywhere else (§14a)
   and the action is silent: the other member is not told.
-- **Locked sessions.** If you've set a passphrase and the session
-  is locked, you can't read or search messages until you unlock —
-  the secret key needed to decrypt them is sealed.
+- **Locked sessions.** If you've locked your key (§14) and the
+  session is locked, you can't read or search messages until you
+  unlock — the secret key needed to decrypt them is sealed.
 - **No recovery.** If you lose your secret key (no passphrase
   backup, device wiped, etc.) the messages are gone. This is the
   trade-off for end-to-end encryption with no central server.
@@ -1059,7 +1069,8 @@ Ctrl/Cmd+K.) Settings holds:
   targets stay the same size at either setting).
 - **Community node** — optional mirror of your finalized exchanges
   to a community-wide ledger; off by default.
-- **Security** — turn on a passphrase for your identity (§14).
+- **Security** — lock your key with your fingerprint, face, or
+  device PIN, or with a passphrase (§14).
 - **Blocked contacts** — the list of members you've blocked and a
   separate "Previously blocked" history. Each row is **obscured
   by default** — generic avatar, the literal copy "Blocked
@@ -1247,22 +1258,39 @@ A few things worth knowing:
 You can revoke an unredeemed invite from the same page if you
 change your mind.
 
-## 14. Setting a passphrase
+## 14. Locking your key
 
 If your phone has full-disk encryption on and a strong lock screen,
-you're already in decent shape. Setting a passphrase on top of that
+you're already in decent shape. Locking your key on top of that
 means that even if someone gets around your phone's lock, they can't
-use your Understoria identity without your passphrase.
+use your Understoria identity.
 
-1. **Profile → Security → Enable passphrase protection.**
-2. Type a passphrase. At least 8 characters. A four-word phrase from
-   a password manager is ideal.
-3. **Write it down somewhere safe.** There is no recovery. If you
-   forget it, your identity on this device is gone.
+There are two ways to lock, and onboarding offers them the moment
+your key is created (you can also set them up any time in
+Settings → Security):
 
-From then on, the app asks for the passphrase every time you open it.
+- **Your fingerprint, face, or device PIN** — the same way you
+  unlock your phone. Nothing to remember, nothing to type. This is
+  not an account with a company: the check happens inside your
+  phone, nothing is sent to Apple, Google, or anyone, and it works
+  with no internet at all.
+- **A passphrase you type.** At least 8 characters; a four-word
+  phrase from a password manager is ideal. The right choice when
+  several people share one phone's fingerprint or PIN. **Write it
+  down somewhere safe** — there is no recovery for a forgotten
+  passphrase.
 
-You can **Change** or **Disable** protection from the same page. There
+You can have both, with the passphrase as the backup way in. The
+app refuses to remove whichever method is your last way in — a
+locked device must always have a door.
+
+One thing to know either way: if this phone is lost or reset, the
+lock can't bring your key back — a backup can. A second paired
+device (§12a), guardians you choose, or a recovery kit each take
+about a minute in Settings, and they're what bring you back.
+
+From then on, the app asks you to unlock every time you open it.
+You can **Change** or add methods from the same Settings page. There
 is also a **Lock now** button if you need to hand the device to
 someone briefly.
 

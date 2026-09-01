@@ -249,12 +249,19 @@ message carried audio at all — §6 unchanged. Consequences:
 - **Plaintext exposure:** the decrypted audio exists in the clear
   only transiently — an in-memory Blob + object URL for the lifetime
   of the player component, revoked on unmount.
-- **Search/preview:** voice rows never match message search; the
-  conversations list previews them as the fallback line.
+- **Search/preview:** the conversations list previews voice rows as
+  the fallback line. Since V7 (#477) a voice row matches message
+  search through its stored transcript twin — the words actually
+  spoken, decrypted per scan for the current member only; clips the
+  member never transcribed stay unsearchable, and the fallback line
+  still never matches.
 
 Deliberately NOT here: board audio (V4) shipped separately and does
 not touch the relay — a board recording lives unencrypted in the
 node's content-addressed blob store, because board posts are
-community-public (docs/voice-board.md). Still deferred on the voice
-tracking issue #479: fetch-by-reference for *message* audio and
-federated blobs (V8), and transcription (V7).
+community-public (docs/voice-board.md). Since shipped from the voice
+tracking issue #479: federated BOARD blobs by pull-through (V8,
+docs/voice-board.md §5) and on-device transcription with sealed
+transcript twins + search (V7, docs/transcription-plan.md). Still
+genuinely not built: fetch-by-reference for *message* audio — voice
+notes ride inline in the sealed envelope, deliberately.

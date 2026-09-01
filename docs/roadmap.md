@@ -139,7 +139,17 @@ The full framing lives in [`docs/accessibility.md`](accessibility.md):
 who the work serves (blind / low-vision, motor-impaired,
 cognitive-disability, hearing-impaired members), the WCAG 2.1 AA
 standards floor, current state inventory, known gaps, per-PR
-reviewer questions, and review cadence. The political-education
+reviewer questions, and review cadence.
+
+**The Voice Workstream (tracking issue #479, V1–V8) shipped in full
+under this agent's banner**: sealed voice notes in messages, voice
+posts on the board, the spoken interface (read-aloud, #473),
+accessible panic with the CI purge-coverage guard (#476), on-device
+transcription with sealed searchable transcripts (#477,
+docs/transcription-plan.md), federated audio by pull-through (#478),
+and passkey-first onboarding so a non-reader never faces a typed
+passphrase (#475 half A; half B — remote guardian shares — is a
+written proposal awaiting decision, docs/remote-guardian-shares.md). The political-education
 docs already cite Mia Mingus and Leah Lakshmi
 Piepzna-Samarasinha on interdependence as a precondition; this
 agent is the engineering operationalisation of that.

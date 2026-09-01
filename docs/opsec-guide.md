@@ -60,8 +60,9 @@ changes.
   device.** You can export a backup. Keep the backup somewhere safe
   and offline — a printed paper in a drawer is often better than a
   cloud service.
-- **If your phone is lost or stolen:** the passphrase lock is what
-  protects the key on it — that's why we suggest setting one. There
+- **If your phone is lost or stolen:** the lock you set on your key
+  (your fingerprint/face/PIN passkey, or a passphrase) is what
+  protects it — that's why onboarding offers one. There
   is no central revocation and no one who can flip a switch for you:
   tell your community what happened so people know to stop trusting
   that identity, then start fresh with a new key (Profile →

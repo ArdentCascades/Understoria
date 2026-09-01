@@ -43,9 +43,11 @@ the community node or to any third party:
 
 - Your **display name**, skills, availability, location zone, and
   any profile text you've entered.
-- Your **private key**, encrypted under your passphrase. We never
-  see it; we cannot recover it. If you lose your passphrase, the
-  identity is gone.
+- Your **private key**, encrypted under the lock you chose — your
+  device's fingerprint/face/PIN (a passkey; the check happens inside
+  your phone and nothing about it is sent to any platform vendor),
+  a passphrase, or both. We never see it; we cannot recover it. If
+  you lose every way in without a backup, the identity is gone.
   The single exception is the **device-pairing flow you initiate**
   (Settings → Add another device). When you choose to pair a second
   device, the key is wrapped under a fresh one-time passphrase the
@@ -56,6 +58,13 @@ the community node or to any third party:
   ./device-pairing.md). The threat-model entry covering this surface
   is in [`docs/threat-model.md`](./threat-model.md) §7 under "Device
   pairing widens the identity-key surface."
+- **Voice-note transcripts** you create with the optional
+  Transcription feature. The speech recognition runs entirely on
+  your device (the language model downloads once from your
+  community's own server); the recording never leaves your phone
+  for transcription, and the transcript is stored sealed under your
+  own key, readable only by your signed-in identity, erased by the
+  panic button, and excluded from data export.
 - **Direct messages** with other members. These are end-to-end
   encrypted with NaCl `box` (X25519 + XSalsa20-Poly1305) using
   ephemeral keys derived from your Ed25519 identity. Even the
@@ -88,7 +97,7 @@ deliberate exception). The record types are:
 
 | Action | Record | Visible fields |
 |---|---|---|
-| Post a NEED or OFFER | `Post` | Your public key, title, description, category, hours estimate, urgency, post time, your location zone. If you attach a voice note, the recording itself is stored on the node too (`audio_blobs`) — board posts are community content, so anyone in your community, including the operator, can play it |
+| Post a NEED or OFFER | `Post` | Your public key, title, description, category, hours estimate, urgency, post time, your location zone. If you attach a voice note, the recording itself is stored on the node too (`audio_blobs`) — board posts are community content, so anyone in your community, including the operator, can play it. If the post federates to a peer community, members there can play it too: their node fetches a verified copy from yours the first time one of them presses play and caches it (their operator can also play it, and yours learns only that *someone* in that community played it — never who) |
 | Send a direct message — text, voice note, or emoji reaction | `RelayedMessage` | The sealed envelope only: sender and recipient public keys, send time, envelope size, your signature. The node holds it until your correspondent's devices fetch it (bounded retention, about a month, then pruned). Everything inside — the text, the audio, the emoji, the which-post-is-this-about reference — is ciphertext the node cannot open. See §7 |
 | Confirm an exchange | `Exchange` | Both members' public keys, hours, category, completion time, signatures |
 | Vouch for another member | `Vouch` | Your public key, their public key, timestamp |
@@ -251,6 +260,12 @@ node propagate to those peers. Specifically:
 - Peers see public keys, not display names. They learn that "key
   X helped key Y" — not "Alice helped Bob" — unless someone on
   their node has separately associated those keys with names.
+- A voice post's recording does not broadcast to peers. A peer node
+  fetches it from your node only when one of its members presses
+  play, verifying it byte-for-byte against your signed reference,
+  and caches the copy (size-capped, oldest-played evicted). Your
+  node learns which community fetched which recording and when —
+  not which member there.
 - Peers do **not** receive your direct messages, your profile, or
   any data that stayed on your device or your community's node. In
   plain language: peers do **not** receive your RSVPs. They sync
