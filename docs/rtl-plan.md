@@ -1,8 +1,9 @@
 # Phase 3 — Right-to-left support (code-verified plan)
 
-Status: **R1–R3 SHIPPED** (the logical-property sweep and its
-guard; the semantic cases; the pseudo-locale and its mirrored-surface
-verification); R4 outstanding. This document began as the survey that had to
+Status: **PROGRAM COMPLETE — R1–R5 SHIPPED** (the logical-property
+sweep and its guard; the semantic cases; the pseudo-locale and its
+mirrored-surface verification; the Arabic fleet + corpus; the Urdu
+fleet + corpus). This document began as the survey that had to
 exist before the work started, in the same spirit as the router-8,
 React-19 and eslint-10 plan docs: every number below was measured
 against the tree at `d6d225e`, not estimated. It is now also the
@@ -311,7 +312,26 @@ Phase 2 rails — all 64 playbooks, starter steps, tips, event
 templates, FAQ, the start-a-community guide and the design
 principles, `content/bundles/ar.ts`, registry flipped to
 `content: "full"` — with every content parity gate extended to `ar`.
-Remaining in R4: Urdu on the same path.
+
+**R5 — Urdu. SHIPPED IN FULL — UI fleet and the whole authored
+corpus.** (The Urdu tranche is numbered R5 in the glossary and the
+code comments; this section is its record.) Between R4 and R5 the
+program paused for the Tibetan expedite (not an RTL language, but
+it took the queue slot for communities responding to the 2026 Tibet
+flood — see docs/i18n-expansion.md). Urdu then resumed on the rails
+Arabic proved: a rendering spike FIRST (Nastaliq is the tallest
+script the app ships — measured font line box 2.5× the font size —
+so `:lang(ur)` in index.css carries a Nastaliq-first system-font
+stack and a 2.0 line-height floor, stronger than Tibetan's 1.6),
+then the glossary (docs/i18n-glossary/ur.md: آپ address throughout,
+gender-neutral by construction, and its own politically-marked ban
+list), then all ~2,900 UI strings, then the corpus. CLDR Urdu is
+plain one/other, so none of Arabic's plural amendments were needed;
+`languages.test.ts` pins the RTL allowlist at `["ar", "ur"]`. As
+with Arabic, zero Unicode directional controls in any string — the
+bidi holds by structure alone, and the validators reject U+200E/F,
+U+202A–202E and U+2066–2069 outright.
+
 Only now does `ar`/`ur` become a translation problem, and it runs the
 ordinary playbook: glossary first, then the UI fleet, then the
 content fleet. The Arabic glossary is `docs/i18n-glossary/ar.md` —
@@ -338,8 +358,13 @@ exactly where the category admits one number — nowhere else.
   stopped there. Short interpolated strings — a display name inside a
   translated sentence — are left to the UBA on purpose: wrapping each
   one would fight the surrounding sentence more often than it helped.
-- Font work. Arabic and Urdu shaping is a system-font concern; the
-  app ships no custom face for them and should not start.
+- Font work — amended by R5, but the boundary held: the app still
+  ships no font FILES for Arabic or Urdu, and should not start.
+  What R5's rendering spike did add is CSS: a Nastaliq-first
+  *system*-font stack and a 2.0 line-height floor under
+  `:lang(ur)`, because Nastaliq's vertical extent (2.5× line box)
+  collides tight leading that Naskh survives. Shaping itself
+  remains the platform's job.
 - Any registry `rtl` entry before R3 verification passes. That gate
   stays exactly where the registry comment says it is.
 
@@ -347,8 +372,10 @@ exactly where the category admits one number — nowhere else.
 
 R1 was a day of mechanical work with a gate; R2 the interesting
 half-day, and it held to that. R3 is the real cost — building the
-pseudo-locale and reading every mirrored surface honestly. R4 is two
-ordinary translation runs at the playbook's known cost.
+pseudo-locale and reading every mirrored surface honestly. R4/R5 were two
+ordinary translation runs at the playbook's known cost — which is
+how they played out, plus one rendering spike each side of the
+Tibetan expedite.
 
 The headline for planning: **this is a much smaller program than the
 docs implied.** 98 tokens, no CSS debt, no directional JavaScript, and

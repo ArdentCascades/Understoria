@@ -1,7 +1,13 @@
 # The translation playbook — mechanical recipe per language
 
 This is the as-practiced pipeline that shipped fr/pt/zh/hi/vi UI
-strings and es/fr/pt/zh content (PRs #543–#550). It exists so ANY
+strings and es/fr/pt/zh content (PRs #543–#550). It has since run
+end-to-end four more times — hi/vi/ru content, then Arabic, Tibetan
+and Urdu (fleet AND corpus each) — which is the claim below holding:
+those runs added per-language wrinkles (Arabic's six plural
+categories, Tibetan and Nastaliq rendering spikes, RTL validators
+rejecting directional controls) without changing a step of the
+recipe. It exists so ANY
 future session — regardless of which model drives it — can add a
 language or a content corpus without rediscovering the process. The
 quality lives in the **gates and validators**, not in the driver:
