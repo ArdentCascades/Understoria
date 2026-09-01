@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { db } from "./database";
+import { messageTranscriptKey, transcriptReader } from "./transcripts";
 import { getSecretKey } from "./secrets";
 import { uuid } from "@/lib/id";
 import {
@@ -378,6 +379,9 @@ export async function searchAllMessages(
     .orderBy("createdAt")
     .reverse()
     .toArray();
+  // One identity/secret resolution for the whole scan; each voice
+  // row is then a single indexed get + unbox (V7 Phase 3).
+  const readTranscriptFor = await transcriptReader();
   const hits: MessageSearchHit[] = [];
   for (const m of all) {
     if (m.senderKey !== myKey && m.recipientKey !== myKey) continue;
@@ -387,10 +391,24 @@ export async function searchAllMessages(
     // must not match envelope JSON syntax.
     const msg = decryptAndDecode(m, sk, otherKey);
     // Reaction rows aren't thread messages — a search for "✕" or an
-    // emoji must not surface them as hits. Voice rows carry only the
-    // old-client fallback line as text; matching on it would surface
-    // every voice note for a query like "voice".
-    if (msg.reaction || msg.voice) continue;
+    // emoji must not surface them as hits.
+    if (msg.reaction) continue;
+    if (msg.voice) {
+      // A voice row matches through its transcript twin — the words
+      // actually spoken — never through the old-client fallback line
+      // (which would surface every voice note for a query like
+      // "voice"). Untranscribed clips stay unsearchable: search
+      // never runs the engine, it only reads what a tap already
+      // paid for (V7 #477 Phase 3). The hit's snippet IS the
+      // transcript, so highlighting works like any text message.
+      const transcript = await readTranscriptFor(
+        messageTranscriptKey(msg.id),
+      );
+      if (transcript !== null && matchesQuery(transcript, query)) {
+        hits.push({ otherKey, message: { ...msg, plaintext: transcript } });
+      }
+      continue;
+    }
     if (matchesQuery(msg.plaintext, query)) {
       hits.push({ otherKey, message: msg });
     }

@@ -10,6 +10,15 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Search now hears voice notes — through their transcripts.**
+  Message search matches the words actually spoken in a voice note,
+  once you've transcribed it: the result shows the transcript with
+  your search term highlighted, like any text message. Only clips
+  you chose to transcribe are searchable — search never runs the
+  engine or spends battery, it just reads the sealed transcripts
+  already on your device, and clips you never transcribed stay
+  exactly as unsearchable as before. This completes the
+  transcription work: engine, sealed transcripts, and now search.
 - **Transcripts now stick — sealed, and erased by the panic button.**
   A voice note you transcribe keeps its text: the caption reappears
   whenever you see that clip again, so each clip costs battery at
