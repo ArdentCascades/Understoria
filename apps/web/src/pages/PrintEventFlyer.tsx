@@ -73,7 +73,15 @@ export default function PrintEventFlyerPage() {
   if (!event || cancelled || ended) {
     return (
       <div className="px-4 pb-8 pt-6">
-        <PrintToolbar />
+        <PrintToolbar
+          nothingToPrint={t(
+            !event
+              ? "print.flyer.notFound"
+              : cancelled
+                ? "print.flyer.cancelled"
+                : "print.flyer.ended",
+          )}
+        />
         <p className="text-sm text-moss-700 dark:text-moss-200">
           {t(
             !event

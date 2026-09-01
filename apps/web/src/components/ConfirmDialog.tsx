@@ -33,6 +33,10 @@ export interface ConfirmDialogProps {
   confirmingLabel?: string;
   cancelLabel?: string;
   tone?: "neutral" | "caution";
+  /** Acknowledgment mode: hides the cancel button, leaving a single
+   *  confirm (typically "Close"). Esc still fires `onCancel`, so
+   *  callers wire both handlers to the same dismiss. */
+  acknowledgeOnly?: boolean;
   /** May return a Promise. While the Promise is unresolved, both
    *  buttons are disabled and the confirm button shows
    *  `confirmingLabel` if provided. Return type is intentionally
@@ -50,6 +54,7 @@ export function ConfirmDialog({
   confirmingLabel,
   cancelLabel,
   tone = "neutral",
+  acknowledgeOnly = false,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -142,14 +147,16 @@ export function ConfirmDialog({
           </div>
         )}
         <div className="mt-5 flex justify-end gap-2">
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={onCancel}
-            disabled={pending}
-          >
-            {resolvedCancelLabel}
-          </button>
+          {!acknowledgeOnly && (
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={onCancel}
+              disabled={pending}
+            >
+              {resolvedCancelLabel}
+            </button>
+          )}
           <button
             ref={confirmRef}
             type="button"

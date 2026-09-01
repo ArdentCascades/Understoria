@@ -21,6 +21,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useStepFocus } from "@/lib/useStepFocus";
+import { isInstalledIosApp } from "@/lib/installGuide";
 import QRCode from "qrcode";
 import { useApp } from "@/state/AppContext";
 import { validatePassphrase } from "@/lib/passphrase";
@@ -231,13 +232,15 @@ export function RecoveryKitCard() {
             <button type="button" className="btn-primary" onClick={download}>
               {t("recoveryKit.download")}
             </button>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => void print()}
-            >
-              {t("recoveryKit.print")}
-            </button>
+            {!isInstalledIosApp() && (
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => void print()}
+              >
+                {t("recoveryKit.print")}
+              </button>
+            )}
             <button
               type="button"
               className="btn-ghost"
@@ -246,6 +249,11 @@ export function RecoveryKitCard() {
               {t("recoveryKit.done")}
             </button>
           </div>
+          {isInstalledIosApp() && (
+            <p className="text-xs text-moss-600 dark:text-moss-300">
+              {t("recoveryKit.iosAppPrint")}
+            </p>
+          )}
           <p className="text-xs text-moss-600 dark:text-moss-300">
             {t("recoveryKit.storageHint")}
           </p>

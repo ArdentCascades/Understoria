@@ -80,7 +80,11 @@ export default function PrintBoardPage() {
 
   return (
     <div className="px-4 pb-8 pt-6 print:bg-white print:px-0 print:pb-0 print:pt-0 print:text-black">
-      <PrintToolbar />
+      <PrintToolbar
+        nothingToPrint={
+          visible.length === 0 ? t("print.board.empty") : undefined
+        }
+      />
 
       <h1 className="page-title print:text-black">
         {t(type === "OFFER" ? "print.board.titleOffers" : "print.board.titleNeeds")}

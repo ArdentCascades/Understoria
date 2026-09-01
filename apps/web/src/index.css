@@ -533,3 +533,16 @@
 :lang(ur).leading-snug {
   line-height: 2;
 }
+
+/* Paper is always light. Belt to the JS print-theme guard's braces:
+   whatever theme class survives into the print snapshot (iOS defers
+   print requests past beforeprint), the sheet's own canvas prints
+   white behind black text instead of the app's dark background
+   showing through as dark slabs. */
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+}

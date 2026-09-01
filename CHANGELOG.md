@@ -84,6 +84,43 @@ include breaking changes.
   same rails as every other language.
 
 ### Fixed
+- **The Print button no longer plays dead in the installed iPhone
+  app.** Every print surface rests on the browser's own dialog
+  (`window.print()` — no popups, no PDF library), and in the
+  installed iOS home-screen app that call is a silent no-op:
+  standalone WebKit ships no print UI, so the button on all seven
+  print sheets — upcoming events, the invite poster, the board view,
+  event flyers, sign-in sheets, the tabling guide, the outage kit —
+  and on the recovery kit did nothing at all, with nothing to say
+  why. Now the app notices it is that installed copy (reusing the
+  install guide's iPhone/iPad detection) and swaps the dead button
+  for what actually works, in every language: it says plainly that
+  this is an iPhone limitation and not the member's doing, walks
+  through the Full Page screenshot route (which prints and saves as
+  PDF), and names Safari honestly — printing works there, but Safari
+  is its own copy of Understoria with its own sign-in. The recovery
+  kit points at its Download button instead, which was always the
+  sturdier path. Android's installed app and every browser keep the
+  one-tap Print button they already had.
+- **Printing from a dark-mode phone no longer produces dark slabs
+  and unreadable light-on-white titles.** The app's dark mode is a
+  class on the page root, and those two-class `dark:` rules outrank
+  the one-class `print:` overrides the print sheets rely on — so a
+  member printing in dark mode got the sheet's title in near-white
+  ink on white paper and the app's dark background printed as a
+  slab wherever it showed. Paper is always light now, twice over: a
+  print-media rule forces the page canvas to white-behind-black, and
+  the moment the print dialog opens the app sets the theme aside
+  (and restores it the instant the dialog closes), so every dark
+  style reverts to its readable light value on all eight sheets.
+- **An empty sheet warns instead of printing.** Printing the
+  community calendar with nothing scheduled produced a nearly blank
+  page — a title, one line saying nothing is coming up, and the
+  footer. Now the Print button on an empty sheet opens a small
+  dialog saying there's nothing to print, quoting the page's own
+  explanation, instead of a print preview of an empty poster. The
+  same guard covers the board view with nothing matching and the
+  flyer of a cancelled or already-finished gathering.
 - **The Arabic corpus and locale no longer ride in everyone's first
   download.** Every language's translations are meant to load as
   their own lazily-fetched chunks, but the build config was never

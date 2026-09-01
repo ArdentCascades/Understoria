@@ -66,6 +66,35 @@ export function applyTheme(resolved: ResolvedTheme): void {
   }
 }
 
+/** Paper is always light. With darkMode: "class", every `dark:` rule
+ *  compiles to a two-class selector that outranks the one-class
+ *  `print:` utilities the print sheets rely on — so a dark-mode
+ *  phone printed light titles on white paper and dark slabs where
+ *  the page background showed. This guard drops the `dark` class
+ *  for the duration of the print dialog (beforeprint) and restores
+ *  the member's real theme after (afterprint). Returns an uninstall
+ *  for tests; no-op in non-DOM contexts. */
+export function installPrintThemeGuard(): () => void {
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    return () => {};
+  }
+  let wasDark = false;
+  const before = () => {
+    const root = document.documentElement;
+    wasDark = root.classList.contains("dark");
+    root.classList.remove("dark");
+  };
+  const after = () => {
+    if (wasDark) document.documentElement.classList.add("dark");
+  };
+  window.addEventListener("beforeprint", before);
+  window.addEventListener("afterprint", after);
+  return () => {
+    window.removeEventListener("beforeprint", before);
+    window.removeEventListener("afterprint", after);
+  };
+}
+
 /** Mirror the resolved theme to localStorage so the inline script in
  *  index.html can read it synchronously on the next page load. */
 export function cacheResolvedTheme(pref: ThemePreference): void {

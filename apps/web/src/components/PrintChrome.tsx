@@ -18,10 +18,13 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { formatAbsoluteDate } from "@/lib/format";
+import { isInstalledIosApp } from "@/lib/installGuide";
 import { InviteQRCode } from "@/components/InviteQRCode";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 // Shared frame bits for the /print/... pages (desktop-power-tools
 // plan 5). The pages render as normal on-screen routes; @media print
@@ -30,26 +33,63 @@ import { InviteQRCode } from "@/components/InviteQRCode";
 // comes out of the printer is just the sheet.
 
 /** Screen-only Print + Back row. `window.print()`, no popups, no
- *  PDF library — the browser's own dialog is the whole mechanism. */
-export function PrintToolbar() {
+ *  PDF library — the browser's own dialog is the whole mechanism.
+ *
+ *  Except in the installed iOS app, where `window.print()` is a
+ *  silent no-op (standalone WebKit ships no print UI). A dead button
+ *  that "doesn't seem to do anything" reads as the member's fault —
+ *  so there the button gives way to what actually works: the Full
+ *  Page screenshot, or Safari (named honestly as its own copy). */
+export function PrintToolbar({
+  nothingToPrint,
+}: {
+  /** The page's own empty-state message. When set, the sheet is
+   *  empty and the Print button warns with a dialog instead of
+   *  opening a print preview of a nearly blank page. */
+  nothingToPrint?: string;
+} = {}) {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const iosApp = isInstalledIosApp();
+  const [emptyWarningOpen, setEmptyWarningOpen] = useState(false);
   return (
-    <div className="mb-4 flex flex-wrap gap-2 print:hidden">
-      <button
-        type="button"
-        className="btn-secondary"
-        onClick={() => navigate(-1)}
-      >
-        {t("common.back")}
-      </button>
-      <button
-        type="button"
-        className="btn-primary"
-        onClick={() => window.print()}
-      >
-        {t("print.printButton")}
-      </button>
+    <div className="mb-4 print:hidden">
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => navigate(-1)}
+        >
+          {t("common.back")}
+        </button>
+        {!iosApp && (
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() =>
+              nothingToPrint ? setEmptyWarningOpen(true) : window.print()
+            }
+          >
+            {t("print.printButton")}
+          </button>
+        )}
+      </div>
+      {iosApp && (
+        <div className="mt-3 text-sm text-moss-700 dark:text-moss-200">
+          <p>{t("print.iosApp.explain")}</p>
+          <p className="mt-2">{t("print.iosApp.screenshot")}</p>
+          <p className="mt-2">{t("print.iosApp.safari")}</p>
+        </div>
+      )}
+      <ConfirmDialog
+        open={emptyWarningOpen}
+        title={t("print.nothingTitle")}
+        description={nothingToPrint}
+        acknowledgeOnly
+        confirmLabel={t("common.close")}
+        onConfirm={() => setEmptyWarningOpen(false)}
+        onCancel={() => setEmptyWarningOpen(false)}
+      />
     </div>
   );
 }

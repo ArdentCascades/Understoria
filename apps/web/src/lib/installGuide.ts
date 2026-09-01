@@ -371,6 +371,20 @@ export function currentInstallEnvironment(): InstallEnvironment {
   });
 }
 
+/** Running as the installed home-screen app on an iPhone or iPad.
+ *  The one environment where `window.print()` is a silent no-op —
+ *  standalone WebKit has no print UI — so the print surfaces swap
+ *  the dead button for honest guidance (PrintChrome, RecoveryKitCard).
+ *  Never true for the desktop shell or Android's installed PWA,
+ *  where printing works. */
+export function isInstalledIosApp(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return (
+    readStandalone() &&
+    isIos(navigator.userAgent, navigator.platform, navigator.maxTouchPoints ?? 0)
+  );
+}
+
 // --- Dexie dismiss sentinel ------------------------------------------
 // Mirrors firstActionNudge.ts: a single per-device flag. The card on
 // Board honors it for permanent dismissal; the panel in Learn ignores
