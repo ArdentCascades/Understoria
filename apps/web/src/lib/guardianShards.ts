@@ -46,18 +46,21 @@ import { uuid } from "@/lib/id";
  * guardian's key with the same NaCl box construction as E2E messages.
  * Recovery gathers any k releases and reconstructs.
  *
- * DELIVERY-LEG DELTA from the original plan, named: the plan said
- * distribution "rides the shipped E2E channel", but the DM layer has
- * no transport (messages are written locally and deliberately never
- * relayed or federated — threat-model §7). So every K2 hand-off is
- * DEVICE-TO-DEVICE: a QR shown on one screen and scanned by the other
+ * DELIVERY LEG, current state: every K2 hand-off is DEVICE-TO-DEVICE
+ * — a QR shown on one screen and scanned by the other
  * (`PairDeviceCapture` — camera with paste fallback), or the text
  * pasted through any channel the two members already trust. The node
- * appears NOWHERE in this design — not even as a ciphertext mailbox —
- * which is strictly less metadata than the plan's mailbox option
- * leaked. The cost is that hand-offs are synchronous and usually
- * in-person; for a recovery ceremony the plan wanted in-person bias
- * anyway.
+ * appears NOWHERE — not even as a ciphertext mailbox — so the
+ * who-guards-whom relation never becomes node-visible metadata. The
+ * cost is that hand-offs are synchronous and usually in-person.
+ *
+ * (An earlier revision of this comment justified QR-only by claiming
+ * the DM layer "has no transport" — that predated the message relay,
+ * which has since shipped. Whether shard DISTRIBUTION should ride
+ * the relay is now a live design question with a written proposal:
+ * docs/remote-guardian-shares.md, V5 #475 half B — offers possibly
+ * remote, releases in-person regardless. Until that's decided, this
+ * in-person design stands on its own merits, not on a stale claim.)
  *
  * Envelope hygiene: shares are ciphertext at rest on the guardian's
  * device (box to the guardian's key) and in every hand-off (offer:

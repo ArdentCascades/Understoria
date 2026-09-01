@@ -124,15 +124,16 @@ As built (`lib/sss.ts`, `lib/guardianShards.ts`,
   the reconstructed seed and requiring it to equal the owner's
   known key (`secretMatchesPublicKey` — the same anchor the
   recovery kit uses).
-- **Delivery delta from the original design:** the plan above
-  assumed shards could ride the E2E message channel. In the
-  shipped codebase direct messages have NO transport — they are
-  written locally only (no outbox kind, no federation pull, no
-  node route). So every hand-off in K2 is **device-to-device**:
+- **Delivery leg:** every hand-off in K2 is **device-to-device**:
   QR scan or copy/paste via the same capture component device
-  pairing uses. This is strictly LESS metadata than the mailbox
-  design — the node appears nowhere in any leg of the ceremony,
-  not even as a ciphertext relay.
+  pairing uses. The node appears nowhere in any leg of the
+  ceremony, not even as a ciphertext relay — the who-guards-whom
+  relation never becomes node-visible metadata. (An earlier
+  revision justified this by claiming direct messages "have NO
+  transport"; the message relay has since shipped, and whether
+  shard *distribution* should ride it is an open proposal —
+  `docs/remote-guardian-shares.md`. Release stays in-person under
+  every variant of that proposal.)
 - **Distribution:** each shard is sealed to the chosen guardian's
   X25519 key (ed2curve — the shared `crypto.ts` box construction)
   and shown to that guardian as a QR, one guardian at a time. The
