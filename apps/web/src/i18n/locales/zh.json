@@ -882,7 +882,8 @@
       "transcriptLine": "转写：{{text}}",
       "transcriptEmpty": "没有识别出内容——转写结果是空的。",
       "transcriptFailed": "这条语音转写失败了。播放不受影响。",
-      "transcriptNoModel": "模型还不在这台设备上——请先到设置 → 语音转文字里下载。"
+      "transcriptNoModel": "模型还不在这台设备上——请先到设置 → 语音转文字里下载。",
+      "transcriptNodeNoModel": "这个社区的节点还没有为你的语言提供转写模型，所以没有可下载的内容。节点维护者可以添加一个。"
     }
   },
   "projects": {

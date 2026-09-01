@@ -41,16 +41,23 @@ type TranscriptState =
   | { kind: "done"; text: string }
   | { kind: "empty" }
   | { kind: "no_model" }
+  | { kind: "node_no_model" }
   | { kind: "failed" };
 
 export function VoicePlayer({
   audioBase64,
   mime,
   durationMs,
+  transcriptKey,
 }: {
   audioBase64: string;
   mime: string;
   durationMs: number;
+  /** Stable clip identity for the encrypted transcript twin
+   *  (db/transcripts.ts) — "msg:<id>" / "blob:<id>". Omitted for
+   *  ephemeral clips (the recorder preview): those transcribe
+   *  in-memory only. */
+  transcriptKey?: string;
 }) {
   const { t, i18n } = useTranslation();
   const [failed, setFailed] = useState(false);
@@ -61,11 +68,41 @@ export function VoicePlayer({
   // zero transcription UI, zero engine bytes, zero cost (V7 #477).
   const transcriptionOn = isTranscriptionEnabled();
 
+  // A clip already transcribed shows its caption immediately — each
+  // clip is paid for at most once (#477 Phase 2). The twin is
+  // ciphertext at rest; this decrypts for the current member only.
+  useEffect(() => {
+    if (!transcriptionOn || transcriptKey === undefined) return;
+    let alive = true;
+    void (async () => {
+      const { readTranscript } = await import("@/db/transcripts");
+      const stored = await readTranscript(transcriptKey);
+      if (alive && stored !== null) {
+        setTranscript({ kind: "done", text: stored });
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+    // transcriptionOn is a render-time localStorage read, not state,
+    // so the key is the only real dependency.
+  }, [transcriptKey, transcriptionOn]);
+
   async function handleTranscribe() {
     setTranscript({ kind: "running" });
     // The 5.8 MB engine chunk loads only here, on the member's tap.
     const { transcribeClip } = await import("@/lib/transcriptionEngine");
     const outcome = await transcribeClip(audioBase64, i18n.resolvedLanguage);
+    if (outcome.kind === "ok" && transcriptKey !== undefined) {
+      // Persist the twin (boxed under the member's own key). Failure
+      // to persist never blocks the caption the member just paid for.
+      const { saveTranscript } = await import("@/db/transcripts");
+      void saveTranscript(
+        transcriptKey,
+        i18n.resolvedLanguage ?? "en",
+        outcome.text,
+      );
+    }
     setTranscript(
       outcome.kind === "ok"
         ? { kind: "done", text: outcome.text }
@@ -73,7 +110,9 @@ export function VoicePlayer({
           ? { kind: "empty" }
           : outcome.kind === "no_model"
             ? { kind: "no_model" }
-            : { kind: "failed" },
+            : outcome.kind === "node_no_model"
+              ? { kind: "node_no_model" }
+              : { kind: "failed" },
     );
   }
 
@@ -150,6 +189,13 @@ export function VoicePlayer({
           {transcript.kind === "no_model" && (
             <p className="text-xs opacity-70">
               {t("messages.voice.transcriptNoModel")}
+            </p>
+          )}
+          {transcript.kind === "node_no_model" && (
+            // Distinct from no_model: pointing at a Settings download
+            // that doesn't exist is a door with nothing behind it.
+            <p className="text-xs opacity-70">
+              {t("messages.voice.transcriptNodeNoModel")}
             </p>
           )}
           {transcript.kind === "failed" && (

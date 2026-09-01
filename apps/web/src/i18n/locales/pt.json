@@ -882,7 +882,8 @@
       "transcriptLine": "Transcrição: {{text}}",
       "transcriptEmpty": "Nada reconhecível — a transcrição voltou vazia.",
       "transcriptFailed": "A transcrição não funcionou com este clipe. A gravação continua tocando normalmente.",
-      "transcriptNoModel": "O modelo não está neste dispositivo — baixe primeiro em Configurações → Transcrição."
+      "transcriptNoModel": "O modelo não está neste dispositivo — baixe primeiro em Configurações → Transcrição.",
+      "transcriptNodeNoModel": "O nó desta comunidade ainda não oferece um modelo de transcrição para o seu idioma, então não há nada para baixar. Quem opera o nó pode adicionar um."
     }
   },
   "projects": {

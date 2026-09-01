@@ -113,6 +113,10 @@ function cacheKeyFor(entry: ModelEntry): string {
   return `/models/${entry.sha256}`;
 }
 
+function entryKeyFor(appLanguage: string | undefined): string {
+  return `/models/entry-${primarySubtag(appLanguage)}`;
+}
+
 async function openCache(): Promise<Cache | null> {
   try {
     if (typeof caches === "undefined") return null;
@@ -146,9 +150,15 @@ export type DownloadResult =
  * against the manifest, and store the verified bytes. A hash
  * mismatch stores nothing and is refused loudly — a wrong model
  * file is an operator mistake (or worse) the member must see.
+ *
+ * The manifest entry is cached beside the bytes, keyed by language,
+ * so a later transcription can find its model with NO network at
+ * all — "runs fully offline after model fetch" is the acceptance
+ * contract, and a manifest re-fetch on every clip would break it.
  */
 export async function downloadModel(
   entry: ModelEntry,
+  appLanguage: string | undefined,
 ): Promise<DownloadResult> {
   try {
     const res = await fetch(`/models/${encodeURIComponent(entry.file)}`);
@@ -165,9 +175,46 @@ export async function downloadModel(
         headers: { "content-type": "application/octet-stream" },
       }),
     );
+    await cache.put(
+      entryKeyFor(appLanguage),
+      new Response(JSON.stringify(entry), {
+        headers: { "content-type": "application/json" },
+      }),
+    );
     return { kind: "ok" };
   } catch {
     return { kind: "failed" };
+  }
+}
+
+/** The manifest entry cached at download time for this language, or
+ *  null when no model was ever downloaded here. The offline path:
+ *  entry from here → bytes from the cache → zero network. */
+export async function readCachedModelEntry(
+  appLanguage: string | undefined,
+): Promise<ModelEntry | null> {
+  const cache = await openCache();
+  if (cache === null) return null;
+  const hit = await cache.match(entryKeyFor(appLanguage));
+  if (hit === undefined) return null;
+  try {
+    const raw = (await hit.json()) as Record<string, unknown>;
+    if (
+      typeof raw.file === "string" &&
+      typeof raw.bytes === "number" &&
+      typeof raw.sha256 === "string" &&
+      typeof raw.label === "string"
+    ) {
+      return {
+        file: raw.file,
+        bytes: raw.bytes,
+        sha256: raw.sha256,
+        label: raw.label,
+      };
+    }
+    return null;
+  } catch {
+    return null;
   }
 }
 

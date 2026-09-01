@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Post } from "@/types";
 import { fetchAudioBlob } from "@/lib/audioBlobs";
+import { blobTranscriptKey } from "@/db/transcripts";
 import { VoicePlayer } from "@/components/VoicePlayer";
 
 /**
@@ -73,6 +74,7 @@ export function AudioPostPlayer({
         audioBase64={state.base64}
         mime={state.mime}
         durationMs={audio.durationMs}
+        transcriptKey={blobTranscriptKey(audio.blobId)}
       />
     );
   }

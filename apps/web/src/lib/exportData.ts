@@ -79,6 +79,12 @@ export const EXPORT_EXCLUDED_TABLES = [
   // hand to someone else would quietly break it. Low-value in a
   // backup anyway — plans retire with the tasks they annotate.
   "taskPlans",
+  // `transcripts` — other members' spoken words, written down
+  // (ciphertext at rest, but an export travels and the member's own
+  // key opens it). The same reasoning that keeps `guardianShards`
+  // out: a shareable file must not carry what other people said in
+  // sealed messages. Regenerable on-device from the audio anyway.
+  "transcripts",
 ] as const;
 
 /**

@@ -463,6 +463,23 @@ export interface JournalEntryRow {
  */
 export type EventCancellationRow = EventCancellation;
 
+/**
+ * Encrypted transcript twin for one voice clip (V7 #477 Phase 2).
+ * Only ciphertext at rest — boxed under the member's OWN key; the
+ * open/seal logic lives in `db/transcripts.ts`.
+ */
+export interface TranscriptRow {
+  /** Clip key: "msg:<messageId>" or "blob:<audioBlobId>". */
+  id: string;
+  /** Whose eyes this is for — the key it is boxed under. */
+  ownerKey: string;
+  /** App language the model transcribed in. */
+  lang: string;
+  nonce: string;
+  ciphertext: string;
+  createdAt: number;
+}
+
 export class UnderstoriaDB extends Dexie {
   members!: Table<Member, string>;
   posts!: Table<Post, string>;
@@ -611,6 +628,19 @@ export class UnderstoriaDB extends Dexie {
    * Read and written only by `db/journal.ts`.
    */
   journalEntries!: Table<JournalEntryRow, string>;
+
+  /**
+   * Encrypted transcript twins for voice clips (V7 #477 Phase 2,
+   * docs/transcription-plan.md D3) — NaCl-box ciphertext under the
+   * member's OWN key, plaintext never at rest (a transcript must not
+   * be the weaker copy of a message Dexie only ever holds sealed).
+   * Keyed by clip ("msg:<id>" / "blob:<id>"). LOCAL-ONLY: never
+   * synced, no outbox kind, not in SNAPSHOT_TABLES, EXCLUDED from
+   * the export bundle (spoken words of OTHER members ride in it —
+   * the guardianShards reasoning), cleared whole by softPurge.
+   * Read and written only by `db/transcripts.ts`.
+   */
+  transcripts!: Table<TranscriptRow, string>;
 
   constructor(name = "understoria") {
     super(name);
@@ -1237,6 +1267,16 @@ export class UnderstoriaDB extends Dexie {
     // no backfill — pre-v39 communities acceded nobody in-band.
     this.version(39).stores({
       founderAccessions: "nomination.nomineeKey",
+    });
+
+    // v40 — encrypted transcript twins (V7 #477 Phase 2): pure new
+    // table, no backfill. Primary key is the clip key; `ownerKey`
+    // indexed so a future multi-identity device can drop one
+    // identity's transcripts; `createdAt` for ordering. Ciphertext
+    // at rest, local-only, purge-cleared, export-excluded — the full
+    // posture is on the field declaration above.
+    this.version(40).stores({
+      transcripts: "id, ownerKey, createdAt",
     });
   }
 }

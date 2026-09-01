@@ -10,6 +10,21 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Transcripts now stick — sealed, and erased by the panic button.**
+  A voice note you transcribe keeps its text: the caption reappears
+  whenever you see that clip again, so each clip costs battery at
+  most once. What's stored is never readable off the disk — each
+  transcript is sealed under your own key, exactly like your
+  messages, and only your signed-in identity can open it. Spoken
+  words honor every boundary the recording honors: transcripts never
+  leave the device, never ride the data export or device pairing,
+  and the emergency wipe erases them all — enforced by the same
+  build-breaking purge check that guards every store. Also fixed
+  from the first live test on a phone: tapping Transcribe in a
+  community whose server doesn't host models yet now says exactly
+  that, instead of pointing you at a download that doesn't exist —
+  and a downloaded model now works with no connection at all, as
+  promised.
 - **Voice notes can now become text — on your device, for your eyes
   only.** An optional Transcription setting (off by default, zero
   cost until you turn it on) lets you tap Transcribe on any voice

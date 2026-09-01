@@ -24,6 +24,17 @@ vi.mock("@/lib/transcriptionEngine", () => ({
     transcribeMock(...(args as [])),
 }));
 
+let mockStored: string | null = null;
+const readMock = vi.fn(async () => mockStored);
+const saveMock = vi.fn(async () => true);
+
+vi.mock("@/db/transcripts", () => ({
+  readTranscript: () => readMock(),
+  saveTranscript: (...args: unknown[]) => saveMock(...(args as [])),
+  messageTranscriptKey: (id: string) => `msg:${id}`,
+  blobTranscriptKey: (id: string) => `blob:${id}`,
+}));
+
 import "@/i18n";
 import i18n from "@/i18n";
 import { setTranscriptionEnabled } from "@/lib/transcription";
@@ -34,6 +45,7 @@ let root: Root;
 
 beforeEach(() => {
   mockOutcome = { kind: "ok", text: "hello there" };
+  mockStored = null;
   setTranscriptionEnabled(false);
   vi.stubGlobal("URL", {
     ...URL,
@@ -53,10 +65,15 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-function render() {
+function render(transcriptKey?: string) {
   act(() => {
     root.render(
-      <VoicePlayer audioBase64="aGVsbG8=" mime="audio/webm" durationMs={3000} />,
+      <VoicePlayer
+        audioBase64="aGVsbG8="
+        mime="audio/webm"
+        durationMs={3000}
+        transcriptKey={transcriptKey}
+      />,
     );
   });
 }
@@ -97,6 +114,36 @@ describe("VoicePlayer transcription", () => {
     expect(container.textContent).toContain(
       i18n.t("messages.voice.transcriptNoModel"),
     );
+  });
+
+  it("shows a stored transcript on mount without a tap (#477 Phase 2)", async () => {
+    setTranscriptionEnabled(true);
+    mockStored = "already written down";
+    await act(async () => render("msg:m1"));
+
+    expect(container.textContent).toContain(
+      i18n.t("messages.voice.transcriptLine", {
+        text: "already written down",
+      }),
+    );
+    // Paid for once: no button, no engine call.
+    expect(transcribeButton()).toBeUndefined();
+    expect(transcribeMock).not.toHaveBeenCalled();
+  });
+
+  it("persists the twin after a successful transcription", async () => {
+    setTranscriptionEnabled(true);
+    await act(async () => render("msg:m2"));
+    await act(async () => transcribeButton()!.click());
+    expect(saveMock).toHaveBeenCalledWith("msg:m2", "en", "hello there");
+  });
+
+  it("never touches the store for ephemeral clips (no key)", async () => {
+    setTranscriptionEnabled(true);
+    await act(async () => render());
+    await act(async () => transcribeButton()!.click());
+    expect(readMock).not.toHaveBeenCalled();
+    expect(saveMock).not.toHaveBeenCalled();
   });
 
   it("reports failure without touching playback", async () => {

@@ -11,6 +11,7 @@ import {
   fetchModelManifest,
   isModelDownloaded,
   modelForLanguage,
+  readCachedModelEntry,
   readModelBytes,
   type ModelEntry,
 } from "./transcriptionModels";
@@ -142,7 +143,7 @@ describe("downloadModel", () => {
     );
 
     expect(await isModelDownloaded(entry)).toBe(false);
-    expect((await downloadModel(entry)).kind).toBe("ok");
+    expect((await downloadModel(entry, "es")).kind).toBe("ok");
     expect(await isModelDownloaded(entry)).toBe(true);
 
     const stored = await readModelBytes(entry);
@@ -157,7 +158,7 @@ describe("downloadModel", () => {
       vi.fn(async () => new Response(MODEL_BYTES.slice())),
     );
 
-    expect((await downloadModel(entry)).kind).toBe("verify_failed");
+    expect((await downloadModel(entry, "es")).kind).toBe("verify_failed");
     expect(await isModelDownloaded(entry)).toBe(false);
     expect(await readModelBytes(entry)).toBeNull();
   });
@@ -168,7 +169,25 @@ describe("downloadModel", () => {
       "fetch",
       vi.fn(async () => new Response("gone", { status: 404 })),
     );
-    expect((await downloadModel(entry)).kind).toBe("failed");
+    expect((await downloadModel(entry, "es")).kind).toBe("failed");
+  });
+
+  it("caches the manifest entry beside the bytes for offline lookup", async () => {
+    const entry = entryWith(await sha256Hex(MODEL_BYTES));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(MODEL_BYTES.slice())),
+    );
+
+    expect(await readCachedModelEntry("es")).toBeNull();
+    await downloadModel(entry, "es");
+    // The entry round-trips (regioned language resolves too), so a
+    // later transcription needs no manifest fetch at all.
+    expect(await readCachedModelEntry("es-MX")).toEqual(entry);
+    expect(await readCachedModelEntry("bo")).toBeNull();
+
+    await deleteAllModels();
+    expect(await readCachedModelEntry("es")).toBeNull();
   });
 
   it("delete removes everything and presence reports honestly", async () => {
@@ -177,7 +196,7 @@ describe("downloadModel", () => {
       "fetch",
       vi.fn(async () => new Response(MODEL_BYTES.slice())),
     );
-    await downloadModel(entry);
+    await downloadModel(entry, "es");
     expect(await isModelDownloaded(entry)).toBe(true);
 
     await deleteAllModels();
