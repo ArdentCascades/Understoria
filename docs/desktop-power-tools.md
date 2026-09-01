@@ -245,6 +245,9 @@ tri-states), checklist persistence round-trip.
 **Size:** 1–2 PRs. No server changes in P1.
 
 ## 5. Print surfaces — SHIPPED
+(2026-09 as-built deltas — iOS-app print fallback, the dark-mode
+print theme guard, and the empty-sheet warning dialog — are
+recorded with the shared guardrails in `docs/paper-systems.md`.)
 
 As built: `/print/invite#<encoded>` (pages/PrintInvite.tsx) and
 `/print/board?tab=…` (pages/PrintBoard.tsx), plus the global

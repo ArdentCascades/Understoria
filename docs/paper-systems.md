@@ -32,6 +32,25 @@ Shared guardrails, up front:
   signed paths the app already has, attributed honestly.
 - **`window.print()` only.** No popups, no PDF library, no print
   service. The browser dialog is the whole mechanism.
+  As-built amendments (2026-09, from field-testing on a dark-mode
+  iPhone — the mechanism stands, with three honest guards around
+  it): (1) in the INSTALLED iOS app `window.print()` is a silent
+  no-op (standalone WebKit ships no print UI), so `PrintToolbar`
+  swaps the dead button there for guidance — the Full Page
+  screenshot route, and Safari named truthfully as its own copy of
+  Understoria; the recovery kit points at Download instead. (2)
+  Paper is always light: `darkMode: "class"` rules outrank the
+  sheets' one-class `print:` utilities, so `installPrintThemeGuard`
+  (lib/theme.ts) sets the dark class aside between beforeprint and
+  afterprint, and an `@media print` rule in index.css forces the
+  html/body canvas white-behind-black for snapshots taken past
+  beforeprint (iOS defers blocked prints). (3) An EMPTY sheet warns
+  instead of printing: `PrintToolbar`'s `nothingToPrint` prop opens
+  an acknowledgment dialog quoting the page's own empty-state line
+  (wired on the calendar, the board view, and dead-event flyers;
+  the blank shift roster stays printable on purpose — an empty
+  sign-in sheet is the point). Future "simplify printing" passes:
+  these three exist because members hit all three failures.
 - **En/es parity** on every sheet — a bulletin board in a bilingual
   neighborhood should be printable twice.
 

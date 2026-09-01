@@ -51,6 +51,27 @@ FORBID translations from adding the count). **PHASE 2 COMPLETE: Hindi
 one of the eight shipped languages now carries the full authored
 corpus and no registry entry is `content: "ui-only"` (see Phase 2
 below).
+PHASE 3 (RTL) + WAVE 3 COMPLETE, plus one expedite: **Arabic (ar),
+Tibetan (bo) and Urdu (ur) SHIPPED in full — eleven languages, all
+`content: "full"`.** Arabic rode the RTL program (docs/rtl-plan.md:
+R1–R3 rails, R4 the ar fleet + corpus) as the registry's first
+`dir: "rtl"` entry; its six plural categories exercised the
+Intl.PluralRules-derived gates, and the {{count}} amendment for
+single-integer categories landed in the parity gate. Tibetan jumped
+the Wave-3 queue for communities responding to the 2026 Tibet flood
+(rendering spike first: tsheg-aware breaking is native but stacked
+glyphs overflow the Latin line box — a Tibetan font stack and a
+line-height floor now live under `:lang(bo)`); glossary at
+docs/i18n-glossary/bo.md with its corvée/alms/debt register bans.
+Urdu then resumed the RTL rails as the second `dir: "rtl"` language
+(tracked as R5: Nastaliq rendering spike — the tallest script the
+app ships, 2.5× line box, hence the `:lang(ur)` Nastaliq-first
+stack and 2.0 leading floor — then glossary at
+docs/i18n-glossary/ur.md, UI fleet, corpus). A vite chunking defect
+found during the bo corpus (locale/corpus chunks for ar/bo unnamed,
+so Arabic rode in everyone's first download) was fixed by teaching
+the build every language's chunk names; each corpus loads as its
+own lazy `lazy-content-<code>` chunk, precache-excluded.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from
