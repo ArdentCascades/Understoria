@@ -23,6 +23,7 @@ import {
   sendVoiceMessage,
 } from "./messages";
 import type { DirectMessage } from "@/types";
+import { messageTranscriptKey, saveTranscript } from "./transcripts";
 
 // Real keypairs, real crypto, real (fake-indexeddb) Dexie — the
 // envelope must round-trip through the actual encrypt/decrypt path,
@@ -37,6 +38,7 @@ beforeEach(async () => {
     db.blocks.clear(),
     db.outbox.clear(),
     db.settings.clear(),
+    db.transcripts.clear(),
   ]);
   alice = generateKeyPair();
   bob = generateKeyPair();
@@ -283,10 +285,51 @@ describe("voice messages", () => {
     expect(msg.plaintext).toContain("Voice message");
   });
 
-  it("voice rows never surface in message search", async () => {
+  it("untranscribed voice rows never surface in message search", async () => {
+    // The fallback line must not make every voice note a hit for a
+    // query like "voice" — only a transcript makes a clip searchable.
     await sendVoiceMessage(alice.publicKey, bob.publicKey, CLIP);
     const hits = await searchAllMessages(alice.publicKey, "Voice message");
     expect(hits).toHaveLength(0);
+  });
+
+  it("transcribed voice rows match through their transcript twin (#477 Phase 3)", async () => {
+    const sent = await sendVoiceMessage(alice.publicKey, bob.publicKey, CLIP);
+    await setSetting(SETTING_KEYS.currentMember, alice.publicKey);
+    await saveTranscript(
+      messageTranscriptKey(sent.id),
+      "en",
+      "meet me at the tool library on saturday",
+    );
+
+    const hits = await searchAllMessages(alice.publicKey, "tool library");
+    expect(hits).toHaveLength(1);
+    // The snippet IS the transcript — highlighting works like text —
+    // and the row still declares itself a voice note.
+    expect(hits[0].message.plaintext).toBe(
+      "meet me at the tool library on saturday",
+    );
+    expect(hits[0].message.voice).toBeDefined();
+
+    // The transcript never leaks matches it doesn't contain, and the
+    // fallback line still never matches.
+    expect(await searchAllMessages(alice.publicKey, "zucchini")).toHaveLength(0);
+    expect(
+      await searchAllMessages(alice.publicKey, "Voice message"),
+    ).toHaveLength(0);
+  });
+
+  it("another identity's transcript twin doesn't make MY search match", async () => {
+    // Bob searches on the same device: alice's twin is boxed to
+    // alice; bob's reader opens nothing, so the clip stays unmatched.
+    const sent = await sendVoiceMessage(alice.publicKey, bob.publicKey, CLIP);
+    await setSetting(SETTING_KEYS.currentMember, alice.publicKey);
+    await saveTranscript(messageTranscriptKey(sent.id), "en", "tool library");
+
+    await setSetting(SETTING_KEYS.currentMember, bob.publicKey);
+    expect(await searchAllMessages(bob.publicKey, "tool library")).toHaveLength(
+      0,
+    );
   });
 
   it("reactions attach to voice messages like any other message", async () => {

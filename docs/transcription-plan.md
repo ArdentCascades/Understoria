@@ -8,7 +8,9 @@ pointing at a Settings download that doesn't exist, and the manifest
 entry is cached beside the model bytes so inference is genuinely
 zero-network once downloaded (the acceptance line "runs fully
 offline after model fetch" held only by accident before). Phase 3
-(search over transcripts) remains.
+(search over transcripts) shipped behind it — **the program is
+complete**; what remains open is hardware validation (the runbook
+pass) and the per-community operator setup (§7b).
 
 Optional local captions: a member can turn a voice note into text on
 their own device, for their own eyes, to serve Deaf and
@@ -165,9 +167,19 @@ a cheap phone — no hard model dependency" is enforced structurally:
    Clips are keyed "msg:<id>" / "blob:<id>"; a stored transcript
    renders as the caption on mount — each clip transcribed at most
    once. The recorder preview stays ephemeral (no key, no row).
-3. **Search over transcripts.** Un-skip voice rows in
-   `searchAllMessages` when a stored transcript decrypts; same
-   normalize/match/highlight pipeline as text messages.
+3. **Search over transcripts — SHIPPED.** `searchAllMessages`
+   matches voice rows through their decrypted twin: identity/secret
+   resolve once per scan (`transcriptReader()`), each voice row is
+   one indexed get + unbox, and a hit's snippet IS the transcript —
+   so the existing normalize/match/highlight pipeline works
+   untouched. Untranscribed clips stay unsearchable (search never
+   runs the engine — it reads only what a tap already paid for), the
+   old-client fallback line still never matches, and another
+   identity's twins open as null. Known seam, deliberately left: the
+   result link carries `?q=` into the conversation, whose in-page
+   match highlighting still skips voice bubbles — extending it means
+   async transcript reads inside Conversation's render state; do it
+   only if members actually miss it.
 
 ## 3. Audio path (Phase 1 detail)
 

@@ -87,23 +87,43 @@ export async function saveTranscript(
   }
 }
 
+/** A reusable open-my-transcripts function: the identity and secret
+ *  resolve ONCE, then each clip is a single indexed get + unbox —
+ *  what a search scanning many voice rows needs (V7 Phase 3). With
+ *  no signed-in identity (or a locked secret) the reader answers
+ *  null for everything, matching search's locked-session posture. */
+export async function transcriptReader(): Promise<
+  (clipKey: string) => Promise<string | null>
+> {
+  let me: string | undefined;
+  let secret: string | undefined;
+  try {
+    me = await getSetting(SETTING_KEYS.currentMember);
+    if (me) secret = await getSecretKey(me);
+  } catch {
+    // Locked or absent — the always-null reader below.
+  }
+  if (!me || !secret) return async () => null;
+  const myKey = me;
+  const mySecret = secret;
+  return async (clipKey: string) => {
+    try {
+      const row = await db.transcripts.get(clipKey);
+      if (row === undefined || row.ownerKey !== myKey) return null;
+      return decryptMessage(
+        { nonce: row.nonce, ciphertext: row.ciphertext },
+        mySecret,
+        row.ownerKey,
+      );
+    } catch {
+      return null;
+    }
+  };
+}
+
 /** The stored transcript for a clip, decrypted for the current
  *  member — null when none exists, it belongs to a different
  *  identity, or it can't be opened. */
 export async function readTranscript(clipKey: string): Promise<string | null> {
-  try {
-    const row = await db.transcripts.get(clipKey);
-    if (row === undefined) return null;
-    const me = await getSetting(SETTING_KEYS.currentMember);
-    if (!me || row.ownerKey !== me) return null;
-    const secret = await getSecretKey(me);
-    if (!secret) return null;
-    return decryptMessage(
-      { nonce: row.nonce, ciphertext: row.ciphertext },
-      secret,
-      row.ownerKey,
-    );
-  } catch {
-    return null;
-  }
+  return (await transcriptReader())(clipKey);
 }
