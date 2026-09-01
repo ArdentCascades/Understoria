@@ -31,3 +31,6 @@ export { EVENT_TEMPLATES_AR as EVENT_TEMPLATES } from "../eventTemplates.ar";
 export { FAQ_SECTIONS_AR as FAQ_SECTIONS } from "../faq.ar";
 export { START_COMMUNITY_AR as START_COMMUNITY } from "../startCommunity.ar";
 export { DESIGN_PRINCIPLES_AR as DESIGN_PRINCIPLES } from "../design-principles.ar";
+export { MEMBER_GUIDE_AR as MEMBER_GUIDE } from "../member-guide.ar";
+export { OPSEC_GUIDE_AR as OPSEC_GUIDE } from "../opsec-guide.ar";
+export { STUDY_PROMPTS_AR as STUDY_PROMPTS } from "../study-prompts.ar";

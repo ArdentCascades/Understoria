@@ -2790,7 +2790,8 @@
       "studyPrompts": "学习小组讨论题",
       "addToPhone": "添加到手机",
       "promptCopy": "复制一份带去聚会",
-      "promptCopied": "已复制"
+      "promptCopied": "已复制",
+      "promptShareAttribution": "来自 Understoria 的讨论题，摘自 docs/political-education/README.md"
     },
     "communitySettings": {
       "title": "社区设置",

@@ -10,6 +10,18 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The member guide, the opsec guide, and the study-group prompts
+  now read in your language.** These three were the last in-app
+  content still English-only — the guides a new member is most
+  likely to need, and the prompts a study group reads aloud
+  together. Each now ships in all eleven languages, translated with
+  each language's established glossary and register (the same
+  vocabulary decisions the rest of the app uses, down to quoting
+  the exact button labels your screen shows), loading with the
+  language pack you already chose — no extra download, works
+  offline. A structure gate keeps every translation in lockstep
+  with English section by section, so a future edit to a guide
+  cannot quietly leave any language behind.
 - **The app is now honest about compelled unlock: in many places,
   police can compel a fingerprint but not words in your head.** The
   onboarding "Protect your key" passphrase door says so at the

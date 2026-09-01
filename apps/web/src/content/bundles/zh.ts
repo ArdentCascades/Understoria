@@ -31,3 +31,6 @@ export { EVENT_TEMPLATES_ZH as EVENT_TEMPLATES } from "../eventTemplates.zh";
 export { FAQ_SECTIONS_ZH as FAQ_SECTIONS } from "../faq.zh";
 export { START_COMMUNITY_ZH as START_COMMUNITY } from "../startCommunity.zh";
 export { DESIGN_PRINCIPLES_ZH as DESIGN_PRINCIPLES } from "../design-principles.zh";
+export { MEMBER_GUIDE_ZH as MEMBER_GUIDE } from "../member-guide.zh";
+export { OPSEC_GUIDE_ZH as OPSEC_GUIDE } from "../opsec-guide.zh";
+export { STUDY_PROMPTS_ZH as STUDY_PROMPTS } from "../study-prompts.zh";

@@ -2790,7 +2790,8 @@
       "studyPrompts": "Preguntas para grupos de estudio",
       "addToPhone": "Añadir a tu teléfono",
       "promptCopy": "Copiar para una reunión",
-      "promptCopied": "Copiado"
+      "promptCopied": "Copiado",
+      "promptShareAttribution": "Pregunta para grupos de estudio de Understoria, reflejada de docs/political-education/README.md"
     },
     "communitySettings": {
       "title": "Configuración comunitaria",

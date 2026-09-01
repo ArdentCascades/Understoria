@@ -2790,7 +2790,8 @@
       "studyPrompts": "སྦྱོང་ཚོགས་ཀྱི་གྲོས་གཞི།",
       "addToPhone": "ཁ་པར་ལ་སྣོན།",
       "promptCopy": "ཚོགས་འདུར་བཤུ།",
-      "promptCopied": "བཤུས་ཟིན།"
+      "promptCopied": "བཤུས་ཟིན།",
+      "promptShareAttribution": "Understoria ནས་གྲོས་གཞི། docs/political-education/README.md ནས་བཤུས་པ།"
     },
     "communitySettings": {
       "title": "ཚོགས་སྡེའི་སྒྲིག་འགོད།",

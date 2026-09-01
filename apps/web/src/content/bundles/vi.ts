@@ -31,3 +31,6 @@ export { EVENT_TEMPLATES_VI as EVENT_TEMPLATES } from "../eventTemplates.vi";
 export { FAQ_SECTIONS_VI as FAQ_SECTIONS } from "../faq.vi";
 export { START_COMMUNITY_VI as START_COMMUNITY } from "../startCommunity.vi";
 export { DESIGN_PRINCIPLES_VI as DESIGN_PRINCIPLES } from "../design-principles.vi";
+export { MEMBER_GUIDE_VI as MEMBER_GUIDE } from "../member-guide.vi";
+export { OPSEC_GUIDE_VI as OPSEC_GUIDE } from "../opsec-guide.vi";
+export { STUDY_PROMPTS_VI as STUDY_PROMPTS } from "../study-prompts.vi";

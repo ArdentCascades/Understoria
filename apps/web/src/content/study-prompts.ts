@@ -11,11 +11,12 @@
  */
 
 // Study-group prompts mirrored from docs/political-education/README.md.
-// Kept here (rather than in i18n locales) because long-form prose
-// translation is a separate workstream from UI string translation —
-// see docs/roadmap.md "i18n debt compounding" in the failure-modes
-// section. English-only for now; a structured translation pass is
-// tracked as Agent 9 maintenance work.
+// Kept here (rather than in i18n locales) because long-form prose is
+// authored content, not UI strings: this module carries English (the
+// eager fallback), and every other shipped language has a
+// study-prompts.<code>.ts twin loaded through content/registry.ts —
+// same ids, same themes, enforced by guides.parity.test.ts. Render
+// through getStudyPrompts(locale).
 
 export interface StudyPrompt {
   id: string;
@@ -131,6 +132,24 @@ export const STUDY_PROMPTS: readonly StudyPrompt[] = [
   },
 ] as const;
 
-export function promptShareText(prompt: StudyPrompt): string {
-  return `${prompt.body}\n\n— Discussion prompt from Understoria, mirrored from docs/political-education/README.md`;
+import { getContentBundle } from "./registry";
+
+/** The study prompts in the given UI locale, English for any locale
+ *  without a translated bundle. Synchronous by the same gate every
+ *  content selector relies on (see content/registry.ts). */
+export function getStudyPrompts(
+  locale: string | undefined,
+): readonly StudyPrompt[] {
+  return getContentBundle(locale).STUDY_PROMPTS;
+}
+
+/** Clipboard text for one prompt. The attribution line is a UI
+ *  string (profile.learn.promptShareAttribution) so it travels with
+ *  the member's language like the rest of the chrome around the
+ *  prompt. */
+export function promptShareText(
+  prompt: StudyPrompt,
+  attribution: string,
+): string {
+  return `${prompt.body}\n\n— ${attribution}`;
 }

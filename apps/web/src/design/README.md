@@ -198,7 +198,7 @@ controlled in the same PR as the surface it serves.
 
 | File | Surface |
 | --- | --- |
-| `content/member-guide.ts` | In-app member guide (English-only for now; i18n debt is tracked separately). |
+| `content/member-guide.ts` | In-app member guide (all eleven languages via `member-guide.<code>.ts` twins behind the content registry). |
 | `content/opsec-guide.ts` | OPSEC guide for safety-sensitive contexts. |
 | `content/faq.ts` | FAQ entries. |
 | `content/design-principles.ts` | Design-principles reading inside the app. |

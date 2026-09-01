@@ -29,3 +29,6 @@ export { EVENT_TEMPLATES_EN as EVENT_TEMPLATES } from "../eventTemplates.en";
 export { FAQ_SECTIONS } from "../faq";
 export { START_COMMUNITY } from "../startCommunity";
 export { DESIGN_PRINCIPLES } from "../design-principles";
+export { MEMBER_GUIDE } from "../member-guide";
+export { OPSEC_GUIDE } from "../opsec-guide";
+export { STUDY_PROMPTS } from "../study-prompts";

@@ -13,9 +13,9 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import { getDesignPrinciples } from "@/content/design-principles";
-import { MEMBER_GUIDE } from "@/content/member-guide";
-import { OPSEC_GUIDE } from "@/content/opsec-guide";
-import { promptShareText, STUDY_PROMPTS } from "@/content/study-prompts";
+import { getMemberGuide } from "@/content/member-guide";
+import { getOpsecGuide } from "@/content/opsec-guide";
+import { getStudyPrompts, promptShareText } from "@/content/study-prompts";
 import { LeafDivider } from "@/components/visual";
 import { InstallGuide } from "@/components/InstallGuide";
 import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
@@ -149,7 +149,7 @@ export function LearnSection() {
 
         {panel === "guide" && (
           <div className="mt-4 space-y-4 border-t border-moss-200 pt-4 dark:border-moss-800">
-            {MEMBER_GUIDE.map((section) => (
+            {getMemberGuide(i18n.resolvedLanguage).map((section) => (
               <article key={section.id}>
                 <h4 className="mb-1 text-base font-semibold text-moss-800 dark:text-moss-100">
                   {section.title}
@@ -169,7 +169,7 @@ export function LearnSection() {
             <p className="text-xs text-moss-600 dark:text-moss-300">
               {t("profile.learn.opsecIntro")}
             </p>
-            {OPSEC_GUIDE.map((section) => (
+            {getOpsecGuide(i18n.resolvedLanguage).map((section) => (
               <article key={section.id}>
                 <h4 className="mb-1 text-base font-semibold text-moss-800 dark:text-moss-100">
                   {section.title}
@@ -213,12 +213,20 @@ export function LearnSection() {
 
         {panel === "prompts" && (
           <ol className="mt-4 space-y-3 border-t border-moss-200 pt-4 dark:border-moss-800">
-            {STUDY_PROMPTS.map((p) => (
+            {getStudyPrompts(i18n.resolvedLanguage).map((p) => (
               <li key={p.id} className="text-sm text-moss-700 dark:text-moss-200">
                 <p>{p.body}</p>
                 <button
                   type="button"
-                  onClick={() => copyPrompt(p.id, promptShareText(p))}
+                  onClick={() =>
+                    copyPrompt(
+                      p.id,
+                      promptShareText(
+                        p,
+                        t("profile.learn.promptShareAttribution"),
+                      ),
+                    )
+                  }
                   className="mt-1 text-xs text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
                 >
                   {copiedId === p.id
