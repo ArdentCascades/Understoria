@@ -170,6 +170,23 @@ formal audit; the formal audit is one of the items in §6.
   speech that didn't happen. Category surfaces pair the speech
   with a language-free emoji icon per category
   (`lib/categories.ts`), so meaning survives with sound off too.
+- **Voice-note transcription (captions)** — voice workstream #477,
+  serving Deaf and hard-of-hearing members. An opt-in Transcription
+  setting (model size and battery cost stated before anything is
+  paid) puts a Transcribe option under every voice clip: on-device
+  speech-to-text, the transcript rendered as a visible caption that
+  persists (sealed to the member's own key) and makes the clip
+  searchable. Degradation is honest at every rung — device can't
+  run it, node hosts no models, no model for the member's language
+  — and audio playback never depends on any of it.
+- **No-typed-passphrase identity protection** — voice workstream
+  #475. Onboarding ends with a "Protect your key" step whose leading
+  door is the device's own fingerprint/face/PIN — a member who
+  can't comfortably type a passphrase can fully lock their identity
+  without ever facing a text field. The step's copy carries the
+  explanation burden (not an account, nothing sent anywhere, works
+  offline, what a lost phone means), the passphrase stays available
+  and honestly framed for shared phones, and skip stays shame-free.
 - **ARIA primitives** — `ToastContainer` has `aria-live="polite"`
   + `role="status"`. `AttentionSection` uses `aria-labelledby`.
   Form fields in PostForm / ProjectNew / Profile have associated

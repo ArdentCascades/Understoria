@@ -31,7 +31,7 @@ export const OPSEC_GUIDE: readonly GuideSection[] = [
     body: [
       "Understoria does not ask for an email or phone number. If anyone claiming to be from Understoria asks for these, that is a phishing attempt.",
       "Your identity is a cryptographic key on this device. You can export a backup — keep it somewhere safe and offline. A printed paper in a drawer is often better than a cloud service.",
-      "If your phone is lost or stolen, the passphrase lock is what protects the key on it — that's why we suggest setting one. There is no central revocation and no one who can flip a switch for you: tell your community what happened so people know to stop trusting that identity, then start fresh with a new key (Profile → Emergency → Hard purge on any device that still holds the old one).",
+      "If your phone is lost or stolen, the lock you set on your key (your fingerprint/face/PIN passkey, or a passphrase) is what protects it — that's why onboarding offers one. There is no central revocation and no one who can flip a switch for you: tell your community what happened so people know to stop trusting that identity, then start fresh with a new key (Profile → Emergency → Hard purge on any device that still holds the old one).",
     ],
   },
   {

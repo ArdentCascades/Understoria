@@ -89,6 +89,7 @@ Understoria is a platform where communities exchange help, tracked through **tim
 - **Community Projects** — Collective efforts with task lists, starter templates, co-organizer invitations, task ordering and soft dependencies, and a page per task for its discussion thread.
 - **In my care** — One tab (`/my-work`) gathers every task you're carrying, shift you've signed up for, need you've claimed, and project in your care, across all of your projects.
 - **Timebank Credits** — Every exchange earns and spends time credits. New members start with seed credits so asking for help is never gated. Project-task credit records the hours actually given, not the estimate.
+- **Voice, spoken interface, and captions** — Sealed voice notes in messages, voice posts on the board (playable across federated communities, fetched only when someone presses play), a read-aloud mode that speaks any control's label, and optional on-device transcription that captions voice and makes it searchable. Identity can be locked with a fingerprint, face, or device PIN right at onboarding — no typed passphrase ever required.
 
 <p align="center">
   <img src="docs/images/start-a-project-mobile.png"
@@ -173,6 +174,12 @@ software does about it, in plain terms:
 - **No attendance graph, anywhere.** RSVPs stay on the node where they
   happen and are never relayed to peer nodes. Who showed up to what is
   not a thing this software assembles.
+- **Your voice is processed only on your device.** Read-aloud uses
+  your phone's own speech engine; transcription runs a local model
+  downloaded from your community's own server. No recording, no
+  transcript, and no spoken query ever goes to a cloud service —
+  the one API that would have (iOS spoken search) was dropped for
+  exactly that reason.
 - **Blocking is yours alone.** Blocks never federate, never aggregate,
   and never signal anything to the person blocked. Blocking is personal
   relief, separate from the community's dispute process.
@@ -492,8 +499,8 @@ what is done, and in what order it unblocks the rest is in
 - **Foundations** — *shipped.* Core PWA, community board, exchange flow,
   time credits, threat model, governance draft.
 - **Hardening** — *shipped.* Key-pair identity, signed exchanges,
-  cryptographic invites and web-of-trust vouching, passphrase-wrapped
-  keys, the panic button, end-to-end encrypted messaging, device
+  cryptographic invites and web-of-trust vouching, locked keys
+  (fingerprint/face/PIN passkey or passphrase), the panic button, end-to-end encrypted messaging, device
   pairing, the calendar and community events, member blocking.
 - **Federation** — *active.* Community node server, signed-record
   verification, the pull loop between peer nodes, per-task comment
