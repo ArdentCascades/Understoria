@@ -10,6 +10,23 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Voice notes can now become text — on your device, for your eyes
+  only.** An optional Transcription setting (off by default, zero
+  cost until you turn it on) lets you tap Transcribe on any voice
+  note and read what was said, right under the player. Everything
+  runs on your own device: the speech engine loads only when you ask,
+  the language model comes from your community's own server — never a
+  third-party service — with its size stated plainly before you
+  download and its checksum verified before it's trusted, and nothing
+  about the recording or the text leaves your phone. One clip at a
+  time, when you ask, and the engine unloads afterward, so a cheap
+  phone pays only for what it asked for. Every way it can't work is
+  said honestly: a device that can't run it, a node that doesn't host
+  models yet, a language no model exists for (Tibetan, for now), a
+  download that doesn't match its checksum. In all eleven languages;
+  node operators host models with a one-page runbook. This is the
+  first phase of the transcription work — saved transcripts and
+  search over them come next (docs/transcription-plan.md).
 - **Read-aloud now tells you when your device can't speak your
   language — and conversation rows say who they are, briefly.** The
   spoken interface reads any button you touch using the device's own

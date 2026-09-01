@@ -876,7 +876,13 @@
       "discard": "Discard",
       "playerLabel": "Voice message, about {{seconds}} seconds",
       "durationLine": "Voice note · about {{seconds}}s",
-      "playbackFailed": "This voice note could not be played on this device."
+      "playbackFailed": "This voice note could not be played on this device.",
+      "transcribe": "Transcribe",
+      "transcribing": "Transcribing on this device… this can take a little while.",
+      "transcriptLine": "Transcript: {{text}}",
+      "transcriptEmpty": "Nothing recognizable — the transcript came back empty.",
+      "transcriptFailed": "Transcription didn't work on this clip. The recording still plays.",
+      "transcriptNoModel": "The model isn't on this device — download it in Settings → Transcription first."
     }
   },
   "projects": {
@@ -2581,6 +2587,21 @@
         "off": "Off"
       }
     }
+  },
+  "transcription": {
+    "title": "Transcription",
+    "intro": "Turn a voice note into text you can read — on this device only, one clip at a time, when you ask. Nothing is sent anywhere. It needs a one-time model download from your community's server, and it uses battery while it runs.",
+    "turnOn": "Turn transcription on",
+    "turnOff": "Turn transcription off",
+    "unsupported": "This device or this deployment can't run the transcription engine. On an up-to-date phone, this usually means the server's security headers haven't been updated for it yet — something the node's operator can fix.",
+    "noModels": "This community's node doesn't offer transcription models yet. The node's operator can host them — it's an optional, one-time setup.",
+    "noModelForLanguage": "The node doesn't host a {{language}} model yet — for some languages none exists. Transcription will stay quiet here until one is available.",
+    "download": "Download the {{language}} model ({{size}})",
+    "downloading": "Downloading and checking the model ({{size}})…",
+    "downloaded": "The {{language}} model ({{size}}) is on this device. Voice notes now show a Transcribe option.",
+    "removeModel": "Remove the model from this device",
+    "verifyFailed": "The downloaded model didn't match the checksum the node declared, so it was refused. Tell your node's operator — this shouldn't happen.",
+    "downloadFailed": "The download didn't finish. Check your connection and try again."
   },
   "betaNotice": {
     "dismiss": "Got it",

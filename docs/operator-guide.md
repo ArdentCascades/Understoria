@@ -780,6 +780,62 @@ suffices without history, and the restore drill that proves your
 node's pack actually builds (CI runs it weekly; you can run it by
 hand) — is [`node-as-seed.md`](./node-as-seed.md).
 
+## 7b. Optional: host speech models for on-device transcription
+
+Members who opt in (Settings → Transcription) can turn a voice note
+into text **on their own device** — nothing is sent anywhere. The
+speech model they need comes from YOUR static tier, never a
+third-party CDN (docs/transcription-plan.md D4). Hosting it is
+optional; a node without `/models/` simply shows members "this
+community's node doesn't offer transcription models."
+
+To host models:
+
+1. Download the Vosk **small** model for each language your
+   community uses, from `https://alphacephei.com/vosk/models` (or a
+   mirror you trust). Small models are ~40–50 MB each; skip the
+   large ones — they're built for servers, not phones. Not every
+   language has one (Tibetan doesn't; the app tells members so
+   honestly).
+2. Compute each archive's hash: `sha256sum vosk-model-small-*.tar.gz`.
+3. Put the archives under your static root at `/models/` alongside a
+   `manifest.json`:
+
+   ```json
+   {
+     "models": {
+       "es": {
+         "file": "vosk-model-small-es-0.42.tar.gz",
+         "bytes": 39000000,
+         "sha256": "<the sha256sum output>",
+         "label": "vosk-model-small-es-0.42"
+       }
+     }
+   }
+   ```
+
+   Keys are Understoria language codes (`en es fr pt zh hi vi ru ar
+   bo ur`); `bytes` is the exact file size (`stat -c%s <file>`) —
+   the app states it to the member **before** they download.
+4. That's it — Caddy's `file_server` serves the path like
+   `/source/`. The app fetches the manifest, shows the size, and
+   **verifies the sha256 before storing** — a member never runs a
+   model whose bytes don't match what you declared.
+
+**CSP prerequisite:** transcription needs the two CSP additions in
+the current `deploy/Caddyfile` — `'wasm-unsafe-eval'` in
+`script-src` and `blob:` in `worker-src` (rationale in the file and
+docs/transcription-plan.md D5; `'unsafe-eval'` stays banned). If
+your deployment predates them, copy the updated header lines into
+both site blocks. Until then the app's probe reports "this device
+can't run transcription" to members — that message on a modern
+phone usually means the CSP hasn't been updated.
+
+Integrity vs authenticity: the sha256 proves members got the bytes
+you declared, not that upstream's model is trustworthy — same
+honesty note as §7a. Verify your download against the hash upstream
+publishes before hosting it.
+
 ## 8. Things that are NOT yet built (and what to do about it)
 
 | Feature | Status | Operator workaround |

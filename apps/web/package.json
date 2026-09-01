@@ -32,7 +32,8 @@
     "react-dom": "^19.2.8",
     "react-i18next": "^17.0.11",
     "react-router": "^8.3.0",
-    "tweetnacl": "^1.0.3"
+    "tweetnacl": "^1.0.3",
+    "vosk-browser": "0.0.8"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",

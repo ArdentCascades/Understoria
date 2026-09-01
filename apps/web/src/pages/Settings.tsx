@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { BackLink } from "@/components/BackLink";
 import { LanguageSection } from "@/components/LanguageSection";
 import { ReadAloudSection } from "@/components/ReadAloudSection";
+import { TranscriptionSection } from "@/components/TranscriptionSection";
 import { AppearanceSection } from "@/components/AppearanceSection";
 import { NodeSection } from "@/components/NodeSection";
 import { ReseedSection } from "@/components/ReseedSection";
@@ -95,6 +96,7 @@ export default function SettingsPage() {
       >
         <LanguageSection />
         <ReadAloudSection />
+        <TranscriptionSection />
 
         <AppearanceSection />
 

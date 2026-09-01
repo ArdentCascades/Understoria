@@ -21,6 +21,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { createAudioUrl, releaseAudioUrl } from "@/lib/audioUrls";
+import { isTranscriptionEnabled } from "@/lib/transcription";
 
 /**
  * Plays a decrypted voice note (docs/message-relay.md §10). The
@@ -34,6 +35,14 @@ import { createAudioUrl, releaseAudioUrl } from "@/lib/audioUrls";
  * codecs (Opus/WebM from most platforms, AAC/MP4 from iOS Safari)
  * without us guessing.
  */
+type TranscriptState =
+  | { kind: "idle" }
+  | { kind: "running" }
+  | { kind: "done"; text: string }
+  | { kind: "empty" }
+  | { kind: "no_model" }
+  | { kind: "failed" };
+
 export function VoicePlayer({
   audioBase64,
   mime,
@@ -43,8 +52,30 @@ export function VoicePlayer({
   mime: string;
   durationMs: number;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [failed, setFailed] = useState(false);
+  const [transcript, setTranscript] = useState<TranscriptState>({
+    kind: "idle",
+  });
+  // Sync read of the per-device preference — off (the default) means
+  // zero transcription UI, zero engine bytes, zero cost (V7 #477).
+  const transcriptionOn = isTranscriptionEnabled();
+
+  async function handleTranscribe() {
+    setTranscript({ kind: "running" });
+    // The 5.8 MB engine chunk loads only here, on the member's tap.
+    const { transcribeClip } = await import("@/lib/transcriptionEngine");
+    const outcome = await transcribeClip(audioBase64, i18n.resolvedLanguage);
+    setTranscript(
+      outcome.kind === "ok"
+        ? { kind: "done", text: outcome.text }
+        : outcome.kind === "empty"
+          ? { kind: "empty" }
+          : outcome.kind === "no_model"
+            ? { kind: "no_model" }
+            : { kind: "failed" },
+    );
+  }
 
   const url = useMemo(() => {
     try {
@@ -87,6 +118,47 @@ export function VoicePlayer({
       <p className="mt-0.5 text-xs opacity-60">
         {t("messages.voice.durationLine", { seconds })}
       </p>
+      {transcriptionOn && (
+        <div className="mt-1 text-sm">
+          {transcript.kind === "idle" && (
+            <button
+              type="button"
+              className="text-xs font-medium underline underline-offset-2"
+              onClick={() => void handleTranscribe()}
+            >
+              {t("messages.voice.transcribe")}
+            </button>
+          )}
+          {transcript.kind === "running" && (
+            <p role="status" className="text-xs opacity-70">
+              {t("messages.voice.transcribing")}
+            </p>
+          )}
+          {transcript.kind === "done" && (
+            // Phase 1: in-memory caption, gone when the screen
+            // closes. Phase 2 stores the encrypted twin
+            // (docs/transcription-plan.md D7).
+            <p className="whitespace-pre-wrap">
+              {t("messages.voice.transcriptLine", { text: transcript.text })}
+            </p>
+          )}
+          {transcript.kind === "empty" && (
+            <p className="text-xs italic opacity-70">
+              {t("messages.voice.transcriptEmpty")}
+            </p>
+          )}
+          {transcript.kind === "no_model" && (
+            <p className="text-xs opacity-70">
+              {t("messages.voice.transcriptNoModel")}
+            </p>
+          )}
+          {transcript.kind === "failed" && (
+            <p className="text-xs italic opacity-70">
+              {t("messages.voice.transcriptFailed")}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

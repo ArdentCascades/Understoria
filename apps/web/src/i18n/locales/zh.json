@@ -876,7 +876,13 @@
       "discard": "丢弃",
       "playerLabel": "语音消息，约{{seconds}}秒",
       "durationLine": "语音 · 约{{seconds}}秒",
-      "playbackFailed": "这条语音在这台设备上放不出来。"
+      "playbackFailed": "这条语音在这台设备上放不出来。",
+      "transcribe": "转文字",
+      "transcribing": "正在这台设备上转写……可能要等一会儿。",
+      "transcriptLine": "转写：{{text}}",
+      "transcriptEmpty": "没有识别出内容——转写结果是空的。",
+      "transcriptFailed": "这条语音转写失败了。播放不受影响。",
+      "transcriptNoModel": "模型还不在这台设备上——请先到设置 → 语音转文字里下载。"
     }
   },
   "projects": {
@@ -2581,6 +2587,21 @@
         "off": "关"
       }
     }
+  },
+  "transcription": {
+    "title": "语音转文字",
+    "intro": "把语音变成可以阅读的文字——只在这台设备上进行，一条一条来，由你决定什么时候转。不会把任何内容发送到任何地方。需要从社区自己的服务器一次性下载一个模型，转写过程中会耗电。",
+    "turnOn": "开启语音转文字",
+    "turnOff": "关闭语音转文字",
+    "unsupported": "这台设备或这套部署运行不了转写引擎。如果手机是新的，多半是服务器的安全响应头还没为它更新——节点维护者可以修好。",
+    "noModels": "这个社区的节点还没有提供转写模型。节点维护者可以托管模型——这是一次性的可选设置。",
+    "noModelForLanguage": "节点还没有托管{{language}}的模型——有些语言目前根本没有可用模型。在有模型之前，这里的转写保持沉默。",
+    "download": "下载{{language}}模型（{{size}}）",
+    "downloading": "正在下载并校验模型（{{size}}）……",
+    "downloaded": "{{language}}模型（{{size}}）已在这台设备上。语音条目现在会显示“转文字”选项。",
+    "removeModel": "从这台设备移除模型",
+    "verifyFailed": "下载的模型与节点声明的校验和不符，已被拒绝。请告诉节点维护者——这不该发生。",
+    "downloadFailed": "下载没有完成。检查网络后再试一次。"
   },
   "betaNotice": {
     "dismiss": "知道了",

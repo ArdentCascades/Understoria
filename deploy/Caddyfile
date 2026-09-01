@@ -49,12 +49,22 @@
 	# A bare microphone=() blocks recording outright in Chromium
 	# browsers; iOS Safari ignores the header for top-level pages,
 	# which is how the gap shipped unnoticed.
+	#
+	# 'wasm-unsafe-eval' (script-src) + blob: (worker-src) exist for
+	# on-device transcription (docs/transcription-plan.md D5): the
+	# speech engine compiles WASM inside a worker that its own bundled
+	# chunk spawns from a blob: URL. 'wasm-unsafe-eval' permits ONLY
+	# WebAssembly compilation — JS eval stays banned ('unsafe-eval' is
+	# NOT granted) — and a blob: worker inherits this same CSP, so
+	# neither directive opens remote code loading. The app probes for
+	# these at runtime and degrades honestly on deployments that
+	# haven't picked them up yet.
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "geolocation=(), camera=(), microphone=(self), payment=()"
-		Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-lvEa/iIXgn2+Np2mTOvhBGRQj/6AoDgkHgQCJFaQplo='; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; media-src 'self' blob:; worker-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-lvEa/iIXgn2+Np2mTOvhBGRQj/6AoDgkHgQCJFaQplo='; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; media-src 'self' blob:; worker-src 'self' blob:; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 		-Server
 	}
 
@@ -118,7 +128,7 @@ http://:8080 {
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "geolocation=(), camera=(), microphone=(self), payment=()"
-		Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-lvEa/iIXgn2+Np2mTOvhBGRQj/6AoDgkHgQCJFaQplo='; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; media-src 'self' blob:; worker-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-lvEa/iIXgn2+Np2mTOvhBGRQj/6AoDgkHgQCJFaQplo='; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self'; media-src 'self' blob:; worker-src 'self' blob:; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 		-Server
 	}
 
