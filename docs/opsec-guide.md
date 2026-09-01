@@ -162,6 +162,42 @@ everywhere:
 - You do have the right to remain silent. It does not make you look
   guilty.
 
+**Fingerprints and faces are not words.** In many places, courts
+treat a biometric unlock like a physical key: police can press your
+finger to the phone or hold it up to your face, and no refusal of
+yours stops that. Something you *know* — a passphrase, a PIN you
+keep in your head — is closer to testimony, which in many
+jurisdictions you can lawfully refuse to give. This distinction
+varies by country and by court, and it shifts over time, so check
+with a local legal organization for where you live. The safe working
+assumption if you might be detained: **a biometric can be compelled;
+a passphrase cannot.**
+
+What to do with that, practically:
+
+- **Learn your phone's hard-lock gesture before you need it.** On
+  iPhone: hold the side button and either volume button for about
+  two seconds, until the power-off screen appears — Face ID and
+  Touch ID are now disabled until the passcode is typed. On
+  Android: hold the power button and tap **Lockdown** (if it isn't
+  there, enable it first under Settings → Display → Lock screen).
+  Practice it with your phone in your pocket until it's muscle
+  memory. It takes two seconds and it changes what can be compelled.
+- **In Understoria:** if compelled unlock is part of your threat
+  model, protect your key with a passphrase rather than a
+  fingerprint — the onboarding "Protect your key" step says as much
+  on the passphrase door. If you already use the fingerprint/face
+  unlock, you can remove it (Profile → Settings → Security) before
+  a protest, a border crossing, or any moment when detention is
+  possible, and add it back afterward. Only a passphrase you type
+  carries the you-can-refuse property end to end: hard-locking the
+  phone protects the *device*, but if the phone itself opens with a
+  compelled biometric, an app that also opens with that biometric
+  opens with it.
+- **The panic button exists for when locking is not enough.**
+  Profile → Emergency → Hard purge wipes local state entirely. A
+  key that is no longer on the device cannot be compelled off it.
+
 Your local legal organizations (NLG in the US, LDAN in the UK, similar
 elsewhere) can provide jurisdiction-specific "Know Your Rights"
 cards. Keep one in your wallet.

@@ -243,7 +243,41 @@ We are not trying to protect against:
   what a lost phone means. The credential's user
   handle is random, deliberately NOT the member's public key, so the
   platform credential store learns nothing linking the passkey to
-  the federated identity. Phase 2 — passkey-based identity RESTORE
+  the federated identity.
+
+  **Compelled unlock (the biometric/testimonial asymmetry).** In
+  many jurisdictions a biometric can be physically compelled (a
+  finger pressed to the sensor, a phone held to a face) while a
+  passphrase is treated as testimony that can be refused — so a
+  passkey-protected key is, against a detaining authority, only as
+  protected as the platform's biometric gate, which is to say: not.
+  The project's response is honesty plus an exit, not a mandatory
+  knowledge factor. The onboarding passphrase door states the
+  asymmetry at the moment of choice ("In many places, police can
+  compel a fingerprint, but not words in your head"), the opsec
+  guide's "Know your rights" section carries the full treatment
+  (jurisdiction-varies, the OS hard-lock gestures, remove-the-
+  passkey-before-risky-moments, the panic button as the floor), and
+  Settings lets a member drop the passkey wrapper at any time once
+  a passphrase exists. **Requiring a knowledge factor alongside the
+  biometric was considered and declined**, for the record: (a) an
+  either-or fallback (biometric OR PIN) adds zero compelled-unlock
+  protection — the biometric still opens the device, the fallback
+  is just a second door; (b) a conjunctive requirement (biometric
+  AND typed secret on every unlock) defeats the entire point of the
+  passkey-first path, which exists for members who cannot reliably
+  type a secret at all; and (c) a short app-level PIN wrapper is
+  not a meaningful compensating control in a PWA — there is no
+  secure element or OS-enforced attempt counter available to web
+  code, so a PIN-wrapped key copied off the device falls to an
+  offline search of a 10⁴–10⁶ space in seconds. That last point is
+  precisely why the typed method is a ≥8-character passphrase
+  through a 600k-iteration PBKDF2 rather than a PIN. An OPT-IN
+  conjunctive mode ("require my passphrase AND my fingerprint") is
+  parked as a possible future toggle for members who want it; it
+  must never become the default.
+
+  Phase 2 — passkey-based identity RESTORE
   via a node-held encrypted vault — is a design proposal only
   (`docs/passkey-restore.md`), not built: it would change what the
   node stores and make the member's platform account a recovery

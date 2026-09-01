@@ -3351,7 +3351,7 @@
       "passkeyDoor": "Trancar com sua digital, seu rosto ou o PIN do telefone",
       "passkeyDoorBody": "Do mesmo jeito que você desbloqueia o telefone. Nada para lembrar, nada para digitar.",
       "passphraseDoor": "Criar uma frase secreta em vez disso",
-      "passphraseDoorBody": "Palavras que você digita para destrancar. Escolha isso se várias pessoas compartilham a digital ou o PIN deste telefone.",
+      "passphraseDoorBody": "Palavras que você digita para destrancar. Escolha isso se várias pessoas compartilham a digital ou o PIN deste telefone — ou se alguém puder forçar seu dedo neste telefone. Em muitos lugares, a polícia pode obrigar uma digital, mas não as palavras na sua cabeça.",
       "skipDoor": "Pular por enquanto",
       "skipDoorBody": "Você pode trancar depois em Configurações → Segurança.",
       "passphraseLabel": "Sua frase secreta",

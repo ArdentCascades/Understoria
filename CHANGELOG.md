@@ -10,6 +10,25 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The app is now honest about compelled unlock: in many places,
+  police can compel a fingerprint but not words in your head.** The
+  onboarding "Protect your key" passphrase door says so at the
+  moment of choice (in all eleven languages), so a member facing
+  that risk picks the typed passphrase knowingly. The in-app opsec
+  guide's "Know your rights" section carries the full treatment:
+  the biometric-versus-testimony legal asymmetry (and that it
+  varies by jurisdiction), the two-second hard-lock gestures on
+  iPhone and Android worth making muscle memory, and the
+  Understoria-specific posture — protect with a passphrase if
+  detention is in your threat model, or remove the fingerprint
+  unlock in Settings before a protest or border crossing and add it
+  back after. The threat model records why a mandatory PIN alongside
+  the biometric was considered and declined: an either-or fallback
+  adds nothing (the fingerprint still opens the door), an
+  every-unlock requirement would defeat the no-typing path this
+  feature exists for, and a web app has no secure element to
+  rate-limit PIN guesses — which is exactly why the typed method is
+  a real passphrase, not a PIN.
 - **Lock your key with your fingerprint — offered the moment your key
   is born, no typed password ever needed.** Onboarding now ends with
   a "Protect your key" step: one screen, three honest doors. Lock

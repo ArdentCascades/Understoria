@@ -3351,7 +3351,7 @@
       "passkeyDoor": "Khóa bằng vân tay, khuôn mặt hoặc mã PIN điện thoại",
       "passkeyDoorBody": "Giống như cách bạn mở khóa điện thoại. Không phải nhớ gì, không phải gõ gì.",
       "passphraseDoor": "Tạo cụm mật khẩu thay thế",
-      "passphraseDoorBody": "Những từ bạn gõ để mở khóa. Chọn cách này nếu nhiều người dùng chung vân tay hoặc PIN của điện thoại này.",
+      "passphraseDoorBody": "Những từ bạn gõ để mở khóa. Chọn cách này nếu nhiều người dùng chung vân tay hoặc PIN của điện thoại này — hoặc nếu có ai đó có thể ép ngón tay bạn đặt lên điện thoại. Ở nhiều nơi, cảnh sát có thể cưỡng ép lấy vân tay, nhưng không thể cưỡng ép những từ trong đầu bạn.",
       "skipDoor": "Bỏ qua lúc này",
       "skipDoorBody": "Bạn có thể khóa sau trong Cài đặt → Bảo mật.",
       "passphraseLabel": "Cụm mật khẩu của bạn",

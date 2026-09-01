@@ -3351,7 +3351,7 @@
       "passkeyDoor": "Verrouiller avec ton empreinte, ton visage ou le code PIN du téléphone",
       "passkeyDoorBody": "Comme quand tu déverrouilles ton téléphone. Rien à retenir, rien à taper.",
       "passphraseDoor": "Créer une phrase secrète à la place",
-      "passphraseDoorBody": "Des mots que tu tapes pour déverrouiller. Choisis ça si plusieurs personnes partagent l'empreinte ou le PIN de ce téléphone.",
+      "passphraseDoorBody": "Des mots que tu tapes pour déverrouiller. Choisis ça si plusieurs personnes partagent l'empreinte ou le PIN de ce téléphone — ou si quelqu'un pouvait forcer ton doigt sur ce téléphone. Dans beaucoup d'endroits, la police peut contraindre une empreinte, mais pas les mots dans ta tête.",
       "skipDoor": "Passer pour l'instant",
       "skipDoorBody": "Tu pourras la verrouiller plus tard dans Réglages → Sécurité.",
       "passphraseLabel": "Ta phrase secrète",
