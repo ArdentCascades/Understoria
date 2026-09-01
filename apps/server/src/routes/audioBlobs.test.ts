@@ -277,3 +277,217 @@ describe("voice posts on /posts (the signed audio reference)", () => {
     expect(Object.prototype.hasOwnProperty.call(stored, "audio")).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// V8 (#478): pull-through federation of audio blobs. A miss on a
+// federated post's recording asks the configured peers, verifies the
+// content address over what actually arrived, caches LRU-capped, and
+// serves — refs federate with posts, bytes move only on demand.
+
+import {
+  createRemoteAudioCacheStore,
+} from "../db.js";
+import { NO_PULL_HEADER, type BlobFetcher } from "../remoteAudio.js";
+
+const PEER_BYTES = utf8encode("peer-community-recording-bytes");
+const PEER_BLOB_ID = audioBlobId(PEER_BYTES);
+
+function peerFetcher(
+  serves: Record<string, Uint8Array>,
+  log: Array<{ url: string; headers: Record<string, string> }>,
+  mime = "audio/webm",
+): BlobFetcher {
+  return async (url, init) => {
+    log.push({ url, headers: init.headers });
+    const id = url.split("/").pop()!;
+    const bytes = serves[id];
+    if (bytes === undefined) {
+      return {
+        ok: false,
+        headers: { get: () => null },
+        arrayBuffer: async () => new ArrayBuffer(0),
+      };
+    }
+    return {
+      ok: true,
+      headers: { get: (n: string) => (n === "content-type" ? mime : null) },
+      arrayBuffer: async () =>
+        bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.length),
+    };
+  };
+}
+
+async function peerServer(env: Record<string, string>, fetcher: BlobFetcher) {
+  await app.close();
+  db.close();
+  db = openDatabase(":memory:");
+  const config = readConfigFromEnv({
+    LOG_LEVEL: "fatal",
+    READ_AUTH: "off",
+    NODE_ID: "node_test",
+    PEER_NODE_URLS: "https://peer-a.test,https://peer-b.test",
+    PEER_READ_TOKENS: '{"https://peer-a.test":"tok-a-0123456789abcdef"}',
+    ...env,
+  } as NodeJS.ProcessEnv);
+  const built = await buildServer({ config, database: db, blobFetcher: fetcher });
+  app = built.app;
+  await app.ready();
+}
+
+describe("GET /audio-blobs pull-through (V8 #478)", () => {
+  it("fetches a peer blob on miss, serves it, and caches for the next GET", async () => {
+    const calls: Array<{ url: string; headers: Record<string, string> }> = [];
+    await peerServer({}, peerFetcher({ [PEER_BLOB_ID]: PEER_BYTES }, calls));
+
+    const first = await app.inject({
+      method: "GET",
+      url: `/audio-blobs/${PEER_BLOB_ID}`,
+    });
+    expect(first.statusCode).toBe(200);
+    expect(first.rawPayload).toEqual(Buffer.from(PEER_BYTES));
+    expect(first.headers["content-type"]).toContain("audio/webm");
+    // The outbound request carried the loop guard and peer-a's bearer.
+    expect(calls[0].url).toBe(`https://peer-a.test/audio-blobs/${PEER_BLOB_ID}`);
+    expect(calls[0].headers[NO_PULL_HEADER]).toBe("1");
+    expect(calls[0].headers.authorization).toBe(
+      "Bearer tok-a-0123456789abcdef",
+    );
+
+    // Cached: the second GET never leaves the node.
+    const callCount = calls.length;
+    const second = await app.inject({
+      method: "GET",
+      url: `/audio-blobs/${PEER_BLOB_ID}`,
+    });
+    expect(second.statusCode).toBe(200);
+    expect(second.rawPayload).toEqual(Buffer.from(PEER_BYTES));
+    expect(calls.length).toBe(callCount);
+  });
+
+  it("tries the next peer when the first misses", async () => {
+    const calls: Array<{ url: string; headers: Record<string, string> }> = [];
+    // peer-a misses everything; peer-b serves.
+    const fetcher: BlobFetcher = async (url, init) => {
+      if (url.startsWith("https://peer-a.test")) {
+        calls.push({ url, headers: init.headers });
+        return {
+          ok: false,
+          headers: { get: () => null },
+          arrayBuffer: async () => new ArrayBuffer(0),
+        };
+      }
+      return peerFetcher({ [PEER_BLOB_ID]: PEER_BYTES }, calls)(url, init);
+    };
+    await peerServer({}, fetcher);
+
+    const res = await app.inject({
+      method: "GET",
+      url: `/audio-blobs/${PEER_BLOB_ID}`,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(calls.map((c) => new URL(c.url).host)).toEqual([
+      "peer-a.test",
+      "peer-b.test",
+    ]);
+  });
+
+  it("REFUSES peer bytes that don't hash to the requested id", async () => {
+    const calls: Array<{ url: string; headers: Record<string, string> }> = [];
+    const lie = utf8encode("swapped-recording-under-the-same-id");
+    await peerServer(
+      {},
+      peerFetcher({ [PEER_BLOB_ID]: lie }, calls),
+    );
+    const res = await app.inject({
+      method: "GET",
+      url: `/audio-blobs/${PEER_BLOB_ID}`,
+    });
+    expect(res.statusCode).toBe(404);
+    // Nothing poisoned the cache — both peers were tried and refused.
+    expect(createRemoteAudioCacheStore(db).count()).toBe(0);
+  });
+
+  it("never pulls for a request that carries the loop-guard header", async () => {
+    const calls: Array<{ url: string; headers: Record<string, string> }> = [];
+    await peerServer({}, peerFetcher({ [PEER_BLOB_ID]: PEER_BYTES }, calls));
+    const res = await app.inject({
+      method: "GET",
+      url: `/audio-blobs/${PEER_BLOB_ID}`,
+      headers: { [NO_PULL_HEADER]: "1" },
+    });
+    expect(res.statusCode).toBe(404);
+    expect(calls).toHaveLength(0);
+  });
+
+  it("never pulls when the operator disabled the cache (cap 0)", async () => {
+    const calls: Array<{ url: string; headers: Record<string, string> }> = [];
+    await peerServer(
+      { REMOTE_AUDIO_CACHE_MAX_BYTES: "0" },
+      peerFetcher({ [PEER_BLOB_ID]: PEER_BYTES }, calls),
+    );
+    const res = await app.inject({
+      method: "GET",
+      url: `/audio-blobs/${PEER_BLOB_ID}`,
+    });
+    expect(res.statusCode).toBe(404);
+    expect(calls).toHaveLength(0);
+  });
+
+  it("never turns a malformed id into an outbound request", async () => {
+    const calls: Array<{ url: string; headers: Record<string, string> }> = [];
+    await peerServer({}, peerFetcher({}, calls));
+    const res = await app.inject({
+      method: "GET",
+      url: "/audio-blobs/not-a-content-address",
+    });
+    expect(res.statusCode).toBe(404);
+    expect(calls).toHaveLength(0);
+  });
+
+  it("this community's own uploads win without asking any peer", async () => {
+    const calls: Array<{ url: string; headers: Record<string, string> }> = [];
+    await peerServer({}, peerFetcher({}, calls));
+    const upload = makeUpload();
+    await app.inject({ method: "POST", url: "/audio-blobs", payload: upload });
+    const res = await app.inject({
+      method: "GET",
+      url: `/audio-blobs/${upload.blobId}`,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(calls).toHaveLength(0);
+  });
+});
+
+describe("remote audio cache store (LRU trim-on-write)", () => {
+  it("evicts least-recently-played rows to the cap; touch refreshes recency", () => {
+    const cacheDb = openDatabase(":memory:");
+    const cache = createRemoteAudioCacheStore(cacheDb);
+    const blob = (label: string) => Buffer.from(`clip-${label}-0123456789`);
+    const size = blob("a").length;
+    const cap = size * 2;
+
+    expect(
+      cache.insertWithTrim({ blobId: "a".repeat(64), mime: "audio/webm", bytes: blob("a"), now: 1 }, cap),
+    ).toBe(true);
+    cache.insertWithTrim({ blobId: "b".repeat(64), mime: "audio/webm", bytes: blob("b"), now: 2 }, cap);
+    // Playing "a" makes "b" the LRU candidate.
+    expect(cache.getAndTouch("a".repeat(64), 3)).not.toBeNull();
+    cache.insertWithTrim({ blobId: "c".repeat(64), mime: "audio/webm", bytes: blob("c"), now: 4 }, cap);
+
+    expect(cache.count()).toBe(2);
+    expect(cache.totalBytes()).toBeLessThanOrEqual(cap);
+    expect(cache.getAndTouch("b".repeat(64), 5)).toBeNull(); // evicted
+    expect(cache.getAndTouch("a".repeat(64), 6)).not.toBeNull();
+    expect(cache.getAndTouch("c".repeat(64), 7)).not.toBeNull();
+
+    // A blob bigger than the whole cap is served but never admitted.
+    expect(
+      cache.insertWithTrim(
+        { blobId: "d".repeat(64), mime: "audio/webm", bytes: Buffer.alloc(cap + 1), now: 8 },
+        cap,
+      ),
+    ).toBe(false);
+    expect(cache.count()).toBe(2);
+    cacheDb.close();
+  });
+});

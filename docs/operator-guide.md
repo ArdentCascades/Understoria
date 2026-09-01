@@ -312,6 +312,8 @@ Two things to know:
 | `OPERATOR_CONTACT` | unset | Preferred operator contact (Matrix room, email, URL) |
 | `PEER_NODE_URLS` | unset | Comma-separated base URLs of nodes to pull from. Each must be `http://` or `https://`; trailing slashes are stripped |
 | `PEER_PULL_INTERVAL_MS` | `300000` (5 min) | How often the pull worker hits each peer |
+| `REMOTE_AUDIO_CACHE_MAX_BYTES` | `104857600` (100 MiB) | Byte cap for the pull-through cache of PEER communities' recordings (V8). When a member opens a federated voice post whose bytes you don't hold, the node fetches from a peer, verifies the content address, and caches here, LRU-evicting to this cap. Sizing: clips cap at 400 KB, so the default holds ~250 clips; bandwidth is one clip per first-play per community — replays serve from cache. `0` disables cross-node audio entirely (federated voice posts play as "recording unavailable") |
+| `REMOTE_AUDIO_FETCH_TIMEOUT_MS` | `10000` | Per-peer timeout for one pull-through fetch. The member's play request waits on it, so keep it short — on expiry the next peer is tried, then the player shows its retry button |
 | `NODE_SYSTEM_SECRET_KEY` | unset | Base64 Ed25519 secret for the §4 auto-confirm system key. Unset = auto-confirm signing off (the server warns loudly if a window is configured with no key). Generate via `scripts/generate-system-key.mjs`; rotation procedure in `system-key-rotation.md` |
 | `NODE_SYSTEM_KEY_HISTORY` | unset | JSON array of retired system public keys (`[{"pubkey":"…","retiredAt":…}]`). Append-only across rotations — peers verify old auto-confirmed records against it. The server refuses to boot on a malformed entry |
 | `AUTO_CONFIRM_MIN_HOURS` | `168` (7 days) | Server-side floor under the community's `autoConfirmHours` setting. Set `0` to disable auto-confirm via this node regardless of community config — also the safe way to turn it off without unpublishing key history |
@@ -651,6 +653,16 @@ records from each peer over a small public surface:
   `GET /coorg-invitation-revocations` — the co-organizer trio
 - `GET /events` and `GET /event-cancellations` — signed community
   events and their cancellations
+
+Voice-post audio does NOT ride these legs. The post federates with
+its signed audio *reference* only; the bytes move by pull-through
+when a member actually presses play — your node fetches
+`GET /audio-blobs/<id>` from a peer (with your peer bearer token and
+a loop-guard header), recomputes the content address over the bytes
+that arrive, refuses a mismatch, and caches the verified copy under
+`REMOTE_AUDIO_CACHE_MAX_BYTES`. Refs travel, payloads wait to be
+wanted — a Raspberry Pi's disk fills at the rate its members
+listen, not at the rate peers post.
 
 Every record's signature is verified before insert. Pulled rows
 keep their original `nodeId` (for exchanges) — federation is

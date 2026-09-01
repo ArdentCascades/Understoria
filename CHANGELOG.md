@@ -10,6 +10,22 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Voice posts from neighboring communities now play.** Until now a
+  voice post that arrived from a peer community showed "recording
+  unavailable" — the post traveled, the recording didn't. Now, when
+  you press play, your community's own server fetches the recording
+  from the neighboring community's server, checks that the bytes are
+  exactly the ones the poster signed for (a tampering server gets
+  refused, not trusted), keeps a copy so the next listener in your
+  community plays it instantly, and serves it to you. Recordings
+  move only when someone actually listens — never broadcast — so a
+  server on a Raspberry Pi fills its disk at the rate its members
+  listen, within a size cap its operator sets, oldest-played evicted
+  first; your community's own recordings are never eviction
+  candidates. What the neighboring server learns is deliberately
+  blunt: "someone in that community played this recording" — never
+  who, and only the first time; replays stay home. Operators can
+  turn the whole thing off with one setting.
 - **Search now hears voice notes — through their transcripts.**
   Message search matches the words actually spoken in a voice note,
   once you've transcribed it: the result shows the transcript with

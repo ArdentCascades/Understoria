@@ -16,10 +16,15 @@ import {
   parseAudioBlobUpload,
   verifyAudioBlobUpload,
 } from "@understoria/shared/crypto";
-import type { AudioBlobStore } from "../db.js";
+import type { AudioBlobStore, RemoteAudioCacheStore } from "../db.js";
+import { NO_PULL_HEADER, type RemoteAudioPuller } from "../remoteAudio.js";
 
 interface Deps {
   store: AudioBlobStore;
+  /** The peer-blob cache + puller (V8 #478). Absent (tests, or a
+   *  cap of 0) ⇒ misses 404 exactly as before V8. */
+  remoteCache?: RemoteAudioCacheStore;
+  puller?: RemoteAudioPuller;
   now?: () => number;
 }
 
@@ -49,13 +54,18 @@ interface Deps {
  *   Member-authenticated read — the deny-by-default read guard covers
  *   this GET like every other federation read.
  *
- * PWA↔node only in this slice: blobs do NOT ride the peer-pull legs.
- * A federated post referencing a recording its node doesn't hold plays
- * as "recording unavailable" until V8 (#478) federates blobs.
+ * Since V8 (#478) the GET is also the federation leg: a miss on a
+ * post from a PEER community triggers a pull-through fetch — this
+ * node asks its configured peers, verifies the content address over
+ * the bytes that arrive, caches them (LRU-capped, remoteAudio.ts),
+ * and serves. Refs federate with posts; bytes move only when a
+ * member actually presses play. Requests carrying NO_PULL_HEADER
+ * (i.e. another node's own pull-through) answer from local storage
+ * only — the loop guard.
  */
 export async function registerAudioBlobRoutes(
   app: FastifyInstance,
-  { store, now = () => Date.now() }: Deps,
+  { store, remoteCache, puller, now = () => Date.now() }: Deps,
 ): Promise<void> {
   // Per-route body ceiling (the /messages and /device-link precedent):
   // the server-wide 64 KB default is far too small for base64 audio,
@@ -107,19 +117,33 @@ export async function registerAudioBlobRoutes(
   app.get<{ Params: { blobId: string } }>(
     "/audio-blobs/:blobId",
     async (req, reply) => {
-      const row = store.get(req.params.blobId);
-      if (row === null) {
-        reply.code(404);
-        return { error: "not_found" };
+      const serve = (row: { mime: string; bytes: Buffer }) => {
+        // Content-addressed ⇒ immutable: the same id can never serve
+        // different bytes, so let the browser cache the recording for
+        // good. `private` keeps shared proxies out of it — the GET is
+        // member-authenticated.
+        reply
+          .type(row.mime)
+          .header("Cache-Control", "private, max-age=31536000, immutable");
+        return reply.send(row.bytes);
+      };
+
+      // This community's own uploads win; then the peer cache.
+      const local = store.get(req.params.blobId);
+      if (local !== null) return serve(local);
+      const cached = remoteCache?.getAndTouch(req.params.blobId, now());
+      if (cached != null) return serve(cached);
+
+      // Loop guard: another node's pull-through never triggers OUR
+      // pull-through — without this, two nodes missing the same blob
+      // would ask each other forever.
+      if (puller !== undefined && req.headers[NO_PULL_HEADER] === undefined) {
+        const pulled = await puller.fetch(req.params.blobId);
+        if (pulled !== null) return serve(pulled);
       }
-      // Content-addressed ⇒ immutable: the same id can never serve
-      // different bytes, so let the browser cache the recording for
-      // good. `private` keeps shared proxies out of it — the GET is
-      // member-authenticated.
-      reply
-        .type(row.mime)
-        .header("Cache-Control", "private, max-age=31536000, immutable");
-      return reply.send(row.bytes);
+
+      reply.code(404);
+      return { error: "not_found" };
     },
   );
 }

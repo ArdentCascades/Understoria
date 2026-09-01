@@ -274,10 +274,35 @@ We are not trying to protect against:
   member — can listen. A recording carries the member's actual voice,
   a stronger and less deniable identifier than typed text; the
   member-guide says this plainly at the point of posting. Audio blobs
-  are size-capped (400 KB), covered by the per-key insert caps, do
-  NOT federate to peer nodes (deferred to workstream V8, #478), and
+  are size-capped (400 KB), covered by the per-key insert caps, and
   board voice references are scrubbed by the same purge paths as the
-  posts that carry them.
+  posts that carry them. Since V8 (#478) the bytes also cross node
+  boundaries — but only by pull-through, never broadcast: the signed
+  reference federates with the post, and a peer node fetches the
+  bytes only when one of its members presses play, verifying the
+  content address over what actually arrived (a lying peer cannot
+  swap a recording under a signed reference). The fetched copy lives
+  in a separate LRU-capped cache (`remote_audio_cache`,
+  `REMOTE_AUDIO_CACHE_MAX_BYTES`, 0 = disabled), never in the
+  member-signed `audio_blobs` store.
+- **Audio fetch-interest metadata (V8, #478).** A pull-through blob
+  GET tells the ORIGIN community's operator that the recording was
+  just played by someone in the fetching community — a read-side
+  disclosure that did not exist while blobs stayed home. Deliberate
+  bounds: the request authenticates with the NODE's peer bearer
+  token, never a member key, so the origin operator learns "a member
+  of community A played this, now" — not which member; the
+  member↔clip mapping exists only on the member's own node, which
+  already sees every read they make. Caching sharpens the picture
+  the origin loses: after the first fetch, replays anywhere in
+  community A are served from A's cache and the origin sees nothing.
+  Loop guard (`x-understoria-no-pull`) keeps one node's pull-through
+  from triggering another's, so a missing blob costs each peer at
+  most one probe per requesting node per attempt, and a malformed id
+  never becomes an outbound request at all. Residual: timing of the
+  FIRST play per community still leaks to the origin — same class as
+  every federated read, documented here because audio is a sharper
+  signal than a feed page.
 - **Metadata leakage via federation.** Broadcast of need/offer to peers
   reveals category, zone, timing. Mitigation: opt-in per post, zone is
   already coarsened to neighborhood, no precise location.

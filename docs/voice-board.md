@@ -76,9 +76,13 @@ never the bytes.**
 - Node-side growth is bounded by the existing insert caps
   (`PER_KEY_ROW_CEILING` / `TABLE_ROW_CEILING`); at 400 KB max per
   blob, the audio table is the first table where the per-key cap is
-  doing real disk work. Pruning recordings whose posts are gone is
-  deferred to the V8 (#478) federation/GC design — append-only until
-  then, matching every other federated table.
+  doing real disk work. The community's own `audio_blobs` store stays
+  append-only; V8 (#478) added a SEPARATE `remote_audio_cache` for
+  peer communities' recordings, which is where eviction lives
+  (LRU-trimmed to `REMOTE_AUDIO_CACHE_MAX_BYTES`) — a member's own
+  uploads are never eviction candidates. GC of local blobs whose
+  posts are gone remains an open policy question
+  (docs/node-seizure-plan.md D4).
 
 ## 4. Purge
 
@@ -89,11 +93,21 @@ text post), but this device can no longer name them. Hard purge
 deletes the posts table outright, reference included. The
 purge-coverage CI guard (#476) holds this in place.
 
-## 5. Not in this slice
+## 5. Follow-ups (status as-built)
 
-- **Cross-node audio**: a post federated from a peer community carries
-  its audio reference, but the peer's blobs don't replicate — the
-  player shows "recording unavailable" with a retry. Blob federation
-  is V8 (#478), which reuses this store and content-address scheme.
-- **Search over voice posts**: needs transcripts — V7 (#477).
-- **Post deletion GC** of node-side blobs — with V8, above.
+- **Cross-node audio — SHIPPED (V8, #478)**: the post federates its
+  signed audio reference; when a member presses play, their node
+  pull-through-fetches the bytes from a peer (loop-guarded,
+  content-address-verified, LRU-cached — `remoteAudio.ts`). The
+  "recording unavailable" + retry player is now only the
+  all-peers-unreachable fallback. Fetch-interest metadata is
+  documented in threat-model §7.
+- **Search over voice notes — SHIPPED via transcripts (V7, #477)**
+  in MESSAGE search: a member's own sealed transcripts make their
+  voice notes searchable. Voice POSTS get persistent captions from
+  the same twins, but board search still matches title/description
+  only — extending it to transcript twins is a small follow-up if
+  members ask.
+- **Post deletion GC** of a community's own local blobs — still open,
+  deliberately: it's a retention *policy* question
+  (docs/node-seizure-plan.md D4), not a sweep to bolt on.

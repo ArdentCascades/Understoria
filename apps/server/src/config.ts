@@ -294,6 +294,26 @@ export interface Config {
    *  runs. */
   capacitySampleKeepN: number;
   /**
+   * Byte ceiling for the pull-through cache of PEER communities'
+   * recordings (`REMOTE_AUDIO_CACHE_MAX_BYTES`, V8 #478 — the first
+   * byte-valued knob). When a member opens a federated voice post
+   * whose bytes this node doesn't hold, the node fetches them from a
+   * peer, verifies the content address, and caches them here,
+   * LRU-trimming to this cap on every insert. Default 100 MiB
+   * (~250 clips at the 400 KB clip ceiling). `0` disables cross-node
+   * audio fetching entirely — federated voice posts then play as
+   * "recording unavailable", exactly the pre-V8 behavior.
+   */
+  remoteAudioCacheMaxBytes: number;
+  /**
+   * Timeout for one peer blob fetch during pull-through, in ms
+   * (`REMOTE_AUDIO_FETCH_TIMEOUT_MS`, default 10s). The member's GET
+   * blocks on the fetch, so this bounds how long an unreachable peer
+   * can hold a player spinner hostage; on expiry the next peer is
+   * tried, then the request 404s into the existing retry UI.
+   */
+  remoteAudioFetchTimeoutMs: number;
+  /**
    * Retention-sweep worker cadence (`RETENTION_SWEEP_INTERVAL_MS`,
    * default 6 h; 0 disables the worker) — docs/node-seizure-plan.md
    * §3. The sweep deletes metadata a seized node should not yield
@@ -468,6 +488,16 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
       "CAPACITY_SAMPLE_KEEP_N",
       env.CAPACITY_SAMPLE_KEEP_N,
       2000,
+    ),
+    remoteAudioCacheMaxBytes: asNonNegativeInt(
+      "REMOTE_AUDIO_CACHE_MAX_BYTES",
+      env.REMOTE_AUDIO_CACHE_MAX_BYTES,
+      100 * 1024 * 1024,
+    ),
+    remoteAudioFetchTimeoutMs: asInt(
+      "REMOTE_AUDIO_FETCH_TIMEOUT_MS",
+      env.REMOTE_AUDIO_FETCH_TIMEOUT_MS,
+      10_000,
     ),
     retentionSweepIntervalMs: asNonNegativeInt(
       "RETENTION_SWEEP_INTERVAL_MS",

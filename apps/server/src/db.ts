@@ -175,6 +175,35 @@ export interface AudioBlobStore {
 }
 
 /**
+ * The pull-through cache for peer communities' recordings (V8 #478).
+ * Content-addressed like `audio_blobs` but evictable by design —
+ * `insertWithTrim` LRU-evicts down to the operator's byte cap in the
+ * same transaction as the insert (the capacity-ring-buffer
+ * trim-on-write pattern; no background sweep to forget), and
+ * `getAndTouch` refreshes recency so what members actually play
+ * stays warm.
+ */
+export interface RemoteAudioCacheStore {
+  /** Read + refresh last_access_at in one step. */
+  getAndTouch(
+    blobId: string,
+    now: number,
+  ): { mime: string; bytes: Buffer } | null;
+  /**
+   * Store a verified peer blob, then evict least-recently-accessed
+   * rows until total bytes fit under `maxTotalBytes`. A blob larger
+   * than the whole cap is not stored (returns false) — the caller
+   * still serves it, it just isn't cached.
+   */
+  insertWithTrim(
+    entry: { blobId: string; mime: string; bytes: Buffer; now: number },
+    maxTotalBytes: number,
+  ): boolean;
+  totalBytes(): number;
+  count(): number;
+}
+
+/**
  * Storage for signed task comments. Same insert/list/has shape as the
  * other federated record stores, plus an `upsertTombstone` operation:
  * once a peer learns the author soft-deleted a comment, we update only
@@ -1542,6 +1571,37 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '33')",
     ).run();
   }
+
+  if (current < 34) {
+    // Schema v34 — federated audio transport (V8 #478): the
+    // pull-through cache for PEER communities' recordings, a
+    // deliberately separate table from `audio_blobs`:
+    //
+    //   - `audio_blobs` holds THIS community's member-signed uploads,
+    //     append-only; eviction must never touch them.
+    //   - `remote_audio_cache` holds bytes fetched from peers on a
+    //     member's demand, verified by content address alone (the
+    //     blob_id IS the hash, recomputed on receipt — no signature
+    //     row needed, and none arrives on a GET). Evictable by
+    //     design: LRU-trimmed on every insert to the operator's
+    //     REMOTE_AUDIO_CACHE_MAX_BYTES, `last_access_at` refreshed
+    //     on every hit.
+    db.exec(`
+      CREATE TABLE remote_audio_cache (
+        blob_id        TEXT PRIMARY KEY,
+        mime           TEXT NOT NULL,
+        bytes          BLOB NOT NULL,
+        byte_length    INTEGER NOT NULL,
+        fetched_at     INTEGER NOT NULL,
+        last_access_at INTEGER NOT NULL
+      );
+      CREATE INDEX remote_audio_cache_lru_idx
+        ON remote_audio_cache (last_access_at);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '34')",
+    ).run();
+  }
 }
 
 /**
@@ -1981,6 +2041,80 @@ export function createAudioBlobStore(db: DatabaseType): AudioBlobStore {
     has(blobId) {
       return hasStmt.get(blobId) !== undefined;
     },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+export function createRemoteAudioCacheStore(
+  db: DatabaseType,
+): RemoteAudioCacheStore {
+  const getStmt = db.prepare(
+    "SELECT mime, bytes FROM remote_audio_cache WHERE blob_id = ?",
+  );
+  const touchStmt = db.prepare(
+    "UPDATE remote_audio_cache SET last_access_at = ? WHERE blob_id = ?",
+  );
+  const insertStmt = db.prepare(`
+    INSERT OR IGNORE INTO remote_audio_cache (
+      blob_id, mime, bytes, byte_length, fetched_at, last_access_at
+    ) VALUES (@blobId, @mime, @bytes, @byteLength, @now, @now)
+  `);
+  const totalStmt = db.prepare(
+    "SELECT COALESCE(SUM(byte_length), 0) AS total FROM remote_audio_cache",
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM remote_audio_cache",
+  );
+  const oldestStmt = db.prepare(`
+    SELECT blob_id AS blobId FROM remote_audio_cache
+    ORDER BY last_access_at ASC, blob_id ASC LIMIT 1
+  `);
+  const deleteStmt = db.prepare(
+    "DELETE FROM remote_audio_cache WHERE blob_id = ?",
+  );
+
+  const total = () => (totalStmt.get() as { total: number }).total;
+
+  const insertWithTrim = db.transaction(
+    (
+      entry: { blobId: string; mime: string; bytes: Buffer; now: number },
+      maxTotalBytes: number,
+    ): boolean => {
+      if (entry.bytes.length > maxTotalBytes) return false;
+      insertStmt.run({
+        blobId: entry.blobId,
+        mime: entry.mime,
+        bytes: entry.bytes,
+        byteLength: entry.bytes.length,
+        now: entry.now,
+      });
+      // LRU trim to the cap. The just-inserted row carries the newest
+      // last_access_at, so it is evicted only if it alone would need
+      // to be — impossible past the size guard above.
+      while (total() > maxTotalBytes) {
+        const oldest = oldestStmt.get() as { blobId: string } | undefined;
+        if (oldest === undefined) break;
+        deleteStmt.run(oldest.blobId);
+      }
+      return true;
+    },
+  );
+
+  return {
+    getAndTouch(blobId, now) {
+      const row = getStmt.get(blobId) as
+        | { mime: string; bytes: Buffer }
+        | undefined;
+      if (row === undefined) return null;
+      touchStmt.run(now, blobId);
+      return { mime: row.mime, bytes: row.bytes };
+    },
+    insertWithTrim(entry, maxTotalBytes) {
+      return insertWithTrim(entry, maxTotalBytes) as boolean;
+    },
+    totalBytes: total,
     count() {
       return (countStmt.get() as { n: number }).n;
     },
