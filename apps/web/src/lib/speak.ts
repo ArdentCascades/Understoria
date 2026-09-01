@@ -139,6 +139,53 @@ export function isSpeechAvailable(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
 }
 
+/** Can this device speak a given language? Three honest answers, not
+ *  two: `getVoices()` is often EMPTY right after load (engines fill
+ *  the list late and fire `voiceschanged`), and an empty list means
+ *  "don't know yet" — never "no". Only a populated list with no
+ *  match means "missing", which is the everyday reality for bo and
+ *  patchy reality for ur: the engine exists, but no voice for the
+ *  member's language is installed, so read-aloud would sit silent.
+ *  Matching is by primary subtag ("ur" matches a "ur-PK" voice) —
+ *  any voice in the language beats none. */
+export type VoiceAvailability = "unknown" | "available" | "missing";
+
+export function voiceAvailabilityFor(lang: string): VoiceAvailability {
+  try {
+    if (typeof speechSynthesis === "undefined") return "missing";
+    const voices = speechSynthesis.getVoices();
+    if (voices.length === 0) return "unknown";
+    const want = primarySubtag(lang);
+    return voices.some((v) => primarySubtag(v.lang) === want)
+      ? "available"
+      : "missing";
+  } catch {
+    return "unknown";
+  }
+}
+
+function primarySubtag(tag: string): string {
+  return tag.toLowerCase().split("-")[0];
+}
+
+/** Re-run an availability check when the engine's voice list changes
+ *  (it loads late on many phones). Returns an unsubscribe; no-op
+ *  where the API or the event is missing. */
+export function onVoicesChanged(cb: () => void): () => void {
+  try {
+    if (
+      typeof speechSynthesis === "undefined" ||
+      typeof speechSynthesis.addEventListener !== "function"
+    ) {
+      return () => {};
+    }
+    speechSynthesis.addEventListener("voiceschanged", cb);
+    return () => speechSynthesis.removeEventListener("voiceschanged", cb);
+  } catch {
+    return () => {};
+  }
+}
+
 /** Stop any in-flight speech (dialog closed, action taken). Settles
  *  the pending speak() as ok — stopping on purpose is not a device
  *  failure — and kills its watchdog, so no timer outlives the screen

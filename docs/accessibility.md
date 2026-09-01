@@ -147,9 +147,29 @@ formal audit; the formal audit is one of the items in §6.
   disclosure) is keyboard-accessible by default (space / enter to
   toggle) and screen readers announce expanded / collapsed without
   any extra ARIA.
-- **i18n** — every user-facing string is in `i18n/locales/`,
-  so a future right-to-left language drop-in is mechanically
-  possible. RTL CSS hasn't been tested.
+- **i18n** — every user-facing string is in `i18n/locales/`, in
+  eleven languages with the full authored corpus in each. The RTL
+  program (docs/rtl-plan.md R1–R5) shipped and is guarded: Arabic
+  and Urdu run `dir="rtl"` over logical properties, with a
+  pseudo-locale for mirrored-surface verification.
+- **Spoken interface (read-aloud)** — voice workstream #473,
+  TTS-first. A per-device toggle (Settings → Read aloud, right
+  after Language) makes every interactive control speak its label
+  on focus or touch via the device's own `speechSynthesis` — on
+  device, offline, no network call (`lib/readAloud.ts`,
+  `lib/speak.ts`). Speech is additive, never a gate: activation
+  proceeds normally, and where the engine is missing the card says
+  so instead of offering a dead toggle. Where the engine exists
+  but has no voice for the member's language (the everyday reality
+  for Tibetan, patchy for Urdu), the card shows an honest no-voice
+  note — voices load late on many phones, so the probe re-checks
+  on `voiceschanged` and never warns from an unpopulated list. The
+  same helper speaks the panic confirm (#476) and "Speak this
+  message" in conversations; a start-watchdog catches engines that
+  accept an utterance and never speak it, so UI never claims
+  speech that didn't happen. Category surfaces pair the speech
+  with a language-free emoji icon per category
+  (`lib/categories.ts`), so meaning survives with sound off too.
 - **ARIA primitives** — `ToastContainer` has `aria-live="polite"`
   + `role="status"`. `AttentionSection` uses `aria-labelledby`.
   Form fields in PostForm / ProjectNew / Profile have associated
@@ -269,6 +289,18 @@ address. Each maps to a focused PR or a small bundle.
 - **Screen reader testing.** No one has driven the app with
   NVDA, VoiceOver, or TalkBack end-to-end. This is the gap most
   likely to surface things this audit missed.
+- **Spoken-interface follow-ups (#473).** The read-aloud mode
+  ships TTS-only; the issue's optional human-recorded clip
+  overlay for the ~30 core-navigation labels is deliberately
+  deferred until real recordings exist — plumbing without clips
+  would be dead code, and docs should describe what is. The
+  acceptance-level usability test (a non-reader navigating board
+  → post → messages by icons and speech alone) hasn't been run
+  with a real person; the runbook now carries the pass to run it
+  with. Tibetan has no `speechSynthesis` voice on any mainstream
+  platform today — the honest no-voice note in Settings is the
+  mitigation, not a fix; revisit if an on-device bo voice ever
+  ships.
 - **Formal audit.** A surface-by-surface walk through every
   page with axe-core (or similar) and a screen reader,
   recording findings, is on the list.

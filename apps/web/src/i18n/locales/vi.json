@@ -788,6 +788,7 @@
       "emptyPane": "Chọn một cuộc trò chuyện trong danh sách."
     },
     "emptyTitle": "Chưa có cuộc trò chuyện nào",
+    "rowLabel": "Cuộc trò chuyện với {{name}}, tin nhắn mới nhất {{time}}",
     "empty": "Chưa có tin nhắn nào. Trò chuyện bắt đầu từ một mẩu tin — mở mẩu tin của ai đó và chạm Nhắn tin để bắt chuyện.",
     "sendMessage": "Nhắn tin",
     "messageButton": "Nhắn tin",
@@ -3030,7 +3031,8 @@
       "turnOff": "Tắt đọc cho nghe",
       "spokenOn": "Đọc cho nghe đã bật. Chạm vào nút bất kỳ để nghe tên của nó.",
       "spokenOff": "Đọc cho nghe đã tắt.",
-      "unsupported": "Trình duyệt trên thiết bị này không có giọng đọc tích hợp, nên đọc cho nghe không dùng được ở đây."
+      "unsupported": "Trình duyệt trên thiết bị này không có giọng đọc tích hợp, nên đọc cho nghe không dùng được ở đây.",
+      "noVoice": "Thiết bị này chưa cài giọng đọc nào cho {{language}}, nên đọc cho nghe chưa thể phát tiếng ở đây. Giọng đọc được thêm trong phần cài đặt của chính thiết bị, không phải trong ứng dụng — các nút và biểu tượng vẫn hoạt động bình thường."
     }
   },
   "help": {

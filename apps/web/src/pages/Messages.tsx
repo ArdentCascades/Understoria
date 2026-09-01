@@ -280,8 +280,20 @@ export default function MessagesShell() {
                 const isSelected = c.otherKey === selectedKey;
                 return (
                   <li key={c.otherKey}>
+                    {/* Concise accessible name (#473): without it the
+                        row's spoken label is its whole textContent —
+                        name + 80-char preview + timestamp in one
+                        breath. Who and how recent is what a member
+                        navigating by ear needs; the preview stays
+                        visible text. */}
                     <Link
                       to={`/messages/${encodeURIComponent(c.otherKey)}`}
+                      aria-label={t("messages.rowLabel", {
+                        name:
+                          nameByKey.get(c.otherKey) ??
+                          t("common.memberFallback"),
+                        time: formatRelativeTime(c.lastMessage.createdAt),
+                      })}
                       aria-current={isSelected ? "page" : undefined}
                       className={`card block transition-shadow hover:shadow-md ${
                         isSelected

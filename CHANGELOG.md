@@ -10,6 +10,22 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Read-aloud now tells you when your device can't speak your
+  language — and conversation rows say who they are, briefly.** The
+  spoken interface reads any button you touch using the device's own
+  voices, and those voices come from the device, not the app: a phone
+  with no Tibetan or Urdu voice installed would sit silent while the
+  toggle promised speech. The read-aloud card in Settings now checks
+  the device's installed voices and, when none matches your language,
+  says so honestly in an amber note — the toggle keeps working, the
+  note just tells the truth about why nothing sounds. Phones load
+  their voice list late, so the check listens for it to fill in
+  rather than warning falsely from an empty list. And in Messages,
+  each conversation row now speaks as "Conversation with {name}, last
+  message {time}" instead of reading its whole preview blob in one
+  breath — who and how recent, which is what navigating by ear
+  actually needs. In all eleven languages.
+
 - **The whole authored library now exists in Urdu — the language
   program's eleventh and, for now, final full corpus.** The app began
   speaking Urdu in the last entry — every button and message — and now
@@ -84,6 +100,16 @@ include breaking changes.
   same rails as every other language.
 
 ### Fixed
+- **The panic purge now silences voice notes still loaded in
+  memory.** A voice note plays through a temporary in-memory address
+  that used to live exactly as long as its player was on screen —
+  which meant the emergency wipe depended on screens happening to
+  close in the right order. Every audio address is now minted through
+  a registry, and both purges revoke everything in it as their first
+  move, before any table is touched: after a panic, no playable audio
+  survives anywhere, and the purge report says how many addresses it
+  killed. Nothing changes about playback day to day.
+
 - **The Print button no longer plays dead in the installed iPhone
   app.** Every print surface rests on the browser's own dialog
   (`window.print()` — no popups, no PDF library), and in the

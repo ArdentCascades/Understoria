@@ -788,6 +788,7 @@
       "emptyPane": "Choisis une conversation dans la liste."
     },
     "emptyTitle": "Pas encore de conversations",
+    "rowLabel": "Conversation avec {{name}}, dernier message {{time}}",
     "empty": "Pas encore de messages. Les conversations commencent depuis une annonce — ouvre l'annonce de quelqu'un et touche Message pour prendre contact.",
     "sendMessage": "Message",
     "messageButton": "Message",
@@ -3030,7 +3031,8 @@
       "turnOff": "Désactiver la lecture à voix haute",
       "spokenOn": "La lecture à voix haute est activée. Touche un bouton pour entendre son nom.",
       "spokenOff": "La lecture à voix haute est désactivée.",
-      "unsupported": "Le navigateur de cet appareil n'a pas de voix intégrée, donc la lecture à voix haute n'est pas disponible ici."
+      "unsupported": "Le navigateur de cet appareil n'a pas de voix intégrée, donc la lecture à voix haute n'est pas disponible ici.",
+      "noVoice": "Aucune voix pour {{language}} n'est installée sur cet appareil, donc la lecture à voix haute ne peut pas encore parler ici. Les voix s'ajoutent dans les réglages de l'appareil lui-même, pas dans l'application — les boutons et les icônes continuent de fonctionner."
     }
   },
   "help": {

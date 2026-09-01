@@ -788,6 +788,7 @@
       "emptyPane": "Elige una conversación de la lista."
     },
     "emptyTitle": "Aún no hay conversaciones",
+    "rowLabel": "Conversación con {{name}}, último mensaje {{time}}",
     "empty": "Aún no hay mensajes. Las conversaciones empiezan desde una publicación — abre la publicación de alguien y toca Mensaje para escribir.",
     "sendMessage": "Mensaje",
     "messageButton": "Mensaje",
@@ -3030,7 +3031,8 @@
       "turnOff": "Desactivar leer en voz alta",
       "spokenOn": "Leer en voz alta está activado. Toca cualquier botón para escuchar su nombre.",
       "spokenOff": "Leer en voz alta está desactivado.",
-      "unsupported": "El navegador de este dispositivo no ofrece voz integrada, así que leer en voz alta no está disponible aquí."
+      "unsupported": "El navegador de este dispositivo no ofrece voz integrada, así que leer en voz alta no está disponible aquí.",
+      "noVoice": "Este dispositivo no tiene instalada ninguna voz para {{language}}, así que leer en voz alta todavía no puede hablar aquí. Las voces se añaden en los ajustes del propio dispositivo, no en la aplicación — los botones y los iconos siguen funcionando de todos modos."
     }
   },
   "help": {
