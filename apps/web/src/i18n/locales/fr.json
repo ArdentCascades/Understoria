@@ -2790,7 +2790,8 @@
       "studyPrompts": "Pistes pour groupes d'étude",
       "addToPhone": "Ajouter à ton téléphone",
       "promptCopy": "Copier pour une réunion",
-      "promptCopied": "Copié"
+      "promptCopied": "Copié",
+      "promptShareAttribution": "Piste de discussion d'Understoria, reprise de docs/political-education/README.md"
     },
     "communitySettings": {
       "title": "Réglages de la communauté",

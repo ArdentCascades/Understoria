@@ -31,3 +31,6 @@ export { EVENT_TEMPLATES_BO as EVENT_TEMPLATES } from "../eventTemplates.bo";
 export { FAQ_SECTIONS_BO as FAQ_SECTIONS } from "../faq.bo";
 export { START_COMMUNITY_BO as START_COMMUNITY } from "../startCommunity.bo";
 export { DESIGN_PRINCIPLES_BO as DESIGN_PRINCIPLES } from "../design-principles.bo";
+export { MEMBER_GUIDE_BO as MEMBER_GUIDE } from "../member-guide.bo";
+export { OPSEC_GUIDE_BO as OPSEC_GUIDE } from "../opsec-guide.bo";
+export { STUDY_PROMPTS_BO as STUDY_PROMPTS } from "../study-prompts.bo";

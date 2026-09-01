@@ -2790,7 +2790,8 @@
       "studyPrompts": "स्टडी ग्रुप के सवाल",
       "addToPhone": "अपने फ़ोन में जोड़ें",
       "promptCopy": "बैठक के लिए कॉपी करें",
-      "promptCopied": "कॉपी हो गया"
+      "promptCopied": "कॉपी हो गया",
+      "promptShareAttribution": "Understoria का चर्चा के लिए सवाल, docs/political-education/README.md से ज्यों का त्यों लिया गया"
     },
     "communitySettings": {
       "title": "समुदाय की सेटिंग्स",

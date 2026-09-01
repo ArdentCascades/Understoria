@@ -31,3 +31,6 @@ export { EVENT_TEMPLATES_RU as EVENT_TEMPLATES } from "../eventTemplates.ru";
 export { FAQ_SECTIONS_RU as FAQ_SECTIONS } from "../faq.ru";
 export { START_COMMUNITY_RU as START_COMMUNITY } from "../startCommunity.ru";
 export { DESIGN_PRINCIPLES_RU as DESIGN_PRINCIPLES } from "../design-principles.ru";
+export { MEMBER_GUIDE_RU as MEMBER_GUIDE } from "../member-guide.ru";
+export { OPSEC_GUIDE_RU as OPSEC_GUIDE } from "../opsec-guide.ru";
+export { STUDY_PROMPTS_RU as STUDY_PROMPTS } from "../study-prompts.ru";

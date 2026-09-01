@@ -2790,7 +2790,8 @@
       "studyPrompts": "Study group prompts",
       "addToPhone": "Add to your phone",
       "promptCopy": "Copy for a meeting",
-      "promptCopied": "Copied"
+      "promptCopied": "Copied",
+      "promptShareAttribution": "Discussion prompt from Understoria, mirrored from docs/political-education/README.md"
     },
     "communitySettings": {
       "title": "Community settings",

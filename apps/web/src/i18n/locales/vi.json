@@ -2790,7 +2790,8 @@
       "studyPrompts": "Câu gợi mở cho nhóm học tập",
       "addToPhone": "Thêm vào điện thoại của bạn",
       "promptCopy": "Sao chép để mang đi họp",
-      "promptCopied": "Đã sao chép"
+      "promptCopied": "Đã sao chép",
+      "promptShareAttribution": "Câu hỏi thảo luận từ Understoria, lấy từ docs/political-education/README.md"
     },
     "communitySettings": {
       "title": "Cài đặt cộng đồng",

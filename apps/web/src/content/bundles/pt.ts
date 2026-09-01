@@ -31,3 +31,6 @@ export { EVENT_TEMPLATES_PT as EVENT_TEMPLATES } from "../eventTemplates.pt";
 export { FAQ_SECTIONS_PT as FAQ_SECTIONS } from "../faq.pt";
 export { START_COMMUNITY_PT as START_COMMUNITY } from "../startCommunity.pt";
 export { DESIGN_PRINCIPLES_PT as DESIGN_PRINCIPLES } from "../design-principles.pt";
+export { MEMBER_GUIDE_PT as MEMBER_GUIDE } from "../member-guide.pt";
+export { OPSEC_GUIDE_PT as OPSEC_GUIDE } from "../opsec-guide.pt";
+export { STUDY_PROMPTS_PT as STUDY_PROMPTS } from "../study-prompts.pt";

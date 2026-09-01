@@ -14,10 +14,12 @@
 // docs/member-guide.md on disk; this file is the version that ships
 // to members offline, kept short enough to read in a few minutes.
 //
-// Lives outside the i18n locales because long-form prose translation
-// is a separate workstream from UI string translation — see
-// docs/roadmap.md "i18n debt compounding" in the failure-modes
-// section. English-only for now.
+// Lives outside the i18n locales because long-form prose is authored
+// content, not UI strings: this module carries English (the eager
+// fallback), and every other shipped language has a
+// member-guide.<code>.ts twin loaded through content/registry.ts —
+// same ids, same section/paragraph structure, enforced by
+// guides.parity.test.ts. Render through getMemberGuide(locale).
 
 export interface GuideSection {
   id: string;
@@ -126,3 +128,14 @@ export const MEMBER_GUIDE: readonly GuideSection[] = [
     ],
   },
 ] as const;
+
+import { getContentBundle } from "./registry";
+
+/** The member guide in the given UI locale, English for any locale
+ *  without a translated bundle. Synchronous by the same gate every
+ *  content selector relies on (see content/registry.ts). */
+export function getMemberGuide(
+  locale: string | undefined,
+): readonly GuideSection[] {
+  return getContentBundle(locale).MEMBER_GUIDE;
+}

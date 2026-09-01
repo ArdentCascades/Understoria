@@ -31,3 +31,6 @@ export { EVENT_TEMPLATES_HI as EVENT_TEMPLATES } from "../eventTemplates.hi";
 export { FAQ_SECTIONS_HI as FAQ_SECTIONS } from "../faq.hi";
 export { START_COMMUNITY_HI as START_COMMUNITY } from "../startCommunity.hi";
 export { DESIGN_PRINCIPLES_HI as DESIGN_PRINCIPLES } from "../design-principles.hi";
+export { MEMBER_GUIDE_HI as MEMBER_GUIDE } from "../member-guide.hi";
+export { OPSEC_GUIDE_HI as OPSEC_GUIDE } from "../opsec-guide.hi";
+export { STUDY_PROMPTS_HI as STUDY_PROMPTS } from "../study-prompts.hi";

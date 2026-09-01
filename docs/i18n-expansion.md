@@ -293,9 +293,22 @@ Its own project, sequenced after waves 1–2 prove the pipeline:
 
 ## Phase 4 — Beyond the app shell
 
-In priority order, after their language's in-app content exists:
-member-guide/opsec content modules, the print/paper surfaces (already
-`t()`-driven — mostly free), `docs/member-guide.md`, the showcase site.
+**In-app guide corpus SHIPPED**: the last English-only in-app
+content — the condensed member guide, the condensed opsec guide, and
+the study-group prompts — now ships in all eleven languages as
+`member-guide.<code>.ts` / `opsec-guide.<code>.ts` /
+`study-prompts.<code>.ts` modules riding each language's existing
+`lazy-content-<code>` bundle, with structure parity (ids, order,
+per-section paragraph counts, themes) enforced by
+`guides.parity.test.ts` and the share-attribution line moved into
+the UI locales (`profile.learn.promptShareAttribution`). Production
+method: one agent per language with the language's glossary, its
+shipped FAQ as register authority, and its locale JSON as the
+verbatim source for every UI label the guides quote.
+
+Still open, in priority order: the print/paper surfaces (already
+`t()`-driven — mostly free), `docs/member-guide.md`, the showcase
+site.
 
 ## Ongoing governance
 

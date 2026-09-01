@@ -2790,7 +2790,8 @@
       "studyPrompts": "مطالعے کی بیٹھک کے سوال",
       "addToPhone": "اپنے فون میں ڈالیں",
       "promptCopy": "ملاقات کے لیے نقل کریں",
-      "promptCopied": "نقل ہو گیا"
+      "promptCopied": "نقل ہو گیا",
+      "promptShareAttribution": "مطالعے کی بیٹھک کا سوال، Understoria کے docs/political-education/README.md سے لیا گیا"
     },
     "communitySettings": {
       "title": "برادری کی ترتیبات",

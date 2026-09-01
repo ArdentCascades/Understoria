@@ -12,8 +12,12 @@
 
 // Condensed in-app opsec guide. Source of truth is
 // docs/opsec-guide.md; this is the version that ships to members
-// offline, kept short enough to scan in a few minutes. English-only
-// for now (same rationale as the member guide).
+// offline, kept short enough to scan in a few minutes. This module
+// carries English (the eager fallback); every other shipped language
+// has an opsec-guide.<code>.ts twin loaded through
+// content/registry.ts — same ids, same section/paragraph structure,
+// enforced by guides.parity.test.ts. Render through
+// getOpsecGuide(locale).
 
 import type { GuideSection } from "./member-guide";
 
@@ -72,3 +76,14 @@ export const OPSEC_GUIDE: readonly GuideSection[] = [
     ],
   },
 ];
+
+import { getContentBundle } from "./registry";
+
+/** The opsec guide in the given UI locale, English for any locale
+ *  without a translated bundle. Synchronous by the same gate every
+ *  content selector relies on (see content/registry.ts). */
+export function getOpsecGuide(
+  locale: string | undefined,
+): readonly GuideSection[] {
+  return getContentBundle(locale).OPSEC_GUIDE;
+}

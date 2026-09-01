@@ -31,3 +31,6 @@ export { EVENT_TEMPLATES_FR as EVENT_TEMPLATES } from "../eventTemplates.fr";
 export { FAQ_SECTIONS_FR as FAQ_SECTIONS } from "../faq.fr";
 export { START_COMMUNITY_FR as START_COMMUNITY } from "../startCommunity.fr";
 export { DESIGN_PRINCIPLES_FR as DESIGN_PRINCIPLES } from "../design-principles.fr";
+export { MEMBER_GUIDE_FR as MEMBER_GUIDE } from "../member-guide.fr";
+export { OPSEC_GUIDE_FR as OPSEC_GUIDE } from "../opsec-guide.fr";
+export { STUDY_PROMPTS_FR as STUDY_PROMPTS } from "../study-prompts.fr";

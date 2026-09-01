@@ -2850,7 +2850,8 @@
       "studyPrompts": "Вопросы для совместных обсуждений",
       "addToPhone": "Добавить на телефон",
       "promptCopy": "Скопировать для встречи",
-      "promptCopied": "Скопировано"
+      "promptCopied": "Скопировано",
+      "promptShareAttribution": "Вопрос для обсуждения из Understoria, взят из docs/political-education/README.md"
     },
     "communitySettings": {
       "title": "Настройки сообщества",

@@ -31,3 +31,6 @@ export { EVENT_TEMPLATES_UR as EVENT_TEMPLATES } from "../eventTemplates.ur";
 export { FAQ_SECTIONS_UR as FAQ_SECTIONS } from "../faq.ur";
 export { START_COMMUNITY_UR as START_COMMUNITY } from "../startCommunity.ur";
 export { DESIGN_PRINCIPLES_UR as DESIGN_PRINCIPLES } from "../design-principles.ur";
+export { MEMBER_GUIDE_UR as MEMBER_GUIDE } from "../member-guide.ur";
+export { OPSEC_GUIDE_UR as OPSEC_GUIDE } from "../opsec-guide.ur";
+export { STUDY_PROMPTS_UR as STUDY_PROMPTS } from "../study-prompts.ur";

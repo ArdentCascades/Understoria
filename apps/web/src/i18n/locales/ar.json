@@ -2910,7 +2910,8 @@
       "studyPrompts": "أسئلة حلقات النقاش",
       "addToPhone": "الإضافة إلى هاتفك",
       "promptCopy": "نسخه لاجتماع",
-      "promptCopied": "نُسخ"
+      "promptCopied": "نُسخ",
+      "promptShareAttribution": "سؤال للنقاش من Understoria، نقلاً عن docs/political-education/README.md"
     },
     "communitySettings": {
       "title": "إعدادات المجتمع",
