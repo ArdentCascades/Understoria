@@ -1,7 +1,14 @@
 # On-device Transcription & Search (V7, issue #477)
 
-Status: **PHASE 1 IN PROGRESS** — engine spike + opt-in. Phases 2–3
-(encrypted transcript twin, search) land behind it.
+Status: **PHASES 1–2 SHIPPED** — engine spike + opt-in (PR #589),
+then the encrypted transcript twin + persistent captions, alongside
+two fixes from the first live tap on hardware: the engine now says
+"the node doesn't offer a model for your language" instead of
+pointing at a Settings download that doesn't exist, and the manifest
+entry is cached beside the model bytes so inference is genuinely
+zero-network once downloaded (the acceptance line "runs fully
+offline after model fetch" held only by accident before). Phase 3
+(search over transcripts) remains.
 
 Optional local captions: a member can turn a voice note into text on
 their own device, for their own eyes, to serve Deaf and
@@ -148,13 +155,16 @@ a cheap phone — no hard model dependency" is enforced structurally:
    zone 1 (beside Read aloud), Transcribe affordance in
    `VoicePlayer` (covers DMs, voice posts, and recorder preview in
    one place), CSP change, operator runbook, strings ×11.
-2. **Encrypted transcript twin.** Dexie v-next `transcripts` table
-   (ciphertext at rest per D3), `SOFT_PURGE_CLASSIFICATION:
-   "cleared"` + real handling in `softPurge`, excluded from the
-   export bundle (transcripts of other people's voices don't travel
-   in a shareable file — same reasoning as `guardianShards`),
-   captions render from the store, "Voice notes ride in `messages`"
-   comment in panic.ts updated.
+2. **Encrypted transcript twin — SHIPPED.** Dexie v40 `transcripts`
+   table (ciphertext at rest per D3, self-boxed; open/seal only in
+   `db/transcripts.ts`), `SOFT_PURGE_CLASSIFICATION: "cleared"` +
+   real handling in `softPurge` (the #476 guard held the door until
+   both existed), excluded from the export bundle (transcripts of
+   other people's voices don't travel in a shareable file — the
+   `guardianShards` reasoning) and absent from `SNAPSHOT_TABLES`.
+   Clips are keyed "msg:<id>" / "blob:<id>"; a stored transcript
+   renders as the caption on mount — each clip transcribed at most
+   once. The recorder preview stays ephemeral (no key, no row).
 3. **Search over transcripts.** Un-skip voice rows in
    `searchAllMessages` when a stored transcript decrypts; same
    normalize/match/highlight pipeline as text messages.

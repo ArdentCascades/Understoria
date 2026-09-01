@@ -86,8 +86,9 @@ export const SOFT_PURGE_CLASSIFICATION: Readonly<
   proposals: "scrubbed",
   projectActivity: "scrubbed",
   // Cleared — the row is the relationship (see the per-table
-  // rationale in softPurge below). Voice notes ride in `messages`,
-  // so audio is covered here with no separate store.
+  // rationale in softPurge below). Voice-note AUDIO rides in
+  // `messages`; their transcript twins are the separate
+  // `transcripts` store below (V7 Phase 2) — both cleared.
   blocks: "cleared",
   previouslyBlocked: "cleared",
   messages: "cleared",
@@ -105,6 +106,10 @@ export const SOFT_PURGE_CLASSIFICATION: Readonly<
   guardianShards: "cleared",
   votes: "cleared",
   pairingLog: "cleared",
+  // Transcripts are spoken words written down — ciphertext at rest,
+  // but the panic contract clears even ciphertext copies of member
+  // speech (#477 Phase 2 rides #476's coverage guard).
+  transcripts: "cleared",
   // Preserved — deliberate survivors of a SOFT purge.
   exchanges: "preserved", // the signed ledger the contract keeps
   vouches: "preserved", // signed trust records, keys not linkable text
@@ -353,6 +358,7 @@ export async function softPurge(): Promise<PurgeResult> {
       db.guardianShards,
       db.votes,
       db.pairingLog,
+      db.transcripts,
     ],
     async () => {
       await db.blocks.clear();
@@ -383,6 +389,10 @@ export async function softPurge(): Promise<PurgeResult> {
       await db.guardianShards.clear();
       await db.votes.clear();
       await db.pairingLog.clear();
+      // Transcript twins: ciphertext of member speech, cleared even
+      // sealed — the audio they caption clears with `messages`, and
+      // no written-down copy may outlive it (#477 Phase 2).
+      await db.transcripts.clear();
     },
   );
   tables.push("blocks");
@@ -402,6 +412,7 @@ export async function softPurge(): Promise<PurgeResult> {
   tables.push("guardianShards");
   tables.push("votes");
   tables.push("pairingLog");
+  tables.push("transcripts");
 
   // Settings deliberately survive: under the threat-model contract
   // ("anonymize all linkable text while preserving the signed exchange

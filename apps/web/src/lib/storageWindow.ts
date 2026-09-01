@@ -72,6 +72,12 @@ export const WINDOW_LOCAL_TABLES = [
   // notes. Tiny free text, never re-downloadable, and the member's
   // working record — the walker never evicts it.
   "journalEntries",
+  // Encrypted transcript twins (db/transcripts.ts, #477 Phase 2):
+  // per-device ciphertext the member paid battery to produce. Small
+  // (text, not audio), private by construction, and re-creatable
+  // only by re-running the engine — the walker leaves them alone;
+  // panic, not pressure, is what deletes transcripts.
+  "transcripts",
 ] as const;
 
 /**

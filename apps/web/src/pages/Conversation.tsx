@@ -42,6 +42,7 @@ import { VoicePlayer } from "@/components/VoicePlayer";
 import { VoiceRecorder, type CapturedClip } from "@/components/VoiceRecorder";
 import { isBlocked } from "@/db/blocks";
 import { clearDraft, loadDraft, saveDraft } from "@/db/drafts";
+import { messageTranscriptKey } from "@/db/transcripts";
 import { pullFederatedMessages } from "@/lib/federationSync";
 import { SYNC_KICK_EVENT } from "@/lib/syncLoop";
 import { formatRelativeTime } from "@/lib/format";
@@ -1112,6 +1113,7 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                       audioBase64={m.voice.audio}
                       mime={m.voice.mime}
                       durationMs={m.voice.durationMs}
+                      transcriptKey={messageTranscriptKey(m.id)}
                     />
                   ) : (
                     // dir="auto" so a message lays itself out by its own
