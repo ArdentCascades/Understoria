@@ -41,6 +41,7 @@ type TranscriptState =
   | { kind: "done"; text: string }
   | { kind: "empty" }
   | { kind: "no_model" }
+  | { kind: "node_no_model" }
   | { kind: "failed" };
 
 export function VoicePlayer({
@@ -73,7 +74,9 @@ export function VoicePlayer({
           ? { kind: "empty" }
           : outcome.kind === "no_model"
             ? { kind: "no_model" }
-            : { kind: "failed" },
+            : outcome.kind === "node_no_model"
+              ? { kind: "node_no_model" }
+              : { kind: "failed" },
     );
   }
 
@@ -150,6 +153,13 @@ export function VoicePlayer({
           {transcript.kind === "no_model" && (
             <p className="text-xs opacity-70">
               {t("messages.voice.transcriptNoModel")}
+            </p>
+          )}
+          {transcript.kind === "node_no_model" && (
+            // Distinct from no_model: pointing at a Settings download
+            // that doesn't exist is a door with nothing behind it.
+            <p className="text-xs opacity-70">
+              {t("messages.voice.transcriptNodeNoModel")}
             </p>
           )}
           {transcript.kind === "failed" && (

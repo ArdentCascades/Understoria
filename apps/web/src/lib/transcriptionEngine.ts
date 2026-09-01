@@ -43,6 +43,7 @@ import {
 import {
   fetchModelManifest,
   modelForLanguage,
+  readCachedModelEntry,
   readModelBytes,
 } from "./transcriptionModels";
 
@@ -65,12 +66,49 @@ export type TranscribeOutcome =
   | { kind: "ok"; text: string }
   /** Recognizer ran fine and heard nothing it could turn into words. */
   | { kind: "empty" }
-  /** No verified model on this device for the app language —
-   *  Settings is where the download lives. */
+  /** A model for this language exists to download, but isn't on
+   *  this device — Settings is where the download lives. */
   | { kind: "no_model" }
+  /** The community's node hosts no model for this language at all —
+   *  pointing the member at a download that doesn't exist would be
+   *  the exact dishonesty this feature is built to avoid. */
+  | { kind: "node_no_model" }
   /** This device (or this deployment's CSP) can't run WASM. */
   | { kind: "unsupported" }
   | { kind: "failed" };
+
+/** Find the model bytes for the app language, offline-first: the
+ *  entry cached at download time, then its bytes — zero network on
+ *  the everyday path. Only a device without a downloaded model asks
+ *  the node's manifest, and only to tell the member the truth:
+ *  "download it" when a model exists, "the node doesn't offer one"
+ *  when it doesn't. */
+async function resolveModelBytes(
+  appLanguage: string | undefined,
+): Promise<
+  | { kind: "bytes"; bytes: ArrayBuffer }
+  | { kind: "no_model" }
+  | { kind: "node_no_model" }
+> {
+  const cached = await readCachedModelEntry(appLanguage);
+  if (cached !== null) {
+    const bytes = await readModelBytes(cached);
+    // A hit means fully-offline transcription; a miss means the OS
+    // evicted the model bytes — fall through and re-offer honestly.
+    if (bytes !== null) return { kind: "bytes", bytes };
+  }
+  const manifest = await fetchModelManifest();
+  if (manifest.kind === "absent") return { kind: "node_no_model" };
+  if (manifest.kind === "unreachable") {
+    // Offline with no downloaded model: "not on this device" is the
+    // actionable truth; Settings has its own network states.
+    return { kind: "no_model" };
+  }
+  const entry = modelForLanguage(manifest, appLanguage);
+  if (entry === null) return { kind: "node_no_model" };
+  const bytes = await readModelBytes(entry);
+  return bytes === null ? { kind: "no_model" } : { kind: "bytes", bytes };
+}
 
 /** Decode a clip to mono float samples. Decoding happens on the
  *  main thread (milliseconds for sub-minute clips) at whatever rate
@@ -117,11 +155,9 @@ export async function transcribeClip(
   if (!isTranscriptionEnabled() || !canRunTranscription()) {
     return { kind: "unsupported" };
   }
-  const manifest = await fetchModelManifest();
-  const entry = modelForLanguage(manifest, appLanguage);
-  if (entry === null) return { kind: "no_model" };
-  const modelBytes = await readModelBytes(entry);
-  if (modelBytes === null) return { kind: "no_model" };
+  const resolved = await resolveModelBytes(appLanguage);
+  if (resolved.kind !== "bytes") return { kind: resolved.kind };
+  const modelBytes = resolved.bytes;
 
   let modelUrl: string | null = null;
   let model: { terminate(): void } | null = null;

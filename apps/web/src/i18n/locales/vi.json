@@ -882,7 +882,8 @@
       "transcriptLine": "Bản chữ: {{text}}",
       "transcriptEmpty": "Không nhận ra được gì — bản chữ trả về trống.",
       "transcriptFailed": "Không chuyển được đoạn này thành chữ. Đoạn ghi âm vẫn phát bình thường.",
-      "transcriptNoModel": "Mô hình chưa có trên thiết bị này — hãy tải trước trong Cài đặt → Chuyển giọng nói thành chữ."
+      "transcriptNoModel": "Mô hình chưa có trên thiết bị này — hãy tải trước trong Cài đặt → Chuyển giọng nói thành chữ.",
+      "transcriptNodeNoModel": "Nút của cộng đồng này chưa cung cấp mô hình chuyển chữ cho ngôn ngữ của bạn, nên chưa có gì để tải. Người vận hành nút có thể thêm vào."
     }
   },
   "projects": {

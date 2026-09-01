@@ -882,7 +882,8 @@
       "transcriptLine": "Transcript: {{text}}",
       "transcriptEmpty": "Nothing recognizable — the transcript came back empty.",
       "transcriptFailed": "Transcription didn't work on this clip. The recording still plays.",
-      "transcriptNoModel": "The model isn't on this device — download it in Settings → Transcription first."
+      "transcriptNoModel": "The model isn't on this device — download it in Settings → Transcription first.",
+      "transcriptNodeNoModel": "This community's node doesn't offer a transcription model for your language yet, so there's nothing to download. The node's operator can add one."
     }
   },
   "projects": {

@@ -88,7 +88,7 @@ export function TranscriptionSection() {
 
   async function handleDownload(entry: ModelEntry) {
     setModel({ kind: "downloading", entry });
-    const result = await downloadModel(entry);
+    const result = await downloadModel(entry, i18n.resolvedLanguage);
     setModel(
       result.kind === "ok"
         ? { kind: "downloaded", entry }

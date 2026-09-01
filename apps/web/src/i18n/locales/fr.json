@@ -882,7 +882,8 @@
       "transcriptLine": "Transcription : {{text}}",
       "transcriptEmpty": "Rien de reconnaissable — la transcription est revenue vide.",
       "transcriptFailed": "La transcription n'a pas fonctionné sur cet enregistrement. La lecture, elle, fonctionne toujours.",
-      "transcriptNoModel": "Le modèle n'est pas sur cet appareil — téléchargez-le d'abord dans Réglages → Transcription."
+      "transcriptNoModel": "Le modèle n'est pas sur cet appareil — téléchargez-le d'abord dans Réglages → Transcription.",
+      "transcriptNodeNoModel": "Le nœud de cette communauté ne propose pas encore de modèle de transcription pour votre langue, il n'y a donc rien à télécharger. La personne qui opère le nœud peut en ajouter un."
     }
   },
   "projects": {
