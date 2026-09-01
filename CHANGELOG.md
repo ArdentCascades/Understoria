@@ -84,6 +84,24 @@ include breaking changes.
   same rails as every other language.
 
 ### Fixed
+- **The Print button no longer plays dead in the installed iPhone
+  app.** Every print surface rests on the browser's own dialog
+  (`window.print()` — no popups, no PDF library), and in the
+  installed iOS home-screen app that call is a silent no-op:
+  standalone WebKit ships no print UI, so the button on all seven
+  print sheets — upcoming events, the invite poster, the board view,
+  event flyers, sign-in sheets, the tabling guide, the outage kit —
+  and on the recovery kit did nothing at all, with nothing to say
+  why. Now the app notices it is that installed copy (reusing the
+  install guide's iPhone/iPad detection) and swaps the dead button
+  for what actually works, in every language: it says plainly that
+  this is an iPhone limitation and not the member's doing, walks
+  through the Full Page screenshot route (which prints and saves as
+  PDF), and names Safari honestly — printing works there, but Safari
+  is its own copy of Understoria with its own sign-in. The recovery
+  kit points at its Download button instead, which was always the
+  sturdier path. Android's installed app and every browser keep the
+  one-tap Print button they already had.
 - **The Arabic corpus and locale no longer ride in everyone's first
   download.** Every language's translations are meant to load as
   their own lazily-fetched chunks, but the build config was never

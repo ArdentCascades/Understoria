@@ -1919,6 +1919,7 @@
     "created": "Your kit is ready. Save the file somewhere that isn't this device, or print it — a drawer at home beats a folder on this phone.",
     "download": "Download file",
     "print": "Print",
+    "iosAppPrint": "Printing isn't available in the installed app — an iPhone limitation. Save the file instead: it holds the same kit and prints from any other device.",
     "done": "Done",
     "storageHint": "Store it like a spare house key: out of sight, away from this device, and where you'll find it in a bad week. Make a new kit if you change communities.",
     "errorMismatch": "The passphrases don't match.",
@@ -3619,6 +3620,11 @@
   },
   "print": {
     "printButton": "Print",
+    "iosApp": {
+      "explain": "The installed app can't open the print dialog — an iPhone and iPad limitation, not something you did.",
+      "screenshot": "To put this page on paper: take a screenshot, tap its preview, and choose Full Page — from there you can print it or save it as a PDF.",
+      "safari": "Printing works directly in Safari — though Safari is its own copy of Understoria, so it shows your community's data only if you use Understoria there too."
+    },
     "footer": "Printed from Understoria on {{date}} — paper doesn't sync or purge. When this sheet goes stale, recycle it and print a fresh one.",
     "invite": {
       "headline": "You're invited to our mutual-aid network",

@@ -1919,6 +1919,7 @@
     "created": "Tu kit está listo. Guarda el archivo fuera de este dispositivo, o imprímelo — un cajón en casa es mejor que una carpeta en este teléfono.",
     "download": "Descargar archivo",
     "print": "Imprimir",
+    "iosAppPrint": "Imprimir no está disponible en la app instalada — una limitación del iPhone. Guarda el archivo: contiene el mismo kit y se imprime desde cualquier otro dispositivo.",
     "done": "Listo",
     "storageHint": "Guárdalo como una llave de repuesto: fuera de la vista, lejos de este dispositivo, y donde lo encuentres en una mala semana. Crea un kit nuevo si cambias de comunidad.",
     "errorMismatch": "Las frases no coinciden.",
@@ -3619,6 +3620,11 @@
   },
   "print": {
     "printButton": "Imprimir",
+    "iosApp": {
+      "explain": "La app instalada no puede abrir el diálogo de impresión — es una limitación del iPhone y el iPad, no algo que hiciste mal.",
+      "screenshot": "Para pasar esta página al papel: haz una captura de pantalla, toca su vista previa y elige la opción de página completa — desde ahí puedes imprimirla o guardarla como PDF.",
+      "safari": "En Safari imprimir funciona directamente — aunque Safari es su propia copia de Understoria, así que solo muestra los datos de tu comunidad si también usas Understoria ahí."
+    },
     "footer": "Impreso desde Understoria el {{date}} — el papel no se sincroniza ni se purga. Cuando esta hoja quede vieja, recíclala e imprime una nueva.",
     "invite": {
       "headline": "Estás invitada a nuestra red de apoyo mutuo",

@@ -1919,6 +1919,7 @@
     "created": "Bộ khôi phục của bạn đã sẵn sàng. Lưu tệp ở nơi nào không phải thiết bị này, hoặc in ra — một ngăn kéo ở nhà tốt hơn một thư mục trong chính chiếc điện thoại này.",
     "download": "Tải tệp về",
     "print": "In",
+    "iosAppPrint": "Không in được trong ứng dụng đã cài — giới hạn của iPhone. Hãy tải tệp về thay thế: tệp chứa đúng bộ khôi phục đó và in được từ bất kỳ thiết bị nào khác.",
     "done": "Xong",
     "storageHint": "Cất nó như một chiếc chìa khóa nhà dự phòng: khuất mắt, xa thiết bị này, và ở nơi bạn tìm ra được trong một tuần tồi tệ. Làm một bộ mới nếu bạn đổi cộng đồng.",
     "errorMismatch": "Hai cụm mật khẩu không khớp nhau.",
@@ -3619,6 +3620,11 @@
   },
   "print": {
     "printButton": "In",
+    "iosApp": {
+      "explain": "Ứng dụng đã cài không mở được hộp thoại in — đây là giới hạn của iPhone và iPad, không phải bạn làm sai.",
+      "screenshot": "Để đưa trang này ra giấy: chụp màn hình, nhấn vào bản xem trước rồi chọn chế độ toàn trang — từ đó có thể in hoặc lưu thành PDF.",
+      "safari": "Trong Safari, nút in hoạt động bình thường — nhưng Safari là một bản Understoria riêng, nên trang này chỉ có dữ liệu cộng đồng của bạn nếu bạn cũng dùng Understoria ở đó."
+    },
     "footer": "In từ Understoria ngày {{date}} — giấy không tự đồng bộ hay tự xóa. Khi tờ này cũ đi, đem tái chế và in một tờ mới.",
     "invite": {
       "headline": "Mời bạn vào mạng lưới tương trợ của cộng đồng",
