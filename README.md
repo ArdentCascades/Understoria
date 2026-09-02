@@ -141,10 +141,9 @@ Understoria is a platform where communities exchange help, tracked through **tim
   Vietnamese, Russian, Arabic and Urdu — both right-to-left, with the
   whole interface mirrored — Tibetan, expedited for
   communities responding to the 2026 Tibet flood, and Indonesian, the
-  first of the demand-driven wave. Eleven carry the
+  first of the demand-driven wave. All twelve carry the
   whole authored corpus translated, not just the buttons: the help
-  pages, the project playbooks, the event templates (Indonesian is
-  interface-first for now, and the app says so in Settings).
+  pages, the project playbooks, the event templates.
   Ten are newly translated and have not yet been read by a native
   speaker — the app says that too.
 - **Federation** — Each community runs its own node. Nodes can peer with each other to share needs and offers across groups. No central server, no single point of failure.

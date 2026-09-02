@@ -162,17 +162,17 @@ export const LANGUAGES = [
   // Indonesian opens the demand-driven wave (docs/i18n-expansion.md
   // "Which languages"): Latin script, single CLDR plural category
   // (id.json follows the zh/bo precedent — _one/_other both exist
-  // with identical strings), no rendering spike needed. Ships
-  // UI-first: content is "ui-only" until the id corpus lands on the
-  // Phase 2 rails, so the Settings language card discloses the
-  // English-content fallback honestly.
+  // with identical strings), no rendering spike needed. The full
+  // authored corpus (templates, tips, steps, FAQ, guides,
+  // principles) shipped on the Phase 2 rails
+  // (content/bundles/id.ts), so content is "full" like the others.
   {
     code: "id",
     endonym: "Bahasa Indonesia",
     dir: "ltr",
     speakLang: "id",
     reviewStatus: "new",
-    content: "ui-only",
+    content: "full",
   },
 ] as const satisfies readonly LanguageInfo[];
 
