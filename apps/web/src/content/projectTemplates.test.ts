@@ -382,7 +382,7 @@ describe("getProjectTemplates", () => {
   });
 
   it("falls back to English for an unknown locale", () => {
-    expect(getProjectTemplates("sw")).toBe(PROJECT_TEMPLATES_EN);
+    expect(getProjectTemplates("xx")).toBe(PROJECT_TEMPLATES_EN);
   });
 });
 

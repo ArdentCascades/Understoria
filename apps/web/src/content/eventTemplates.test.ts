@@ -177,7 +177,7 @@ describe("eventTemplates — accessors", () => {
     expect(getEventTemplates("bo")).toBe(EVENT_TEMPLATES_BO);
     expect(getEventTemplates("ur")).toBe(EVENT_TEMPLATES_UR);
     expect(getEventTemplates("id")).toBe(EVENT_TEMPLATES_ID);
-    expect(getEventTemplates("sw")).toBe(EVENT_TEMPLATES_EN);
+    expect(getEventTemplates("xx")).toBe(EVENT_TEMPLATES_EN);
   });
 
   it("looks up a template by id, locale-aware", () => {

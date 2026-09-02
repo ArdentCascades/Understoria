@@ -87,8 +87,8 @@ describe("HelpPage — locale-aware FAQ", () => {
     // locale the registry doesn't know at all: the selector must
     // fall through to the English source rather than render an
     // empty page.
-    expect(getFaqSections("sw")).toBe(getFaqSections("en"));
-    await i18n.changeLanguage("sw");
+    expect(getFaqSections("xx")).toBe(getFaqSections("en"));
+    await i18n.changeLanguage("xx");
     render(<HelpPage />);
     expect(container.textContent).toContain("Posts and exchanges");
   });
