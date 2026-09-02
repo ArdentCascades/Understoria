@@ -10,6 +10,23 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Maktaba yote sasa inasomeka kwa Kiswahili — the whole library
+  now reads in Swahili.** All 64 project playbooks with their task
+  guides and tips, the 14 event templates, the help pages, the
+  start-a-community guide, the design principles, and the member,
+  opsec, and study guides. The words carry the same care as the
+  interface: an hour of help is always saa (never money words, and
+  never confusable with o'clock — durations say masaa, counts
+  carry msaada beside them); a work day is kazi ya pamoja;
+  vouching stays on the everyday dhamini root while dhamana (bail)
+  appears only in its literal court sense inside the court-support
+  playbook; skills use the same everyday verbs across all 64
+  playbooks so matching works. Advice localizes honestly for East
+  Africa: kilo and lita, afisa ugani, zahanati, Msalaba Mwekundu,
+  ORS, clock times in the region's own convention. The "content
+  still in English" note for Kiswahili in Settings retires. Still
+  a new AI-assisted translation awaiting a native-speaker read —
+  the app says so.
 - **Kiswahili.** The thirteenth language: the entire interface —
   all ~2,900 strings — now speaks Swahili, the kind spoken between
   neighbors, not the kind banks and NGOs write. Help is msaada,

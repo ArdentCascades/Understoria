@@ -22,6 +22,7 @@ import { FAQ_SECTIONS_AR } from "./faq.ar";
 import { FAQ_SECTIONS_BO } from "./faq.bo";
 import { FAQ_SECTIONS_UR } from "./faq.ur";
 import { FAQ_SECTIONS_ID } from "./faq.id";
+import { FAQ_SECTIONS_SW } from "./faq.sw";
 
 // Guardrail against translation drift. The FAQ ids are stable URL
 // fragments shared across languages (`/help#confirm-exchange`), so
@@ -42,6 +43,7 @@ describe.each([
   ["Tibetan", FAQ_SECTIONS_BO],
   ["Urdu", FAQ_SECTIONS_UR],
   ["Indonesian", FAQ_SECTIONS_ID],
+  ["Swahili", FAQ_SECTIONS_SW],
 ] as const)("FAQ parity — English ↔ %s", (localeName, FAQ_SECTIONS_TR) => {
   it("has the same section ids in both languages", () => {
     const enSectionIds = FAQ_SECTIONS.map((s) => s.id).sort();
