@@ -62,6 +62,7 @@ const LOCALE_LOADERS: Record<
   bo: () => import("./locales/bo.json"),
   ur: () => import("./locales/ur.json"),
   id: () => import("./locales/id.json"),
+  sw: () => import("./locales/sw.json"),
 };
 
 // Minimal i18next backend over the loader map. `supportedLngs` below

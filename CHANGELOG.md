@@ -10,6 +10,21 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Kiswahili.** The thirteenth language: the entire interface —
+  all ~2,900 strings — now speaks Swahili, the kind spoken between
+  neighbors, not the kind banks and NGOs write. Help is msaada,
+  never a "huduma" (nothing here is for sale); hours are saa,
+  never money-words; vouching uses the everyday dhamini of
+  answering for someone (never dhamana, which is bail); guardians
+  of your recovery pieces are washika amana; the community
+  dashboard is Mdundo — the drumbeat. Harambee stays out of the
+  buttons deliberately: in Kenya a harambee is a cash fundraiser,
+  and this timebank has no money in it. Plurals agree properly
+  with their noun classes throughout (mdhamini mmoja, wadhamini
+  wawili). The help pages and playbooks still read in English for
+  now — Settings says so honestly — and the full Kiswahili corpus
+  is next. A native-speaker review is welcome; the app discloses
+  that none has happened yet.
 - **Everything now reads in Indonesian — the full library, not just
   the buttons.** All 64 project playbooks with their step-by-step
   task guides and field-tested tips, the 14 event templates, the
