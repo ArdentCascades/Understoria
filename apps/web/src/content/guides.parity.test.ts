@@ -24,6 +24,7 @@ import { MEMBER_GUIDE_AR } from "./member-guide.ar";
 import { MEMBER_GUIDE_BO } from "./member-guide.bo";
 import { MEMBER_GUIDE_UR } from "./member-guide.ur";
 import { MEMBER_GUIDE_ID } from "./member-guide.id";
+import { MEMBER_GUIDE_SW } from "./member-guide.sw";
 import { OPSEC_GUIDE_ES } from "./opsec-guide.es";
 import { OPSEC_GUIDE_FR } from "./opsec-guide.fr";
 import { OPSEC_GUIDE_PT } from "./opsec-guide.pt";
@@ -35,6 +36,7 @@ import { OPSEC_GUIDE_AR } from "./opsec-guide.ar";
 import { OPSEC_GUIDE_BO } from "./opsec-guide.bo";
 import { OPSEC_GUIDE_UR } from "./opsec-guide.ur";
 import { OPSEC_GUIDE_ID } from "./opsec-guide.id";
+import { OPSEC_GUIDE_SW } from "./opsec-guide.sw";
 import { STUDY_PROMPTS_ES } from "./study-prompts.es";
 import { STUDY_PROMPTS_FR } from "./study-prompts.fr";
 import { STUDY_PROMPTS_PT } from "./study-prompts.pt";
@@ -46,6 +48,7 @@ import { STUDY_PROMPTS_AR } from "./study-prompts.ar";
 import { STUDY_PROMPTS_BO } from "./study-prompts.bo";
 import { STUDY_PROMPTS_UR } from "./study-prompts.ur";
 import { STUDY_PROMPTS_ID } from "./study-prompts.id";
+import { STUDY_PROMPTS_SW } from "./study-prompts.sw";
 
 // Guardrail against translation drift for the guide corpus (member
 // guide, opsec guide, study prompts) — same posture as
@@ -70,6 +73,7 @@ const GUIDE_LOCALES: ReadonlyArray<
   ["Tibetan", MEMBER_GUIDE_BO, OPSEC_GUIDE_BO],
   ["Urdu", MEMBER_GUIDE_UR, OPSEC_GUIDE_UR],
   ["Indonesian", MEMBER_GUIDE_ID, OPSEC_GUIDE_ID],
+  ["Swahili", MEMBER_GUIDE_SW, OPSEC_GUIDE_SW],
 ];
 
 const PROMPT_LOCALES: ReadonlyArray<[string, readonly StudyPrompt[]]> = [
@@ -84,6 +88,7 @@ const PROMPT_LOCALES: ReadonlyArray<[string, readonly StudyPrompt[]]> = [
   ["Tibetan", STUDY_PROMPTS_BO],
   ["Urdu", STUDY_PROMPTS_UR],
   ["Indonesian", STUDY_PROMPTS_ID],
+  ["Swahili", STUDY_PROMPTS_SW],
 ];
 
 function checkGuideAgainstEnglish(

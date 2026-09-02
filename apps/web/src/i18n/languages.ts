@@ -179,16 +179,17 @@ export const LANGUAGES = [
   // _one/_other pairs really differ — noun-class concords). Until
   // this entry existed the test suite used "sw" as its
   // unknown-locale fallback probe; those probes moved to "xx" in
-  // the same PR. Ships UI-first: content is "ui-only" until the sw
-  // corpus lands on the Phase 2 rails, so the Settings language
-  // card discloses the English-content fallback honestly.
+  // the same PR. Shipped UI-first; the full authored corpus
+  // (templates, tips, steps, FAQ, guides, principles) has since
+  // shipped on the Phase 2 rails (content/bundles/sw.ts), so
+  // content is "full" like the others.
   {
     code: "sw",
     endonym: "Kiswahili",
     dir: "ltr",
     speakLang: "sw",
     reviewStatus: "new",
-    content: "ui-only",
+    content: "full",
   },
 ] as const satisfies readonly LanguageInfo[];
 

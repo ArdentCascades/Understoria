@@ -35,3 +35,4 @@ await ensureContent("ar");
 await ensureContent("bo");
 await ensureContent("ur");
 await ensureContent("id");
+await ensureContent("sw");

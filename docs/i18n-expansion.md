@@ -114,9 +114,23 @@ Swahili's genuine one/other plural split makes it the first
 post-Slavic language whose _one/_other pairs really differ —
 concords and all. Registering sw forced the unknown-locale
 fallback probes (which had used "sw" precisely because it wasn't
-shipped) to move to "xx", a code that can never ship. Registry
-carries `reviewStatus: "new"` + `content: "ui-only"`; the sw
-corpus is next; Tagalog and Bengali (spike first) follow.
+shipped) to move to "xx", a code that can never ship. **The sw
+corpus then SHIPPED** on the Phase 2 rails (11-agent fleet;
+independent fragment validation; assembly with corpus-wide
+skills-tag unification — nine divergent families resolved by
+majority with the injectivity check — and a cross-fragment
+repointing pass that replaced six English sibling-template
+references with the owning fragments' Swahili names). Register
+work on the record: Benki ya Muda's "one hour = one credit" is
+«saa moja ya msaada ni saa moja» with zero money vocabulary; rent
+deposits stay «deposit» (dhamana is bail, and even bail appears
+only literally inside the court-support template); deni only in
+explicit «si deni» rejection lines; the disability slogan keeps
+its first person («Hakuna lolote kuhusu sisi bila sisi»); the East
+African clock trap is disambiguated string by string (masaa for
+durations, msaada context beside counts, clock times in EA
+convention words). All thirteen registry entries are
+`content: "full"`. Tagalog and Bengali (spike first) follow.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from

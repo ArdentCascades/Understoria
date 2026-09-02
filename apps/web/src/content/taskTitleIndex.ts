@@ -124,6 +124,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ajak orang untuk giliran bersih-bersih dan isi ulang",
       "Bangun hubungan dengan pemasok",
       "Siapkan kontak untuk masalah"
+    ],
+    "sw": [
+      "Tafuta mwenyeji mwenye umeme na wapita njia",
+      "Tafuta friji na kibanda cha kuikinga",
+      "Weka kanuni za msingi na lebo",
+      "Kusanya zamu ya usafi na kujaza upya",
+      "Jenga mahusiano ya vyanzo vya chakula",
+      "Weka mawasiliano ya matatizo"
     ]
   },
   "community-garden": {
@@ -234,6 +242,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tanam sesuai iklim dan musimmu",
       "Atur giliran siram dan cabut gulma",
       "Rencanakan panen dan kelebihannya"
+    ],
+    "sw": [
+      "Pata ardhi na kibali",
+      "Pima udongo na upange matuta",
+      "Kusanya vifaa na mjenge",
+      "Amueni namna ya kugawana",
+      "Panda kulingana na msimu wenu",
+      "Weka zamu ya kumwagilia na kupalilia",
+      "Panga mavuno na ziada"
     ]
   },
   "tool-lending-library": {
@@ -344,6 +361,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Siapkan pencatatan keluar",
       "Latih para pustakawanmu",
       "Rawat dan kembangkan"
+    ],
+    "sw": [
+      "Tafuta hifadhi na saa za ufunguzi",
+      "Kusanya na kupanga zana",
+      "Orodhesha kila kitu",
+      "Andika kanuni za kuazima",
+      "Anzisha daftari la kuazimisha",
+      "Fundisha wakutubi wenu",
+      "Tunza na ukuze"
     ]
   },
   "neighborhood-care-network": {
@@ -454,6 +480,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Buat rencana eskalasi",
       "Koordinasikan bantuan praktis",
       "Dukung juga para penolongnya"
+    ],
+    "sw": [
+      "Tambua walio karibu",
+      "Kusanya na kuchunguza waliojitokeza",
+      "Unganisha kwa busara",
+      "Weka utaratibu wa kujulia hali",
+      "Andaa mpango wa dharura",
+      "Ratibu msaada wa vitendo",
+      "Wasaidie waliojitokeza pia"
     ]
   },
   "emergency-preparedness": {
@@ -564,6 +599,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tentukan titik-titik aman",
       "Adakan latihan atau malam informasi",
       "Tetapkan peran untuk “hari-H”"
+    ],
+    "sw": [
+      "Tambua hatari za mtaa wenu",
+      "Jenga mti wa mawasiliano",
+      "Panga mawasiliano bila mtandao",
+      "Hifadhi vifaa vya pamoja",
+      "Tambua sehemu salama",
+      "Fanya zoezi au jioni ya maelezo",
+      "Panga nani anafanya nini siku yenyewe"
     ]
   },
   "free-store": {
@@ -662,6 +706,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tata supaya orang bisa memilih dengan bermartabat",
       "Isi acara dengan penolong",
       "Urus sisa barang"
+    ],
+    "sw": [
+      "Chagua muundo na nafasi",
+      "Weka vigezo vya vitu vinavyopokelewa",
+      "Panga upokeaji na upangaji",
+      "Panga vitu watu waangalie kwa heshima",
+      "Panga watu wa tukio",
+      "Shughulikia mabaki"
     ]
   },
   "skill-share": {
@@ -748,6 +800,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Cari tempat dan waktunya",
       "Susun jadwal",
       "Buat mudah diikuti semua orang"
+    ],
+    "sw": [
+      "Uliza ujuzi na shauku",
+      "Tafuta na kuandaa walimu",
+      "Tafuta nafasi na wakati",
+      "Tengeneza ratiba",
+      "Ifanye ifikike kwa wote"
     ]
   },
   "bulk-buying-coop": {
@@ -858,6 +917,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Atur pengantaran dan tempat memilah",
       "Bagi pesanan dengan adil",
       "Gilir pekerjaannya"
+    ],
+    "sw": [
+      "Kusanya kikundi cha ununuzi",
+      "Tafuta muuzaji wa jumla",
+      "Anzisha uagizaji",
+      "Shughulikia pesa kwa uwazi",
+      "Panga upokeaji na mahali pa kugawa",
+      "Gawa maagizo kwa haki",
+      "Pokezaneni kazi"
     ]
   },
   "repair-cafe": {
@@ -956,6 +1024,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Buat alur penerimaan barang",
       "Jaga keselamatan dan ekspektasi",
       "Sediakan suku cadang dan bahan habis pakai"
+    ],
+    "sw": [
+      "Tafuta mafundi kwa fani zao",
+      "Andaa vituo vya kutengeneza",
+      "Panga tarehe inayojirudia",
+      "Tengeneza utaratibu wa mapokezi",
+      "Simamia usalama na matarajio",
+      "Hifadhi vipuri na vitu vinavyotumika sana"
     ]
   },
   "rides-transportation": {
@@ -1066,6 +1142,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tentukan apa saja yang tercakup",
       "Atur biayanya",
       "Jaga penumpang dan pengemudi tetap aman"
+    ],
+    "sw": [
+      "Tafuta na uchunguze madereva",
+      "Panga mambo ya bima na uwajibikaji",
+      "Anzisha mfumo wa kuomba safari",
+      "Jenga utaratibu wa kupanga safari",
+      "Wekeni wazi safari zinazohusika",
+      "Panga mambo ya mafuta",
+      "Walinde abiria na madereva"
     ]
   },
   "tenant-union": {
@@ -1176,6 +1261,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Adakan kelas kenali-hakmu",
       "Susun protokol tanggap pengusiran",
       "Jalin hubungan dengan bantuan hukum dan dukungan lanjutan"
+    ],
+    "sw": [
+      "Unda kamati ndogo ya waanzilishi",
+      "Chora ramani ya majengo na shida za wapangaji",
+      "Kusanya taarifa sahihi za haki za wapangaji",
+      "Jengeni mfumo wa mawasiliano wa haraka",
+      "Andaa kikao cha kujua haki zako",
+      "Andaeni utaratibu wa kukabili kufukuzwa",
+      "Unganeni na msaada wa kisheria wa kudumu"
     ]
   },
   "childcare-collective": {
@@ -1286,6 +1380,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Susun aturan kesehatan, alergi, dan darurat",
       "Latih pengasuh soal dasar-dasarnya",
       "Jalankan sesi uji coba dan kumpulkan masukan"
+    ],
+    "sw": [
+      "Kusanya familia za mwanzo na mkubaliane mfumo",
+      "Wekeni viwango vya usalama na uchunguzi",
+      "Tafuteni mahali na mkinge kwa ajili ya watoto",
+      "Anzisheni ratiba na mfumo wa saa",
+      "Wekeni taratibu za afya, aleji, na dharura",
+      "Fundisheni wanaotunza watoto mambo ya msingi",
+      "Fanyeni kikao cha majaribio na mkusanye maoni"
     ]
   },
   "community-composting": {
@@ -1396,6 +1499,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Perjelas apa yang diterima",
       "Ajak dan latih tim rawat bergiliran",
       "Bagikan kompos jadi"
+    ],
+    "sw": [
+      "Tafuta eneo la mboji",
+      "Chagua mbinu ya mboji",
+      "Pata mapipa na vifaa",
+      "Anzisheni mfumo wa ukusanyaji",
+      "Wekeni wazi kinachopokelewa",
+      "Tafuteni na mfundishe zamu za matunzo",
+      "Gawanyeni mboji iliyokamilika"
     ]
   },
   "free-little-library": {
@@ -1482,6 +1594,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Isi koleksi awalnya",
       "Pasang papan tanda dan aturan sederhana",
       "Cari orang yang mau merawatnya"
+    ],
+    "sw": [
+      "Jenga au pata sanduku lisiloingiza maji",
+      "Chagua na uandae mahali",
+      "Jaza mkusanyo wa kwanza",
+      "Weka bango na desturi rahisi",
+      "Tafuta mtunzaji"
     ]
   },
   "community-first-aid-training": {
@@ -1580,6 +1699,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ajak peserta",
       "Jalankan sesi pelatihan",
       "Bagikan kit dan jadwalkan penyegaran"
+    ],
+    "sw": [
+      "Shirikiana na wakufunzi wenye vyeti",
+      "Pata vifaa",
+      "Tafuta mahali na upange vikao",
+      "Karibisha washiriki",
+      "Endesha vikao vya mafunzo",
+      "Gawa kit na vikao vya kurudia"
     ]
   },
   "time-bank": {
@@ -1690,6 +1817,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Buat direktori tawaran bantuan",
       "Koordinasikan dan jodohkan pertukaran",
       "Bangun kebiasaan percaya dan aman"
+    ],
+    "sw": [
+      "Karibisha wanajumuiya wa mwanzo na uorodheshe ujuzi",
+      "Chagua mfumo wa kuandika saa",
+      "Wekeni kanuni",
+      "Wakaribishe wanajumuiya wapya",
+      "Zindua orodha ya msaada unaotolewa",
+      "Ratibu na uunganishe mabadilishano",
+      "Jengeni desturi za kuaminiana na usalama"
     ]
   },
   "solidarity-fund": {
@@ -1800,6 +1936,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Mulai penggalangan dana",
       "Susun alur keputusan dan penyaluran",
       "Kabarkan hasilnya secara terbuka"
+    ],
+    "sw": [
+      "Unda timu ndogo ya kuutunza mfuko",
+      "Panga ushikaji wa pesa ulio wazi",
+      "Weka vigezo vya kuomba na vya kutoa pesa",
+      "Tengeneza fomu fupi, rahisi ya kuomba msaada",
+      "Anzisha ukusanyaji wa pesa",
+      "Jenga mchakato wa maamuzi na utoaji",
+      "Toa taarifa kwa uwazi"
     ]
   },
   "diaper-hygiene-bank": {
@@ -1886,6 +2031,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Pilah dan data stok per ukuran dan jenis",
       "Sepakati aturan pembagian yang adil",
       "Jadwalkan pembagian dan siapkan orangnya"
+    ],
+    "sw": [
+      "Tafuta mahali pa kuhifadhia na kituo cha kugawia",
+      "Panga vyanzo vya vifaa",
+      "Panga na uhesabu kwa saizi na aina",
+      "Weka utaratibu wa kugawa ulio wa haki",
+      "Panga siku za kugawa na uwapange watu"
     ]
   },
   "community-bike-workshop": {
@@ -1984,6 +2136,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ajak montir yang mau membantu",
       "Tetapkan jam buka dan program rakit-bawa-pulang",
       "Bangun kebiasaan keselamatan"
+    ],
+    "sw": [
+      "Tafuta nafasi ya karakana",
+      "Kusanya zana na stendi ya kutengenezea",
+      "Kusanya baiskeli na vipuri vilivyotolewa",
+      "Tafuta mafundi waliojitokeza",
+      "Weka nyakati za kufungua na utaratibu wa jifunze-upate-baiskeli",
+      "Weka desturi za usalama"
     ]
   },
   "newcomer-translation-network": {
@@ -2082,6 +2242,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Buat bahan orientasi",
       "Tawarkan pendampingan ke janji temu",
       "Tetapkan kebiasaan privasi dan keamanan"
+    ],
+    "sw": [
+      "Tafuta waliojitokeza wenye lugha mbili au zaidi",
+      "Chora ramani ya vituo na mashirika ya hapa kwenu",
+      "Jenga mfumo wa kupokea na kuunganisha",
+      "Tengeneza vifaa vya kumfahamisha mgeni",
+      "Toa usindikizaji kwenye miadi",
+      "Weka desturi za faragha na usalama"
     ]
   },
   "community-meal": {
@@ -2192,6 +2360,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Kumpulkan kru masak dan saji",
       "Tetapkan jadwal dan kabarkan",
       "Jalankan sesi makan dan beres-beres"
+    ],
+    "sw": [
+      "Tafuta jiko na mahali pa kulia",
+      "Shughulikia usalama wa chakula na vibali",
+      "Jenga mtiririko wa chakula",
+      "Panga menyu kwa wingi, mahitaji ya vyakula, na aleji",
+      "Kusanya timu ya kupika na kupakua",
+      "Weka ratiba na usambaze habari",
+      "Endesha mlo na usafishe"
     ]
   },
   "seed-library": {
@@ -2278,6 +2455,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tata dan beri label koleksinya",
       "Tetapkan kebiasaan pinjam dan berbagi",
       "Jaga daya tumbuh dan isi ulang"
+    ],
+    "sw": [
+      "Tafuta mwenyeji na mfumo wa kuhifadhi",
+      "Tafuta mbegu za kuanzia",
+      "Panga na uweke lebo mkusanyo",
+      "Weka desturi za kuchukua na kushiriki",
+      "Tunza uotaji na ujaze upya"
     ]
   },
   "digital-literacy": {
@@ -2388,6 +2572,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Rancang kurikulum pemula",
       "Jadwalkan kelas dan jam bantuan bebas",
       "Tetapkan aturan keamanan data dan pengembalian"
+    ],
+    "sw": [
+      "Kusanya na uandae vifaa",
+      "Weka mfumo wa kuazimana",
+      "Panga upatikanaji wa intaneti",
+      "Tafuta na uandae walimu",
+      "Buni mtaala wa wanaoanza",
+      "Panga madarasa na msaada wa kuingia tu",
+      "Weka kanuni za usalama wa data na urudishaji"
     ]
   },
   "weatherization-brigade": {
@@ -2486,6 +2679,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Cari bahan dan alat",
       "Bereskan keselamatan dan tanggung jawab",
       "Jadwalkan dan jalankan gotong royong"
+    ],
+    "sw": [
+      "Tafuta waliojitokeza wenye ujuzi",
+      "Weka mpaka wa kazi",
+      "Jenga mfumo wa kupokea na kukagua",
+      "Tafuta vifaa na zana",
+      "Shughulikia usalama na uwajibikaji",
+      "Panga na uendeshe siku za kazi ya pamoja"
     ]
   },
   "pet-food-bank": {
@@ -2572,6 +2773,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Pilah dan data stok per jenis hewan dan ukuran",
       "Tetapkan aturan pembagian",
       "Jadwalkan dan siapkan orang untuk pembagian"
+    ],
+    "sw": [
+      "Tafuta mahali pa kuhifadhi na pa kugawia",
+      "Jenga njia za kupata chakula cha wanyama",
+      "Panga na uhesabu kwa aina ya mnyama na ukubwa",
+      "Weka utaratibu wa kugawa",
+      "Panga ratiba na watu wa siku za kugawa"
     ]
   },
   "youth-mentorship": {
@@ -2682,6 +2890,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Urus pendaftaran, alergi, dan info darurat",
       "Cari camilan dan perlengkapan",
       "Jalankan sesi dan sapa keluarga"
+    ],
+    "sw": [
+      "Pata mahali salama na upange saa zake",
+      "Weka viwango vya usalama wa watoto na ukaguzi",
+      "Tafuta na ufundishe waelekezi",
+      "Panga shughuli",
+      "Shughulikia uandikishaji, mzio, na taarifa za dharura",
+      "Tafuta vitafunio na vifaa",
+      "Endesha vikao na uwasiliane na familia"
     ]
   },
   "gleaning-network": {
@@ -2792,6 +3009,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Bereskan tanggung jawab hukum dan keamanan pangan",
       "Bangun jalur penyaluran",
       "Jalankan pemungutan dan catat beratnya"
+    ],
+    "sw": [
+      "Tafuta vyanzo vya mazao",
+      "Kusanya timu ya kuokota",
+      "Panga usafiri na hifadhi",
+      "Weka utaratibu wa kuita timu",
+      "Shughulikia sheria na usalama wa chakula",
+      "Jenga njia za kugawa",
+      "Endesha uokotaji na upime kilo"
     ]
   },
   "community-mediation": {
@@ -2902,6 +3128,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tegakkan kerahasiaan dan aturan main",
       "Kabarkan bahwa mediasi ini ada",
       "Pantau hasil dan rawat para penengah"
+    ],
+    "sw": [
+      "Tafuta na ufundishe wasuluhishi",
+      "Weka utaratibu wa kuomba na kupokea",
+      "Tafuta mahali pa kukutania pasipoegemea",
+      "Weka mipaka ya mtakachopokea",
+      "Weka usiri na kanuni za msingi",
+      "Sambaza habari",
+      "Fuatilia matokeo na uwatunze wasuluhishi"
     ]
   },
   "reentry-support": {
@@ -3012,6 +3247,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Hubungkan ke pekerjaan dan tempat tinggal",
       "Tawarkan pendampingan sebaya",
       "Tetapkan praktik privasi dan batasan"
+    ],
+    "sw": [
+      "Jenga orodha ya msaada na washirika",
+      "Tafuta na ufundishe watu wa kusaidia",
+      "Andaa mapokezi na kusikiliza mahitaji",
+      "Saidia nyaraka na msaada wa serikali",
+      "Unganisha na ajira na makazi",
+      "Unganisha na waliopitia wenyewe",
+      "Weka taratibu za faragha na mipaka"
     ]
   },
   "community-wood-bank": {
@@ -3122,6 +3366,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Bangun alur permintaan dan pengantaran",
       "Tetapkan urutan pembagian",
       "Jadwalkan gotong royong dan pengeringan"
+    ],
+    "sw": [
+      "Pata chanzo cha kuni",
+      "Tafuta mahali pa kuchania na kuhifadhi",
+      "Pata zana na vifaa vya kinga",
+      "Kusanya na ufundishe timu ya kuni",
+      "Jenga utaratibu wa kuomba na kufikisha",
+      "Weka vigezo vya kugawa",
+      "Panga siku za kazi ya pamoja na ukaushaji"
     ]
   },
   "community-wifi-mesh": {
@@ -3232,6 +3485,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Cari lokasi tuan rumah untuk node",
       "Tetapkan norma pemakaian dan privasi",
       "Rawat dan perluas jaringan"
+    ],
+    "sw": [
+      "Chora ramani ya mahitaji na mapengo",
+      "Pata njia kuu ya intaneti",
+      "Tafuta watu wa kiufundi",
+      "Tafuta na useti vifaa",
+      "Tafuta maeneo ya kubeba node",
+      "Weka kanuni za matumizi na faragha",
+      "Tunza na upanue mtandao"
     ]
   },
   "mental-health-peer-support": {
@@ -3342,6 +3604,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Sepakati kerahasiaan dan aturan main kelompok",
       "Jadwalkan dan kabarkan sesinya",
       "Dukung para pemandu dan cegah kelelahan"
+    ],
+    "sw": [
+      "Tafuta na ufundishe wawezeshaji",
+      "Weka mipaka na upeo wa duara",
+      "Jenga mpango wa kuelekeza wakati wa shida",
+      "Tafuta mahali pa faragha na salama",
+      "Wekeni usiri na kanuni za kikundi",
+      "Panga vikao na usambaze habari",
+      "Watunze wawezeshaji, epusha uchovu"
     ]
   },
   "community-cleanup": {
@@ -3428,6 +3699,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Kumpulkan perlengkapan dan alat keselamatan",
       "Ajak dan atur orang-orangnya",
       "Gelar gotong royong bersih-bersihnya"
+    ],
+    "sw": [
+      "Tambua maeneo na uyapange kwa umuhimu",
+      "Pata ruhusa na mpango wa kuondoa taka",
+      "Kusanya vifaa na zana za usalama",
+      "Alika na upange waliojitokeza",
+      "Endesha siku ya usafi au ya kurudisha eneo"
     ]
   },
   "free-tax-prep": {
@@ -3538,6 +3816,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Kabarkan ke tetangga yang berhak",
       "Pastikan keamanan dan privasi data",
       "Tawarkan lanjutan penguatan keuangan"
+    ],
+    "sw": [
+      "Fundisha wajazaji na uwapatie cheti",
+      "Shirikiana na programu ya kodi bure inayotambulika",
+      "Andaa chumba na vifaa",
+      "Jenga mfumo wa miadi na mapokezi",
+      "Sambaza habari kwa majirani wanaostahili",
+      "Hakikisha usalama wa data na faragha",
+      "Toa mwendelezo wa uwezo wa kifedha"
     ]
   },
   "community-market": {
@@ -3648,6 +3935,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ajak dan jadwalkan orang-orangnya",
       "Kabarkan dan tetapkan jadwal rutin",
       "Jalankan lapak dan urus sisanya"
+    ],
+    "sw": [
+      "Hakikisha upatikanaji wa mazao na bidhaa",
+      "Tafuta mahali na uandae meza",
+      "Amua mfumo",
+      "Andaa mpangilio, hifadhi, na usalama wa chakula",
+      "Tafuta watu na upange zamu zao",
+      "Sambaza habari na uweke ratiba ya kudumu",
+      "Endesha meza na ushughulikie vilivyobaki"
     ]
   },
   "welcome-wagon": {
@@ -3734,6 +4030,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Rangkai bingkisan sambutan",
       "Ajak dan latih para penyambut",
       "Siapkan jalur rujukan dan cara ikut"
+    ],
+    "sw": [
+      "Amua utamkaribisha nani na vipi",
+      "Tengeneza kifurushi cha taarifa za mtaa",
+      "Andaa vikapu vya karibu",
+      "Tafuta na uandae wakaribishaji",
+      "Anzisha mfumo wa kuelekezwa na kujiunga"
     ]
   },
   "library-of-things": {
@@ -3844,6 +4147,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tulis aturan pinjam dan asas percaya",
       "Siapkan pencatatan pinjam dan latih pustakawan",
       "Rawat, bersihkan, dan kembangkan koleksi"
+    ],
+    "sw": [
+      "Ulizia jumuiya inataka kuazima nini",
+      "Tafuta hifadhi na saa za kufunguliwa",
+      "Kusanya, safisha, na ujaribu vitu",
+      "Weka katalogi na upige picha za vitu",
+      "Andika kanuni za kuazima na msingi wa kuaminiana",
+      "Anzisha utaratibu wa kutoa vitu na uandae wakutubi",
+      "Tunza, safisha, na ukuze mkusanyo"
     ]
   },
   "laundry-shower-access": {
@@ -3942,6 +4254,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tetapkan tata cara kebersihan dan keamanan",
       "Ajak dan latih orang-orang yang membantu",
       "Tetapkan jadwal dan sebarkan kabarnya"
+    ],
+    "sw": [
+      "Pata nafasi ya kufua na kuoga",
+      "Tafuta vifaa",
+      "Anzisha mfumo wa kuandika jina na nafasi za muda",
+      "Weka taratibu za usafi na usalama",
+      "Tafuta na uandae waliojitokeza",
+      "Weka ratiba na usambaze habari"
     ]
   },
   "voter-registration": {
@@ -4040,6 +4360,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Pilih tempat dan acara yang ramai",
       "Jalankan meja pendaftaran",
       "Bantu langkah selanjutnya"
+    ],
+    "sw": [
+      "Jifunze kanuni za kampeni za kuandikisha",
+      "Andaa watu wasiofungamana na chama",
+      "Kusanya vifaa na taarifa sahihi",
+      "Chagua maeneo na matukio yenye watu wengi",
+      "Endesha meza ya kuandikisha",
+      "Saidia hatua zinazofuata"
     ]
   },
   "health-navigation": {
@@ -4150,6 +4478,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tawarkan bantuan janji temu dan resep obat",
       "Tetapkan aturan privasi untuk informasi kesehatan",
       "Bangun kemitraan dengan klinik dan tenaga kesehatan"
+    ],
+    "sw": [
+      "Jenga orodha ya vyanzo vya msaada wa afya",
+      "Tafuta na uandae waelekezi",
+      "Anzisha mfumo wa kuomba na kupokea",
+      "Saidia bima na kujiandikisha",
+      "Toa msaada wa miadi na dawa",
+      "Weka taratibu za faragha za taarifa za afya",
+      "Shirikiana na kliniki na watoa matibabu"
     ]
   },
   "toy-library": {
@@ -4236,6 +4573,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Catat di katalog dan kantongi lengkap kepingannya",
       "Tulis aturan pinjam",
       "Siapkan pencatatan pinjam dan latih pustakawan"
+    ],
+    "sw": [
+      "Tafuta mahali pa kuhifadhia na weka nyakati za kufungua",
+      "Kusanya, safisha, na kagua usalama wa midoli",
+      "Andika kwenye katalogi na fungasha vipande vyote",
+      "Andika masharti ya kuazima",
+      "Anzisha utaratibu wa kuazima na wafundishe watunzaji"
     ]
   },
   "food-preservation": {
@@ -4346,6 +4690,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Rencanakan sesi pengalengan bersama",
       "Ajari dan pandu sesi dengan aman",
       "Bagikan hasil awetan dan catat"
+    ],
+    "sw": [
+      "Pata jiko linalofaa",
+      "Jifunze njia salama za kuhifadhi",
+      "Kusanya vifaa na mitungi",
+      "Tafuta mazao",
+      "Panga vipindi vya kuhifadhi pamoja",
+      "Fundisha na uongoze vipindi kwa usalama",
+      "Gawana chakula kilichohifadhiwa na andika"
     ]
   },
   "free-haircut": {
@@ -4432,6 +4785,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Kumpulkan alat dan perlengkapan",
       "Siapkan sanitasi dan patuhi aturan lisensi",
       "Gelar hari rapi diri"
+    ],
+    "sw": [
+      "Watafute wasusi na vinyozi wenye leseni",
+      "Tafuta mahali penye maji na usafi",
+      "Tafuta vifaa na mahitaji",
+      "Panga usafi na kufuata masharti ya leseni",
+      "Endesha siku za unadhifu"
     ]
   },
   "mutual-aid-moving-crew": {
@@ -4542,6 +4902,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Atur jadwal dan pembagian tugas",
       "Tetapkan cakupan dan batas",
       "Jalankan pindahan dan tindak lanjut"
+    ],
+    "sw": [
+      "Kusanya kikosi na magari",
+      "Kusanya vifaa vya kuhamia",
+      "Jenga utaratibu wa kuomba na kupima uhamaji",
+      "Shughulikia usalama na uwajibikaji",
+      "Weka ratiba na ugawaji wa kazi",
+      "Weka mipaka na upeo",
+      "Endesha uhamaji na fuatilia"
     ]
   },
   "disability-support-network": {
@@ -4652,6 +5021,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Bangun peminjaman alat bantu bersama",
       "Tawarkan pendampingan advokasi dan urusan",
       "Tetapkan standar aksesibilitas semua acara program"
+    ],
+    "sw": [
+      "Weka uongozi wa wenye ulemavu katikati",
+      "Jenga mfumo wa mawasiliano unaofikika",
+      "Chora ramani ya mahitaji na vyanzo vya msaada",
+      "Anzisha mabadilishano ya kusaidiana",
+      "Anzisha kuazimana vifaa",
+      "Toa msaada wa utetezi na uelekezi",
+      "Weka viwango vya ufikivu kwa matukio yote ya mpango"
     ]
   },
   "books-to-prisoners": {
@@ -4750,6 +5128,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ajak dan latih para penolong",
       "Tanggung ongkos kirim dan logistik",
       "Susun program sahabat pena"
+    ],
+    "sw": [
+      "Jifunze kanuni za barua za gereza",
+      "Kusanya vitabu na mahali pa kufanyia kazi",
+      "Anzisha utaratibu wa kupokea vinavyoombwa",
+      "Tafuta na kufundisha waliojitokeza",
+      "Shughulikia stempu na usafirishaji",
+      "Anzisha mpango wa kuandikiana barua"
     ]
   },
   "community-music": {
@@ -4848,6 +5234,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Cari tempat untuk les dan main bareng",
       "Jadwalkan les dan sesi main bareng",
       "Tetapkan harapan rawat dan pengembalian"
+    ],
+    "sw": [
+      "Kusanya na kutengeneza ala",
+      "Anzisha utaratibu wa kuazima ala",
+      "Tafuta walimu waliojitokeza",
+      "Tafuta mahali pa masomo na vikao",
+      "Panga masomo na vikao vya kupiga pamoja",
+      "Weka matarajio ya utunzaji na urudishaji"
     ]
   },
   "school-supply-program": {
@@ -4934,6 +5328,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Sortir dan rakit per jenjang kelas",
       "Siapkan tempat simpan dan titik pembagian",
       "Jadwalkan dan isi regu pembagian"
+    ],
+    "sw": [
+      "Pata orodha za vifaa na upime mahitaji",
+      "Endesha ukusanyaji na ununuzi wa jumla",
+      "Panga na fungasha kwa darasa",
+      "Andaa hifadhi na mahali pa kukabidhia",
+      "Panga ratiba na watu wa kukabidhi"
     ]
   },
   "legal-aid-clinic": {
@@ -5044,6 +5445,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Susun materi kenali-hakmu dan adakan lokakarya",
       "Sebarkan kabar dan jadwalkan klinik",
       "Jaga kerahasiaan dan periksa benturan kepentingan"
+    ],
+    "sw": [
+      "Shirikiana na mawakili na msaada wa kisheria",
+      "Weka mipaka na njia za rufaa",
+      "Andaa mahali na mapokezi",
+      "Jenga utaratibu wa miadi wa siri",
+      "Andaa mafunzo na machapisho ya jua haki zako",
+      "Panga ratiba ya kliniki na usambaze habari",
+      "Linda usiri na kagua mgongano wa maslahi"
     ]
   },
   "resource-hub-dispatch": {
@@ -5154,6 +5564,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ajak dan latih koordinator",
       "Tetapkan kebiasaan privasi data dan tindak lanjut",
       "Catat kebutuhan yang belum terpenuhi dan celahnya"
+    ],
+    "sw": [
+      "Anzisha mapokezi moja ya mahitaji na msaada",
+      "Jenga orodha ya waliojitokeza na vilivyopo",
+      "Unda mchakato wa kuunganisha na kuelekeza",
+      "Tunza orodha kuu ya msaada",
+      "Tafuta na ufundishe waratibu",
+      "Weka faragha ya taarifa na ufuatiliaji",
+      "Fuatilia mahitaji yasiyotimizwa na mapengo"
     ]
   },
   "harm-reduction-supplies": {
@@ -5252,6 +5671,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Rakit kit dengan lembar petunjuk berbahasa sederhana",
       "Atur keliling pembagian dan titik tetap",
       "Isi ulang, catat, dan jaga pelatihan tetap segar"
+    ],
+    "sw": [
+      "Pata mafunzo na mshirika wa kupunguza madhara",
+      "Kagua sheria ya hapa kuhusu vifaa",
+      "Pata naloxone na vifaa vya kit",
+      "Funga kits zenye maelekezo ya lugha rahisi",
+      "Panga mizunguko na sehemu maalum za ugawaji",
+      "Jaza upya, fuatilia, na uhuishe mafunzo"
     ]
   },
   "court-support": {
@@ -5350,6 +5777,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Latih penolong pendamping",
       "Koordinasikan tumpangan dan penjagaan anak untuk sidang",
       "Atur surat dukungan saat pembela memintanya"
+    ],
+    "sw": [
+      "Jitambulishe kwa watetezi na vikundi vya mahakama",
+      "Andika kanuni za msingi: msaada, si sheria",
+      "Jenga mapokezi na kalenda ya usikilizwaji",
+      "Fundisha waliojitokeza kusindikiza",
+      "Ratibu usafiri na utunzaji wa watoto",
+      "Panga barua za msaada utetezi ukiomba"
     ]
   },
   "cooling-warming-center": {
@@ -5460,6 +5895,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Susun giliran sesi",
       "Sebarkan kabar sebelum musimnya",
       "Buka, jaga, dan bereskan tiap aktivasi"
+    ],
+    "sw": [
+      "Tafuta mahali penye kiyoyozi na joto",
+      "Weka vigezo vya kufungua na mpango wa tahadhari",
+      "Kusanya vifaa",
+      "Tafuta na ufundishe wenyeji wa zamu",
+      "Panga zamu",
+      "Sambaza habari kabla ya msimu",
+      "Fungua, karibisha, na urejeshe kila mara"
     ]
   },
   "community-oral-history": {
@@ -5534,6 +5978,12 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Siapkan alat dan daftar pertanyaan",
       "Rekam sesi cerita",
       "Arsipkan dan bagikan kembali, sesuai keinginan mereka"
+    ],
+    "sw": [
+      "Andika fomu ya ridhaa ya lugha rahisi",
+      "Kusanya vifaa na orodha ya maswali",
+      "Rekodi vikao vya hadithi",
+      "Hifadhi na urudishe, kwa masharti yao"
     ]
   },
   "community-solar-coop": {
@@ -5644,6 +6094,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Bermitra dengan pemasang dan penyedia",
       "Siapkan sistem potongan tagihan dan keanggotaan",
       "Ajari anggota soal pemakaian energi"
+    ],
+    "sw": [
+      "Kusanya wanajumuiya na upime nia",
+      "Jifunze miundo na kanuni za eneo",
+      "Tafuta mahali au mpango wa kujiunga",
+      "Panga fedha na muundo wa kisheria",
+      "Shirikiana na wafungaji na watoa nishati",
+      "Anzisha mfumo wa unafuu wa bili na uanachama",
+      "Elimisha wanajumuiya matumizi ya umeme"
     ]
   },
   "worker-coop-incubator": {
@@ -5754,6 +6213,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Hubungkan ke sumber daya rintisan",
       "Sediakan pendampingan mentor",
       "Bangun dukungan antarusaha"
+    ],
+    "sw": [
+      "Pima ujuzi na malengo ya wanajumuiya",
+      "Toa mafunzo ya ajira na ujuzi",
+      "Fundisha muundo wa ushirika",
+      "Saidia uundaji wa ushirika",
+      "Unganisha na njia za kuanzia",
+      "Toa ushauri wa karibu",
+      "Jenga kusaidiana kati ya biashara changa"
     ]
   },
   "elder-meal-delivery": {
@@ -5864,6 +6332,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Catat info makan, alergi, dan kontak darurat",
       "Susun protokol cek keadaan",
       "Dampingi penolong dan kumpulkan masukan"
+    ],
+    "sw": [
+      "Tambua wazee wasioweza kutoka nyumbani",
+      "Tafuta na uchunguze waliojitokeza",
+      "Panga chanzo cha milo",
+      "Panga njia na ratiba ya upelekaji",
+      "Andika taarifa za chakula, mzio, na dharura",
+      "Weka utaratibu wa kuangalia hali ya mzee",
+      "Wajali waliojitokeza na ukusanye maoni"
     ]
   },
   "disaster-relief-hub": {
@@ -5974,6 +6451,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Rekrut dan latih tim penolong siaga",
       "Berkoordinasi dengan penanggap lain",
       "Rencanakan komunikasi dan keselamatan"
+    ],
+    "sw": [
+      "Tambua mapema mahali pa kituo na pa ziada",
+      "Jenga njia za kupata vitu",
+      "Andaa upokeaji, upangaji, na hesabu ya vitu",
+      "Tengeneza mfumo wa ugawaji",
+      "Kusanya na ufundishe timu ya kuitwa ghafla",
+      "Ratibu na vikundi vingine vya msaada",
+      "Panga mawasiliano na usalama"
     ]
   },
   "recovery-peer-support": {
@@ -6084,6 +6570,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Sepakati kerahasiaan dan aturan kelompok",
       "Jadwalkan dan kabarkan pertemuan",
       "Topang fasilitator dan cegah kelelahan"
+    ],
+    "sw": [
+      "Tafuta na ufundishe waongozaji wenzao",
+      "Weka upeo na mipaka",
+      "Jenga njia za rufaa na za wakati wa shida",
+      "Tafuta chumba salama, cha faragha, kisicho na vilevi",
+      "Wekeni usiri na kanuni za kikundi",
+      "Panga mikutano na usambaze habari",
+      "Wajali waongozaji na uzuie uchovu"
     ]
   },
   "community-fitness": {
@@ -6194,6 +6689,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Urus keselamatan dan kesehatan",
       "Tetapkan jadwal dan sebarkan kabarnya",
       "Rawat kebersamaan dan keteraturan"
+    ],
+    "sw": [
+      "Chunguza mapendezi na viwango vya nguvu",
+      "Tafuta viongozi wa shughuli",
+      "Tafuta maeneo salama",
+      "Panga shughuli za kujumuisha kila ngazi",
+      "Shughulikia usalama na afya",
+      "Weka ratiba na usambaze habari",
+      "Jenga ukaribu na mwendelezo"
     ]
   },
   "urban-orchard": {
@@ -6304,6 +6808,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Adakan gotong royong tanam",
       "Susun perawatan jangka panjang",
       "Rencanakan berbagi panen"
+    ],
+    "sw": [
+      "Pata makubaliano ya ardhi ya muda mrefu",
+      "Panga mchoro wa upandaji",
+      "Tafuta miti na mimea",
+      "Andaa eneo",
+      "Fanya siku za upandaji",
+      "Panga utunzaji wa muda mrefu",
+      "Panga ugawanaji wa mavuno"
     ]
   },
   "new-parent-support": {
@@ -6414,6 +6927,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Bentuk lingkar dukungan sebaya",
       "Tetapkan praktik keselamatan dan batasan",
       "Sambungkan ke proyek lain"
+    ],
+    "sw": [
+      "Tafuta waliojitokeza na wenzao wa kusaidia",
+      "Andaa mfumo wa kupokezana milo",
+      "Toa msaada wa vitendo",
+      "Jenga orodha ya mahali pa kupata msaada",
+      "Anzisha vikundi vya wazazi kusaidiana",
+      "Weka taratibu za usalama na mipaka",
+      "Unganisha na miradi mingine"
     ]
   },
   "foster-kinship-support": {
@@ -6524,6 +7046,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Adakan kelompok dukungan sebaya",
       "Susun direktori bantuan",
       "Tetapkan praktik keselamatan anak dan privasi"
+    ],
+    "sw": [
+      "Jenga uhusiano na familia zinazolea",
+      "Kusanya nguo na vitu vya kila umri",
+      "Tengeneza mfumo wa vitu vya haraka",
+      "Panga zamu za kuwapumzisha walezi",
+      "Anzisha vikundi vya walezi kusaidiana",
+      "Jenga orodha ya mahali pa kupata msaada",
+      "Weka taratibu za usalama wa mtoto na faragha"
     ]
   },
   "weather-survival-outreach": {
@@ -6634,6 +7165,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Susun rencana distribusi dan rute",
       "Hubungkan orang ke penampungan dan bantuan",
       "Bersiap untuk kedaruratan"
+    ],
+    "sw": [
+      "Fungasha vifurushi vya kila msimu",
+      "Tafuta vifaa",
+      "Chora ramani ya mahali pa kuwafikia watu",
+      "Tafuta na ufundishe waliojitokeza kwenda mitaani",
+      "Panga mpango wa ugawaji na njia",
+      "Waunganishe watu na makazi ya muda na msaada",
+      "Jiandae kwa dharura"
     ]
   }
 };

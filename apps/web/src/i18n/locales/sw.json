@@ -3359,10 +3359,10 @@
       "passphraseConfirm": "Funga kwa maneno haya ya siri",
       "doneTitle": "Umefungwa. Alama ya kidole, uso, au PIN yako sasa inaufungua ufunguo wako — kwenye simu hii tu.",
       "doneNotAnAccount": "Hii si akaunti ya kampuni yoyote. Ukaguzi unafanyika ndani ya simu yako: hakuna kinachotumwa kwa Apple, Google, wala mtu yeyote — na inafanya kazi bila intaneti kabisa.",
-      "doneBackup": "Jambo moja la kujua: simu hii ikipotea au kuwekwa upya, kufuli hii haiwezi kuurudisha ufunguo wako — nakala ya ziada inaweza. Kifaa cha pili, washika amana unaowachagua, au faili la kurejesha, vyote vinafaa; kila kimoja huchukua kama dakika moja kwenye Mipangilio.",
+      "doneBackup": "Jambo moja la kujua: simu hii ikipotea au kuwekwa upya, kufuli hii haiwezi kuurudisha ufunguo wako — nakala ya ziada inaweza. Kifaa cha pili, washika amana unaowachagua, au kit ya kurejesha, vyote vinafaa; kila kimoja huchukua kama dakika moja kwenye Mipangilio.",
       "backupNow": "Weka nakala ya ziada sasa",
       "backupLater": "Baadaye",
-      "doneTitlePassphrase": "Umefungwa. Maneno yako ya siri sasa yanaufungua ufunguo wako kwenye simu hii. Hakuna kuweka upya — nakala ya ziada kwenye Mipangilio (kifaa cha pili, washika amana, au faili la kurejesha) ndiyo inayokurudisha simu hii ikipotea."
+      "doneTitlePassphrase": "Umefungwa. Maneno yako ya siri sasa yanaufungua ufunguo wako kwenye simu hii. Hakuna kuweka upya — nakala ya ziada kwenye Mipangilio (kifaa cha pili, washika amana, au kit ya kurejesha) ndiyo inayokurudisha simu hii ikipotea."
     }
   },
   "block": {
