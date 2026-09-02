@@ -101,8 +101,22 @@ the disability-movement slogan keeps its authentic first person
 («Tak ada apa pun tentang kami tanpa kami») as a sanctioned kami —
 the movement speaking, not the app. All twelve registry entries are
 `content: "full"`; the Settings English-content disclosure idles
-again. Swahili, Tagalog and Bengali (spike first) follow per the
-wave plan.
+again. **Swahili (sw) UI SHIPPED** next on the same rails: glossary
+at docs/i18n-glossary/sw.md (wewe/u- address — Swahili has no T-V
+split; huduma banned for member help; kujitolea banned as the NGO
+volunteer frame — stepping forward is kujitokeza; harambee kept
+away from every feature because a Kenyan harambee IS a cash
+fundraiser; the vouch family is dhamini with dhamana/bail banned;
+guardians are washika amana; dashboard is Mdundo, the drumbeat,
+joining the pulse family; hours are saa with the o'clock ambiguity
+handled in context; every coined term carries its noun class).
+Swahili's genuine one/other plural split makes it the first
+post-Slavic language whose _one/_other pairs really differ —
+concords and all. Registering sw forced the unknown-locale
+fallback probes (which had used "sw" precisely because it wasn't
+shipped) to move to "xx", a code that can never ship. Registry
+carries `reviewStatus: "new"` + `content: "ui-only"`; the sw
+corpus is next; Tagalog and Bengali (spike first) follow.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from

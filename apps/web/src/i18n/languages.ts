@@ -174,6 +174,22 @@ export const LANGUAGES = [
     reviewStatus: "new",
     content: "full",
   },
+  // Swahili continues the demand-driven wave: Latin script, no
+  // rendering spike, genuine one/other plurals (unlike id/zh/bo the
+  // _one/_other pairs really differ — noun-class concords). Until
+  // this entry existed the test suite used "sw" as its
+  // unknown-locale fallback probe; those probes moved to "xx" in
+  // the same PR. Ships UI-first: content is "ui-only" until the sw
+  // corpus lands on the Phase 2 rails, so the Settings language
+  // card discloses the English-content fallback honestly.
+  {
+    code: "sw",
+    endonym: "Kiswahili",
+    dir: "ltr",
+    speakLang: "sw",
+    reviewStatus: "new",
+    content: "ui-only",
+  },
 ] as const satisfies readonly LanguageInfo[];
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]["code"];
