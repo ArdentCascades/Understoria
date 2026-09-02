@@ -116,6 +116,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "صفائی اور بھرائی کی باری بنائیں",
       "سامان کے رشتے بنائیں",
       "مسئلے کے لیے رابطہ لگائیں"
+    ],
+    "id": [
+      "Cari tuan rumah yang ada listrik dan ramai orang lewat",
+      "Cari kulkas dan pelindung tahan cuaca",
+      "Tetapkan aturan main dan beri label semuanya",
+      "Ajak orang untuk giliran bersih-bersih dan isi ulang",
+      "Bangun hubungan dengan pemasok",
+      "Siapkan kontak untuk masalah"
     ]
   },
   "community-garden": {
@@ -217,6 +225,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "اپنے موسم کے حساب سے بوئیں",
       "پانی اور گوڈی کی باری رکھیں",
       "فصل اور بچت کا سوچ رکھیں"
+    ],
+    "id": [
+      "Amankan lahan dan izinnya",
+      "Uji tanah dan rencanakan bedengan",
+      "Kumpulkan bahan dan bangun",
+      "Sepakati model berbagi",
+      "Tanam sesuai iklim dan musimmu",
+      "Atur giliran siram dan cabut gulma",
+      "Rencanakan panen dan kelebihannya"
     ]
   },
   "tool-lending-library": {
@@ -318,6 +335,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "نکالنے کا اندراج بنائیں",
       "اپنے لائبریرین تیار کریں",
       "سنبھالتے اور بڑھاتے رہیں"
+    ],
+    "id": [
+      "Cari ruang simpan dan tentukan jam buka",
+      "Kumpulkan dan pilah inventaris",
+      "Katalogkan semuanya",
+      "Tulis aturan meminjam",
+      "Siapkan pencatatan keluar",
+      "Latih para pustakawanmu",
+      "Rawat dan kembangkan"
     ]
   },
   "neighborhood-care-network": {
@@ -419,6 +445,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "بگڑنے کی صورت کا منصوبہ بنائیں",
       "روز مرہ کی مدد جوڑیں",
       "ساتھیوں کا بھی خیال رکھیں"
+    ],
+    "id": [
+      "Petakan siapa saja di sekitar",
+      "Ajak dan periksa calon penolong",
+      "Jodohkan dengan penuh pertimbangan",
+      "Tentukan ritme menengok",
+      "Buat rencana eskalasi",
+      "Koordinasikan bantuan praktis",
+      "Dukung juga para penolongnya"
     ]
   },
   "emergency-preparedness": {
@@ -520,6 +555,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "محفوظ جگہیں چنیں",
       "مشق یا معلومات کی شام رکھیں",
       "«اُس دن» کے کردار بانٹیں"
+    ],
+    "id": [
+      "Petakan risiko lingkunganmu",
+      "Bangun pohon kontak",
+      "Rencanakan komunikasi tanpa jaringan",
+      "Isi perlengkapan bersama",
+      "Tentukan titik-titik aman",
+      "Adakan latihan atau malam informasi",
+      "Tetapkan peran untuk “hari-H”"
     ]
   },
   "free-store": {
@@ -610,6 +654,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ایسا سجائیں کہ لوگ عزت سے دیکھ سکیں",
       "محفل کے لیے ہاتھ لگائیں",
       "بچی چیزیں سنبھالیں"
+    ],
+    "id": [
+      "Pilih format dan ruangnya",
+      "Tetapkan standar sumbangan",
+      "Atur penerimaan dan pemilahan",
+      "Tata supaya orang bisa memilih dengan bermartabat",
+      "Isi acara dengan penolong",
+      "Urus sisa barang"
     ]
   },
   "skill-share": {
@@ -689,6 +741,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "جگہ اور وقت طے کریں",
       "نظام الاوقات بنائیں",
       "سب کے بس کا بنائیں"
+    ],
+    "id": [
+      "Jajaki keahlian dan minat",
+      "Ajak dan siapkan pengajar",
+      "Cari tempat dan waktunya",
+      "Susun jadwal",
+      "Buat mudah diikuti semua orang"
     ]
   },
   "bulk-buying-coop": {
@@ -790,6 +849,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "پہنچانے اور بانٹنے کی جگہ طے کریں",
       "آرڈر انصاف سے بانٹیں",
       "کام گھماتے رہیں"
+    ],
+    "id": [
+      "Kumpulkan kelompok belanjamu",
+      "Cari pemasok",
+      "Siapkan cara memesan",
+      "Kelola uang dengan terbuka",
+      "Atur pengantaran dan tempat memilah",
+      "Bagi pesanan dengan adil",
+      "Gilir pekerjaannya"
     ]
   },
   "repair-cafe": {
@@ -880,6 +948,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "اندراج کا بہاؤ بنائیں",
       "حفاظت اور توقعات سنبھالیں",
       "عام پرزے اور خرچ ہونے والا سامان رکھیں"
+    ],
+    "id": [
+      "Ajak ahli reparasi per keahlian",
+      "Siapkan stasiun reparasi",
+      "Tetapkan tanggal berulang",
+      "Buat alur penerimaan barang",
+      "Jaga keselamatan dan ekspektasi",
+      "Sediakan suku cadang dan bahan habis pakai"
     ]
   },
   "rides-transportation": {
@@ -981,6 +1057,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "طے کریں کہ کیا کچھ شامل ہے",
       "خرچے سنبھالیں",
       "سواروں اور چلانے والوں کو محفوظ رکھیں"
+    ],
+    "id": [
+      "Ajak dan periksa pengemudi",
+      "Bereskan urusan asuransi dan tanggung jawab",
+      "Siapkan sistem permintaan",
+      "Bangun rutinitas pembagian antaran",
+      "Tentukan apa saja yang tercakup",
+      "Atur biayanya",
+      "Jaga penumpang dan pengemudi tetap aman"
     ]
   },
   "tenant-union": {
@@ -1082,6 +1167,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "اپنے حق جانو نشست رکھیں",
       "بے دخلی پر جواب کا طریقہ لکھیں",
       "قانونی مدد اور مستقل سہارے سے جڑیں"
+    ],
+    "id": [
+      "Bentuk komite inti penggerak",
+      "Petakan bangunan dan masalah penyewanya",
+      "Kumpulkan info hak penyewa setempat yang akurat",
+      "Bangun sistem kontak tanggap cepat",
+      "Adakan kelas kenali-hakmu",
+      "Susun protokol tanggap pengusiran",
+      "Jalin hubungan dengan bantuan hukum dan dukungan lanjutan"
     ]
   },
   "childcare-collective": {
@@ -1183,6 +1277,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "صحت، الرجی اور ہنگامی پالیسیاں طے کریں",
       "دیکھ بھال کرنے والوں کو بنیادی باتیں سکھائیں",
       "آزمائشی نشست چلا کر رائے جمع کریں"
+    ],
+    "id": [
+      "Kumpulkan keluarga pendiri dan sepakati model",
+      "Tetapkan standar keselamatan dan pemeriksaan",
+      "Cari ruang dan amankan untuk anak",
+      "Buat sistem jadwal dan catatan jam",
+      "Susun aturan kesehatan, alergi, dan darurat",
+      "Latih pengasuh soal dasar-dasarnya",
+      "Jalankan sesi uji coba dan kumpulkan masukan"
     ]
   },
   "community-composting": {
@@ -1284,6 +1387,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "صاف بتائیں کہ کیا قبول ہے",
       "دیکھ بھال کی باری بندی جوڑیں اور سکھائیں",
       "تیار کھاد بانٹیں"
+    ],
+    "id": [
+      "Cari lahan kompos",
+      "Pilih metode mengompos",
+      "Cari wadah dan peralatan",
+      "Susun sistem pengumpulan",
+      "Perjelas apa yang diterima",
+      "Ajak dan latih tim rawat bergiliran",
+      "Bagikan kompos jadi"
     ]
   },
   "free-little-library": {
@@ -1363,6 +1475,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "شروع کا ذخیرہ بھریں",
       "تختی اور سادہ دستور لگائیں",
       "امانت دار مقرر کریں"
+    ],
+    "id": [
+      "Buat atau cari kotak buku tahan hujan",
+      "Pilih dan siapkan lokasinya",
+      "Isi koleksi awalnya",
+      "Pasang papan tanda dan aturan sederhana",
+      "Cari orang yang mau merawatnya"
     ]
   },
   "community-first-aid-training": {
@@ -1453,6 +1572,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "حصہ لینے والے ڈھونڈیں",
       "تربیتی نشستیں چلائیں",
       "پیٹیاں بانٹیں اور دہرائی کرائیں"
+    ],
+    "id": [
+      "Gandeng pelatih bersertifikat",
+      "Cari perlengkapan",
+      "Cari ruang dan jadwalkan sesi",
+      "Ajak peserta",
+      "Jalankan sesi pelatihan",
+      "Bagikan kit dan jadwalkan penyegaran"
     ]
   },
   "time-bank": {
@@ -1554,6 +1681,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "خدمتوں کی فہرست جاری کریں",
       "تبادلے جوڑیں اور ملائیں",
       "بھروسے اور حفاظت کے چلن بنائیں"
+    ],
+    "id": [
+      "Ajak anggota pendiri dan data keahlian mereka",
+      "Pilih sistem pencatatan",
+      "Tetapkan aturannya",
+      "Sambut anggota baru",
+      "Buat direktori tawaran bantuan",
+      "Koordinasikan dan jodohkan pertukaran",
+      "Bangun kebiasaan percaya dan aman"
     ]
   },
   "solidarity-fund": {
@@ -1655,6 +1791,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "چندہ جوڑنے کا بندوبست کریں",
       "فیصلے اور ادائیگی کا طریقہ بنائیں",
       "شفافیت سے حال سنائیں"
+    ],
+    "id": [
+      "Bentuk tim kecil yang merawat dana",
+      "Atur penanganan uang yang transparan",
+      "Sepakati kriteria meminta dan menyalurkan dana",
+      "Buat formulir permintaan yang sederhana dan ringan syarat",
+      "Mulai penggalangan dana",
+      "Susun alur keputusan dan penyaluran",
+      "Kabarkan hasilnya secara terbuka"
     ]
   },
   "diaper-hygiene-bank": {
@@ -1734,6 +1879,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ناپ اور قسم سے چھانٹ کر گنتی رکھیں",
       "بانٹنے کی انصاف والی پالیسی طے کریں",
       "بانٹنے کے دن طے کر کے لوگ لگائیں"
+    ],
+    "id": [
+      "Cari tempat simpan dan titik pembagian",
+      "Atur sumber pasokan",
+      "Pilah dan data stok per ukuran dan jenis",
+      "Sepakati aturan pembagian yang adil",
+      "Jadwalkan pembagian dan siapkan orangnya"
     ]
   },
   "community-bike-workshop": {
@@ -1824,6 +1976,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "مستری مددگار ڈھونڈیں",
       "کھلنے کے وقت اور سائیکل-کماؤ ڈھانچہ طے کریں",
       "حفاظت کے چلن قائم کریں"
+    ],
+    "id": [
+      "Cari ruang bengkel",
+      "Kumpulkan alat dan stand reparasi",
+      "Kumpulkan sepeda dan onderdil sumbangan",
+      "Ajak montir yang mau membantu",
+      "Tetapkan jam buka dan program rakit-bawa-pulang",
+      "Bangun kebiasaan keselamatan"
     ]
   },
   "newcomer-translation-network": {
@@ -1914,6 +2074,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "تعارفی مواد بنائیں",
       "ملاقاتوں پر ساتھ جانے کا بندوبست کریں",
       "رازداری اور حفاظت کے چلن بنائیں"
+    ],
+    "id": [
+      "Ajak penolong dwibahasa dan multibahasa",
+      "Petakan lembaga dan mitra setempat",
+      "Bangun sistem permintaan dan pencocokan",
+      "Buat bahan orientasi",
+      "Tawarkan pendampingan ke janji temu",
+      "Tetapkan kebiasaan privasi dan keamanan"
     ]
   },
   "community-meal": {
@@ -2015,6 +2183,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "پکانے اور پروسنے کا ٹولہ جوڑیں",
       "وقت مقرر کر کے خبر پھیلائیں",
       "کھانا چلائیں اور سمیٹیں"
+    ],
+    "id": [
+      "Cari dapur dan ruang saji",
+      "Bereskan keamanan pangan dan izin",
+      "Bangun aliran pasokan makanan",
+      "Rencanakan menu untuk porsi besar, pantangan, dan alergi",
+      "Kumpulkan kru masak dan saji",
+      "Tetapkan jadwal dan kabarkan",
+      "Jalankan sesi makan dan beres-beres"
     ]
   },
   "seed-library": {
@@ -2094,6 +2271,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ذخیرہ ترتیب دے کر نام لکھیں",
       "لینے اور بانٹنے کے دستور طے کریں",
       "اگنے کی سکت جانچتے اور بھرتے رہیں"
+    ],
+    "id": [
+      "Cari tuan rumah dan sistem simpan",
+      "Cari benih awal",
+      "Tata dan beri label koleksinya",
+      "Tetapkan kebiasaan pinjam dan berbagi",
+      "Jaga daya tumbuh dan isi ulang"
     ]
   },
   "digital-literacy": {
@@ -2195,6 +2379,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "نئے سیکھنے والوں کا نصاب بنائیں",
       "کلاسیں اور بے وقت مدد کے اوقات رکھیں",
       "معلومات کی حفاظت اور واپسی کی پالیسیاں بنائیں"
+    ],
+    "id": [
+      "Kumpulkan dan segarkan perangkat",
+      "Siapkan sistem peminjaman",
+      "Atur akses internet",
+      "Ajak dan bekali para pengajar",
+      "Rancang kurikulum pemula",
+      "Jadwalkan kelas dan jam bantuan bebas",
+      "Tetapkan aturan keamanan data dan pengembalian"
     ]
   },
   "weatherization-brigade": {
@@ -2285,6 +2478,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "سامان اور اوزار جٹائیں",
       "حفاظت اور ذمہ داری سلجھائیں",
       "کام کے دن طے کر کے چلائیں"
+    ],
+    "id": [
+      "Ajak penolong yang terampil",
+      "Tetapkan batas pekerjaan",
+      "Bangun sistem permintaan dan peninjauan",
+      "Cari bahan dan alat",
+      "Bereskan keselamatan dan tanggung jawab",
+      "Jadwalkan dan jalankan gotong royong"
     ]
   },
   "pet-food-bank": {
@@ -2364,6 +2565,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "جانور اور ناپ کے حساب سے چھانٹ کر گنتی رکھیں",
       "بانٹنے کی پالیسی طے کریں",
       "بانٹنے کے وقت طے کر کے لوگ لگائیں"
+    ],
+    "id": [
+      "Cari tempat penyimpanan dan titik pembagian",
+      "Bangun pasokan makanan hewan",
+      "Pilah dan data stok per jenis hewan dan ukuran",
+      "Tetapkan aturan pembagian",
+      "Jadwalkan dan siapkan orang untuk pembagian"
     ]
   },
   "youth-mentorship": {
@@ -2465,6 +2673,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "داخلہ، الرجی اور ہنگامی معلومات سنبھالیں",
       "کھانا اور سامان جٹائیں",
       "نشستیں چلائیں اور گھرانوں سے حال لیتے رہیں"
+    ],
+    "id": [
+      "Amankan ruang yang aman dan tetapkan jamnya",
+      "Tetapkan standar keselamatan anak dan pemeriksaan",
+      "Ajak dan latih para mentor",
+      "Rencanakan kegiatannya",
+      "Urus pendaftaran, alergi, dan info darurat",
+      "Cari camilan dan perlengkapan",
+      "Jalankan sesi dan sapa keluarga"
     ]
   },
   "gleaning-network": {
@@ -2566,6 +2783,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ذمہ داری اور خوراک کی حفاظت سلجھائیں",
       "آگے بانٹنے کے راستے بنائیں",
       "چنائیاں چلائیں اور وزن لکھیں"
+    ],
+    "id": [
+      "Cari sumber hasil panen",
+      "Bentuk tim pemungut",
+      "Atur transportasi dan penyimpanan",
+      "Siapkan penjadwalan dan pengerahan",
+      "Bereskan tanggung jawab hukum dan keamanan pangan",
+      "Bangun jalur penyaluran",
+      "Jalankan pemungutan dan catat beratnya"
     ]
   },
   "community-mediation": {
@@ -2667,6 +2893,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "راز داری اور بنیادی اصول قائم کریں",
       "خدمت کی خبر پھیلائیں",
       "نتیجے لکھیں اور ثالثوں کو سہارا دیں"
+    ],
+    "id": [
+      "Ajak dan latih para penengah",
+      "Siapkan alur permintaan dan penerimaan",
+      "Cari tempat pertemuan yang netral",
+      "Tetapkan cakupan dan batasnya",
+      "Tegakkan kerahasiaan dan aturan main",
+      "Kabarkan bahwa mediasi ini ada",
+      "Pantau hasil dan rawat para penengah"
     ]
   },
   "reentry-support": {
@@ -2768,6 +3003,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "روزگار اور ٹھکانے سے جوڑیں",
       "ہم سفر رہنمائی دیں",
       "رازداری اور حدوں کے چلن بنائیں"
+    ],
+    "id": [
+      "Susun direktori sumber bantuan dan mitra",
+      "Ajak dan latih para penolong",
+      "Buat penyambutan dan penggalian kebutuhan",
+      "Bantu urus dokumen dan bantuan sosial",
+      "Hubungkan ke pekerjaan dan tempat tinggal",
+      "Tawarkan pendampingan sebaya",
+      "Tetapkan praktik privasi dan batasan"
     ]
   },
   "community-wood-bank": {
@@ -2869,6 +3113,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "درخواست اور پہنچانے کا نظام بنائیں",
       "بانٹنے کے پیمانے طے کریں",
       "کام کے دن اور سکھائی کا وقت طے کریں"
+    ],
+    "id": [
+      "Amankan sumber kayu",
+      "Cari lokasi pengolahan dan penyimpanan",
+      "Siapkan peralatan dan pelindung diri",
+      "Bentuk dan latih tim kayu",
+      "Bangun alur permintaan dan pengantaran",
+      "Tetapkan urutan pembagian",
+      "Jadwalkan gotong royong dan pengeringan"
     ]
   },
   "community-wifi-mesh": {
@@ -2970,6 +3223,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "نقطوں کے میزبان ٹھکانے ڈھونڈیں",
       "قابلِ قبول استعمال اور رازداری کے دستور طے کریں",
       "جال سنبھالیں اور پھیلائیں"
+    ],
+    "id": [
+      "Petakan kebutuhan dan celah jangkauan",
+      "Amankan koneksi internet utama",
+      "Ajak orang-orang yang paham teknologi",
+      "Kumpulkan dan konfigurasikan perangkat",
+      "Cari lokasi tuan rumah untuk node",
+      "Tetapkan norma pemakaian dan privasi",
+      "Rawat dan perluas jaringan"
     ]
   },
   "mental-health-peer-support": {
@@ -3071,6 +3333,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "راز داری اور حلقے کے بنیادی اصول طے کریں",
       "نشستیں طے کر کے خبر پھیلائیں",
       "چلانے والوں کو سہارا دیں اور تھکن سے بچائیں"
+    ],
+    "id": [
+      "Ajak dan latih para pemandu",
+      "Tetapkan cakupan dan batas lingkar",
+      "Susun rencana rujukan dan eskalasi krisis",
+      "Cari ruang yang privat dan aman",
+      "Sepakati kerahasiaan dan aturan main kelompok",
+      "Jadwalkan dan kabarkan sesinya",
+      "Dukung para pemandu dan cegah kelelahan"
     ]
   },
   "community-cleanup": {
@@ -3150,6 +3421,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "سامان اور حفاظتی پوشاک جمع کریں",
       "مددگار جوڑیں اور منظم کریں",
       "صفائی یا بحالی کا دن چلائیں"
+    ],
+    "id": [
+      "Petakan dan urutkan lokasi",
+      "Urus izin dan rencana pembuangan",
+      "Kumpulkan perlengkapan dan alat keselamatan",
+      "Ajak dan atur orang-orangnya",
+      "Gelar gotong royong bersih-bersihnya"
     ]
   },
   "free-tax-prep": {
@@ -3251,6 +3529,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "اہل پڑوسیوں تک خبر پہنچائیں",
       "معلومات کی حفاظت اور رازداری پکی کریں",
       "مالی خودمختاری کا اگلا ہاتھ بڑھائیں"
+    ],
+    "id": [
+      "Latih dan sertifikasi para penyusun laporan",
+      "Bermitra dengan program lapor pajak gratis yang diakui",
+      "Siapkan ruangan dan peralatan",
+      "Bangun sistem janji temu dan penerimaan",
+      "Kabarkan ke tetangga yang berhak",
+      "Pastikan keamanan dan privasi data",
+      "Tawarkan lanjutan penguatan keuangan"
     ]
   },
   "community-market": {
@@ -3352,6 +3639,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "مددگار جوڑیں اور باریاں باندھیں",
       "خبر پھیلائیں اور پکا وقت رکھیں",
       "ٹھیلا چلائیں اور بچا مال سنبھالیں"
+    ],
+    "id": [
+      "Amankan pasokan hasil bumi dan barang",
+      "Cari lokasi dan siapkan lapaknya",
+      "Putuskan modelnya",
+      "Atur tampilan, penyimpanan, dan keamanan makanan",
+      "Ajak dan jadwalkan orang-orangnya",
+      "Kabarkan dan tetapkan jadwal rutin",
+      "Jalankan lapak dan urus sisanya"
     ]
   },
   "welcome-wagon": {
@@ -3431,6 +3727,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "خوش آمدید ٹوکریاں سجائیں",
       "ملنے والے جوڑیں اور تیار کریں",
       "حوالگی اور نام لکھوانے کا نظام بنائیں"
+    ],
+    "id": [
+      "Tentukan siapa yang disambut dan bagaimana",
+      "Susun paket informasi lokal",
+      "Rangkai bingkisan sambutan",
+      "Ajak dan latih para penyambut",
+      "Siapkan jalur rujukan dan cara ikut"
     ]
   },
   "library-of-things": {
@@ -3532,6 +3835,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ادھار کے اصول اور بھروسے کی پالیسی لکھیں",
       "اندراج جمائیں اور کتب خانہ دار تیار کریں",
       "ذخیرہ سنبھالیں، ستھرائیں اور بڑھائیں"
+    ],
+    "id": [
+      "Survei apa yang ingin dipinjam warga",
+      "Cari tempat penyimpanan dan jam buka",
+      "Kumpulkan, bersihkan, dan uji barang",
+      "Katalogkan dan foto semua barang",
+      "Tulis aturan pinjam dan asas percaya",
+      "Siapkan pencatatan pinjam dan latih pustakawan",
+      "Rawat, bersihkan, dan kembangkan koleksi"
     ]
   },
   "laundry-shower-access": {
@@ -3622,6 +3934,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "صفائی اور حفاظت کے طریقے قائم کریں",
       "مددگار جوڑیں اور تیار کریں",
       "وقت مقرر کر کے خبر پھیلائیں"
+    ],
+    "id": [
+      "Amankan akses cuci baju dan mandi",
+      "Cari perlengkapan",
+      "Siapkan sistem tulis nama dan pembagian sesi",
+      "Tetapkan tata cara kebersihan dan keamanan",
+      "Ajak dan latih orang-orang yang membantu",
+      "Tetapkan jadwal dan sebarkan kabarnya"
     ]
   },
   "voter-registration": {
@@ -3712,6 +4032,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "بھیڑ والی جگہیں اور تقریبیں چنیں",
       "اندراج کی میز چلائیں",
       "اگلے قدموں میں ہاتھ بٹائیں"
+    ],
+    "id": [
+      "Pelajari aturan gerakan pendaftaran",
+      "Latih orang-orang agar nonpartisan",
+      "Kumpulkan bahan dan informasi akurat",
+      "Pilih tempat dan acara yang ramai",
+      "Jalankan meja pendaftaran",
+      "Bantu langkah selanjutnya"
     ]
   },
   "health-navigation": {
@@ -3813,6 +4141,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ملاقات اور دواؤں کا سہارا دیں",
       "صحت کی معلومات پر رازداری کے چلن بنائیں",
       "شفاخانوں اور معالجوں کا ساتھ لیں"
+    ],
+    "id": [
+      "Susun direktori sumber bantuan kesehatan",
+      "Ajak dan latih para pemandu",
+      "Siapkan jalur permintaan dan penerimaan",
+      "Bantu urusan asuransi dan pendaftarannya",
+      "Tawarkan bantuan janji temu dan resep obat",
+      "Tetapkan aturan privasi untuk informasi kesehatan",
+      "Bangun kemitraan dengan klinik dan tenaga kesehatan"
     ]
   },
   "toy-library": {
@@ -3892,6 +4229,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "فہرست بنائیں اور سب ٹکڑوں سمیت تھیلوں میں باندھیں",
       "ادھار کے اصول لکھیں",
       "اندراج جمائیں اور کتب خانہ دار تیار کریں"
+    ],
+    "id": [
+      "Cari tempat simpan dan tentukan jam buka",
+      "Kumpulkan, bersihkan, dan periksa keamanan mainan",
+      "Catat di katalog dan kantongi lengkap kepingannya",
+      "Tulis aturan pinjam",
+      "Siapkan pencatatan pinjam dan latih pustakawan"
     ]
   },
   "food-preservation": {
@@ -3993,6 +4337,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "مل کر ڈبہ بندی کی نشستیں سوچیں",
       "نشستیں سکھاتے ہوئے حفاظت سے چلائیں",
       "بچائی خوراک بانٹیں اور لکھیں"
+    ],
+    "id": [
+      "Amankan dapur yang layak",
+      "Pelajari cara pengawetan yang aman",
+      "Kumpulkan alat dan stoples",
+      "Cari bahan pangan",
+      "Rencanakan sesi pengalengan bersama",
+      "Ajari dan pandu sesi dengan aman",
+      "Bagikan hasil awetan dan catat"
     ]
   },
   "free-haircut": {
@@ -4072,6 +4425,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "سامان جٹائیں",
       "ستھرائی اور سند کے قاعدوں کی پابندی جمائیں",
       "سنگھار کے دن چلائیں"
+    ],
+    "id": [
+      "Ajak penata rambut dan tukang cukur berlisensi",
+      "Cari tempat dengan sanitasi memadai",
+      "Kumpulkan alat dan perlengkapan",
+      "Siapkan sanitasi dan patuhi aturan lisensi",
+      "Gelar hari rapi diri"
     ]
   },
   "mutual-aid-moving-crew": {
@@ -4173,6 +4533,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "وقت طے کرنا اور روانگی جمائیں",
       "دائرہ اور حدیں طے کریں",
       "منتقلیاں چلائیں اور بعد میں حال لیں"
+    ],
+    "id": [
+      "Kumpulkan regu dan kendaraan",
+      "Kumpulkan perlengkapan pindahan",
+      "Bangun alur permintaan dan penakaran",
+      "Bereskan keselamatan dan tanggung jawab",
+      "Atur jadwal dan pembagian tugas",
+      "Tetapkan cakupan dan batas",
+      "Jalankan pindahan dan tindak lanjut"
     ]
   },
   "disability-support-network": {
@@ -4274,6 +4643,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "سامان ادھار دینے کا ذخیرہ بنائیں",
       "آواز اٹھانے اور راہ دکھانے کا سہارا دیں",
       "پروگرام کی ہر تقریب کے لیے رسائی کے پیمانے بنائیں"
+    ],
+    "id": [
+      "Utamakan kepemimpinan difabel",
+      "Bangun sistem komunikasi yang aksesibel",
+      "Petakan kebutuhan dan sumber daya",
+      "Siapkan pertukaran saling dukung",
+      "Bangun peminjaman alat bantu bersama",
+      "Tawarkan pendampingan advokasi dan urusan",
+      "Tetapkan standar aksesibilitas semua acara program"
     ]
   },
   "books-to-prisoners": {
@@ -4364,6 +4742,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "مددگار جوڑیں اور تیار کریں",
       "ڈاک خرچ اور بندوبست پورا کریں",
       "خط لکھنے کا پروگرام جمائیں"
+    ],
+    "id": [
+      "Pelajari aturan kiriman tiap lapas",
+      "Kumpulkan buku dan ruang kerja",
+      "Siapkan pencatatan permintaan",
+      "Ajak dan latih para penolong",
+      "Tanggung ongkos kirim dan logistik",
+      "Susun program sahabat pena"
     ]
   },
   "community-music": {
@@ -4454,6 +4840,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "سبق اور سنگت کی جگہ ڈھونڈیں",
       "سبق اور سنگت کی نشستیں طے کریں",
       "سنبھال اور واپسی کی توقعات طے کریں"
+    ],
+    "id": [
+      "Kumpulkan dan perbaiki alat musik",
+      "Siapkan pencatatan pinjam alat musik",
+      "Ajak pengajar yang mau membantu",
+      "Cari tempat untuk les dan main bareng",
+      "Jadwalkan les dan sesi main bareng",
+      "Tetapkan harapan rawat dan pengembalian"
     ]
   },
   "school-supply-program": {
@@ -4533,6 +4927,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "جماعت کے حساب سے چھانٹیں اور جوڑیں",
       "رکھنے کی جگہ اور بانٹنے کا ٹھکانہ جمائیں",
       "بانٹنے کے دن طے کر کے لوگ لگائیں"
+    ],
+    "id": [
+      "Minta daftar perlengkapan dan ukur kebutuhan",
+      "Galang sumbangan dan belanja borongan",
+      "Sortir dan rakit per jenjang kelas",
+      "Siapkan tempat simpan dan titik pembagian",
+      "Jadwalkan dan isi regu pembagian"
     ]
   },
   "legal-aid-clinic": {
@@ -4634,6 +5035,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "اپنے حق جانو مواد اور نشستیں بنائیں",
       "شفاخانوں کی خبر پھیلائیں اور تاریخیں رکھیں",
       "رازداری بچائیں اور مفاد کا ٹکراؤ جانچیں"
+    ],
+    "id": [
+      "Gandeng pengacara dan lembaga bantuan hukum",
+      "Tentukan cakupan dan jalur rujukan",
+      "Siapkan ruang dan alur penerimaan",
+      "Bangun sistem janji temu yang menjaga rahasia",
+      "Susun materi kenali-hakmu dan adakan lokakarya",
+      "Sebarkan kabar dan jadwalkan klinik",
+      "Jaga kerahasiaan dan periksa benturan kepentingan"
     ]
   },
   "resource-hub-dispatch": {
@@ -4735,6 +5145,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "رابطہ کار جوڑیں اور تیار کریں",
       "معلومات کی رازداری اور حال پوچھنے کے چلن طے کریں",
       "ادھوری ضرورتیں اور خلا لکھیں"
+    ],
+    "id": [
+      "Buka satu pintu penerimaan untuk kebutuhan dan tawaran",
+      "Susun daftar penolong dan sumber daya",
+      "Buat alur mempertemukan dan menyalurkan",
+      "Rawat direktori induk sumber daya",
+      "Ajak dan latih koordinator",
+      "Tetapkan kebiasaan privasi data dan tindak lanjut",
+      "Catat kebutuhan yang belum terpenuhi dan celahnya"
     ]
   },
   "harm-reduction-supplies": {
@@ -4825,6 +5244,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "سادہ زبان کے پرچوں والی کِٹیں باندھیں",
       "بانٹنے کے پھیرے اور پکے ٹھکانے جمائیں",
       "دوبارہ بھریں، لکھیں، اور تربیت تازہ رکھیں"
+    ],
+    "id": [
+      "Ikuti pelatihan dan cari mitra pengurangan dampak buruk",
+      "Periksa hukum setempat soal perlengkapan",
+      "Dapatkan nalokson dan isi kit",
+      "Rakit kit dengan lembar petunjuk berbahasa sederhana",
+      "Atur keliling pembagian dan titik tetap",
+      "Isi ulang, catat, dan jaga pelatihan tetap segar"
     ]
   },
   "court-support": {
@@ -4915,6 +5342,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ساتھ جانے والے مددگار تیار کریں",
       "سماعتوں کے لیے سواریاں اور بچوں کی دیکھ بھال جوڑیں",
       "صفائی کے مانگنے پر سہارے کے خط جوڑیں"
+    ],
+    "id": [
+      "Jalin hubungan dengan pembela dan kelompok pengadilan yang ada",
+      "Tulis aturan mainnya: mendukung, bukan mengurus hukum",
+      "Bangun penerimaan dan kalender sidang",
+      "Latih penolong pendamping",
+      "Koordinasikan tumpangan dan penjagaan anak untuk sidang",
+      "Atur surat dukungan saat pembela memintanya"
     ]
   },
   "cooling-warming-center": {
@@ -5016,6 +5451,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "باری بندی بنائیں",
       "موسم سے پہلے خبر پھیلائیں",
       "ہر بار کھولیں، میزبانی کریں، اور سمیٹیں"
+    ],
+    "id": [
+      "Cari lokasi tuan rumah dengan pendingin dan pemanas",
+      "Tetapkan pemicu aktivasi dan rencana siaga",
+      "Setok perlengkapan",
+      "Ajak dan latih tuan rumah sesi",
+      "Susun giliran sesi",
+      "Sebarkan kabar sebelum musimnya",
+      "Buka, jaga, dan bereskan tiap aktivasi"
     ]
   },
   "community-oral-history": {
@@ -5084,6 +5528,12 @@ export const TEMPLATE_TASK_NAMES: Record<
       "سامان اور سوالوں کی فہرست جوڑیں",
       "کہانی کی نشستیں ریکارڈ کریں",
       "محفوظ کریں اور انہی کی شرطوں پر لوٹا کر بانٹیں"
+    ],
+    "id": [
+      "Tulis formulir persetujuan berbahasa sederhana",
+      "Siapkan alat dan daftar pertanyaan",
+      "Rekam sesi cerita",
+      "Arsipkan dan bagikan kembali, sesuai keinginan mereka"
     ]
   },
   "community-solar-coop": {
@@ -5185,6 +5635,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "لگانے والوں اور خدمت دینے والوں کا ساتھ لیں",
       "بل کے حصے اور رکنیت کا نظام جمائیں",
       "اراکین کو توانائی کے استعمال پر سکھائیں"
+    ],
+    "id": [
+      "Kumpulkan anggota dan ukur minat",
+      "Pelajari model dan aturan setempat",
+      "Cari lokasi atau program untuk diikuti",
+      "Bereskan pendanaan dan struktur hukum",
+      "Bermitra dengan pemasang dan penyedia",
+      "Siapkan sistem potongan tagihan dan keanggotaan",
+      "Ajari anggota soal pemakaian energi"
     ]
   },
   "worker-coop-incubator": {
@@ -5286,6 +5745,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "شروعاتی وسیلوں سے جوڑیں",
       "رہنمائی دیں",
       "کاروباروں میں آپس کا سہارا بنائیں"
+    ],
+    "id": [
+      "Petakan keahlian dan cita-cita anggota",
+      "Adakan pelatihan kesiapan kerja dan keahlian",
+      "Ajarkan model koperasi",
+      "Dampingi pendirian koperasi",
+      "Hubungkan ke sumber daya rintisan",
+      "Sediakan pendampingan mentor",
+      "Bangun dukungan antarusaha"
     ]
   },
   "elder-meal-delivery": {
@@ -5387,6 +5855,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "پرہیز، الرجی اور ہنگامی معلومات لکھیں",
       "خیریت جانچنے کا طریقہ قائم کریں",
       "مددگاروں کو سہارا دیں اور رائے جمع کریں"
+    ],
+    "id": [
+      "Cari lansia yang tak bisa keluar rumah",
+      "Ajak dan periksa calon penolong",
+      "Siapkan sumber makanan",
+      "Rencanakan rute dan jadwal antar",
+      "Catat info makan, alergi, dan kontak darurat",
+      "Susun protokol cek keadaan",
+      "Dampingi penolong dan kumpulkan masukan"
     ]
   },
   "disaster-relief-hub": {
@@ -5488,6 +5965,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ہلے کی مددگار ٹیم جوڑیں اور تربیت دیں",
       "دوسرے جواب دینے والوں سے تال میل کریں",
       "رابطے اور حفاظت کا منصوبہ بنائیں"
+    ],
+    "id": [
+      "Tentukan lokasi pusat dan cadangannya sejak awal",
+      "Bangun jalur pasokan barang",
+      "Siapkan alur terima, pilah, dan stok",
+      "Buat sistem distribusi",
+      "Rekrut dan latih tim penolong siaga",
+      "Berkoordinasi dengan penanggap lain",
+      "Rencanakan komunikasi dan keselamatan"
     ]
   },
   "recovery-peer-support": {
@@ -5589,6 +6075,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "راز داری اور ٹولی کے دستور طے کریں",
       "ملاقاتیں طے کر کے خبر پھیلائیں",
       "چلانے والوں کو سہارا دیں اور تھکن سے بچائیں"
+    ],
+    "id": [
+      "Rekrut dan latih fasilitator sebaya",
+      "Tetapkan cakupan dan batasan",
+      "Bangun jalur rujukan dan krisis",
+      "Cari ruang yang aman, privat, dan bebas zat",
+      "Sepakati kerahasiaan dan aturan kelompok",
+      "Jadwalkan dan kabarkan pertemuan",
+      "Topang fasilitator dan cegah kelelahan"
     ]
   },
   "community-fitness": {
@@ -5690,6 +6185,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "حفاظت اور صحت سنبھالیں",
       "وقت مقرر کر کے خبر پھیلائیں",
       "جوڑ اور پکا پن بنائیں"
+    ],
+    "id": [
+      "Jajaki minat dan tingkat aktivitas",
+      "Cari pemandu kegiatan",
+      "Temukan ruang yang aman",
+      "Rancang program inklusif untuk semua tingkat",
+      "Urus keselamatan dan kesehatan",
+      "Tetapkan jadwal dan sebarkan kabarnya",
+      "Rawat kebersamaan dan keteraturan"
     ]
   },
   "urban-orchard": {
@@ -5791,6 +6295,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "پودے لگانے کے دن رکھیں",
       "لمبی امانت داری جمائیں",
       "فصل بانٹنے کا سوچیں"
+    ],
+    "id": [
+      "Amankan akses lahan jangka panjang",
+      "Rancang pola tanam",
+      "Dapatkan pohon dan tanaman",
+      "Siapkan lahannya",
+      "Adakan gotong royong tanam",
+      "Susun perawatan jangka panjang",
+      "Rencanakan berbagi panen"
     ]
   },
   "new-parent-support": {
@@ -5892,6 +6405,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ہم سفر سہارے کے حلقے بنائیں",
       "حفاظت اور حدوں کے چلن طے کریں",
       "دوسرے منصوبوں سے جوڑیں"
+    ],
+    "id": [
+      "Kumpulkan penolong dan pendamping sebaya",
+      "Siapkan sistem estafet antar makanan",
+      "Tawarkan bantuan sehari-hari",
+      "Susun direktori bantuan",
+      "Bentuk lingkar dukungan sebaya",
+      "Tetapkan praktik keselamatan dan batasan",
+      "Sambungkan ke proyek lain"
     ]
   },
   "foster-kinship-support": {
@@ -5993,6 +6515,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ہم سفر سہارے کی ٹولیاں دیں",
       "ذریعوں کی فہرست بنائیں",
       "بچوں کی حفاظت اور رازداری کے چلن طے کریں"
+    ],
+    "id": [
+      "Jalin hubungan dengan keluarga pengasuh",
+      "Kumpulkan stok pakaian dan barang",
+      "Buat sistem pasokan cepat tanggap",
+      "Atur bantuan jeda pengasuh",
+      "Adakan kelompok dukungan sebaya",
+      "Susun direktori bantuan",
+      "Tetapkan praktik keselamatan anak dan privasi"
     ]
   },
   "weather-survival-outreach": {
@@ -6094,6 +6625,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "تقسیم اور راستوں کا منصوبہ بنائیں",
       "لوگوں کو پناہ گاہوں اور خدمتوں سے جوڑیں",
       "ہنگامی حالتوں کا منصوبہ بنائیں"
+    ],
+    "id": [
+      "Rakit paket sesuai musim",
+      "Kumpulkan perbekalan",
+      "Petakan tempat menjangkau orang",
+      "Ajak dan latih penolong turun jalan",
+      "Susun rencana distribusi dan rute",
+      "Hubungkan orang ke penampungan dan bantuan",
+      "Bersiap untuk kedaruratan"
     ]
   }
 };

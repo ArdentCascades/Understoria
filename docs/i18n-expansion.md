@@ -85,11 +85,24 @@ as decoration, kerja bakti banned (New-Order compulsion register —
 the corvée reasoning), node and passkey kept English (simpul is a
 rope knot; "kunci sandi" is one consonant from kata sandi), Denyut
 for the dashboard, "Yang kurawat" for In my care, "tempat berteduh"
-for storm hubs. Registry entry carries `reviewStatus: "new"` +
-`content: "ui-only"` — the Settings content-fallback disclosure is
-live again for the first time since Phase 2 completed. The id corpus
-is next on the Phase 2 rails; Swahili, Tagalog and Bengali (spike
-first) follow per the wave plan.
+for storm hubs. **The id corpus then SHIPPED on the Phase 2 rails**
+(11-agent fleet: 8 template batches + events&principles +
+FAQ&start-community + the guide trio; independent fragment
+validation; assembly with a corpus-wide skills-tag unification —
+twelve divergent families resolved by majority with the injectivity
+check, outreach's six candidate renderings landing on «menjangkau
+warga» — and the shipped `skillsPlaceholder` as tie-break
+authority). Notable register work: credits are jam everywhere
+(childcare "care credits" → jam rawat; Bank Waktu's "one hour = one
+credit" → «satu jam ya satu jam»), rent deposits stay «deposit» so
+jaminan stays reserved for vouching, «pemulihan» reserved for
+account recovery (substance recovery uses the pulih family), and
+the disability-movement slogan keeps its authentic first person
+(«Tak ada apa pun tentang kami tanpa kami») as a sanctioned kami —
+the movement speaking, not the app. All twelve registry entries are
+`content: "full"`; the Settings English-content disclosure idles
+again. Swahili, Tagalog and Bengali (spike first) follow per the
+wave plan.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from

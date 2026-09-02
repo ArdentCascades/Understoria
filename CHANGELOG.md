@@ -10,6 +10,20 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Everything now reads in Indonesian — the full library, not just
+  the buttons.** All 64 project playbooks with their step-by-step
+  task guides and field-tested tips, the 14 event templates, the
+  help pages, the start-a-community guide, the design principles,
+  the member and opsec guides, and the study prompts. Care went
+  into the words: an hour is always jam, never "kredit" (which
+  means an installment loan in Indonesia); a work day is gotong
+  royong; skills use the same everyday verbs across all 64
+  playbooks so matching works; and the advice localizes honestly —
+  metric units, Palang Merah instead of the Red Cross, posyandu
+  lansia, oralit, PLN. The "content still in English" note for
+  Indonesian in Settings retires. Like the interface, this is a
+  new AI-assisted translation awaiting a native-speaker read — the
+  app still says so.
 - **Bahasa Indonesia.** The twelfth language, and the first of the
   demand-driven wave: the entire interface — every button, every
   screen, every error message, all ~2,900 strings — now speaks

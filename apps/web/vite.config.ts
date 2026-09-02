@@ -262,6 +262,10 @@ export default defineConfig({
               name: "lazy-content-ur",
               test: /src[\\/]content[\\/](?:[^\\/]+\.ur\.ts|bundles[\\/]ur\.ts)/,
             },
+            {
+              name: "lazy-content-id",
+              test: /src[\\/]content[\\/](?:[^\\/]+\.id\.ts|bundles[\\/]id\.ts)/,
+            },
             // The transcription engine (vosk-browser, ~5.8 MB with its
             // base64-embedded WASM worker) loads only when a member who
             // opted in taps Transcribe (docs/transcription-plan.md D6).
