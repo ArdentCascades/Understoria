@@ -130,7 +130,25 @@ its first person («Hakuna lolote kuhusu sisi bila sisi»); the East
 African clock trap is disambiguated string by string (masaa for
 durations, msaada context beside counts, clock times in EA
 convention words). All thirteen registry entries are
-`content: "full"`. Tagalog and Bengali (spike first) follow.
+`content: "full"`. **Filipino (fil) UI SHIPPED** next: the locale
+code is fil — what modern browsers, iOS, Android, and CLDR use —
+with legacy tl/tl-PH detections aliased at the language detector
+(convertDetectedLanguage), the zh pick-what-browsers-send
+reasoning. Glossary at docs/i18n-glossary/fil.md: ka/ikaw/mo
+without po (po-in-apps is the hotline register; warmth comes from
+particles), kami banned as the telco-apology voice, **the utang na
+loob fence** (hours are oras that move, never owed — the one
+permitted utang names the trap to refuse it: «hindi utang — at
+lalong hindi utang na loob»), bayanihan spent only on concrete
+collective work (worn by the Bayanihan Act and CSR), vouch = the
+panagot family (piyansa/bail fenced off), guardians = mga
+tagapag-ingat (the school-form words banned), dashboard = Pintig
+(joining the pulse family), an honest three-tier Taglish policy
+with one loan-verb affixation convention (i-/mag-/na-), and the
+real CLDR fil quirk on record: "one" selects every count not
+ending in 4/6/9, so _one strings always interpolate {{count}}.
+Registry carries `reviewStatus: "new"` + `content: "ui-only"`; the
+fil corpus is next; Bengali (spike first) completes the wave.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from

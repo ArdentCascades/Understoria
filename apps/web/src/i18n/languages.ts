@@ -191,6 +191,25 @@ export const LANGUAGES = [
     reviewStatus: "new",
     content: "full",
   },
+  // Filipino ships under "fil" — the code modern browsers, iOS,
+  // Android, and CLDR use — following the zh precedent of picking
+  // the tag browsers actually send. Legacy "tl"/"tl-PH" detections
+  // are aliased to fil at the language detector
+  // (convertDetectedLanguage in i18n/index.ts), so older systems
+  // still land on Filipino rather than English. Latin script, no
+  // rendering spike. CLDR Filipino's "one" plural category covers
+  // every count NOT ending in 4/6/9, so fil _one strings always
+  // interpolate {{count}} and never hard-code a singular. Ships
+  // UI-first: content is "ui-only" until the fil corpus lands on
+  // the Phase 2 rails.
+  {
+    code: "fil",
+    endonym: "Filipino",
+    dir: "ltr",
+    speakLang: "fil",
+    reviewStatus: "new",
+    content: "ui-only",
+  },
 ] as const satisfies readonly LanguageInfo[];
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]["code"];

@@ -10,6 +10,21 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Filipino.** The fourteenth language: the entire interface — all
+  ~2,900 strings — now speaks Filipino the way neighbors text each
+  other: ka and ikaw, no po (that's the hotline register; the
+  warmth is in the particles), help is tulong and never a
+  "serbisyo". One thing mattered above all: hours here are never
+  utang na loob. An hour of help is oras that moves between
+  neighbors — the app says "hindi utang — at lalong hindi utang na
+  loob" exactly once, to refuse the frame by name. Work days carry
+  bayanihan, the word that already means carrying each other's
+  houses; vouching is pananagot for a neighbor, never a piyansa;
+  the community dashboard is Pintig — the pulse. Works whether
+  your phone says "fil" or the older "tl". The help pages and
+  playbooks still read in English for now — Settings says so — and
+  the full Filipino corpus is next. A native-speaker read is
+  welcome; the app discloses none has happened yet.
 - **Maktaba yote sasa inasomeka kwa Kiswahili — the whole library
   now reads in Swahili.** All 64 project playbooks with their task
   guides and tips, the 14 event templates, the help pages, the
