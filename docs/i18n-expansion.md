@@ -147,8 +147,24 @@ tagapag-ingat (the school-form words banned), dashboard = Pintig
 with one loan-verb affixation convention (i-/mag-/na-), and the
 real CLDR fil quirk on record: "one" selects every count not
 ending in 4/6/9, so _one strings always interpolate {{count}}.
-Registry carries `reviewStatus: "new"` + `content: "ui-only"`; the
-fil corpus is next; Bengali (spike first) completes the wave.
+**The fil corpus then SHIPPED** on the Phase 2 rails (11-agent
+fleet; independent fragment validation; assembly with corpus-wide
+skills-tag unification — ten divergent families resolved by
+majority with the injectivity check — plus a repointing pass that
+replaced batch-crossing English sibling references with the owning
+fragments' Filipino names and unified the salo-salo spelling to
+the KWF-argued form). Register work on the record: Bangko ng Oras
+entirely in the oras register («isang oras = isang oras, walang
+pasubali»; imbalance is «hindi pantay na oras … hanggang
+magtampo»); the single corpus utang is the named-to-refuse formula
+in the member guide's credits section; piyansa appears only as
+literal court bail; the tubero/gripo water-context rule held; the
+disability slogan keeps its first person («Walang tungkol sa amin
+nang wala kami»); Philippine color where nationally neutral
+(talipapa, ukay-ukay, sari-sari store, dyip, raket for gigs;
+community pantry kept as the lived term). All fourteen registry
+entries are `content: "full"`. Bengali (rendering spike first)
+completes the wave.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from

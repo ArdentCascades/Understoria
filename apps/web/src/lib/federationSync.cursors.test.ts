@@ -99,7 +99,10 @@ describe("composite pull cursors (phase 3)", () => {
   beforeEach(reset);
   afterEach(() => vi.unstubAllGlobals());
 
-  it("converges through a same-timestamp wedge: 120 posts sharing one createdAt drain in three 50-row pages", async () => {
+  // 120 signed rows through three verify-and-store pages sits right at
+  // vitest's 5s default on a loaded machine — an explicit budget keeps
+  // the drill deterministic instead of load-sensitive.
+  it("converges through a same-timestamp wedge: 120 posts sharing one createdAt drain in three 50-row pages", { timeout: 15_000 }, async () => {
     // Pre-pair, this was the §2 wedge: since=<ts> is inclusive, so a
     // page of 50 rows all stamped <ts> was re-served verbatim on every
     // pull and the 70 rows behind it were unreachable forever.

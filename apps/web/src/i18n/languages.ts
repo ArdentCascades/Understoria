@@ -199,16 +199,18 @@ export const LANGUAGES = [
   // still land on Filipino rather than English. Latin script, no
   // rendering spike. CLDR Filipino's "one" plural category covers
   // every count NOT ending in 4/6/9, so fil _one strings always
-  // interpolate {{count}} and never hard-code a singular. Ships
-  // UI-first: content is "ui-only" until the fil corpus lands on
-  // the Phase 2 rails.
+  // interpolate {{count}} and never hard-code a singular. Shipped
+  // UI-first; the full authored corpus (templates, tips, steps,
+  // FAQ, guides, principles) has since shipped on the Phase 2
+  // rails (content/bundles/fil.ts), so content is "full" like the
+  // others.
   {
     code: "fil",
     endonym: "Filipino",
     dir: "ltr",
     speakLang: "fil",
     reviewStatus: "new",
-    content: "ui-only",
+    content: "full",
   },
 ] as const satisfies readonly LanguageInfo[];
 
