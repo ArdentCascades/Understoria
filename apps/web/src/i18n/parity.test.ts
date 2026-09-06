@@ -32,6 +32,7 @@ import bo from "./locales/bo.json";
 import ur from "./locales/ur.json";
 import id from "./locales/id.json";
 import sw from "./locales/sw.json";
+import fil from "./locales/fil.json";
 import { LANGUAGES } from "./languages";
 
 // Every shipped locale, keyed for the gates below. Locale files are
@@ -52,6 +53,7 @@ const SHIPPED_LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   { code: "ur", data: ur },
   { code: "id", data: id },
   { code: "sw", data: sw },
+  { code: "fil", data: fil },
 ];
 
 /** Plural categories that match exactly ONE integer for a locale —

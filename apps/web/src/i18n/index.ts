@@ -63,6 +63,7 @@ const LOCALE_LOADERS: Record<
   ur: () => import("./locales/ur.json"),
   id: () => import("./locales/id.json"),
   sw: () => import("./locales/sw.json"),
+  fil: () => import("./locales/fil.json"),
 };
 
 // Minimal i18next backend over the loader map. `supportedLngs` below
@@ -120,6 +121,11 @@ export const i18nReady: Promise<unknown> = i18n
       order: ["localStorage", "navigator"],
       lookupLocalStorage: STORAGE_KEY,
       caches: ["localStorage"],
+      // Filipino ships under "fil" (what modern platforms send), but
+      // older systems still report the legacy ISO 639-1 tag "tl" —
+      // alias it so those members land on Filipino, not English.
+      convertDetectedLanguage: (lng: string) =>
+        lng === "tl" || lng.startsWith("tl-") ? "fil" : lng,
     },
     returnNull: false,
   })
