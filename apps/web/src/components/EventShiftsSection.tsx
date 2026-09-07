@@ -13,6 +13,7 @@ import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
+import { intlLocale } from "@/i18n";
 import {
   SHIFT_LABEL_MAX,
   addShift,
@@ -75,12 +76,15 @@ function formatShiftRange(
   const start = new Date(startsAt);
   const end = new Date(endsAt);
   const time = (d: Date) =>
-    d.toLocaleTimeString(locale, { hour: "numeric", minute: "2-digit" });
+    d.toLocaleTimeString(intlLocale(locale), {
+      hour: "numeric",
+      minute: "2-digit",
+    });
   const sameDay = start.toDateString() === end.toDateString();
   if (sameDay) {
-    return `${start.toLocaleDateString(locale)} · ${time(start)} – ${time(end)}`;
+    return `${start.toLocaleDateString(intlLocale(locale))} · ${time(start)} – ${time(end)}`;
   }
-  return `${start.toLocaleDateString(locale)} ${time(start)} – ${end.toLocaleDateString(locale)} ${time(end)}`;
+  return `${start.toLocaleDateString(intlLocale(locale))} ${time(start)} – ${end.toLocaleDateString(intlLocale(locale))} ${time(end)}`;
 }
 
 // Split an epoch-millis into the YYYY-MM-DD + HH:mm pair the native

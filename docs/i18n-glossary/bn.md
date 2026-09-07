@@ -154,7 +154,9 @@ matches, and fork deliberately where Bengali differs.
    material. Questions use ?, exclamations use ! — sparingly. Quotes:
    curly “ ” (the sibling convention). Ellipsis: the single-char …
    ("পাঠানো হচ্ছে…"). Em dash: " — " with plain spaces, as en/es.
-   Headings, buttons, and chips take no terminal punctuation.
+   Headings, buttons, and chips take no terminal punctuation. Nested
+   and word-as-word quotes inside prose use curly singles ‘ ’ (the hi
+   convention), keeping “ ” as the outer/label quote.
 10. **Length is the layout risk.** Bengali runs ~15–30% longer than
     en, and conjunct-heavy words are unbreakable. The tight surfaces
     are known: the bottom nav and the 3-up board pill row at 375px.
@@ -328,8 +330,8 @@ real Tailwind metrics — the same method as the Urdu spike):
   "কমিউনিটির স্পন্দন" — bn rejoins the sibling pulse family that hi
   stepped out of, because স্পন্দন carries no jargon and no collision.
 - **The unit of progress is us, not me** (`dashboard.tagline`) →
-  "এগোনোর হিসাব 'আমি'-তে নয়, 'আমরা'-তে।" — the আমি/আমরা pair does in
-  Bengali what us/me does in English.
+  "এগোনোর হিসাব ‘আমি’-তে নয়, ‘আমরা’-তে।" — the আমি/আমরা pair does in
+  Bengali what us/me does in English (curly singles per rule 9).
 - **You start with credit** (`welcome.screens.credit.title`, body) →
   "শুরুতেই আপনার হাতে ঘণ্টা" — credit becomes hours everywhere (rule
   4); the body keeps "সবাই 5 ঘণ্টা নিয়ে শুরু করে".

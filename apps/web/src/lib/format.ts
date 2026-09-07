@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import i18n from "@/i18n";
+import i18n, { intlLocale } from "@/i18n";
 
 export function formatHours(hours: number): string {
   if (Number.isNaN(hours)) return "0h";
@@ -82,14 +82,16 @@ function formatFutureTime(diff: number): string {
 // argument falls back to the browser default, which can mismatch
 // the app's chosen language (Spanish UI, English dates).
 export function formatAbsoluteDate(timestamp: number): string {
-  return new Date(timestamp).toLocaleDateString(i18n.resolvedLanguage);
+  return new Date(timestamp).toLocaleDateString(
+    intlLocale(i18n.resolvedLanguage),
+  );
 }
 
 // Same as formatAbsoluteDate but includes the time of day. For
 // events where the hour-of-day matters (federation sync timestamps,
 // invite redemption moment).
 export function formatAbsoluteDateTime(timestamp: number): string {
-  return new Date(timestamp).toLocaleString(i18n.resolvedLanguage);
+  return new Date(timestamp).toLocaleString(intlLocale(i18n.resolvedLanguage));
 }
 
 // Smart formatter for future-facing events (invite expiries,

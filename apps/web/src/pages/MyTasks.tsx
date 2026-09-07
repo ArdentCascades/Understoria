@@ -20,6 +20,7 @@
  */
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
+import { intlLocale } from "@/i18n";
 import type { MyClaimedTasksView, MyTaskGroup } from "@/lib/myTasks";
 import { localDayString } from "@/db/taskPlans";
 import { CategoryBadge } from "@/components/CategoryBadge";
@@ -102,7 +103,7 @@ function TaskRow({
   if (plannedDay) {
     const todayStr = localDayString();
     const [y, m, d] = plannedDay.split("-").map(Number);
-    const dayLabel = new Intl.DateTimeFormat(i18n.language, {
+    const dayLabel = new Intl.DateTimeFormat(intlLocale(i18n.language), {
       weekday: "short",
       month: "short",
       day: "numeric",

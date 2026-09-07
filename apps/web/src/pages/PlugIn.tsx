@@ -21,6 +21,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
+import { intlLocale } from "@/i18n";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/db/database";
 import { useApp } from "@/state/AppContext";
@@ -280,12 +281,12 @@ function MatchedOn({ tokens }: { tokens: string[] }) {
 function ShiftRow({ entry }: { entry: ShelfShift }) {
   const { t, i18n } = useTranslation();
   const { shift, event, spotsOpen, matchedOn } = entry;
-  const dateFmt = new Intl.DateTimeFormat(i18n.language, {
+  const dateFmt = new Intl.DateTimeFormat(intlLocale(i18n.language), {
     weekday: "short",
     month: "short",
     day: "numeric",
   });
-  const timeFmt = new Intl.DateTimeFormat(i18n.language, {
+  const timeFmt = new Intl.DateTimeFormat(intlLocale(i18n.language), {
     hour: "numeric",
     minute: "2-digit",
   });

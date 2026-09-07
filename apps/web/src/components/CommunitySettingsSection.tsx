@@ -12,6 +12,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
+import { intlLocale } from "@/i18n";
 import { useApp } from "@/state/AppContext";
 import {
   InvalidNodeConfigError,
@@ -393,7 +394,7 @@ export function CommunitySettingsSection() {
             <span className="text-xs text-moss-600 dark:text-moss-300">
               {t("common.savedAt", {
                 when: new Date(savedAt).toLocaleTimeString(
-                  i18n.resolvedLanguage,
+                  intlLocale(i18n.resolvedLanguage),
                 ),
               })}
             </span>

@@ -28,7 +28,7 @@ import {
 } from "react";
 import { Link, useParams, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
-import { speakLangFor } from "@/i18n";
+import { intlLocale, speakLangFor } from "@/i18n";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
 import {
@@ -323,7 +323,7 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
         return t("messages.day.yesterday");
       }
       const d = new Date(ts);
-      return new Intl.DateTimeFormat(i18n.language, {
+      return new Intl.DateTimeFormat(intlLocale(i18n.language), {
         weekday: "long",
         month: "long",
         day: "numeric",
@@ -1359,7 +1359,7 @@ function ConversationView({ memberKey }: { memberKey: string | undefined }) {
                       <div className="rounded-lg bg-moss-900/5 px-2 py-1.5 text-xs dark:bg-white/10">
                         <p>
                           {t("messages.menu.infoSent", {
-                            when: new Intl.DateTimeFormat(i18n.language, {
+                            when: new Intl.DateTimeFormat(intlLocale(i18n.language), {
                               dateStyle: "full",
                               timeStyle: "short",
                             }).format(new Date(m.createdAt)),

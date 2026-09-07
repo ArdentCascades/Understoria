@@ -162,9 +162,26 @@ literal court bail; the tubero/gripo water-context rule held; the
 disability slogan keeps its first person («Walang tungkol sa amin
 nang wala kami»); Philippine color where nationally neutral
 (talipapa, ukay-ukay, sari-sari store, dyip, raket for gigs;
-community pantry kept as the lived term). All fourteen registry
-entries are `content: "full"`. Bengali (rendering spike first)
-completes the wave.
+community pantry kept as the lived term). All fourteen prior registry
+entries are `content: "full"`. Bengali then LANDED UI-first as the
+fifteenth language, completing the wave's UI layer: the rendering
+spike came first (fontTools + HarfBuzz over Noto Sans Bengali —
+1.325em declared box, matra/conjunct ink past the tight Tailwind
+leadings → the :lang(bn) stack and 1.5 floor in index.css), then
+the glossary (docs/i18n-glossary/bn.md: আপনি with -ুন imperatives;
+the debt fence sharpened for the microcredit heartland — ঋণ/কিস্তি/
+মহাজন/দাদন banned, সমিতি banned for the community itself; Western
+digits; the ZWJ letterform ban with substitutes; স্পন্দন), then the
+6-chunk fleet + independent reconciliation (16 quoted-label fixes,
+সিংক/যে কোনো/Wi-Fi/পাবলিক চাবি unifications, three vote-vocabulary
+corrections). Bengali also forced a first: bare "bn" is the only
+shipped tag whose CLDR default numbering isn't Western, so the
+registry grew `intlNumbering` and every Intl call site now routes
+through `intlLocale()` (i18next's {{count, number}} formatter
+included) — plus plurals.test.ts gained the registry-coverage guard
+that would have caught the id/sw/fil rows it was silently missing.
+`content: "ui-only"` until the bn corpus lands on the Phase 2 rails
+— the one remaining wave item.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from

@@ -24,10 +24,11 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 
 import en from "./locales/en.json";
-import { languageInfo, SELECTABLE_LANGUAGES } from "./languages";
+import { intlLocale, languageInfo, SELECTABLE_LANGUAGES } from "./languages";
 import { ensureContent } from "@/content/registry";
 
 export {
+  intlLocale,
   LANGUAGES,
   languageInfo,
   RTL_PSEUDO,
@@ -64,6 +65,7 @@ const LOCALE_LOADERS: Record<
   id: () => import("./locales/id.json"),
   sw: () => import("./locales/sw.json"),
   fil: () => import("./locales/fil.json"),
+  bn: () => import("./locales/bn.json"),
 };
 
 // Minimal i18next backend over the loader map. `supportedLngs` below
@@ -128,6 +130,20 @@ export const i18nReady: Promise<unknown> = i18n
         lng === "tl" || lng.startsWith("tl-") ? "fil" : lng,
     },
     returnNull: false,
+  })
+  .then(() => {
+    // i18next's built-in {{value, number}} formatter hands the bare
+    // language tag to Intl.NumberFormat, which for Bengali means
+    // Bengali digits (১,২৩৪) spliced into Western-digit sentences.
+    // Re-register it over intlLocale() so interpolation-formatted
+    // numbers follow the same registry pin every direct Intl call
+    // site uses (languages.ts intlNumbering).
+    i18n.services.formatter?.add("number", (value: unknown, lng, options) =>
+      new Intl.NumberFormat(
+        intlLocale(lng),
+        options as Intl.NumberFormatOptions,
+      ).format(value as number),
+    );
   })
   // The detected language's authored-content bundle loads before the
   // gate opens (see the i18nReady doc comment above). ensureContent

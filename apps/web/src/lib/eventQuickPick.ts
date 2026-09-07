@@ -11,6 +11,8 @@
 // empty time input renders as an unlabeled blank pill, the chips are
 // the visible affordance the native control fails to be.
 
+import { intlLocale } from "@/i18n";
+
 export interface QuickDay {
   id: "today" | "tomorrow" | "weekend";
   /** YYYY-MM-DD, in the device's local timezone (what
@@ -72,11 +74,16 @@ export function quickTimes(): QuickTime[] {
 export function formatQuickTime(time: string, lang: string): string {
   const [h, m] = time.split(":").map(Number);
   const d = new Date(2000, 0, 1, h, m);
-  return d.toLocaleTimeString(lang, { hour: "numeric", minute: "2-digit" });
+  return d.toLocaleTimeString(intlLocale(lang), {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 /** Locale weekday label for the weekend chip ("sat"/"sáb"). */
 export function formatQuickWeekday(date: string, lang: string): string {
   const [y, m, d] = date.split("-").map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString(lang, { weekday: "short" });
+  return new Date(y, m - 1, d).toLocaleDateString(intlLocale(lang), {
+    weekday: "short",
+  });
 }

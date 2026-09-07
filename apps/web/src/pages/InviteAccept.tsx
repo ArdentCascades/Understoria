@@ -21,6 +21,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import i18n, { intlLocale } from "@/i18n";
 import { useApp } from "@/state/AppContext";
 import { BetaNotice } from "@/components/BetaNotice";
 import { decodeAndVerifyInvite, extractInviteToken } from "@/lib/invite";
@@ -329,7 +330,9 @@ export default function InviteAcceptPage() {
 
         <p className="mt-4 text-sm text-moss-600 dark:text-moss-300">
           {t("invite.expiresOn", {
-            date: new Date(invite.expiresAt).toLocaleDateString(),
+            date: new Date(invite.expiresAt).toLocaleDateString(
+              intlLocale(i18n.resolvedLanguage),
+            ),
           })}
         </p>
 

@@ -53,6 +53,15 @@ export interface LanguageInfo {
    *  Renders the honest content-fallback note in Settings — never
    *  silent mixed-language surprises. */
   content: "full" | "ui-only";
+  /** Set when the locale's translated strings use Western digits but
+   *  CLDR's default numbering system for the language is a native one
+   *  — today only Bengali, whose bare "bn" makes Intl render ১,২৩৪
+   *  and ৭/৯/২০২৬. Interpolated counts arrive as Western digits from
+   *  the runtime, so an unpinned formatter would mix digit systems in
+   *  one sentence. intlLocale() below appends the -u-nu-<system>
+   *  Unicode extension wherever a language tag is handed to Intl
+   *  (docs/i18n-glossary/bn.md, rule 8). */
+  intlNumbering?: "latn";
 }
 
 export const LANGUAGES = [
@@ -212,6 +221,26 @@ export const LANGUAGES = [
     reviewStatus: "new",
     content: "full",
   },
+  // Bengali closes the demand-driven wave. Its rendering spike lives
+  // in index.css (:lang(bn) font stack + 1.5 line-height floor for
+  // the matra/conjunct ink measured past the Latin line box) and its
+  // glossary in docs/i18n-glossary/bn.md. Two grammar facts shape
+  // the strings: CLDR bn's "one" covers 0 AND 1 (like hi), so every
+  // _one form interpolates {{count}}; and bn is the first shipped
+  // language whose CLDR default numbering system is not Western —
+  // bare "bn" makes Intl render Bengali digits against the locale's
+  // Western-digit text, so intlNumbering pins -u-nu-latn at every
+  // Intl call site via intlLocale(). Shipped UI-first: content is
+  // "ui-only" until the corpus lands on the Phase 2 rails.
+  {
+    code: "bn",
+    endonym: "বাংলা",
+    dir: "ltr",
+    speakLang: "bn",
+    reviewStatus: "new",
+    content: "ui-only",
+    intlNumbering: "latn",
+  },
 ] as const satisfies readonly LanguageInfo[];
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]["code"];
@@ -274,4 +303,19 @@ export function languageInfo(lang: string | undefined): LanguageInfo {
  *  every future language to an English voice. */
 export function speakLangFor(lang: string | undefined): string {
   return languageInfo(lang).speakLang;
+}
+
+/** The tag to hand to Intl (NumberFormat, DateTimeFormat,
+ *  toLocaleDateString…) for the active UI language. Usually the tag
+ *  itself, but a language whose registry entry pins intlNumbering
+ *  gets the -u-nu-<system> Unicode extension appended — Bengali UI
+ *  text uses Western digits, so unpinned Intl output (১,২৩৪) would
+ *  mix digit systems in one sentence. Callers pass
+ *  `i18n.resolvedLanguage`; regioned tags ("bn-BD") keep their
+ *  region, and unknown tags pass through untouched (Intl applies
+ *  its own fallback, same as before this helper existed). */
+export function intlLocale(lang: string | undefined): string {
+  const base = lang ?? "en";
+  const numbering = languageInfo(base).intlNumbering;
+  return numbering ? `${base}-u-nu-${numbering}` : base;
 }
