@@ -12,6 +12,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
+import { intlLocale } from "@/i18n";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/db/database";
 import { useApp } from "@/state/AppContext";
@@ -481,12 +482,12 @@ function ShiftRow({ upcoming }: { upcoming: UpcomingShift }) {
   const { t, i18n } = useTranslation();
   const { showToast } = useToast();
   const { shift, event } = upcoming;
-  const dateFmt = new Intl.DateTimeFormat(i18n.language, {
+  const dateFmt = new Intl.DateTimeFormat(intlLocale(i18n.language), {
     weekday: "short",
     month: "short",
     day: "numeric",
   });
-  const timeFmt = new Intl.DateTimeFormat(i18n.language, {
+  const timeFmt = new Intl.DateTimeFormat(intlLocale(i18n.language), {
     hour: "numeric",
     minute: "2-digit",
   });

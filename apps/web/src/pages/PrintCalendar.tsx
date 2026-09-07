@@ -20,6 +20,7 @@
  */
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { intlLocale } from "@/i18n";
 import { useApp } from "@/state/AppContext";
 import { shareOrigin } from "@/lib/appOrigin";
 import { InviteQRCode } from "@/components/InviteQRCode";
@@ -85,7 +86,7 @@ export default function PrintCalendarPage() {
   const byDay = useMemo(() => {
     const groups: { day: string; rows: Event[] }[] = [];
     for (const ev of upcoming) {
-      const day = new Date(ev.startsAt).toLocaleDateString(locale, {
+      const day = new Date(ev.startsAt).toLocaleDateString(intlLocale(locale), {
         weekday: "long",
         month: "long",
         day: "numeric",
@@ -132,7 +133,7 @@ export default function PrintCalendarPage() {
                   >
                     <div className="min-w-0">
                       <p className="text-sm font-semibold print:text-black">
-                        {new Date(ev.startsAt).toLocaleTimeString(locale, {
+                        {new Date(ev.startsAt).toLocaleTimeString(intlLocale(locale), {
                           hour: "numeric",
                           minute: "2-digit",
                         })}

@@ -20,6 +20,7 @@
  */
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { intlLocale } from "@/i18n";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/db/database";
 import {
@@ -142,7 +143,7 @@ export function TaskPrivateChecklist({
   // and shift the shown day near midnight in western timezones.
   function formatDay(day: string): string {
     const [y, m, d] = day.split("-").map(Number);
-    return new Intl.DateTimeFormat(i18n.language, {
+    return new Intl.DateTimeFormat(intlLocale(i18n.language), {
       weekday: "short",
       month: "short",
       day: "numeric",

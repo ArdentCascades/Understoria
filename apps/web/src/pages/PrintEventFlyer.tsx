@@ -20,6 +20,7 @@
  */
 import { Link, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
+import { intlLocale } from "@/i18n";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
 import { db } from "@/db/database";
@@ -41,8 +42,8 @@ import { PrintFooter, PrintToolbar } from "@/components/PrintChrome";
 // locale — the same shape EventDetail uses (local clock, no zone).
 function formatDateTime(ms: number, locale: string | undefined): string {
   const date = new Date(ms);
-  return `${date.toLocaleDateString(locale)} · ${date.toLocaleTimeString(
-    locale,
+  return `${date.toLocaleDateString(intlLocale(locale))} · ${date.toLocaleTimeString(
+    intlLocale(locale),
     { hour: "numeric", minute: "2-digit" },
   )}`;
 }

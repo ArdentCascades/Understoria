@@ -11,6 +11,7 @@
  */
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { intlLocale } from "@/i18n";
 import { useLiveQuery } from "dexie-react-hooks";
 import { BackLink } from "@/components/BackLink";
 import { useApp } from "@/state/AppContext";
@@ -58,7 +59,7 @@ export default function PilotJournalPage() {
 
   function handleShare() {
     const text = composeJournalText(entries, (ms) =>
-      new Date(ms).toLocaleString(i18n.resolvedLanguage),
+      new Date(ms).toLocaleString(intlLocale(i18n.resolvedLanguage)),
     );
     const blob = new Blob([text], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -139,7 +140,7 @@ export default function PilotJournalPage() {
               <div className="mt-2 flex items-center justify-between gap-2">
                 <time className="text-xs text-moss-600 dark:text-moss-300">
                   {new Date(entry.createdAt).toLocaleString(
-                    i18n.resolvedLanguage,
+                    intlLocale(i18n.resolvedLanguage),
                   )}
                 </time>
                 <button

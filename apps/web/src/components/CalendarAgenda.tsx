@@ -21,6 +21,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
+import { intlLocale } from "@/i18n";
 import {
   entryIsPast,
   getTodayDayKey,
@@ -97,7 +98,7 @@ export function CalendarAgenda({
 
   const dayFmt = useMemo(
     () =>
-      new Intl.DateTimeFormat(locale, {
+      new Intl.DateTimeFormat(intlLocale(locale), {
         weekday: "long",
         day: "numeric",
         month: "long",
@@ -198,7 +199,7 @@ function AgendaEntry({
     // post chip. aria-label names the kind for screen readers; an unknown
     // peer category falls back to a neutral glyph/colour, never crashes.
     const meta = eventCategoryMeta(entry.category);
-    const timeFmt = new Intl.DateTimeFormat(i18n.language, {
+    const timeFmt = new Intl.DateTimeFormat(intlLocale(i18n.language), {
       hour: "numeric",
       minute: "2-digit",
     });

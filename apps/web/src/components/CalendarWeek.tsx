@@ -21,6 +21,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
+import { intlLocale } from "@/i18n";
 import {
   WEEK_MS,
   dayKey,
@@ -151,7 +152,7 @@ export function CalendarWeek({
     new Date(days[6].ms).getUTCFullYear() !== currentYear;
   const rangeFmt = useMemo(
     () =>
-      new Intl.DateTimeFormat(locale, {
+      new Intl.DateTimeFormat(intlLocale(locale), {
         month: "short",
         day: "numeric",
         ...(needsYear ? { year: "numeric" } : {}),
@@ -161,7 +162,7 @@ export function CalendarWeek({
 
   const headerFmt = useMemo(
     () =>
-      new Intl.DateTimeFormat(locale, {
+      new Intl.DateTimeFormat(intlLocale(locale), {
         weekday: "short",
         day: "numeric",
       }),
@@ -171,7 +172,7 @@ export function CalendarWeek({
   // Mobile day-row headers have room for the full weekday name.
   const rowFmt = useMemo(
     () =>
-      new Intl.DateTimeFormat(locale, {
+      new Intl.DateTimeFormat(intlLocale(locale), {
         weekday: "long",
         month: "short",
         day: "numeric",
@@ -208,7 +209,7 @@ export function CalendarWeek({
   }, [weekIsQuiet, entries, anchorMs]);
   const nextUpFmt = useMemo(
     () =>
-      new Intl.DateTimeFormat(locale, {
+      new Intl.DateTimeFormat(intlLocale(locale), {
         month: "short",
         day: "numeric",
         ...(nextUp && new Date(nextUp.date).getUTCFullYear() !== currentYear
@@ -469,7 +470,7 @@ function WeekChip({
     // The start time is the week view's reason to exist — lead with it
     // on the event's first day. Continuation days of a multi-day span
     // show the day position instead (the time would be a lie there).
-    const timeFmt = new Intl.DateTimeFormat(locale, {
+    const timeFmt = new Intl.DateTimeFormat(intlLocale(locale), {
       hour: "numeric",
       minute: "2-digit",
     });

@@ -10,6 +10,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useTranslation } from "react-i18next";
+import { intlLocale } from "@/i18n";
 import type { DailyContribution } from "@/lib/projectMomentum";
 
 // Inline SVG sparkline. No external charting library — same reasoning
@@ -29,7 +30,7 @@ interface ProjectSparklineProps {
 }
 
 function formatDay(dayStart: number, locale: string): string {
-  return new Date(dayStart).toLocaleDateString(locale, {
+  return new Date(dayStart).toLocaleDateString(intlLocale(locale), {
     month: "short",
     day: "numeric",
   });

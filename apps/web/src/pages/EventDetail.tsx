@@ -41,6 +41,7 @@ import { Markdown } from "@/components/Markdown";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
 import { shareUrl } from "@/lib/share";
 import { buildEventIcs, icsFilename } from "@/lib/eventIcs";
+import { intlLocale } from "@/i18n";
 
 // Render an epoch-ms timestamp as "<date> <time>" in the active
 // locale. The native date+time pickers collected local-time values
@@ -49,8 +50,8 @@ import { buildEventIcs, icsFilename } from "@/lib/eventIcs";
 // always local-clock.
 function formatDateTime(ms: number, locale: string | undefined): string {
   const date = new Date(ms);
-  const datePart = date.toLocaleDateString(locale);
-  const timePart = date.toLocaleTimeString(locale, {
+  const datePart = date.toLocaleDateString(intlLocale(locale));
+  const timePart = date.toLocaleTimeString(intlLocale(locale), {
     hour: "numeric",
     minute: "2-digit",
   });

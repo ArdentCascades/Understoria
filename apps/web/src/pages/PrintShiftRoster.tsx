@@ -20,6 +20,7 @@
  */
 import { useParams } from "react-router";
 import { useTranslation } from "react-i18next";
+import { intlLocale } from "@/i18n";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useApp } from "@/state/AppContext";
 import { db } from "@/db/database";
@@ -56,7 +57,7 @@ export function blankLineCount(
 }
 
 function formatTime(ms: number, locale: string | undefined): string {
-  return new Date(ms).toLocaleTimeString(locale, {
+  return new Date(ms).toLocaleTimeString(intlLocale(locale), {
     hour: "numeric",
     minute: "2-digit",
   });
@@ -123,7 +124,9 @@ export default function PrintShiftRosterPage() {
           <h1 className="page-title print:text-black">{event.title}</h1>
           <p className="mt-1 text-sm font-medium text-moss-700 dark:text-moss-200 print:text-black">
             {t("print.roster.subtitle", {
-              date: new Date(event.startsAt).toLocaleDateString(locale),
+              date: new Date(event.startsAt).toLocaleDateString(
+                intlLocale(locale),
+              ),
             })}
             {" · "}
             {event.location}

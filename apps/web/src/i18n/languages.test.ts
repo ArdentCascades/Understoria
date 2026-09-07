@@ -11,6 +11,7 @@
  */
 import { describe, expect, it } from "vitest";
 import {
+  intlLocale,
   LANGUAGES,
   languageInfo,
   RTL_PSEUDO,
@@ -56,5 +57,33 @@ describe("language registry — the RTL gate", () => {
     expect(languageInfo("es-MX").code).toBe("es");
     expect(languageInfo("xx").code).toBe("en");
     expect(languageInfo(undefined).code).toBe("en");
+  });
+});
+
+// The Intl digit pin (docs/i18n-glossary/bn.md, rule 8). Bengali is
+// the first shipped language whose CLDR default numbering system is
+// not Western: bare "bn" makes Intl render ১,২৩৪ and ৭/৯/২০২৬ against
+// a locale file written in Western digits. intlLocale() is the one
+// helper every Intl call site routes the language tag through.
+describe("intlLocale — the numbering-system pin", () => {
+  it("pins Bengali to Western digits, region preserved", () => {
+    expect(intlLocale("bn")).toBe("bn-u-nu-latn");
+    expect(intlLocale("bn-BD")).toBe("bn-BD-u-nu-latn");
+    expect(new Intl.NumberFormat(intlLocale("bn")).format(1234)).toBe(
+      "1,234",
+    );
+    expect(
+      new Intl.NumberFormat("bn").resolvedOptions().numberingSystem,
+      "if this fails, the ICU default changed and the pin may be moot",
+    ).toBe("beng");
+  });
+
+  it("leaves every other shipped tag untouched", () => {
+    for (const l of LANGUAGES) {
+      if (l.code === "bn") continue;
+      expect(intlLocale(l.code)).toBe(l.code);
+    }
+    expect(intlLocale("es-MX")).toBe("es-MX");
+    expect(intlLocale(undefined)).toBe("en");
   });
 });

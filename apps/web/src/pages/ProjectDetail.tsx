@@ -80,6 +80,7 @@ import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 import { IconMessages, Sprig } from "@/components/visual";
 import { usePendingAction } from "@/lib/usePendingAction";
 import { TaskCard } from "@/components/TaskCard";
+import { intlLocale } from "@/i18n";
 import type {
   CoOrganizerInvitation,
   CoOrganizerInvitationResponse,
@@ -1207,7 +1208,7 @@ const ANNOUNCEMENT_INPUT_ID = "project-announcement-input";
 // record carries UTC epoch ms.
 function formatWorkDayWhen(ms: number, locale: string | undefined): string {
   const d = new Date(ms);
-  return `${d.toLocaleDateString(locale)} · ${d.toLocaleTimeString(locale, {
+  return `${d.toLocaleDateString(intlLocale(locale))} · ${d.toLocaleTimeString(intlLocale(locale), {
     hour: "numeric",
     minute: "2-digit",
   })}`;

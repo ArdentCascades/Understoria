@@ -10,6 +10,23 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **বাংলা.** The fifteenth language, closing the demand-driven wave:
+  the entire interface — all ~2,950 strings — now speaks Bengali as
+  প্রমিত চলিত বাংলা a neighbor would text, আপনি throughout with -ুন
+  imperatives. In the world capital of microcredit the hours-not-debt
+  fence is at its sharpest: no ঋণ, no কিস্তি, no মহাজন, no সমিতি for
+  the community (that's the loan group), and asking for help is
+  "কোনো ঋণ নয় — ধারও নয়, দেনাও নয়।" The dashboard is স্পন্দন — the
+  community's heartbeat. Bengali script gets its rendering due: a
+  :lang(bn) font stack and a measured 1.5 line-height floor so matras
+  and conjuncts never collide, and — a first for the registry — an
+  Intl numbering-system pin (`-u-nu-latn`) at every date/number
+  formatting site, because bare "bn" would render ১,২৩৪ against the
+  locale's Western-digit text. Authored content (playbooks, help
+  pages, guides) still reads in English for now — Settings says so
+  honestly — with the corpus next on the Phase 2 rails. A new
+  AI-assisted translation awaiting a native-speaker read; the app
+  says that too.
 - **Ang buong aklatan, sa Filipino na — the whole library now
   reads in Filipino.** All 64 project playbooks with their task
   guides and tips, the 14 event templates, the help pages, the

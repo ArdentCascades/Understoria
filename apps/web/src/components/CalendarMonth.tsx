@@ -21,6 +21,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
+import { intlLocale } from "@/i18n";
 import {
   dayKey,
   getTodayDayKey,
@@ -100,7 +101,7 @@ export function CalendarMonth({
 
   const monthLabel = useMemo(
     () =>
-      new Intl.DateTimeFormat(locale, {
+      new Intl.DateTimeFormat(intlLocale(locale), {
         month: "long",
         year: "numeric",
       }).format(new Date(grid.monthAnchorMs)),

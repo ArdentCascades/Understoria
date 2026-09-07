@@ -11,6 +11,7 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import i18n, { intlLocale } from "@/i18n";
 import { useApp } from "@/state/AppContext";
 import {
   changePassphrase,
@@ -273,7 +274,9 @@ export function SecuritySection() {
             <>
               <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
                 {t("profile.security.passkey.addedOn", {
-                  date: new Date(enrollment.createdAt).toLocaleDateString(),
+                  date: new Date(enrollment.createdAt).toLocaleDateString(
+                    intlLocale(i18n.resolvedLanguage),
+                  ),
                 })}
               </p>
               <div className="mt-2 flex flex-wrap gap-2">

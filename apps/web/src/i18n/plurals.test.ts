@@ -19,7 +19,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import i18n from "./index";
+import i18n, { i18nReady } from "./index";
 import en from "./locales/en.json";
 import es from "./locales/es.json";
 import fr from "./locales/fr.json";
@@ -31,6 +31,11 @@ import ru from "./locales/ru.json";
 import ar from "./locales/ar.json";
 import bo from "./locales/bo.json";
 import ur from "./locales/ur.json";
+import id from "./locales/id.json";
+import sw from "./locales/sw.json";
+import fil from "./locales/fil.json";
+import bn from "./locales/bn.json";
+import { LANGUAGES } from "./languages";
 
 // CLDR plural-suffix completeness for every shipped locale
 // (docs/i18n-expansion.md Phase 0), plus the original Spanish
@@ -52,6 +57,10 @@ const LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   { code: "ar", data: ar },
   { code: "bo", data: bo },
   { code: "ur", data: ur },
+  { code: "id", data: id },
+  { code: "sw", data: sw },
+  { code: "fil", data: fil },
+  { code: "bn", data: bn },
 ];
 
 function flatKeys(obj: unknown, prefix = ""): string[] {
@@ -119,6 +128,17 @@ describe("plural-suffix completeness", () => {
 
   it("en defines at least one plural family (sanity)", () => {
     expect(families.length).toBeGreaterThan(20);
+  });
+
+  // Registry coverage, mirroring parity.test.ts's guard: this table
+  // has no other tie to languages.ts, and the Indonesian/Swahili/
+  // Filipino fleets each shipped without a row here because nothing
+  // made the omission loud. Now it is.
+  it("covers every language in the registry", () => {
+    const tested = new Set(LOCALES.map((l) => l.code));
+    for (const lang of LANGUAGES) {
+      expect(tested.has(lang.code), `add ${lang.code} to LOCALES`).toBe(true);
+    }
   });
 
   for (const { code, data } of LOCALES) {
@@ -222,5 +242,40 @@ describe("es plural forms", () => {
     expect(
       i18n.t("events.detail.attendeeCountLabel", { count: 4, maybe: 2 }),
     ).toBe("4 confirmadas · 2 tal vez");
+  });
+});
+
+// Bengali end-to-end: two behaviors only running strings can prove.
+// (1) CLDR bn "one" covers 0 AND 1, so count 0 must select the _one
+// form — a hard-coded "1" there would lie at zero. (2) The
+// {{count, number}} interpolation formatter routes through
+// intlLocale(), so it renders Western digits even though bare-"bn"
+// Intl.NumberFormat would emit ১,২৩৪ against the locale's
+// Western-digit text (docs/i18n-glossary/bn.md, rules 8 and 12).
+describe("bn plural selection and digit pinning", () => {
+  beforeAll(async () => {
+    await i18nReady;
+    await i18n.changeLanguage("bn");
+  });
+
+  afterAll(async () => {
+    await i18n.changeLanguage("en");
+  });
+
+  it("selects the _one form at count 0 and interpolates the count", () => {
+    const atZero = i18n.t("format.daysAgo", { count: 0 });
+    const atOne = i18n.t("format.daysAgo", { count: 1 });
+    expect(atZero).toContain("0");
+    expect(atOne).toContain("1");
+    // Same grammatical form — bn "one" covers both.
+    expect(atZero.replace("0", "1")).toBe(atOne);
+  });
+
+  it("formats {{count, number}} in Western digits, not Bengali", () => {
+    const line = i18n.t("dashboard.milestones.label.hours", {
+      count: 1234,
+    });
+    expect(line).toContain("1,234");
+    expect(line).not.toMatch(/[০-৯]/);
   });
 });
