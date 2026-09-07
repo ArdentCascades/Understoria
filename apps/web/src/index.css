@@ -534,6 +534,47 @@
   line-height: 2;
 }
 
+/* Bengali typography (docs/i18n-glossary/bn.md, "Script, typography
+ * and rendering"). Two facts from the rendering spike drive this
+ * block:
+ *
+ * 1. The shared stack (Inter → system fallbacks) has no Bengali
+ *    coverage. Named faces cover Android/Linux and the Google
+ *    webfont (Noto Sans Bengali), iOS/macOS (Kohinoor Bangla, with
+ *    Bangla Sangam MN as the older sibling), and Windows (Nirmala
+ *    UI, with legacy Vrinda behind it).
+ *
+ * 2. Bengali ink runs well past the Latin extents but stays inside
+ *    the font's declared box: Noto Sans Bengali declares ascent
+ *    0.917em + descent 0.408em (a 1.325em line box), and shaped
+ *    measurement of conjunct- and matra-heavy words (reph over
+ *    ī-matras, ৃ/ু below-marks, ন্ধু-type stacks) found word spans
+ *    up to 1.23em. Tailwind's leading-none/tight/snug (1.0–1.375)
+ *    let adjacent Bengali lines touch; the floor below is 1.5 —
+ *    leading-normal — wherever the content language is Bengali,
+ *    sitting between Tibetan's 1.6 and the Latin default.
+ */
+:lang(bn) {
+  font-family:
+    "Noto Sans Bengali",
+    "Kohinoor Bangla",
+    "Bangla Sangam MN",
+    "Nirmala UI",
+    Vrinda,
+    Inter,
+    system-ui,
+    sans-serif;
+}
+
+:lang(bn) .leading-none,
+:lang(bn) .leading-tight,
+:lang(bn) .leading-snug,
+:lang(bn).leading-none,
+:lang(bn).leading-tight,
+:lang(bn).leading-snug {
+  line-height: 1.5;
+}
+
 /* Paper is always light. Belt to the JS print-theme guard's braces:
    whatever theme class survives into the print snapshot (iOS defers
    print requests past beforeprint), the sheet's own canvas prints
