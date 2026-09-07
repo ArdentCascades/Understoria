@@ -24,6 +24,7 @@ import { EVENT_TEMPLATES_BO } from "./eventTemplates.bo";
 import { EVENT_TEMPLATES_UR } from "./eventTemplates.ur";
 import { EVENT_TEMPLATES_ID } from "./eventTemplates.id";
 import { EVENT_TEMPLATES_SW } from "./eventTemplates.sw";
+import { EVENT_TEMPLATES_FIL } from "./eventTemplates.fil";
 import { PROJECT_CATEGORY_META } from "@/lib/categories";
 
 // Every category a template may use: the new event-specific strings plus
@@ -47,6 +48,7 @@ const BOTH: Array<[string, readonly EventTemplate[]]> = [
   ["ur", EVENT_TEMPLATES_UR],
   ["id", EVENT_TEMPLATES_ID],
   ["sw", EVENT_TEMPLATES_SW],
+  ["fil", EVENT_TEMPLATES_FIL],
 ];
 
 describe("eventTemplates — vocabulary", () => {
@@ -81,6 +83,7 @@ describe("eventTemplates — set shape and parity", () => {
     ["ur", EVENT_TEMPLATES_UR] as const,
     ["id", EVENT_TEMPLATES_ID] as const,
     ["sw", EVENT_TEMPLATES_SW] as const,
+    ["fil", EVENT_TEMPLATES_FIL] as const,
   ])("en and %s share the same id set in the same order", (_, set) => {
     expect(set.map((t) => t.id)).toEqual(EVENT_TEMPLATES_EN.map((t) => t.id));
   });
@@ -122,6 +125,7 @@ describe("eventTemplates — set shape and parity", () => {
     ["ur", EVENT_TEMPLATES_UR] as const,
     ["id", EVENT_TEMPLATES_ID] as const,
     ["sw", EVENT_TEMPLATES_SW] as const,
+    ["fil", EVENT_TEMPLATES_FIL] as const,
   ])("keeps locale-invariant fields identical across en and %s", (_, set) => {
     const byId = new Map(set.map((t) => [t.id, t]));
     for (const en of EVENT_TEMPLATES_EN) {
@@ -182,6 +186,7 @@ describe("eventTemplates — accessors", () => {
     expect(getEventTemplates("ur")).toBe(EVENT_TEMPLATES_UR);
     expect(getEventTemplates("id")).toBe(EVENT_TEMPLATES_ID);
     expect(getEventTemplates("sw")).toBe(EVENT_TEMPLATES_SW);
+    expect(getEventTemplates("fil")).toBe(EVENT_TEMPLATES_FIL);
     expect(getEventTemplates("xx")).toBe(EVENT_TEMPLATES_EN);
   });
 

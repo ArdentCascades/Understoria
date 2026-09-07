@@ -23,6 +23,7 @@ import { DESIGN_PRINCIPLES_BO } from "./design-principles.bo";
 import { DESIGN_PRINCIPLES_UR } from "./design-principles.ur";
 import { DESIGN_PRINCIPLES_ID } from "./design-principles.id";
 import { DESIGN_PRINCIPLES_SW } from "./design-principles.sw";
+import { DESIGN_PRINCIPLES_FIL } from "./design-principles.fil";
 
 // Guardrail against translation drift, same shape as faq.parity.
 // Principle ids are stable anchors shared across languages: WhyTooltip
@@ -46,6 +47,7 @@ describe.each([
   ["Urdu", DESIGN_PRINCIPLES_UR],
   ["Indonesian", DESIGN_PRINCIPLES_ID],
   ["Swahili", DESIGN_PRINCIPLES_SW],
+  ["Filipino", DESIGN_PRINCIPLES_FIL],
 ] as const)(
   "design principles parity — English ↔ %s",
   (localeName, PRINCIPLES_TR) => {

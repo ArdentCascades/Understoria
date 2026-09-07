@@ -10,6 +10,21 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Ang buong aklatan, sa Filipino na — the whole library now
+  reads in Filipino.** All 64 project playbooks with their task
+  guides and tips, the 14 event templates, the help pages, the
+  start-a-community guide, the design principles, and the member,
+  opsec, and study guides. The same care as the interface carried
+  through: an hour is always oras and never utang na loob (the
+  guides say so once, by name, to refuse it); the Bangko ng Oras
+  runs on «isang oras = isang oras, walang pasubali»; work days
+  are Bayanihan; vouching stays pananagot while piyansa appears
+  only where it means literal court bail. The advice speaks
+  Filipino life where it fits any province: talipapa, ukay-ukay,
+  sari-sari store, community pantry, dyip, raket. The "content
+  still in English" note for Filipino in Settings retires. Still a
+  new AI-assisted translation awaiting a native-speaker read — the
+  app says so.
 - **Filipino.** The fourteenth language: the entire interface — all
   ~2,900 strings — now speaks Filipino the way neighbors text each
   other: ka and ikaw, no po (that's the hotline register; the

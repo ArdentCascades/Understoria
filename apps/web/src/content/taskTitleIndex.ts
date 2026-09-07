@@ -132,6 +132,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Kusanya zamu ya usafi na kujaza upya",
       "Jenga mahusiano ya vyanzo vya chakula",
       "Weka mawasiliano ya matatizo"
+    ],
+    "fil": [
+      "Humanap ng host na may kuryente at daanan ng tao",
+      "Maghanap ng ref at panangga sa ulan at init",
+      "Itakda ang mga patakaran at lagyan ng label ang lahat",
+      "Buuin ang salitan sa paglilinis at muling pagpupuno",
+      "Buuin ang mga regular na pagkukunan",
+      "Maglagay ng contact para sa problema"
     ]
   },
   "community-garden": {
@@ -251,6 +259,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Panda kulingana na msimu wenu",
       "Weka zamu ya kumwagilia na kupalilia",
       "Panga mavuno na ziada"
+    ],
+    "fil": [
+      "Siguruhin ang lupa at pahintulot",
+      "Ipasuri ang lupa at iplano ang mga taniman",
+      "Magtipon ng materyales at magtayo",
+      "Pagpasyahan ang modelo ng hatian",
+      "Magtanim ayon sa klima at panahon",
+      "Magtakda ng salitan sa dilig at bunot ng damo",
+      "Iplano ang ani at ang sobra"
     ]
   },
   "tool-lending-library": {
@@ -370,6 +387,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Anzisha daftari la kuazimisha",
       "Fundisha wakutubi wenu",
       "Tunza na ukuze"
+    ],
+    "fil": [
+      "Humanap ng imbakan at oras ng bukas",
+      "Ipunin at bukurin ang imbentaryo",
+      "I-catalog ang lahat",
+      "Isulat ang mga patakaran sa paghiram",
+      "Ihanda ang paghiram",
+      "Sanayin ang mga “librarian” mo",
+      "Alagaan at palaguin"
     ]
   },
   "neighborhood-care-network": {
@@ -489,6 +515,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Andaa mpango wa dharura",
       "Ratibu msaada wa vitendo",
       "Wasaidie waliojitokeza pia"
+    ],
+    "fil": [
+      "Alamin kung sino ang nasa paligid",
+      "Maghanap at mag-screen ng mga tutulong",
+      "Magpares nang maingat",
+      "Magtakda ng ritmo ng pagkumusta",
+      "Isulat ang plano kapag may hindi sumasagot",
+      "Ayusin ang praktikal na tulong",
+      "Alagaan din ang mga tumutulong"
     ]
   },
   "emergency-preparedness": {
@@ -608,6 +643,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tambua sehemu salama",
       "Fanya zoezi au jioni ya maelezo",
       "Panga nani anafanya nini siku yenyewe"
+    ],
+    "fil": [
+      "Alamin ang mga panganib sa lugar mo",
+      "Bumuo ng kadena ng tawagan",
+      "Iplano ang komunikasyong offline",
+      "Mag-imbak ng gamit ng lahat",
+      "Tukuyin ang mga ligtas na lugar",
+      "Magsagawa ng drill o gabi ng paghahanda",
+      "Linawin ang mga papel sa “mismong araw”"
     ]
   },
   "free-store": {
@@ -714,6 +758,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Panga vitu watu waangalie kwa heshima",
       "Panga watu wa tukio",
       "Shughulikia mabaki"
+    ],
+    "fil": [
+      "Pumili ng anyo at espasyo",
+      "Itakda ang pamantayan ng donasyon",
+      "Ayusin ang pagtanggap at pagbubukod",
+      "Iladlad para makapamili ang mga tao nang may dignidad",
+      "Tauhan ang event",
+      "Asikasuhin ang matitira"
     ]
   },
   "skill-share": {
@@ -807,6 +859,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tafuta nafasi na wakati",
       "Tengeneza ratiba",
       "Ifanye ifikike kwa wote"
+    ],
+    "fil": [
+      "Alamin ang mga kakayahan at hilig",
+      "Maghanap at ihanda ang mga magtuturo",
+      "Humanap ng lugar at oras",
+      "Buuin ang iskedyul",
+      "Gawin itong abot ng lahat"
     ]
   },
   "bulk-buying-coop": {
@@ -926,6 +985,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Panga upokeaji na mahali pa kugawa",
       "Gawa maagizo kwa haki",
       "Pokezaneni kazi"
+    ],
+    "fil": [
+      "Tipunin ang grupo ng bibili",
+      "Humanap ng supplier",
+      "Ihanda ang pag-order",
+      "Maging malinaw sa pera",
+      "Ayusin ang paghahatid at espasyo ng bukod",
+      "Paghatian ang mga order nang patas",
+      "Pagsalitanin ang trabaho"
     ]
   },
   "repair-cafe": {
@@ -1032,6 +1100,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tengeneza utaratibu wa mapokezi",
       "Simamia usalama na matarajio",
       "Hifadhi vipuri na vitu vinavyotumika sana"
+    ],
+    "fil": [
+      "Hanapin ang mga taga-kumpuni ayon sa kakayahan",
+      "Ihanda ang mga istasyon ng pagkukumpuni",
+      "Magtakda ng regular na petsa",
+      "Gumawa ng daloy ng pagtanggap",
+      "Asikasuhin ang kaligtasan at inaasahan",
+      "Mag-imbak ng karaniwang piyesa at gamit"
     ]
   },
   "rides-transportation": {
@@ -1151,6 +1227,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Wekeni wazi safari zinazohusika",
       "Panga mambo ya mafuta",
       "Walinde abiria na madereva"
+    ],
+    "fil": [
+      "Hanapin at suriin ang mga drayber",
+      "Ayusin ang insurance at legal na proteksyon",
+      "Gumawa ng sistema ng paghingi ng sakay",
+      "Buuin ang gawi ng pagtutugma",
+      "Linawin kung ano ang sakop",
+      "Ayusin ang gastos",
+      "Ingatan ang mga pasahero at drayber"
     ]
   },
   "tenant-union": {
@@ -1270,6 +1355,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Andaa kikao cha kujua haki zako",
       "Andaeni utaratibu wa kukabili kufukuzwa",
       "Unganeni na msaada wa kisheria wa kudumu"
+    ],
+    "fil": [
+      "Buuin ang ubod na pangkat ng tagapag-organisa",
+      "Imapa ang mga gusali at problema ng umuupa",
+      "Ipunin ang tumpak na lokal na karapatan ng umuupa",
+      "Buuin ang mabilisang sistema ng pagkontak",
+      "Magdaos ng workshop sa karapatan ng umuupa",
+      "Isulat ang mga hakbang kapag may pagpapaalis",
+      "Makipag-ugnay sa libreng tulong legal at iba pang suporta"
     ]
   },
   "childcare-collective": {
@@ -1389,6 +1483,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Wekeni taratibu za afya, aleji, na dharura",
       "Fundisheni wanaotunza watoto mambo ya msingi",
       "Fanyeni kikao cha majaribio na mkusanye maoni"
+    ],
+    "fil": [
+      "Tipunin ang mga tagapagtatag na pamilya at pumili ng modelo",
+      "Itakda ang pamantayan sa kaligtasan at pagsusuri",
+      "Humanap ng lugar at gawin itong ligtas sa bata",
+      "Gumawa ng sistema ng iskedyul at oras",
+      "Itakda ang patakaran sa kalusugan, allergy, at emergency",
+      "Sanayin ang mga tagapag-alaga sa mga batayan",
+      "Magsagawa ng subok na session at mangalap ng puna"
     ]
   },
   "community-composting": {
@@ -1508,6 +1611,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Wekeni wazi kinachopokelewa",
       "Tafuteni na mfundishe zamu za matunzo",
       "Gawanyeni mboji iliyokamilika"
+    ],
+    "fil": [
+      "Humanap ng lugar para sa compostan",
+      "Pumili ng paraan ng pag-compost",
+      "Kumuha ng mga bin at kagamitan",
+      "Ayusin kung paano darating ang mga tira",
+      "Linawin kung ano ang tinatanggap",
+      "Buuin at sanayin ang salitan sa pag-aasikaso",
+      "Ipamahagi ang tapos na compost"
     ]
   },
   "free-little-library": {
@@ -1601,6 +1713,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Jaza mkusanyo wa kwanza",
       "Weka bango na desturi rahisi",
       "Tafuta mtunzaji"
+    ],
+    "fil": [
+      "Gumawa o kumuha ng kahong hindi tinatablan ng ulan",
+      "Pumili at ihanda ang puwesto",
+      "Punuin ang panimulang koleksyon",
+      "Maglagay ng karatula at simpleng kaugalian",
+      "Humanap ng taga-asikaso"
     ]
   },
   "community-first-aid-training": {
@@ -1707,6 +1826,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Karibisha washiriki",
       "Endesha vikao vya mafunzo",
       "Gawa kit na vikao vya kurudia"
+    ],
+    "fil": [
+      "Makipagtulungan sa mga sertipikadong tagapagsanay",
+      "Kumuha ng mga gamit",
+      "Humanap ng lugar at magtakda ng mga session",
+      "Mag-imbita ng mga dadalo",
+      "Patakbuhin ang mga session ng pagsasanay",
+      "Ipamahagi ang mga kit at mag-ulit ng pagsasanay"
     ]
   },
   "time-bank": {
@@ -1826,6 +1953,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Zindua orodha ya msaada unaotolewa",
       "Ratibu na uunganishe mabadilishano",
       "Jengeni desturi za kuaminiana na usalama"
+    ],
+    "fil": [
+      "Tipunin ang mga unang miyembro at ilista ang kakayahan",
+      "Pumili ng sistema ng pagtatala",
+      "Itakda ang mga patakaran",
+      "Isalubong ang mga bagong miyembro",
+      "Ilunsad ang direktoryo ng mga alok",
+      "Pag-ugnayin at itugma ang mga palitan",
+      "Buuin ang mga gawi ng tiwala at kaligtasan"
     ]
   },
   "solidarity-fund": {
@@ -1945,6 +2081,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Anzisha ukusanyaji wa pesa",
       "Jenga mchakato wa maamuzi na utoaji",
       "Toa taarifa kwa uwazi"
+    ],
+    "fil": [
+      "Bumuo ng maliit na pangkat na mag-aalaga ng pera",
+      "Ayusin ang malinaw na paghawak ng pera",
+      "Pagkasunduan ang pamantayan sa paghingi at pagbibigay",
+      "Gumawa ng simple at magaan na form ng paghingi",
+      "Simulan ang pangangalap ng donasyon",
+      "Buuin ang daloy ng desisyon at paglabas ng pera",
+      "Mag-ulat nang bukas"
     ]
   },
   "diaper-hygiene-bank": {
@@ -2038,6 +2183,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Panga na uhesabu kwa saizi na aina",
       "Weka utaratibu wa kugawa ulio wa haki",
       "Panga siku za kugawa na uwapange watu"
+    ],
+    "fil": [
+      "Maghanap ng imbakan at puwesto ng pamimigay",
+      "Ayusin ang pinagkukunan ng supply",
+      "Pagbukud-bukurin at itala ayon sa size at uri",
+      "Magtakda ng patas na patakaran sa pamimigay",
+      "Mag-iskedyul ng pamimigay at maghanap ng tutulong"
     ]
   },
   "community-bike-workshop": {
@@ -2144,6 +2296,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tafuta mafundi waliojitokeza",
       "Weka nyakati za kufungua na utaratibu wa jifunze-upate-baiskeli",
       "Weka desturi za usalama"
+    ],
+    "fil": [
+      "Maghanap ng espasyo ng talyer",
+      "Mag-ipon ng kagamitan at repair stand",
+      "Tipunin ang mga donasyong bisikleta at piyesa",
+      "Mag-imbita ng mga mekanikong tutulong",
+      "Magtakda ng bukas na oras at modelong aral-at-uwi",
+      "Magtatag ng mga gawi sa kaligtasan"
     ]
   },
   "newcomer-translation-network": {
@@ -2250,6 +2410,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tengeneza vifaa vya kumfahamisha mgeni",
       "Toa usindikizaji kwenye miadi",
       "Weka desturi za faragha na usalama"
+    ],
+    "fil": [
+      "Mag-imbita ng mga tutulong na marunong ng iba't ibang wika",
+      "Imapa ang mga lokal na mapagkukunan at katuwang",
+      "Bumuo ng sistema ng paghingi at pagtutugma",
+      "Gumawa ng mga panimulang gabay",
+      "Mag-alok ng pagsama sa mga appointment",
+      "Magtakda ng mga gawi sa privacy at kaligtasan"
     ]
   },
   "community-meal": {
@@ -2369,6 +2537,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Kusanya timu ya kupika na kupakua",
       "Weka ratiba na usambaze habari",
       "Endesha mlo na usafishe"
+    ],
+    "fil": [
+      "Maghanap ng kusina at espasyo ng paghahain",
+      "Ayusin ang kaligtasan ng pagkain at mga permit",
+      "Buuin ang tuloy-tuloy na pinagkukunan ng pagkain",
+      "Magplano ng menu para sa dami, diyeta, at allergy",
+      "Mag-imbita ng pangkat sa pagluluto at paghahain",
+      "Magtakda ng iskedyul at ipamalita",
+      "Isagawa ang salo-salo at maglinis"
     ]
   },
   "seed-library": {
@@ -2462,6 +2639,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Panga na uweke lebo mkusanyo",
       "Weka desturi za kuchukua na kushiriki",
       "Tunza uotaji na ujaze upya"
+    ],
+    "fil": [
+      "Maghanap ng host at sistema ng imbakan",
+      "Humanap ng panimulang binhi",
+      "Ayusin at lagyan ng label ang koleksiyon",
+      "Magtakda ng mga kaugalian sa paghiram at pagbabahagi",
+      "Panatilihin ang sigla ng binhi at magpuno ulit"
     ]
   },
   "digital-literacy": {
@@ -2581,6 +2765,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Buni mtaala wa wanaoanza",
       "Panga madarasa na msaada wa kuingia tu",
       "Weka kanuni za usalama wa data na urudishaji"
+    ],
+    "fil": [
+      "Tipunin at ayusin ang mga device",
+      "Mag-set up ng sistema ng pagpapahiram",
+      "Ayusin ang koneksiyon sa internet",
+      "Mag-imbita at magsanay ng mga magtuturo",
+      "Magdisenyo ng mga aralin para sa baguhan",
+      "Mag-iskedyul ng mga klase at bukas na oras ng tulong",
+      "Magtakda ng patakaran sa seguridad ng datos at pagsasauli"
     ]
   },
   "weatherization-brigade": {
@@ -2687,6 +2880,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tafuta vifaa na zana",
       "Shughulikia usalama na uwajibikaji",
       "Panga na uendeshe siku za kazi ya pamoja"
+    ],
+    "fil": [
+      "Mag-imbita ng mga bihasang tutulong",
+      "Itakda ang saklaw ng trabaho",
+      "Bumuo ng sistema ng paghingi at pagsusuri",
+      "Humanap ng materyales at kagamitan",
+      "Ayusin ang kaligtasan at insurance",
+      "Mag-iskedyul at magsagawa ng mga bayanihan"
     ]
   },
   "pet-food-bank": {
@@ -2780,6 +2981,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Panga na uhesabu kwa aina ya mnyama na ukubwa",
       "Weka utaratibu wa kugawa",
       "Panga ratiba na watu wa siku za kugawa"
+    ],
+    "fil": [
+      "Maghanap ng imbakan at lugar ng pamimigay",
+      "Buuin ang pagkukunan ng pagkain ng alagang hayop",
+      "Ihiwa-hiwalay at itala ayon sa hayop at laki",
+      "Magtakda ng patakaran sa pamimigay",
+      "Itakda at lagyan ng tao ang pamimigay"
     ]
   },
   "youth-mentorship": {
@@ -2899,6 +3107,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Shughulikia uandikishaji, mzio, na taarifa za dharura",
       "Tafuta vitafunio na vifaa",
       "Endesha vikao na uwasiliane na familia"
+    ],
+    "fil": [
+      "Maghanap ng ligtas na espasyo at magtakda ng oras",
+      "Magtakda ng pamantayan sa kaligtasan ng bata at pagsusuri",
+      "Maghanap at magsanay ng mga mentor",
+      "Planuhin ang mga aktibidad",
+      "Asikasuhin ang pagpapatala, allergy, at emergency info",
+      "Maghanap ng meryenda at gamit",
+      "Patakbuhin ang mga session at kamustahin ang mga pamilya"
     ]
   },
   "gleaning-network": {
@@ -3018,6 +3235,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Shughulikia sheria na usalama wa chakula",
       "Jenga njia za kugawa",
       "Endesha uokotaji na upime kilo"
+    ],
+    "fil": [
+      "Maghanap ng mapagkukunan ng ani",
+      "Bumuo ng crew ng mamumulot ng ani",
+      "Ayusin ang transportasyon at imbakan",
+      "Mag-set up ng pag-iiskedyul at pagpapakilos",
+      "Ayusin ang usapin ng aksidente at kaligtasan ng pagkain",
+      "Buuin ang mga dadaluyan ng pamamahagi",
+      "Magsagawa ng pamumulot ng ani at itala ang kilo"
     ]
   },
   "community-mediation": {
@@ -3137,6 +3363,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Weka usiri na kanuni za msingi",
       "Sambaza habari",
       "Fuatilia matokeo na uwatunze wasuluhishi"
+    ],
+    "fil": [
+      "Maghanap at magsanay ng mga tagapamagitan",
+      "Mag-set up ng proseso ng paghiling at intake",
+      "Maghanap ng mga neutral na tagpuan",
+      "Linawin ang saklaw at mga hangganan",
+      "Itatag ang pagiging kumpidensyal at mga batayang tuntunin",
+      "Ipaalam sa mga tao ang pamamagitan",
+      "Subaybayan ang mga resulta at alagaan ang mga tagapamagitan"
     ]
   },
   "reentry-support": {
@@ -3256,6 +3491,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Unganisha na ajira na makazi",
       "Unganisha na waliopitia wenyewe",
       "Weka taratibu za faragha na mipaka"
+    ],
+    "fil": [
+      "Bumuo ng direktoryo ng tulong at mga kapartner",
+      "Maghanap at magsanay ng mga tutulong",
+      "Gumawa ng pagsalubong at intake ng pangangailangan",
+      "Tumulong sa mga dokumento at benepisyo",
+      "Iugnay sa trabaho at tirahan",
+      "Mag-alok ng mentorship mula sa kapwa nakaranas",
+      "Magtakda ng gawi sa privacy at mga hangganan"
     ]
   },
   "community-wood-bank": {
@@ -3375,6 +3619,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Jenga utaratibu wa kuomba na kufikisha",
       "Weka vigezo vya kugawa",
       "Panga siku za kazi ya pamoja na ukaushaji"
+    ],
+    "fil": [
+      "Maghanap ng pagkukunan ng kahoy",
+      "Maghanap ng lugar ng pagproseso at imbakan",
+      "Kumuha ng kagamitan at safety gear",
+      "Bumuo at magsanay ng crew sa kahoy",
+      "Bumuo ng sistema ng paghiling at paghahatid",
+      "Magtakda ng pamantayan sa pamimigay",
+      "Itakda ang mga bayanihan at pagpapatuyo"
     ]
   },
   "community-wifi-mesh": {
@@ -3494,6 +3747,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tafuta maeneo ya kubeba node",
       "Weka kanuni za matumizi na faragha",
       "Tunza na upanue mtandao"
+    ],
+    "fil": [
+      "I-mapa ang pangangailangan at mga butas sa abot",
+      "Maghanap ng backhaul na koneksyon sa internet",
+      "Maghanap ng mga tutulong na marunong sa tech",
+      "Mangalap at mag-configure ng kagamitan",
+      "Maghanap ng mga host site para sa mga node",
+      "Magtakda ng mga tuntunin sa paggamit at privacy",
+      "Alagaan at palawakin ang network"
     ]
   },
   "mental-health-peer-support": {
@@ -3613,6 +3875,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Wekeni usiri na kanuni za kikundi",
       "Panga vikao na usambaze habari",
       "Watunze wawezeshaji, epusha uchovu"
+    ],
+    "fil": [
+      "Maghanap at magsanay ng mga tagapagpadaloy",
+      "Linawin ang saklaw at mga hangganan ng bilog",
+      "Bumuo ng plano sa referral kapag may krisis",
+      "Maghanap ng pribado at ligtas na espasyo",
+      "Magtakda ng pagiging kumpidensyal at mga tuntunin ng bilog",
+      "Itakda at ipaalam ang mga session",
+      "Suportahan ang mga tagapagpadaloy at iwasan ang burnout"
     ]
   },
   "community-cleanup": {
@@ -3706,6 +3977,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Kusanya vifaa na zana za usalama",
       "Alika na upange waliojitokeza",
       "Endesha siku ya usafi au ya kurudisha eneo"
+    ],
+    "fil": [
+      "Tukuyin at unahin ang mga lugar",
+      "Kunin ang mga pahintulot at plano sa pagtatapon",
+      "Ipunin ang mga gamit at pananggalang",
+      "Mag-imbita at mag-ayos ng mga tutulong",
+      "Idaos ang araw ng bayanihan sa paglilinis"
     ]
   },
   "free-tax-prep": {
@@ -3825,6 +4103,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Sambaza habari kwa majirani wanaostahili",
       "Hakikisha usalama wa data na faragha",
       "Toa mwendelezo wa uwezo wa kifedha"
+    ],
+    "fil": [
+      "Ipasanay at ipasertipika ang mga preparer",
+      "Makipag-partner sa kinikilalang programa ng libreng pag-file",
+      "Maghanda ng espasyo at kagamitan",
+      "Buuin ang sistema ng appointment at pagtanggap",
+      "Ipaalam sa mga kapitbahay na puwede",
+      "Siguraduhin ang seguridad at privacy ng datos",
+      "Mag-alok ng follow-up sa kaalaman sa pananalapi"
     ]
   },
   "community-market": {
@@ -3944,6 +4231,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tafuta watu na upange zamu zao",
       "Sambaza habari na uweke ratiba ya kudumu",
       "Endesha meza na ushughulikie vilivyobaki"
+    ],
+    "fil": [
+      "Siguraduhin ang suplay ng ani at pagkain",
+      "Maghanap ng lokasyon at ihanda ang puwesto",
+      "Pagpasyahan ang modelo",
+      "Ihanda ang pagtatanghal, imbakan, at kaligtasan ng pagkain",
+      "Mag-imbita at mag-iskedyul ng mga tutulong",
+      "Ikalat ang balita at magtakda ng regular na iskedyul",
+      "Patakbuhin ang puwesto at asikasuhin ang matitira"
     ]
   },
   "welcome-wagon": {
@@ -4037,6 +4333,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Andaa vikapu vya karibu",
       "Tafuta na uandae wakaribishaji",
       "Anzisha mfumo wa kuelekezwa na kujiunga"
+    ],
+    "fil": [
+      "Pagpasyahan kung sino ang sasalubungin at paano",
+      "Buuin ang packet ng lokal na impormasyon",
+      "Buuin ang mga basket na pansalubong",
+      "Mag-imbita at magsanay ng mga tagapagsalubong",
+      "Buuin ang paraan ng pagtuturo at pagsali"
     ]
   },
   "library-of-things": {
@@ -4156,6 +4459,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Andika kanuni za kuazima na msingi wa kuaminiana",
       "Anzisha utaratibu wa kutoa vitu na uandae wakutubi",
       "Tunza, safisha, na ukuze mkusanyo"
+    ],
+    "fil": [
+      "Alamin sa survey kung ano ang gustong hiramin",
+      "Maghanap ng imbakan at magtakda ng oras",
+      "Tipunin, linisin, at subukan ang mga gamit",
+      "I-catalog at kunan ng litrato ang imbentaryo",
+      "Isulat ang mga patakaran sa paghiram na may tiwala",
+      "Ihanda ang paghiram at sanayin ang mga librarian",
+      "Alagaan, linisin, at palaguin ang koleksyon"
     ]
   },
   "laundry-shower-access": {
@@ -4262,6 +4574,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Weka taratibu za usafi na usalama",
       "Tafuta na uandae waliojitokeza",
       "Weka ratiba na usambaze habari"
+    ],
+    "fil": [
+      "Siguraduhin ang access sa labahan at paliguan",
+      "Tipunin ang mga gamit",
+      "Buuin ang listahan at oras-oras na iskedyul",
+      "Itatag ang mga protocol sa kalinisan at kaligtasan",
+      "Mag-imbita at magsanay ng mga tutulong",
+      "Magtakda ng iskedyul at ikalat ang balita"
     ]
   },
   "voter-registration": {
@@ -4368,6 +4688,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Chagua maeneo na matukio yenye watu wengi",
       "Endesha meza ya kuandikisha",
       "Saidia hatua zinazofuata"
+    ],
+    "fil": [
+      "Alamin ang mga patakaran sa pagpapalista ng botante",
+      "Magsanay ng mga tutulong na walang pinapanigan",
+      "Tipunin ang mga materyales at tumpak na impormasyon",
+      "Pumili ng mga mataong lokasyon at pagtitipon",
+      "Patakbuhin ang mesa ng pagpapalista",
+      "Tumulong sa mga susunod na hakbang"
     ]
   },
   "health-navigation": {
@@ -4487,6 +4815,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Toa msaada wa miadi na dawa",
       "Weka taratibu za faragha za taarifa za afya",
       "Shirikiana na kliniki na watoa matibabu"
+    ],
+    "fil": [
+      "Buuin ang direktoryo ng mga tulong sa kalusugan",
+      "Mag-imbita at magsanay ng mga gabay",
+      "Buuin ang sistema ng paghingi at pagtanggap",
+      "Tumulong sa insurance at pag-a-apply",
+      "Mag-alok ng tulong sa appointment at reseta",
+      "Magtakda ng mga gawi sa privacy ng impormasyong pangkalusugan",
+      "Makipag-partner sa mga clinic at provider"
     ]
   },
   "toy-library": {
@@ -4580,6 +4917,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Andika kwenye katalogi na fungasha vipande vyote",
       "Andika masharti ya kuazima",
       "Anzisha utaratibu wa kuazima na wafundishe watunzaji"
+    ],
+    "fil": [
+      "Maghanap ng paglalagyan at itakda ang oras",
+      "Tipunin, linisin, at suriin ang mga laruan",
+      "Itala at isilid sa bag nang kumpleto",
+      "Isulat ang mga patakaran sa paghiram",
+      "Ihanda ang paghiram at sanayin ang mga librarian"
     ]
   },
   "food-preservation": {
@@ -4699,6 +5043,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Panga vipindi vya kuhifadhi pamoja",
       "Fundisha na uongoze vipindi kwa usalama",
       "Gawana chakula kilichohifadhiwa na andika"
+    ],
+    "fil": [
+      "Maghanap ng angkop na kusina",
+      "Pag-aralan ang ligtas na pagpepreserba",
+      "Tipunin ang kagamitan at garapon",
+      "Maghanap ng ani",
+      "Planuhin ang sama-samang session",
+      "Ituro at patakbuhin nang ligtas ang session",
+      "Hatiin ang napreserba at itala"
     ]
   },
   "free-haircut": {
@@ -4792,6 +5145,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tafuta vifaa na mahitaji",
       "Panga usafi na kufuata masharti ya leseni",
       "Endesha siku za unadhifu"
+    ],
+    "fil": [
+      "Imbitahan ang mga lisensyadong stylist at barbero",
+      "Maghanap ng malilinisang lugar",
+      "Tipunin ang kagamitan at gamit",
+      "Ayusin ang kalinisan at lisensya",
+      "Idaos ang mga araw ng gupitan"
     ]
   },
   "mutual-aid-moving-crew": {
@@ -4911,6 +5271,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Weka ratiba na ugawaji wa kazi",
       "Weka mipaka na upeo",
       "Endesha uhamaji na fuatilia"
+    ],
+    "fil": [
+      "Magtipon ng pangkat at sasakyan",
+      "Tipunin ang gamit sa paglipat",
+      "Gumawa ng paraan ng paghiling at pagsusuri",
+      "Ayusin ang kaligtasan at legal na proteksyon",
+      "Ayusin ang iskedyul at pagtatalaga",
+      "Linawin ang sakop at limitasyon",
+      "Isagawa ang lipat at balikan"
     ]
   },
   "disability-support-network": {
@@ -5030,6 +5399,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Anzisha kuazimana vifaa",
       "Toa msaada wa utetezi na uelekezi",
       "Weka viwango vya ufikivu kwa matukio yote ya mpango"
+    ],
+    "fil": [
+      "Iuna ang pamumuno ng may kapansanan",
+      "Gumawa ng naa-access na komunikasyon",
+      "Alamin ang pangangailangan at mapagkukunan",
+      "Ayusin ang palitan ng tulong",
+      "Magbukas ng pahiraman ng kagamitan",
+      "Tumulong sa pagtataguyod at mga proseso",
+      "Magtakda ng pamantayan sa aksesibilidad"
     ]
   },
   "books-to-prisoners": {
@@ -5136,6 +5514,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tafuta na kufundisha waliojitokeza",
       "Shughulikia stempu na usafirishaji",
       "Anzisha mpango wa kuandikiana barua"
+    ],
+    "fil": [
+      "Alamin ang patakaran sa koreo ng pasilidad",
+      "Magtipon ng libro at lugar ng impakan",
+      "Ayusin ang pagtanggap ng mga hiling",
+      "Imbitahan at sanayin ang mga tutulong",
+      "Sagutin ang selyo at logistics",
+      "Buuin ang programang sulatan"
     ]
   },
   "community-music": {
@@ -5242,6 +5628,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tafuta mahali pa masomo na vikao",
       "Panga masomo na vikao vya kupiga pamoja",
       "Weka matarajio ya utunzaji na urudishaji"
+    ],
+    "fil": [
+      "Tipunin at ipakumpuni ang mga instrumento",
+      "Ayusin ang pagpapahiram ng instrumento",
+      "Imbitahan ang mga magtuturo",
+      "Maghanap ng lugar ng aralin at jam",
+      "Iiskedyul ang mga aralin at jam session",
+      "Ituro ang pag-aalaga at pagbabalik"
     ]
   },
   "school-supply-program": {
@@ -5335,6 +5729,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Panga na fungasha kwa darasa",
       "Andaa hifadhi na mahali pa kukabidhia",
       "Panga ratiba na watu wa kukabidhi"
+    ],
+    "fil": [
+      "Kunin ang listahan ng gamit at alamin ang dami",
+      "Magsagawa ng drive at bumili nang pakyawan",
+      "Iuri at buuin ayon sa baitang",
+      "Maghanda ng paglalagyan at lugar ng pamimigay",
+      "Itakda at lagyan ng tao ang pamimigay"
     ]
   },
   "legal-aid-clinic": {
@@ -5454,6 +5855,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Andaa mafunzo na machapisho ya jua haki zako",
       "Panga ratiba ya kliniki na usambaze habari",
       "Linda usiri na kagua mgongano wa maslahi"
+    ],
+    "fil": [
+      "Makipagtuwang sa mga abogado at tulong legal",
+      "Itakda ang saklaw at mga daan ng pagpapasa",
+      "Maghanda ng espasyo at pagtanggap",
+      "Bumuo ng kumpidensiyal na sistema ng appointment",
+      "Gumawa ng mga gabay at workshop tungkol sa karapatan",
+      "Ikalat ang balita at itakda ang mga klinika",
+      "Ingatan ang kumpidensiyalidad at suriin ang mga conflict"
     ]
   },
   "resource-hub-dispatch": {
@@ -5573,6 +5983,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tafuta na ufundishe waratibu",
       "Weka faragha ya taarifa na ufuatiliaji",
       "Fuatilia mahitaji yasiyotimizwa na mapengo"
+    ],
+    "fil": [
+      "Gumawa ng iisang pagtanggap ng mga kailangan at alok",
+      "Bumuo ng talaan ng mga tutulong at mapagkukunan",
+      "Gumawa ng proseso ng pagtutugma at dispatch",
+      "Panatilihin ang master directory ng mga mapagkukunan",
+      "Maghanap at magsanay ng mga coordinator",
+      "Itakda ang privacy ng datos at pag-follow-up",
+      "Subaybayan ang mga hindi natutugunang kailangan"
     ]
   },
   "harm-reduction-supplies": {
@@ -5679,6 +6098,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Funga kits zenye maelekezo ya lugha rahisi",
       "Panga mizunguko na sehemu maalum za ugawaji",
       "Jaza upya, fuatilia, na uhuishe mafunzo"
+    ],
+    "fil": [
+      "Magpasanay at humanap ng katuwang sa harm reduction",
+      "Alamin ang lokal na batas sa mga gamit",
+      "Kumuha ng naloxone at mga gamit sa kit",
+      "Buuin ang mga kit na may simpleng gabay",
+      "Ayusin ang mga ruta at takdang puwesto",
+      "Mag-restock, magtala, at panatilihing sariwa ang pagsasanay"
     ]
   },
   "court-support": {
@@ -5785,6 +6212,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fundisha waliojitokeza kusindikiza",
       "Ratibu usafiri na utunzaji wa watoto",
       "Panga barua za msaada utetezi ukiomba"
+    ],
+    "fil": [
+      "Makipag-ugnayan sa mga tagapagtanggol at grupo sa korte",
+      "Isulat ang mga patakaran: suporta, hindi batas",
+      "Bumuo ng pagtanggap at kalendaryo ng mga pagdinig",
+      "Sanayin ang mga sasama sa korte",
+      "Ayusin ang hatid at pag-aalaga ng bata sa mga pagdinig",
+      "Ayusin ang mga liham ng suporta kapag hiniling ng depensa"
     ]
   },
   "cooling-warming-center": {
@@ -5904,6 +6339,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Panga zamu",
       "Sambaza habari kabla ya msimu",
       "Fungua, karibisha, na urejeshe kila mara"
+    ],
+    "fil": [
+      "Humanap ng host site na may AC at heater",
+      "Itakda ang mga hudyat ng pagbubukas at plano ng alerto",
+      "Mag-ipon ng mga gamit",
+      "Maghanap at magsanay ng mga host ng turno",
+      "Buuin ang salitan ng turno",
+      "Ikalat ang balita bago ang season",
+      "Magbukas, mag-host, at mag-reset bawat pagbubukas"
     ]
   },
   "community-oral-history": {
@@ -5984,6 +6428,12 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Kusanya vifaa na orodha ya maswali",
       "Rekodi vikao vya hadithi",
       "Hifadhi na urudishe, kwa masharti yao"
+    ],
+    "fil": [
+      "Sumulat ng simpleng form ng pahintulot",
+      "Mag-ipon ng gamit at listahan ng tanong",
+      "Mag-record ng mga sesyon ng kuwentuhan",
+      "Mag-imbak at ibalik ang kuwento, sa kanilang kondisyon"
     ]
   },
   "community-solar-coop": {
@@ -6103,6 +6553,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Shirikiana na wafungaji na watoa nishati",
       "Anzisha mfumo wa unafuu wa bili na uanachama",
       "Elimisha wanajumuiya matumizi ya umeme"
+    ],
+    "fil": [
+      "Tipunin ang mga miyembro at sukatin ang interes",
+      "Pag-aralan ang mga modelo at lokal na patakaran",
+      "Humanap ng site o programang masasalihan",
+      "Ayusin ang pagkukunan ng pera at legal na istruktura",
+      "Makipagtuwang sa mga installer at provider",
+      "Ayusin ang sistema ng bawas sa bill at pagiging miyembro",
+      "Turuan ang mga miyembro sa paggamit ng enerhiya"
     ]
   },
   "worker-coop-incubator": {
@@ -6222,6 +6681,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Unganisha na njia za kuanzia",
       "Toa ushauri wa karibu",
       "Jenga kusaidiana kati ya biashara changa"
+    ],
+    "fil": [
+      "Alamin ang mga kakayahan at layunin ng mga miyembro",
+      "Magdaos ng pagsasanay sa trabaho at kakayahan",
+      "Ituro ang modelo ng kooperatiba",
+      "Suportahan ang pagtatatag ng kooperatiba",
+      "Iugnay sa mga panimulang mapagkukunan",
+      "Magbigay ng mentorship",
+      "Bumuo ng suportahan ng mga venture sa isa't isa"
     ]
   },
   "elder-meal-delivery": {
@@ -6341,6 +6809,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Andika taarifa za chakula, mzio, na dharura",
       "Weka utaratibu wa kuangalia hali ya mzee",
       "Wajali waliojitokeza na ukusanye maoni"
+    ],
+    "fil": [
+      "Hanapin ang mga nakatatandang nasa bahay lang",
+      "Maghanap at suriin ang mga tutulong",
+      "Ayusin ang pagkukunan ng pagkain",
+      "Iplano ang mga ruta at iskedyul ng hatid",
+      "Itala ang diyeta, allergy, at emergency contact",
+      "Gumawa ng protocol ng pagsilip sa kalagayan",
+      "Alalayan ang mga tutulong at mangalap ng puna"
     ]
   },
   "disaster-relief-hub": {
@@ -6460,6 +6937,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Kusanya na ufundishe timu ya kuitwa ghafla",
       "Ratibu na vikundi vingine vya msaada",
       "Panga mawasiliano na usalama"
+    ],
+    "fil": [
+      "Pumili nang maaga ng lugar ng sentro at backup",
+      "Buuin ang mga daluyan ng suplay",
+      "Ayusin ang pagtanggap, pagbubukod, at imbentaryo",
+      "Gumawa ng sistema ng pamamahagi",
+      "Maghanap at magsanay ng team na handang dumating agad",
+      "Makipag-ugnayan sa ibang tumutugon",
+      "Iplano ang komunikasyon at kaligtasan"
     ]
   },
   "recovery-peer-support": {
@@ -6579,6 +7065,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Wekeni usiri na kanuni za kikundi",
       "Panga mikutano na usambaze habari",
       "Wajali waongozaji na uzuie uchovu"
+    ],
+    "fil": [
+      "Maghanap at magsanay ng mga facilitator na kapwa",
+      "Isulat ang saklaw at mga hangganan",
+      "Buuin ang mga daanan ng referral at pangkrisis",
+      "Maghanap ng ligtas, pribado, at malinis na lugar",
+      "Itakda ang kumpidensiyalidad at mga alituntunin ng grupo",
+      "Mag-iskedyul at magpaalam ng mga pagtitipon",
+      "Alalayan ang mga facilitator laban sa pagkaupos"
     ]
   },
   "community-fitness": {
@@ -6698,6 +7193,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Shughulikia usalama na afya",
       "Weka ratiba na usambaze habari",
       "Jenga ukaribu na mwendelezo"
+    ],
+    "fil": [
+      "Alamin ang mga gusto at antas ng lakas",
+      "Maghanap ng mga mangunguna sa aktibidad",
+      "Maghanap ng ligtas na mga espasyo",
+      "Magplano ng programang bukas sa lahat ng antas",
+      "Asikasuhin ang kaligtasan at kalusugan",
+      "Magtakda ng iskedyul at ikalat ang balita",
+      "Palalimin ang pagsasamahan at tuloy-tuloy na dating"
     ]
   },
   "urban-orchard": {
@@ -6817,6 +7321,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fanya siku za upandaji",
       "Panga utunzaji wa muda mrefu",
       "Panga ugawanaji wa mavuno"
+    ],
+    "fil": [
+      "Siguraduhin ang pangmatagalang karapatan sa lupa",
+      "Iplano ang disenyo ng taniman",
+      "Humanap ng mga puno at halaman",
+      "Ihanda ang lugar",
+      "Magtakda ng mga araw ng pagtatanim",
+      "Ayusin ang pangmatagalang pag-aalaga",
+      "Iplano ang paghahati ng ani"
     ]
   },
   "new-parent-support": {
@@ -6936,6 +7449,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Anzisha vikundi vya wazazi kusaidiana",
       "Weka taratibu za usalama na mipaka",
       "Unganisha na miradi mingine"
+    ],
+    "fil": [
+      "Maghanap ng mga tutulong at kaagapay na kapwa",
+      "Ayusin ang sistema ng hatiran ng pagkain",
+      "Mag-alok ng praktikal na tulong",
+      "Buuin ang direktoryo ng mga mapagkukunan",
+      "Bumuo ng mga bilog ng kapwa magulang",
+      "Itakda ang kaligtasan at mga hangganan",
+      "Iugnay sa ibang mga proyekto"
     ]
   },
   "foster-kinship-support": {
@@ -7055,6 +7577,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Anzisha vikundi vya walezi kusaidiana",
       "Jenga orodha ya mahali pa kupata msaada",
       "Weka taratibu za usalama wa mtoto na faragha"
+    ],
+    "fil": [
+      "Makipag-ugnayan sa mga pamilyang nag-aalaga",
+      "Bumuo ng suplay ng mga gamit at damit",
+      "Gumawa ng sistemang mabilis tumugon",
+      "Ayusin ang suporta para sa pahinga",
+      "Mag-alok ng mga grupo ng suporta ng kapwa",
+      "Buuin ang direktoryo ng mga mapagkukunan",
+      "Itakda ang kaligtasan ng bata at pagkapribado"
     ]
   },
   "weather-survival-outreach": {
@@ -7174,6 +7705,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Panga mpango wa ugawaji na njia",
       "Waunganishe watu na makazi ya muda na msaada",
       "Jiandae kwa dharura"
+    ],
+    "fil": [
+      "Mag-impake ng mga kit na akma sa panahon",
+      "Humanap ng mga suplay",
+      "Imapa kung saan aabutin ang mga tao",
+      "Maghanap at magsanay ng mga tutulong sa pag-abot",
+      "Buuin ang plano ng pamamahagi at ruta",
+      "Iugnay ang mga tao sa mga shelter at programa",
+      "Magplano para sa mga emergency"
     ]
   }
 };
