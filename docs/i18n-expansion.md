@@ -421,7 +421,9 @@ Its own project, sequenced after waves 1–2 prove the pipeline:
 
 **In-app guide corpus SHIPPED**: the last English-only in-app
 content — the condensed member guide, the condensed opsec guide, and
-the study-group prompts — now ships in all eleven languages as
+the study-group prompts — now ships in every registered language
+(eleven when this phase landed; the demand-driven wave's four each
+carried their guide trio in their own corpus, so fifteen today) as
 `member-guide.<code>.ts` / `opsec-guide.<code>.ts` /
 `study-prompts.<code>.ts` modules riding each language's existing
 `lazy-content-<code>` bundle, with structure parity (ids, order,
