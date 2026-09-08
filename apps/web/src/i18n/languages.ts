@@ -255,15 +255,17 @@ export const LANGUAGES = [
   // rule 12). ht is also the one locale whose fallback chain is
   // ht → fr → en rather than straight to English: Haitian members
   // are far likelier to read French (i18n/index.ts fallbackLng).
-  // Shipped UI-first; content is "ui-only" until the corpus lands
-  // on the Phase 2 rails.
+  // Shipped UI-first; the full authored corpus (templates, tips,
+  // steps, FAQ, guides, principles) has since shipped on the Phase 2
+  // rails (content/bundles/ht.ts), so content is "full" like the
+  // others.
   {
     code: "ht",
     endonym: "Kreyòl Ayisyen",
     dir: "ltr",
     speakLang: "ht",
     reviewStatus: "new",
-    content: "ui-only",
+    content: "full",
   },
 ] as const satisfies readonly LanguageInfo[];
 
