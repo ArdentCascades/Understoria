@@ -35,6 +35,7 @@ import id from "./locales/id.json";
 import sw from "./locales/sw.json";
 import fil from "./locales/fil.json";
 import bn from "./locales/bn.json";
+import ht from "./locales/ht.json";
 import { LANGUAGES } from "./languages";
 
 // CLDR plural-suffix completeness for every shipped locale
@@ -60,6 +61,13 @@ const LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   { code: "id", data: id },
   { code: "sw", data: sw },
   { code: "fil", data: fil },
+  // ht has NO ICU data — Intl.PluralRules("ht") resolves to the test
+  // runner's default locale (en rules in CI), and to whatever each
+  // member's browser defaults to in production. The category checks
+  // below are therefore run against the fallback rules; ht.json's
+  // identical _one/_other pairs (both with {{count}}) satisfy every
+  // possible fallback (docs/i18n-glossary/ht.md, rule 12).
+  { code: "ht", data: ht },
   { code: "bn", data: bn },
 ];
 

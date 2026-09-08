@@ -243,6 +243,28 @@ export const LANGUAGES = [
     content: "full",
     intlNumbering: "latn",
   },
+  // Haitian Creole opens the wave after the demand-driven wave.
+  // Latin script (Inter covers è/ò), no rendering spike, no digit
+  // pin — but a first of its own: ICU/CLDR carries NO ht data, so
+  // Intl.PluralRules("ht") silently resolves to the member's
+  // browser-default locale and plural-category selection is
+  // nondeterministic across devices. ht.json therefore ships
+  // _one/_other pairs with IDENTICAL strings, every form
+  // interpolating {{count}} — which costs Kreyòl nothing, since
+  // nouns don't inflect for number (docs/i18n-glossary/ht.md,
+  // rule 12). ht is also the one locale whose fallback chain is
+  // ht → fr → en rather than straight to English: Haitian members
+  // are far likelier to read French (i18n/index.ts fallbackLng).
+  // Shipped UI-first; content is "ui-only" until the corpus lands
+  // on the Phase 2 rails.
+  {
+    code: "ht",
+    endonym: "Kreyòl Ayisyen",
+    dir: "ltr",
+    speakLang: "ht",
+    reviewStatus: "new",
+    content: "ui-only",
+  },
 ] as const satisfies readonly LanguageInfo[];
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]["code"];

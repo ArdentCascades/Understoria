@@ -198,6 +198,20 @@ slogan keeps its first person ("আমাদের ছাড়া আমাদ�
 disaster templates; the compelled-biometrics passage survived
 line-by-line fidelity review. All fifteen registry entries are
 `content: "full"`. The demand-driven wave is COMPLETE.
+Haitian Creole then opened the next wave as the sixteenth language,
+UI-first: the glossary (docs/i18n-glossary/ht.md — ou/w register,
+the nou trap, the absolute sòl ban, the NGO-register fence, konbit
+for work days, Souf for the dashboard, "kote pou pare lapli" for
+the storm hub) and a technical first — ICU carries NO ht data, so
+Intl.PluralRules("ht") resolves to each member's browser-default
+locale and ht ships identical _one/_other pairs, every form
+interpolating {{count}}. ht is also the first locale with a
+non-uniform fallback chain: ht → fr → en (Haitian members are far
+likelier to read French). The 6-chunk fleet + reconciliation
+(30-odd quoted-label alignments, the mare/rasanbleman/feyè/klete
+family unifications, the {{hours}} unit question settled by reading
+the actual call sites, a vè/vèt meaning fix) shipped ht.json;
+`content: "ui-only"` until the Kreyòl corpus lands.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from

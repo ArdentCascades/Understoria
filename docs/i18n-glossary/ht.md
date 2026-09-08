@@ -307,8 +307,12 @@ recorded here the way bn.md records its digit wrinkle):
   a pou nou toude." — plain book-entry motion, and nou toude is the
   genuine plural you rule 2 permits.
 - **{{hours}} waiting on your confirmation**
-  (`profile.balance.awaitingYouLine`) → "{{hours}} èdtan ap tann ou
-  konfime" — the owed-help family, never dwe or dèt.
+  (`profile.balance.awaitingYouLine`) → "{{hours}} ap tann ou
+  konfime" — the owed-help family, never dwe or dèt. (Erratum from
+  the fleet's code check: this key and `pendingLine` receive a
+  PRE-FORMATTED value — formatSignedHours() emits "+2h" — so the
+  string appends no unit; only keys receiving bare numbers carry
+  "èdtan".)
 - **A new understoria** (`dashboard.categoryBreakdown.emptyTitle`) —
   the brand pun can't transliterate; render the understory image:
   "Yon bagay nèf ap pouse" — and "Understoria" itself never appears
