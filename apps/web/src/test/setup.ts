@@ -37,3 +37,4 @@ await ensureContent("ur");
 await ensureContent("id");
 await ensureContent("sw");
 await ensureContent("fil");
+await ensureContent("bn");

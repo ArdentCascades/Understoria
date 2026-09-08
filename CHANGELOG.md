@@ -10,6 +10,23 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **পুরো লাইব্রেরি এখন বাংলায় — the whole library now reads in
+  Bengali, completing the fifteen-language wave.** All 64 project
+  playbooks with their task guides and tips, the 14 event templates,
+  the help pages, the start-a-community guide, the twelve design
+  principles, and the member, opsec, and study guides. The same care
+  as the interface carried through: an hour is always ঘণ্টা and never
+  debt — the guides refuse the framing once, by name ("সাহায্য চাওয়া
+  কোনো ঋণ নয় — ধারও নয়, দেনাও নয়।"), and the seed library's
+  returns stay "উপহার — ধার নয়"; ত্রাণ never appears even in the
+  disaster playbooks (mutual aid is not relief); the disability
+  movement's slogan keeps its own first person. The advice speaks
+  everyday Bengali life where it fits both sides of the border —
+  পাড়া, বাজার, আড্ডা, চায়ের দোকান — and the compelled-biometrics
+  warning survived translation with full force. The "content still in
+  English" note for Bengali in Settings retires. Still a new
+  AI-assisted translation awaiting a native-speaker read — the app
+  says so.
 - **বাংলা.** The fifteenth language, closing the demand-driven wave:
   the entire interface — all ~2,950 strings — now speaks Bengali as
   প্রমিত চলিত বাংলা a neighbor would text, আপনি throughout with -ুন

@@ -140,6 +140,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Buuin ang salitan sa paglilinis at muling pagpupuno",
       "Buuin ang mga regular na pagkukunan",
       "Maglagay ng contact para sa problema"
+    ],
+    "bn": [
+      "বিদ্যুৎ আর লোক-চলাচল আছে, এমন জায়গা খুঁজুন",
+      "ফ্রিজ আর রোদ-বৃষ্টি সামলানোর ছাউনি জোগাড় করুন",
+      "নিয়মগুলো ঠিক করে সব কিছুতে লেবেল লাগান",
+      "পরিষ্কার আর ভরে রাখার পালার দল গড়ুন",
+      "জোগানের সম্পর্ক গড়ে তুলুন",
+      "সমস্যার জন্য একটা যোগাযোগ ঠিক করুন"
     ]
   },
   "community-garden": {
@@ -268,6 +276,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Magtanim ayon sa klima at panahon",
       "Magtakda ng salitan sa dilig at bunot ng damo",
       "Iplano ang ani at ang sobra"
+    ],
+    "bn": [
+      "জমি আর অনুমতি পাকা করুন",
+      "মাটি পরীক্ষা করিয়ে বেডের ছক আঁকুন",
+      "মালপত্র জোগাড় করে বানিয়ে ফেলুন",
+      "ভাগাভাগির নিয়মটা ঠিক করুন",
+      "নিজের এলাকা আর মৌসুম বুঝে লাগান",
+      "সেচ আর নিড়ানির পালা ঠিক করুন",
+      "ফসল তোলা আর বাড়তির পরিকল্পনা করুন"
     ]
   },
   "tool-lending-library": {
@@ -396,6 +413,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ihanda ang paghiram",
       "Sanayin ang mga “librarian” mo",
       "Alagaan at palaguin"
+    ],
+    "bn": [
+      "রাখার জায়গা আর খোলার সময় ঠিক করুন",
+      "জিনিস জোগাড় করে বাছাই করুন",
+      "সব কিছুর তালিকা বানান",
+      "নেওয়ার নিয়মগুলো লিখে ফেলুন",
+      "নেওয়ার সময় লিখিয়ে নেওয়া চালু করুন",
+      "লাইব্রেরিয়ানদের শিখিয়ে-পড়িয়ে নিন",
+      "দেখভাল করুন, বাড়তে দিন"
     ]
   },
   "neighborhood-care-network": {
@@ -524,6 +550,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Isulat ang plano kapag may hindi sumasagot",
       "Ayusin ang praktikal na tulong",
       "Alagaan din ang mga tumutulong"
+    ],
+    "bn": [
+      "কারা আছেন, চিনে নিন",
+      "সাহায্যকারী খুঁজুন, খোঁজখবর নিন",
+      "ভেবেচিন্তে জুটি বাঁধুন",
+      "খোঁজ নেওয়ার ছন্দ ঠিক করুন",
+      "বিপদে কী করবেন, আগেই লিখে রাখুন",
+      "হাতের কাজের সাহায্য গুছিয়ে দিন",
+      "সাহায্যকারীদেরও পাশে থাকুন"
     ]
   },
   "emergency-preparedness": {
@@ -652,6 +687,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tukuyin ang mga ligtas na lugar",
       "Magsagawa ng drill o gabi ng paghahanda",
       "Linawin ang mga papel sa “mismong araw”"
+    ],
+    "bn": [
+      "পাড়ার ঝুঁকিগুলো চিনে রাখুন",
+      "যোগাযোগের শিকল গড়ুন",
+      "নেট-ছাড়া যোগাযোগ ঠিক করুন",
+      "সবার জিনিসপত্র গুছিয়ে রাখুন",
+      "নিরাপদ জায়গাগুলো ঠিক করুন",
+      "একটা মহড়া বা শেখার সন্ধ্যা করুন",
+      "‘সেই দিনের’ কাজ কার, আগেই ঠিক করুন"
     ]
   },
   "free-store": {
@@ -766,6 +810,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Iladlad para makapamili ang mga tao nang may dignidad",
       "Tauhan ang event",
       "Asikasuhin ang matitira"
+    ],
+    "bn": [
+      "ধরন আর জায়গা বেছে নিন",
+      "কী নেবেন, তার মান ঠিক করুন",
+      "জিনিস নেওয়া আর বাছাই সাজান",
+      "সাজান এমনভাবে, যেন মাথা উঁচু করে বাছা যায়",
+      "আয়োজনের দিনের হাতগুলো ভাগ করুন",
+      "পড়ে-থাকা জিনিস সামলান"
     ]
   },
   "skill-share": {
@@ -866,6 +918,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Humanap ng lugar at oras",
       "Buuin ang iskedyul",
       "Gawin itong abot ng lahat"
+    ],
+    "bn": [
+      "কে কী পারেন, কী শিখতে চান — জেনে নিন",
+      "শিক্ষক খুঁজুন, তৈরি করে দিন",
+      "জায়গা আর সময় ঠিক করুন",
+      "সূচিটা দাঁড় করান",
+      "সবার নাগালে আনুন"
     ]
   },
   "bulk-buying-coop": {
@@ -994,6 +1053,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ayusin ang paghahatid at espasyo ng bukod",
       "Paghatian ang mga order nang patas",
       "Pagsalitanin ang trabaho"
+    ],
+    "bn": [
+      "কেনার দলটা জড়ো করুন",
+      "সরবরাহকারী খুঁজুন",
+      "ফরমাশ নেওয়ার ব্যবস্থা করুন",
+      "টাকার হিসাব রাখুন সবার চোখের সামনে",
+      "মাল পৌঁছানো আর বাছাইয়ের জায়গা ঠিক করুন",
+      "ফরমাশ ভাগ করুন ন্যায্যভাবে",
+      "কাজটা ঘুরিয়ে-ফিরিয়ে দিন"
     ]
   },
   "repair-cafe": {
@@ -1108,6 +1176,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Gumawa ng daloy ng pagtanggap",
       "Asikasuhin ang kaligtasan at inaasahan",
       "Mag-imbak ng karaniwang piyesa at gamit"
+    ],
+    "bn": [
+      "কাজ ধরে ধরে সারাইয়ের মানুষ জোগাড় করুন",
+      "মেরামতের টেবিল সাজান",
+      "ঘুরে ঘুরে আসা একটা তারিখ ঠিক করুন",
+      "কে কী নিয়ে এলেন, তা লেখার ব্যবস্থা করুন",
+      "নিরাপত্তা আর প্রত্যাশা সামলান",
+      "দরকারি খুচরো জিনিস মজুত রাখুন"
     ]
   },
   "rides-transportation": {
@@ -1236,6 +1312,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Linawin kung ano ang sakop",
       "Ayusin ang gastos",
       "Ingatan ang mga pasahero at drayber"
+    ],
+    "bn": [
+      "চালক জোগাড় করুন আর যাচাই করুন",
+      "বিমা আর দায়ের দিকটা পরিষ্কার করুন",
+      "অনুরোধ নেওয়ার ব্যবস্থা দাঁড় করান",
+      "গাড়ি মেলানোর ধরাবাঁধা নিয়ম গড়ুন",
+      "কী কী এর মধ্যে পড়ে, ঠিক করুন",
+      "খরচের দিকটা সামলান",
+      "যাত্রী আর চালক — দুজনেই নিরাপদ থাকুন"
     ]
   },
   "tenant-union": {
@@ -1364,6 +1449,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Magdaos ng workshop sa karapatan ng umuupa",
       "Isulat ang mga hakbang kapag may pagpapaalis",
       "Makipag-ugnay sa libreng tulong legal at iba pang suporta"
+    ],
+    "bn": [
+      "গোড়ার সংগঠক কমিটি গড়ুন",
+      "ভবন আর ভাড়াটেদের সমস্যার মানচিত্র বানান",
+      "এলাকার ভাড়াটে-অধিকারের নির্ভুল তথ্য জোগাড় করুন",
+      "দ্রুত সাড়া দেওয়ার যোগাযোগ-ব্যবস্থা গড়ুন",
+      "‘নিজের অধিকার জানুন’ কর্মশালা করুন",
+      "উচ্ছেদ এলে কী করণীয়, তার ধাপ সাজান",
+      "আইনি সাহায্য আর টানা ভরসার সঙ্গে জুড়ুন"
     ]
   },
   "childcare-collective": {
@@ -1492,6 +1586,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Itakda ang patakaran sa kalusugan, allergy, at emergency",
       "Sanayin ang mga tagapag-alaga sa mga batayan",
       "Magsagawa ng subok na session at mangalap ng puna"
+    ],
+    "bn": [
+      "গোড়ার পরিবার জড়ো করুন আর ছকে একমত হোন",
+      "নিরাপত্তা আর যাচাইয়ের মাপকাঠি ঠিক করুন",
+      "জায়গা খুঁজে বাচ্চাদের জন্য নিরাপদ করুন",
+      "সময় আর ঘণ্টার হিসাবের ব্যবস্থা বানান",
+      "স্বাস্থ্য, অ্যালার্জি আর বিপদের নিয়ম লিখুন",
+      "যাঁরা দেখবেন, তাঁদের গোড়ার জিনিসগুলো শেখান",
+      "একটা মহড়ার আসর করুন, মতামত নিন"
     ]
   },
   "community-composting": {
@@ -1620,6 +1723,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Linawin kung ano ang tinatanggap",
       "Buuin at sanayin ang salitan sa pag-aasikaso",
       "Ipamahagi ang tapos na compost"
+    ],
+    "bn": [
+      "কম্পোস্টের জায়গা খুঁজুন",
+      "কম্পোস্টের পদ্ধতি বাছুন",
+      "বিন আর সরঞ্জাম জোগাড় করুন",
+      "জমা নেওয়ার ব্যবস্থা দাঁড় করান",
+      "কী কী নেওয়া হয়, স্পষ্ট করুন",
+      "পালা করে দেখাশোনার দল গড়ে শেখান",
+      "তৈরি কম্পোস্ট বিলিয়ে দিন"
     ]
   },
   "free-little-library": {
@@ -1720,6 +1832,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Punuin ang panimulang koleksyon",
       "Maglagay ng karatula at simpleng kaugalian",
       "Humanap ng taga-asikaso"
+    ],
+    "bn": [
+      "ঝড়বৃষ্টি সওয়া বইয়ের বাক্স বানান বা জোগাড় করুন",
+      "জায়গা বেছে তৈরি করুন",
+      "শুরুর বইগুলো তুলুন",
+      "সাইন আর সহজ কথাগুলো লাগান",
+      "দেখাশোনার একজনকে ঠিক করুন"
     ]
   },
   "community-first-aid-training": {
@@ -1834,6 +1953,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Mag-imbita ng mga dadalo",
       "Patakbuhin ang mga session ng pagsasanay",
       "Ipamahagi ang mga kit at mag-ulit ng pagsasanay"
+    ],
+    "bn": [
+      "সনদওয়ালা ট্রেনারদের সঙ্গে জোড় বাঁধুন",
+      "সরঞ্জাম জোগাড় করুন",
+      "ঘর খুঁজে আসরের দিন ঠিক করুন",
+      "অংশ নেওয়ার মানুষ জোগাড় করুন",
+      "ট্রেনিংয়ের আসরগুলো চালান",
+      "কিট বিলোন, ঝালাইয়ের আসর রাখুন"
     ]
   },
   "time-bank": {
@@ -1962,6 +2089,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ilunsad ang direktoryo ng mga alok",
       "Pag-ugnayin at itugma ang mga palitan",
       "Buuin ang mga gawi ng tiwala at kaligtasan"
+    ],
+    "bn": [
+      "গোড়ার সদস্য জোগাড় করুন, কে কী পারেন তা টুকুন",
+      "ঘণ্টা টুকে রাখার ব্যবস্থা বাছুন",
+      "নিয়মগুলো ঠিক করুন",
+      "নতুন সদস্যদের বরণ করুন",
+      "কে কী পারেন, তার তালিকা ছাড়ুন",
+      "জোড় মেলান, আদান-প্রদান এগিয়ে দিন",
+      "ভরসা আর নিরাপত্তার চর্চা গড়ুন"
     ]
   },
   "solidarity-fund": {
@@ -2090,6 +2226,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Simulan ang pangangalap ng donasyon",
       "Buuin ang daloy ng desisyon at paglabas ng pera",
       "Mag-ulat nang bukas"
+    ],
+    "bn": [
+      "দেখাশোনার ছোট একটা দল গড়ুন",
+      "টাকাপয়সার স্বচ্ছ ব্যবস্থা দাঁড় করান",
+      "চাওয়া আর টাকা দেওয়ার নিয়ম ঠিক করুন",
+      "সহজ, ঝামেলাহীন চাওয়ার ফরম বানান",
+      "টাকা তোলার ব্যবস্থা করুন",
+      "সিদ্ধান্ত আর টাকা পাঠানোর ধাপ সাজান",
+      "মাসের হিসাব খোলাখুলি জানান"
     ]
   },
   "diaper-hygiene-bank": {
@@ -2190,6 +2335,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Pagbukud-bukurin at itala ayon sa size at uri",
       "Magtakda ng patas na patakaran sa pamimigay",
       "Mag-iskedyul ng pamimigay at maghanap ng tutulong"
+    ],
+    "bn": [
+      "রাখার আর বিলি করার জায়গা খুঁজুন",
+      "জিনিস আসার পথ দাঁড় করান",
+      "সাইজ আর ধরন ধরে গুছিয়ে হিসাব রাখুন",
+      "বিলির ন্যায্য নিয়ম ঠিক করুন",
+      "বিলির দিন ঠিক করুন আর মানুষ জোগাড় করুন"
     ]
   },
   "community-bike-workshop": {
@@ -2304,6 +2456,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Mag-imbita ng mga mekanikong tutulong",
       "Magtakda ng bukas na oras at modelong aral-at-uwi",
       "Magtatag ng mga gawi sa kaligtasan"
+    ],
+    "bn": [
+      "সারাইখানার জায়গা খুঁজুন",
+      "যন্ত্রপাতি আর একটা রিপেয়ার স্ট্যান্ড জোগাড় করুন",
+      "পুরোনো সাইকেল আর যন্ত্রাংশ জোগাড় করুন",
+      "মিস্ত্রি খুঁজুন যাঁরা শেখাতেও জানেন",
+      "খোলা সময় আর খেটে-সাইকেল-জেতার নিয়ম ঠিক করুন",
+      "নিরাপত্তার অভ্যাস দাঁড় করান"
     ]
   },
   "newcomer-translation-network": {
@@ -2418,6 +2578,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Gumawa ng mga panimulang gabay",
       "Mag-alok ng pagsama sa mga appointment",
       "Magtakda ng mga gawi sa privacy at kaligtasan"
+    ],
+    "bn": [
+      "দুই বা বেশি ভাষা জানা সাহায্যকারী খুঁজুন",
+      "স্থানীয় সাহায্যের জায়গা আর সঙ্গীদের তালিকা বানান",
+      "চাওয়া আর মেলানোর ব্যবস্থা গড়ুন",
+      "পথ চেনানোর কাগজপত্র বানান",
+      "অ্যাপয়েন্টমেন্টে সঙ্গে যাওয়ার ব্যবস্থা রাখুন",
+      "গোপনীয়তা আর নিরাপত্তার অভ্যাস ঠিক করুন"
     ]
   },
   "community-meal": {
@@ -2546,6 +2714,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Mag-imbita ng pangkat sa pagluluto at paghahain",
       "Magtakda ng iskedyul at ipamalita",
       "Isagawa ang salo-salo at maglinis"
+    ],
+    "bn": [
+      "রান্নাঘর আর খাওয়ানোর জায়গা খুঁজুন",
+      "খাবারের নিরাপত্তা আর অনুমতির ব্যবস্থা সারুন",
+      "খাবার আসার পথ গড়ুন",
+      "অনেকের জন্য, সব পাত ভেবে মেনু সাজান",
+      "রান্না আর বেড়ে দেওয়ার দল গড়ুন",
+      "দিন ঠিক করুন আর খবর ছড়ান",
+      "খাওয়ান আর ধোয়ামোছা সারুন"
     ]
   },
   "seed-library": {
@@ -2646,6 +2823,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ayusin at lagyan ng label ang koleksiyon",
       "Magtakda ng mga kaugalian sa paghiram at pagbabahagi",
       "Panatilihin ang sigla ng binhi at magpuno ulit"
+    ],
+    "bn": [
+      "রাখার জায়গা আর ব্যবস্থা খুঁজুন",
+      "শুরুর বীজ জোগাড় করুন",
+      "সংগ্রহ গুছিয়ে নাম লিখুন",
+      "নেওয়া আর ভাগ করার নিয়ম ঠিক করুন",
+      "গজানোর ক্ষমতা ধরে রাখুন, নতুন বীজ ভরুন"
     ]
   },
   "digital-literacy": {
@@ -2774,6 +2958,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Magdisenyo ng mga aralin para sa baguhan",
       "Mag-iskedyul ng mga klase at bukas na oras ng tulong",
       "Magtakda ng patakaran sa seguridad ng datos at pagsasauli"
+    ],
+    "bn": [
+      "ডিভাইস জোগাড় করে সারিয়ে তুলুন",
+      "দেওয়া-নেওয়ার খাতা দাঁড় করান",
+      "ইন্টারনেটের ব্যবস্থা করুন",
+      "শেখানোর মানুষ খুঁজে তৈরি করুন",
+      "নতুনদের পাঠ সাজান",
+      "ক্লাস আর যখন-তখন সাহায্যের সময় ঠিক করুন",
+      "তথ্যের নিরাপত্তা আর ফেরতের নিয়ম ঠিক করুন"
     ]
   },
   "weatherization-brigade": {
@@ -2888,6 +3081,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Humanap ng materyales at kagamitan",
       "Ayusin ang kaligtasan at insurance",
       "Mag-iskedyul at magsagawa ng mga bayanihan"
+    ],
+    "bn": [
+      "হাতের কাজ জানা মানুষ খুঁজুন",
+      "কাজের সীমা ঠিক করুন",
+      "চাওয়া আর ঘুরে দেখার ব্যবস্থা গড়ুন",
+      "মালপত্র আর যন্ত্রপাতি জোগাড় করুন",
+      "নিরাপত্তা আর বিমার ব্যবস্থা সারুন",
+      "শ্রমদানের দিন ঠিক করে কাজ চালান"
     ]
   },
   "pet-food-bank": {
@@ -2988,6 +3189,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ihiwa-hiwalay at itala ayon sa hayop at laki",
       "Magtakda ng patakaran sa pamimigay",
       "Itakda at lagyan ng tao ang pamimigay"
+    ],
+    "bn": [
+      "রাখা আর বিলির জায়গা খুঁজুন",
+      "খাবারের নিয়মিত জোগান গড়ুন",
+      "প্রাণী আর মাপ ধরে সাজিয়ে হিসাব রাখুন",
+      "বিলির নিয়ম ঠিক করুন",
+      "বিলির দিন ঠিক করুন, লোক জোগাড় করুন"
     ]
   },
   "youth-mentorship": {
@@ -3116,6 +3324,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Asikasuhin ang pagpapatala, allergy, at emergency info",
       "Maghanap ng meryenda at gamit",
       "Patakbuhin ang mga session at kamustahin ang mga pamilya"
+    ],
+    "bn": [
+      "নিরাপদ জায়গা পাকা করুন, সময় বাঁধুন",
+      "শিশু-নিরাপত্তা আর খতিয়ে দেখার মান ঠিক করুন",
+      "মেন্টর জোগাড় করুন, তৈরি করুন",
+      "কী কী হবে তার পরিকল্পনা করুন",
+      "ভর্তি, অ্যালার্জি আর জরুরি তথ্য সামলান",
+      "নাশতা আর জিনিসপত্র জোগাড় করুন",
+      "আসর চালান, পরিবারের খোঁজ নিন"
     ]
   },
   "gleaning-network": {
@@ -3244,6 +3461,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ayusin ang usapin ng aksidente at kaligtasan ng pagkain",
       "Buuin ang mga dadaluyan ng pamamahagi",
       "Magsagawa ng pamumulot ng ani at itala ang kilo"
+    ],
+    "bn": [
+      "ফসলের উৎস খুঁজুন",
+      "কুড়ানোর দল গড়ুন",
+      "বহন আর রাখার ব্যবস্থা করুন",
+      "সময়সূচি আর ডাক পাঠানোর ব্যবস্থা গড়ুন",
+      "দায়ের ঝুঁকি আর খাবারের নিরাপত্তা বুঝে নিন",
+      "বিলির পথ তৈরি করুন",
+      "কুড়ানোর দিন চালান, ওজনের হিসাব রাখুন"
     ]
   },
   "community-mediation": {
@@ -3372,6 +3598,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Itatag ang pagiging kumpidensyal at mga batayang tuntunin",
       "Ipaalam sa mga tao ang pamamagitan",
       "Subaybayan ang mga resulta at alagaan ang mga tagapamagitan"
+    ],
+    "bn": [
+      "মধ্যস্থ জোগাড় করুন, প্রশিক্ষণ দিন",
+      "অনুরোধ আর প্রথম আলাপের পথ বানান",
+      "নিরপেক্ষ বৈঠকের জায়গা খুঁজুন",
+      "পরিসর আর সীমা ঠিক করুন",
+      "গোপনীয়তা আর গোড়ার নিয়ম ঠিক করুন",
+      "এই সাহায্যের কথা ছড়ান",
+      "ফলাফল টুকুন, মধ্যস্থদের পাশে থাকুন"
     ]
   },
   "reentry-support": {
@@ -3500,6 +3735,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Iugnay sa trabaho at tirahan",
       "Mag-alok ng mentorship mula sa kapwa nakaranas",
       "Magtakda ng gawi sa privacy at mga hangganan"
+    ],
+    "bn": [
+      "কোথায় কী মেলে আর সঙ্গীদের তালিকা গড়ুন",
+      "সাহায্যের হাত জোগাড় করুন, তৈরি করুন",
+      "বরণ আর দরকার জানার আলাপ সাজান",
+      "কাগজপত্র আর ভাতায় সাহায্য করুন",
+      "কাজ আর থাকার জায়গার সঙ্গে জুড়ুন",
+      "সমপথিক মেন্টরের ব্যবস্থা করুন",
+      "গোপনীয়তা আর সীমার চর্চা ঠিক করুন"
     ]
   },
   "community-wood-bank": {
@@ -3628,6 +3872,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Bumuo ng sistema ng paghiling at paghahatid",
       "Magtakda ng pamantayan sa pamimigay",
       "Itakda ang mga bayanihan at pagpapatuyo"
+    ],
+    "bn": [
+      "কাঠের উৎস পাকা করুন",
+      "কাটা-রাখার জায়গা খুঁজুন",
+      "যন্ত্রপাতি আর সুরক্ষার সরঞ্জাম জোগাড় করুন",
+      "কাঠের দল গড়ুন, প্রশিক্ষণ দিন",
+      "চাওয়া আর পৌঁছানোর ব্যবস্থা বানান",
+      "বিলির নিয়ম ঠিক করুন",
+      "শ্রমদান আর শুকানোর সূচি বাঁধুন"
     ]
   },
   "community-wifi-mesh": {
@@ -3756,6 +4009,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Maghanap ng mga host site para sa mga node",
       "Magtakda ng mga tuntunin sa paggamit at privacy",
       "Alagaan at palawakin ang network"
+    ],
+    "bn": [
+      "কোথায় দরকার, কোথায় ফাঁক — নকশা করুন",
+      "মূল ইন্টারনেট লাইন পাকা করুন",
+      "প্রযুক্তি-জানা লোক জোগাড় করুন",
+      "যন্ত্র জোগাড় করুন, সেট করুন",
+      "যন্ত্র বসানোর জায়গা খুঁজুন",
+      "ব্যবহারের আর গোপনীয়তার নিয়ম ঠিক করুন",
+      "নেটওয়ার্ক দেখভাল করুন, বাড়ান"
     ]
   },
   "mental-health-peer-support": {
@@ -3884,6 +4146,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Magtakda ng pagiging kumpidensyal at mga tuntunin ng bilog",
       "Itakda at ipaalam ang mga session",
       "Suportahan ang mga tagapagpadaloy at iwasan ang burnout"
+    ],
+    "bn": [
+      "আসর-চালক খুঁজুন, প্রশিক্ষণ দিন",
+      "আসরের পরিসর আর সীমা ঠিক করুন",
+      "সংকটে পাঠানোর পরিকল্পনা বানান",
+      "আড়ালের নিরাপদ ঘর খুঁজুন",
+      "গোপনীয়তা আর আসরের গোড়ার নিয়ম বাঁধুন",
+      "আসরের সময় ঠিক করুন, খবর ছড়ান",
+      "চালকদের পাশে থাকুন, নিঃশেষ হতে দেবেন না"
     ]
   },
   "community-cleanup": {
@@ -3984,6 +4255,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ipunin ang mga gamit at pananggalang",
       "Mag-imbita at mag-ayos ng mga tutulong",
       "Idaos ang araw ng bayanihan sa paglilinis"
+    ],
+    "bn": [
+      "জায়গা বাছুন, ক্রম সাজান",
+      "অনুমতি নিন, ময়লা সরানোর ব্যবস্থা করুন",
+      "সরঞ্জাম আর নিরাপত্তার জিনিস জোগাড় করুন",
+      "লোক জোগাড় করে দল সাজান",
+      "পরিষ্কার বা সাজানোর দিনটা চালান"
     ]
   },
   "free-tax-prep": {
@@ -4112,6 +4390,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ipaalam sa mga kapitbahay na puwede",
       "Siguraduhin ang seguridad at privacy ng datos",
       "Mag-alok ng follow-up sa kaalaman sa pananalapi"
+    ],
+    "bn": [
+      "রিটার্ন-তৈরির লোকদের ট্রেনিং আর সার্টিফিকেট করান",
+      "স্বীকৃত ফ্রি রিটার্ন-প্রোগ্রামের সাথে হাত মেলান",
+      "জায়গা আর যন্ত্রপাতি গুছিয়ে নিন",
+      "সময় ঠিক করা আর কাগজ বুঝে নেওয়ার ব্যবস্থা গড়ুন",
+      "যোগ্য প্রতিবেশীদের কাছে খবরটা পৌঁছান",
+      "ডেটার নিরাপত্তা আর গোপনীয়তা নিশ্চিত করুন",
+      "টাকাপয়সার হিসাব বোঝার পরের সাহায্যটাও রাখুন"
     ]
   },
   "community-market": {
@@ -4240,6 +4527,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Mag-imbita at mag-iskedyul ng mga tutulong",
       "Ikalat ang balita at magtakda ng regular na iskedyul",
       "Patakbuhin ang puwesto at asikasuhin ang matitira"
+    ],
+    "bn": [
+      "শাকসবজি আর জিনিসের জোগান পাকা করুন",
+      "জায়গা খুঁজুন, স্ট্যান্ড সাজান",
+      "চালানোর ধরনটা ঠিক করুন",
+      "সাজানো, রাখা আর খাবারের নিরাপত্তা গুছিয়ে নিন",
+      "লোক জোগাড় করুন, কাজ ভাগ করুন",
+      "প্রচার করুন, বাঁধা সময় ঠিক করুন",
+      "স্ট্যান্ড চালান, বাড়তিটা কাজে লাগান"
     ]
   },
   "welcome-wagon": {
@@ -4340,6 +4636,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Buuin ang mga basket na pansalubong",
       "Mag-imbita at magsanay ng mga tagapagsalubong",
       "Buuin ang paraan ng pagtuturo at pagsali"
+    ],
+    "bn": [
+      "কাকে, কীভাবে বরণ করবেন ঠিক করুন",
+      "এলাকার খবরাখবরের গোছা বানান",
+      "স্বাগতমের ঝুড়ি সাজান",
+      "বরণকারী জোগাড় করুন, তৈরি করুন",
+      "খোঁজ পাঠানো আর নাম দেওয়ার ব্যবস্থা গড়ুন"
     ]
   },
   "library-of-things": {
@@ -4468,6 +4771,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Isulat ang mga patakaran sa paghiram na may tiwala",
       "Ihanda ang paghiram at sanayin ang mga librarian",
       "Alagaan, linisin, at palaguin ang koleksyon"
+    ],
+    "bn": [
+      "কমিউনিটি কী নিতে চায়, জরিপ করুন",
+      "রাখার জায়গা আর খোলা থাকার সময় ঠিক করুন",
+      "জিনিস জোগাড়, পরিষ্কার আর পরখ করুন",
+      "তালিকা করুন, ছবি তুলুন",
+      "নেওয়ার নিয়ম আর ভরসার নীতিটা লিখুন",
+      "নেওয়া-ফেরতের ব্যবস্থা গড়ুন, লাইব্রেরিয়ানদের শেখান",
+      "যত্ন করুন, ধুয়ে রাখুন, সংগ্রহ বাড়ান"
     ]
   },
   "laundry-shower-access": {
@@ -4582,6 +4894,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Itatag ang mga protocol sa kalinisan at kaligtasan",
       "Mag-imbita at magsanay ng mga tutulong",
       "Magtakda ng iskedyul at ikalat ang balita"
+    ],
+    "bn": [
+      "কাচা আর স্নানের জায়গা পাকা করুন",
+      "টুকিটাকি জিনিস জোগাড় করুন",
+      "নাম দেওয়া আর সময়ের সিরিয়ালের ব্যবস্থা করুন",
+      "পরিচ্ছন্নতা আর নিরাপত্তার নিয়ম দাঁড় করান",
+      "লোক জোগাড় করুন, শিখিয়ে নিন",
+      "সময় বাঁধুন, খবর ছড়ান"
     ]
   },
   "voter-registration": {
@@ -4696,6 +5016,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Pumili ng mga mataong lokasyon at pagtitipon",
       "Patakbuhin ang mesa ng pagpapalista",
       "Tumulong sa mga susunod na hakbang"
+    ],
+    "bn": [
+      "নাম তোলার উদ্যোগের নিয়ম জানুন",
+      "দলনিরপেক্ষ লোক তৈরি করুন",
+      "কাগজপত্র আর নির্ভুল তথ্য জোগাড় করুন",
+      "ভিড়ের জায়গা আর আয়োজন বাছুন",
+      "নাম তোলার টেবিল চালান",
+      "পরের ধাপেও সাহায্য করুন"
     ]
   },
   "health-navigation": {
@@ -4824,6 +5152,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Mag-alok ng tulong sa appointment at reseta",
       "Magtakda ng mga gawi sa privacy ng impormasyong pangkalusugan",
       "Makipag-partner sa mga clinic at provider"
+    ],
+    "bn": [
+      "চিকিৎসার ঠিকানার তালিকা বানান",
+      "পথ দেখানোর লোক খুঁজুন, তৈরি করুন",
+      "অনুরোধ নেওয়ার ব্যবস্থা গড়ুন",
+      "বিমা বোঝা আর আবেদনে সাহায্য করুন",
+      "ডাক্তারের সময় আর ওষুধে সাহায্য দিন",
+      "স্বাস্থ্য-তথ্যের গোপনীয়তার নিয়ম বাঁধুন",
+      "ক্লিনিক আর ডাক্তারদের সাথে জানাশোনা গড়ুন"
     ]
   },
   "toy-library": {
@@ -4924,6 +5261,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Itala at isilid sa bag nang kumpleto",
       "Isulat ang mga patakaran sa paghiram",
       "Ihanda ang paghiram at sanayin ang mga librarian"
+    ],
+    "bn": [
+      "রাখার জায়গা আর খোলা থাকার সময় ঠিক করুন",
+      "খেলনা জোগাড়, পরিষ্কার আর নিরাপত্তা যাচাই করুন",
+      "তালিকায় তুলে সব টুকরোসহ ব্যাগে ভরুন",
+      "বাড়ি নেওয়ার নিয়ম লিখুন",
+      "লিখে-নেওয়ার ব্যবস্থা গড়ুন, সামলানোর মানুষদের শেখান"
     ]
   },
   "food-preservation": {
@@ -5052,6 +5396,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Planuhin ang sama-samang session",
       "Ituro at patakbuhin nang ligtas ang session",
       "Hatiin ang napreserba at itala"
+    ],
+    "bn": [
+      "মানানসই একটা রান্নাঘর পাকা করুন",
+      "নিরাপদ সংরক্ষণের পদ্ধতি শিখুন",
+      "সরঞ্জাম আর বয়াম জোগাড় করুন",
+      "ফল-সবজি জোগাড় করুন",
+      "দলের বয়ামে ভরার আসর সাজান",
+      "আসর চালান, নিরাপদে শেখান",
+      "সংরক্ষণ করা খাবার ভাগ করুন, হিসাব রাখুন"
     ]
   },
   "free-haircut": {
@@ -5152,6 +5505,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Tipunin ang kagamitan at gamit",
       "Ayusin ang kalinisan at lisensya",
       "Idaos ang mga araw ng gupitan"
+    ],
+    "bn": [
+      "লাইসেন্স থাকা স্টাইলিস্ট ও নাপিত জোগাড় করুন",
+      "পানির ব্যবস্থাসহ একটা জায়গা খুঁজুন",
+      "সরঞ্জাম আর টুকিটাকি জোগাড় করুন",
+      "জীবাণুমুক্তি আর লাইসেন্সের নিয়ম সাজান",
+      "পরিপাটি হওয়ার দিনগুলো চালান"
     ]
   },
   "mutual-aid-moving-crew": {
@@ -5280,6 +5640,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ayusin ang iskedyul at pagtatalaga",
       "Linawin ang sakop at limitasyon",
       "Isagawa ang lipat at balikan"
+    ],
+    "bn": [
+      "দল আর গাড়ি জোগাড় করুন",
+      "মাল সরানোর সরঞ্জাম জোগাড় করুন",
+      "অনুরোধ নেওয়া আর মেপে নেওয়ার ব্যবস্থা গড়ুন",
+      "নিরাপত্তা আর দায়ের দিকটা গুছিয়ে নিন",
+      "সময়সূচি আর কে কোথায় যাবে ঠিক করুন",
+      "কাজের সীমা ঠিক করুন",
+      "বাসা-বদল চালান, পরে খোঁজ নিন"
     ]
   },
   "disability-support-network": {
@@ -5408,6 +5777,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Magbukas ng pahiraman ng kagamitan",
       "Tumulong sa pagtataguyod at mga proseso",
       "Magtakda ng pamantayan sa aksesibilidad"
+    ],
+    "bn": [
+      "নেতৃত্ব থাকুক প্রতিবন্ধী সদস্যদের হাতে",
+      "সবার নাগালে থাকা যোগাযোগের ব্যবস্থা গড়ুন",
+      "দরকার আর সহায়-সম্বলের খোঁজ নিন",
+      "একে অপরকে সাহায্যের আদান-প্রদান চালু করুন",
+      "সরঞ্জাম দেওয়া-নেওয়ার ভাণ্ডার গড়ুন",
+      "পক্ষে দাঁড়ানো আর পথ চেনানোয় সাহায্য দিন",
+      "সব ইভেন্টের জন্য নাগালের মাপকাঠি ঠিক করুন"
     ]
   },
   "books-to-prisoners": {
@@ -5522,6 +5900,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Imbitahan at sanayin ang mga tutulong",
       "Sagutin ang selyo at logistics",
       "Buuin ang programang sulatan"
+    ],
+    "bn": [
+      "জেলের ডাক-নিয়ম জেনে নিন",
+      "বই আর কাজের জায়গা জোগাড় করুন",
+      "অনুরোধ সামলানোর ব্যবস্থা গড়ুন",
+      "মানুষ জোগাড় করুন, শিখিয়ে নিন",
+      "ডাকখরচ আর পাঠানোর ব্যবস্থা সামলান",
+      "চিঠি লেখার আয়োজন গড়ুন"
     ]
   },
   "community-music": {
@@ -5636,6 +6022,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Maghanap ng lugar ng aralin at jam",
       "Iiskedyul ang mga aralin at jam session",
       "Ituro ang pag-aalaga at pagbabalik"
+    ],
+    "bn": [
+      "বাদ্যযন্ত্র জোগাড় ও মেরামত করুন",
+      "যন্ত্র দেওয়া-নেওয়ার ব্যবস্থা গড়ুন",
+      "শেখানোর মানুষ জোগাড় করুন",
+      "শেখা আর আসরের জায়গা খুঁজুন",
+      "শেখা আর বাজনার আসরের সূচি সাজান",
+      "যত্ন আর ফেরতের প্রত্যাশা বুঝিয়ে দিন"
     ]
   },
   "school-supply-program": {
@@ -5736,6 +6130,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Iuri at buuin ayon sa baitang",
       "Maghanda ng paglalagyan at lugar ng pamimigay",
       "Itakda at lagyan ng tao ang pamimigay"
+    ],
+    "bn": [
+      "জিনিসের তালিকা নিন, দরকারের আঁচ করুন",
+      "দান তোলা আর একসাথে কেনা চালান",
+      "ক্লাস ধরে বাছাই আর গোছানো",
+      "রাখা আর বিলির জায়গা ঠিক করুন",
+      "বিলির দিন আর মানুষ ঠিক করুন"
     ]
   },
   "legal-aid-clinic": {
@@ -5864,6 +6265,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Gumawa ng mga gabay at workshop tungkol sa karapatan",
       "Ikalat ang balita at itakda ang mga klinika",
       "Ingatan ang kumpidensiyalidad at suriin ang mga conflict"
+    ],
+    "bn": [
+      "আইনজীবী ও আইনি সাহায্য সংগঠনের সঙ্গে হাত মেলান",
+      "গণ্ডি আর কোথায় পাঠাবেন, ঠিক করুন",
+      "জায়গা আর তথ্য নেওয়ার ব্যবস্থা করুন",
+      "গোপন রাখা অ্যাপয়েন্টমেন্টের ব্যবস্থা গড়ুন",
+      "“নিজের অধিকার জানুন” গাইড আর কর্মশালা বানান",
+      "ক্লিনিকের প্রচার করুন, দিন ঠিক করুন",
+      "গোপনীয়তা রক্ষা করুন, স্বার্থের সংঘাত যাচাই করুন"
     ]
   },
   "resource-hub-dispatch": {
@@ -5992,6 +6402,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Maghanap at magsanay ng mga coordinator",
       "Itakda ang privacy ng datos at pag-follow-up",
       "Subaybayan ang mga hindi natutugunang kailangan"
+    ],
+    "bn": [
+      "দরকার আর সাহায্য জানানোর একটাই দরজা বানান",
+      "সাহায্যকারী আর জিনিসপত্রের তালিকা গড়ুন",
+      "মেলানো আর পৌঁছে দেওয়ার নিয়ম ঠিক করুন",
+      "মূল সাহায্য-তালিকা হালনাগাদ রাখুন",
+      "সমন্বয়কারী জোগাড় করুন, শিখিয়ে নিন",
+      "তথ্যের গোপনীয়তা আর খোঁজ নেওয়ার নিয়ম ঠিক করুন",
+      "না-মেটা দরকার আর ফাঁকগুলো টুকে রাখুন"
     ]
   },
   "harm-reduction-supplies": {
@@ -6106,6 +6525,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Buuin ang mga kit na may simpleng gabay",
       "Ayusin ang mga ruta at takdang puwesto",
       "Mag-restock, magtala, at panatilihing sariwa ang pagsasanay"
+    ],
+    "bn": [
+      "প্রশিক্ষণ নিন, ক্ষতি-কমানোর সঙ্গী খুঁজুন",
+      "জিনিসপত্র নিয়ে এলাকার আইন দেখুন",
+      "নালোক্সোন আর কিটের জিনিস জোগাড় করুন",
+      "সহজ ভাষার কাগজসহ কিট সাজান",
+      "বিলির পথ আর বাঁধা জায়গা ঠিক করুন",
+      "ভরে রাখুন, হিসাব রাখুন, প্রশিক্ষণ টাটকা রাখুন"
     ]
   },
   "court-support": {
@@ -6220,6 +6647,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Sanayin ang mga sasama sa korte",
       "Ayusin ang hatid at pag-aalaga ng bata sa mga pagdinig",
       "Ayusin ang mga liham ng suporta kapag hiniling ng depensa"
+    ],
+    "bn": [
+      "ডিফেন্স আইনজীবী আর চালু দলগুলোর সঙ্গে জুড়ুন",
+      "মূল নিয়ম লিখুন: পাশে থাকা, আইন বলা নয়",
+      "অনুরোধ নেওয়ার পথ আর শুনানির ক্যালেন্ডার গড়ুন",
+      "সঙ্গে যাওয়ার সাহায্যকারীদের শিখিয়ে নিন",
+      "শুনানির দিনের গাড়ি আর বাচ্চাদের দেখাশোনা সাজান",
+      "ডিফেন্স চাইলে পাশে-থাকার চিঠি জোগাড় করুন"
     ]
   },
   "cooling-warming-center": {
@@ -6348,6 +6783,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Buuin ang salitan ng turno",
       "Ikalat ang balita bago ang season",
       "Magbukas, mag-host, at mag-reset bawat pagbubukas"
+    ],
+    "bn": [
+      "এসি-হিটারসহ একটা আয়োজক জায়গা খুঁজুন",
+      "খোলার শর্ত আর খবর দেওয়ার ছক ঠিক করুন",
+      "জিনিসপত্র মজুত করুন",
+      "পালার দেখাশোনাকারী জোগাড় করুন, শিখিয়ে নিন",
+      "পালার ছক বানান",
+      "মৌসুমের আগে খবর ছড়ান",
+      "খুলুন, দেখাশোনা করুন, ফের গুছিয়ে রাখুন"
     ]
   },
   "community-oral-history": {
@@ -6434,6 +6878,12 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Mag-ipon ng gamit at listahan ng tanong",
       "Mag-record ng mga sesyon ng kuwentuhan",
       "Mag-imbak at ibalik ang kuwento, sa kanilang kondisyon"
+    ],
+    "bn": [
+      "সহজ ভাষায় সম্মতিপত্র লিখুন",
+      "সরঞ্জাম আর প্রশ্নের তালিকা গোছান",
+      "গল্পের বৈঠকগুলো রেকর্ড করুন",
+      "তাঁর শর্তেই আগলে রাখুন, ফিরিয়ে দিন"
     ]
   },
   "community-solar-coop": {
@@ -6562,6 +7012,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Makipagtuwang sa mga installer at provider",
       "Ayusin ang sistema ng bawas sa bill at pagiging miyembro",
       "Turuan ang mga miyembro sa paggamit ng enerhiya"
+    ],
+    "bn": [
+      "সদস্য জোগাড় করুন, আগ্রহ মাপুন",
+      "মডেল আর লোকাল নিয়মগুলো শিখুন",
+      "জায়গা খুঁজুন, বা চালু ব্যবস্থায় যোগ দিন",
+      "টাকার জোগান আর আইনি কাঠামো সামলান",
+      "ইনস্টলার আর সরবরাহকারীর সঙ্গে জুড়ুন",
+      "বিলের সাশ্রয় আর সদস্যপদের হিসাব দাঁড় করান",
+      "বিদ্যুৎ খরচ নিয়ে সদস্যদের শেখান"
     ]
   },
   "worker-coop-incubator": {
@@ -6690,6 +7149,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Iugnay sa mga panimulang mapagkukunan",
       "Magbigay ng mentorship",
       "Bumuo ng suportahan ng mga venture sa isa't isa"
+    ],
+    "bn": [
+      "সদস্যদের দক্ষতা আর ইচ্ছা জেনে নিন",
+      "কাজের প্রস্তুতি আর দক্ষতার প্রশিক্ষণ দিন",
+      "সমবায়ের ধরনটা শেখান",
+      "সমবায় গড়ায় পাশে থাকুন",
+      "শুরুর টাকার উৎসের সঙ্গে জুড়ে দিন",
+      "পরামর্শদাতা জুড়ে দিন",
+      "ব্যবসাগুলোর নিজেদের মধ্যে বাঁধন গড়ুন"
     ]
   },
   "elder-meal-delivery": {
@@ -6818,6 +7286,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Itala ang diyeta, allergy, at emergency contact",
       "Gumawa ng protocol ng pagsilip sa kalagayan",
       "Alalayan ang mga tutulong at mangalap ng puna"
+    ],
+    "bn": [
+      "ঘরবন্দি বয়স্কদের খুঁজে বের করুন",
+      "সাহায্যকারী জোগাড় করুন, যাচাই করুন",
+      "খাবারের জোগান ঠিক করুন",
+      "পৌঁছানোর রুট আর সময় ঠিক করুন",
+      "খাওয়াদাওয়া, অ্যালার্জি আর বিপদের তথ্য টুকে রাখুন",
+      "খোঁজ নেওয়ার নিয়ম দাঁড় করান",
+      "সাহায্যকারীদের পাশে থাকুন, মতামত শুনুন"
     ]
   },
   "disaster-relief-hub": {
@@ -6946,6 +7423,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Maghanap at magsanay ng team na handang dumating agad",
       "Makipag-ugnayan sa ibang tumutugon",
       "Iplano ang komunikasyon at kaligtasan"
+    ],
+    "bn": [
+      "আগে থেকেই কেন্দ্রের জায়গা আর বিকল্প ঠিক করুন",
+      "জিনিস জোগাড়ের পথ তৈরি করুন",
+      "জিনিস নেওয়া, বাছাই আর হিসাবের ব্যবস্থা সাজান",
+      "বিলির ব্যবস্থা দাঁড় করান",
+      "হঠাৎ ডাকে আসা সাহায্যকারীদের দল গড়ুন, শেখান",
+      "অন্য সাড়া-দেওয়া দলগুলোর সাথে সমন্বয় করুন",
+      "যোগাযোগ আর নিরাপত্তার পরিকল্পনা করুন"
     ]
   },
   "recovery-peer-support": {
@@ -7074,6 +7560,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Itakda ang kumpidensiyalidad at mga alituntunin ng grupo",
       "Mag-iskedyul at magpaalam ng mga pagtitipon",
       "Alalayan ang mga facilitator laban sa pagkaupos"
+    ],
+    "bn": [
+      "সাথি-সঞ্চালক খুঁজুন, ট্রেনিং দিন",
+      "গণ্ডি আর সীমা ঠিক করুন",
+      "পাঠানোর আর সংকটের পথ তৈরি করুন",
+      "নিরাপদ, আড়ালের, নেশামুক্ত ঘর খুঁজুন",
+      "গোপনীয়তা আর আসরের নিয়ম ঠিক করুন",
+      "আসরের সময় ঠিক করুন, খবর ছড়ান",
+      "সঞ্চালকদের পাশে থাকুন, হাঁপিয়ে ওঠা ঠেকান"
     ]
   },
   "community-fitness": {
@@ -7202,6 +7697,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Asikasuhin ang kaligtasan at kalusugan",
       "Magtakda ng iskedyul at ikalat ang balita",
       "Palalimin ang pagsasamahan at tuloy-tuloy na dating"
+    ],
+    "bn": [
+      "কার কী ভালো লাগে, কতটা পারবেন — জেনে নিন",
+      "দল চালানোর মানুষ খুঁজুন",
+      "নিরাপদ জায়গা খুঁজুন",
+      "সবার জন্য, সব স্তরের আয়োজন সাজান",
+      "নিরাপত্তা আর শরীরের খেয়াল রাখুন",
+      "সময় বেঁধে দিন, খবর ছড়ান",
+      "সম্পর্ক গড়ুন, ছন্দ ধরে রাখুন"
     ]
   },
   "urban-orchard": {
@@ -7330,6 +7834,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Magtakda ng mga araw ng pagtatanim",
       "Ayusin ang pangmatagalang pag-aalaga",
       "Iplano ang paghahati ng ani"
+    ],
+    "bn": [
+      "লম্বা মেয়াদের জমির ভরসা পাকা করুন",
+      "লাগানোর নকশা করুন",
+      "গাছ আর চারা জোগাড় করুন",
+      "জায়গাটা তৈরি করুন",
+      "লাগানোর দিনগুলো আয়োজন করুন",
+      "লম্বা মেয়াদের দেখভাল সাজান",
+      "ফলন ভাগের পরিকল্পনা করুন"
     ]
   },
   "new-parent-support": {
@@ -7458,6 +7971,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Bumuo ng mga bilog ng kapwa magulang",
       "Itakda ang kaligtasan at mga hangganan",
       "Iugnay sa ibang mga proyekto"
+    ],
+    "bn": [
+      "সাহায্যকারী আর সাথি জোগাড় করুন",
+      "পালা করে খাবার পৌঁছানোর ব্যবস্থা গড়ুন",
+      "হাতে-কলমে সাহায্য দিন",
+      "দরকারি ঠিকানার তালিকা গড়ুন",
+      "সাথিদের আসর গড়ে তুলুন",
+      "নিরাপত্তা আর সীমার নিয়ম ঠিক করুন",
+      "অন্য প্রজেক্টগুলোর সাথে জুড়ে দিন"
     ]
   },
   "foster-kinship-support": {
@@ -7586,6 +8108,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Mag-alok ng mga grupo ng suporta ng kapwa",
       "Buuin ang direktoryo ng mga mapagkukunan",
       "Itakda ang kaligtasan ng bata at pagkapribado"
+    ],
+    "bn": [
+      "পরিবারগুলোর সাথে যোগাযোগ গড়ুন",
+      "জিনিস আর কাপড়ের ভাঁড়ার গড়ুন",
+      "চটজলদি জিনিস পৌঁছানোর ব্যবস্থা বানান",
+      "দম ফেলার বিরতি সাজান",
+      "সাথিদের আসর চালান",
+      "দরকারি ঠিকানার তালিকা গড়ুন",
+      "শিশু-নিরাপত্তা আর গোপনীয়তার নিয়ম বাঁধুন"
     ]
   },
   "weather-survival-outreach": {
@@ -7714,6 +8245,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Buuin ang plano ng pamamahagi at ruta",
       "Iugnay ang mga tao sa mga shelter at programa",
       "Magplano para sa mga emergency"
+    ],
+    "bn": [
+      "মৌসুম-মাফিক কিট গুছিয়ে ফেলুন",
+      "জিনিস জোগাড় করুন",
+      "মানুষ কোথায় আছেন, ম্যাপে আনুন",
+      "পথে নামার সাহায্যকারী জোগাড় করুন, শেখান",
+      "বিলি আর রুটের পরিকল্পনা বানান",
+      "রাত কাটানোর জায়গার সাথে জুড়ে দিন",
+      "বিপদের জন্য তৈরি থাকুন"
     ]
   }
 };
