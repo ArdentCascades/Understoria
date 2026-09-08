@@ -66,6 +66,7 @@ const LOCALE_LOADERS: Record<
   sw: () => import("./locales/sw.json"),
   fil: () => import("./locales/fil.json"),
   bn: () => import("./locales/bn.json"),
+  ht: () => import("./locales/ht.json"),
 };
 
 // Minimal i18next backend over the loader map. `supportedLngs` below
@@ -110,7 +111,12 @@ export const i18nReady: Promise<unknown> = i18n
     },
     // en above is bundled; everything else arrives via the backend.
     partialBundledLanguages: true,
-    fallbackLng: "en",
+    // Every locale falls back to English — except Haitian Creole,
+    // which goes through French first (docs/i18n-glossary/ht.md,
+    // "the fallback chain"): Haitian members are far likelier to
+    // read French, so a transiently missing key surfaces readable.
+    // The parity gates keep ht complete, so the chain rarely fires.
+    fallbackLng: { ht: ["fr", "en"], default: ["en"] },
     // Selectable, not just shipped: includes the dev-only "rtl"
     // preview when the build carries it (languages.ts). Its empty
     // locale bundle falls through to English per key.

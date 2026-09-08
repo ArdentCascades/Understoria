@@ -10,6 +10,24 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Kreyòl Ayisyen.** The sixteenth language: the entire interface —
+  all ~2,950 strings — now speaks Haitian Creole the way neighbors
+  talk across the lakou: ou and w, warmth from non and annou, never
+  NGO leaflet or relexified French. Hours are èdtan and never debt —
+  no dèt, no prete, and never sòl: the rotating credit club is the
+  one institution a timebank must not resemble. The dashboard is
+  Souf — while the community has breath, it is alive. The storm hub
+  is "kote pou pare lapli", refusing the displacement register of
+  abri and kan; flagging refuses denonse and its history. Work days
+  are konbit, concretely; mutual aid is youn ede lòt — men anpil,
+  chay pa lou. Two firsts under the hood: ICU has no Kreyòl data, so
+  plural forms are written to read correctly on any device's
+  fallback rules; and ht falls back through French rather than
+  straight to English, because that's what a Haitian member can
+  actually read. Authored content (playbooks, help pages, guides)
+  still reads in English for now — Settings says so honestly — with
+  the corpus next. A new AI-assisted translation awaiting a
+  native-speaker read; the app says that too.
 - **পুরো লাইব্রেরি এখন বাংলায় — the whole library now reads in
   Bengali, completing the fifteen-language wave.** All 64 project
   playbooks with their task guides and tips, the 14 event templates,
