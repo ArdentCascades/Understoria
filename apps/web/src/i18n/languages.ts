@@ -230,15 +230,17 @@ export const LANGUAGES = [
   // language whose CLDR default numbering system is not Western —
   // bare "bn" makes Intl render Bengali digits against the locale's
   // Western-digit text, so intlNumbering pins -u-nu-latn at every
-  // Intl call site via intlLocale(). Shipped UI-first: content is
-  // "ui-only" until the corpus lands on the Phase 2 rails.
+  // Intl call site via intlLocale(). Shipped UI-first; the full
+  // authored corpus (templates, tips, steps, FAQ, guides,
+  // principles) has since shipped on the Phase 2 rails
+  // (content/bundles/bn.ts), so content is "full" like the others.
   {
     code: "bn",
     endonym: "বাংলা",
     dir: "ltr",
     speakLang: "bn",
     reviewStatus: "new",
-    content: "ui-only",
+    content: "full",
     intlNumbering: "latn",
   },
 ] as const satisfies readonly LanguageInfo[];

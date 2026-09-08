@@ -180,8 +180,24 @@ registry grew `intlNumbering` and every Intl call site now routes
 through `intlLocale()` (i18next's {{count, number}} formatter
 included) — plus plurals.test.ts gained the registry-coverage guard
 that would have caught the id/sw/fil rows it was silently missing.
-`content: "ui-only"` until the bn corpus lands on the Phase 2 rails
-— the one remaining wave item.
+The bn corpus then SHIPPED on the same rails — the wave's final
+item: 11 fragment agents (8 template batches + events&principles +
+FAQ&startCommunity + guides trio), each self-validated; assembly
+verified invariants byte-equal, unified 16 divergent skills-tag
+families by majority (32 tags, injectivity held), and repointed
+seven cross-fragment references to their siblings' Bengali names
+(সবার রান্নাঘর, the preparedness নেটওয়ার্ক, ডায়াপারের ভাঁড়ার,
+মিলেমিশে বাচ্চাদের দেখাশোনার দল, স্বাগতমের ঝুড়ি, the resource
+hub, skill-share, the rides project). Register work on the record:
+the debt fence held corpus-wide with exactly the sanctioned
+exceptions (the one rejection formula in FAQ + member guide, the
+seed-library "উপহার — ধার নয়" gift line, legal-sense ঋণ in
+legal-aid, জামিন as literal bail in court-support); the disability
+slogan keeps its first person ("আমাদের ছাড়া আমাদের নিয়ে কিছু
+নয়"); ত্রাণ and আশ্রয়কেন্দ্র stayed at zero even through the
+disaster templates; the compelled-biometrics passage survived
+line-by-line fidelity review. All fifteen registry entries are
+`content: "full"`. The demand-driven wave is COMPLETE.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from

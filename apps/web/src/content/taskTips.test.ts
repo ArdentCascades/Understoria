@@ -26,6 +26,7 @@ import { PROJECT_TEMPLATES_UR } from "@/content/projectTemplates.ur";
 import { PROJECT_TEMPLATES_ID } from "@/content/projectTemplates.id";
 import { PROJECT_TEMPLATES_SW } from "@/content/projectTemplates.sw";
 import { PROJECT_TEMPLATES_FIL } from "@/content/projectTemplates.fil";
+import { PROJECT_TEMPLATES_BN } from "@/content/projectTemplates.bn";
 import { getTaskTips } from "@/content/taskTips";
 import { TASK_TIPS_EN } from "@/content/taskTips.en";
 import { TASK_TIPS_ES } from "@/content/taskTips.es";
@@ -41,6 +42,7 @@ import { TASK_TIPS_UR } from "@/content/taskTips.ur";
 import { TASK_TIPS_ID } from "@/content/taskTips.id";
 import { TASK_TIPS_SW } from "@/content/taskTips.sw";
 import { TASK_TIPS_FIL } from "@/content/taskTips.fil";
+import { TASK_TIPS_BN } from "@/content/taskTips.bn";
 
 // Coverage guard for the per-task tips content. The tips live in their
 // own table keyed by template id + task index, so nothing in the type
@@ -126,6 +128,11 @@ describe("TASK_TIPS coverage", () => {
         tpl.tasks.length,
       );
     }
+    for (const tpl of PROJECT_TEMPLATES_BN) {
+      expect(TASK_TIPS_BN[tpl.id]?.length, `${tpl.id} (bn)`).toBe(
+        tpl.tasks.length,
+      );
+    }
   });
 
   it("every tip is non-empty and actually translated", () => {
@@ -144,6 +151,7 @@ describe("TASK_TIPS coverage", () => {
         const idTip = TASK_TIPS_ID[id]?.[i] ?? "";
         const sw = TASK_TIPS_SW[id]?.[i] ?? "";
         const fil = TASK_TIPS_FIL[id]?.[i] ?? "";
+        const bn = TASK_TIPS_BN[id]?.[i] ?? "";
         expect(tip.trim(), `${id}[${i}].en`).not.toBe("");
         expect(es.trim(), `${id}[${i}].es`).not.toBe("");
         expect(es, `${id}[${i}] es===en`).not.toBe(tip);
@@ -171,6 +179,8 @@ describe("TASK_TIPS coverage", () => {
         expect(sw, `${id}[${i}] sw===en`).not.toBe(tip);
         expect(fil.trim(), `${id}[${i}].fil`).not.toBe("");
         expect(fil, `${id}[${i}] fil===en`).not.toBe(tip);
+        expect(bn.trim(), `${id}[${i}].bn`).not.toBe("");
+        expect(bn, `${id}[${i}] bn===en`).not.toBe(tip);
       });
     }
   });
@@ -230,6 +240,10 @@ describe("TASK_TIPS coverage", () => {
         expect(
           (TASK_TIPS_FIL[id]?.[i] ?? "").length,
           `${id}[${i}].fil`,
+        ).toBeLessThanOrEqual(400);
+        expect(
+          (TASK_TIPS_BN[id]?.[i] ?? "").length,
+          `${id}[${i}].bn`,
         ).toBeLessThanOrEqual(400);
       });
     }
@@ -301,6 +315,9 @@ describe("getTaskTips", () => {
     );
     expect(getTaskTips(tpl.id, tpl.tasks[0].name, "fil")).toBe(
       TASK_TIPS_FIL[tpl.id][0],
+    );
+    expect(getTaskTips(tpl.id, tpl.tasks[0].name, "bn")).toBe(
+      TASK_TIPS_BN[tpl.id][0],
     );
   });
 
