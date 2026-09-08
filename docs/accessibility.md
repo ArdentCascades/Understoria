@@ -148,7 +148,9 @@ formal audit; the formal audit is one of the items in §6.
   toggle) and screen readers announce expanded / collapsed without
   any extra ARIA.
 - **i18n** — every user-facing string is in `i18n/locales/`, in
-  eleven languages with the full authored corpus in each. The RTL
+  every shipped language (fifteen today — the registry in
+  `i18n/languages.ts` is the source of truth) with the full
+  authored corpus in each. The RTL
   program (docs/rtl-plan.md R1–R5) shipped and is guarded: Arabic
   and Urdu run `dir="rtl"` over logical properties, with a
   pseudo-locale for mirrored-surface verification.
