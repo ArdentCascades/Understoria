@@ -210,8 +210,27 @@ non-uniform fallback chain: ht → fr → en (Haitian members are far
 likelier to read French). The 6-chunk fleet + reconciliation
 (30-odd quoted-label alignments, the mare/rasanbleman/feyè/klete
 family unifications, the {{hours}} unit question settled by reading
-the actual call sites, a vè/vèt meaning fix) shipped ht.json;
-`content: "ui-only"` until the Kreyòl corpus lands.
+the actual call sites, a vè/vèt meaning fix) shipped ht.json. The
+ht corpus then SHIPPED on the same rails: 11 fragment agents, each
+self-validated (several resumed mid-flight across a rate-limit
+outage and delivered clean); assembly verified invariants
+byte-equal, unified 10 divergent skills-tag families by majority
+(32 tags — with one deliberate post-majority override where
+majority would have collided "tech" and "tech support" onto one
+tag), and repointed the cross-fragment references to their Kreyòl
+names with determiner agreement handled at each splice (“Manje
+kominotè” a, “Rezo pou pare pou dezas” la, “Bank kouchèt”,
+“Kolektif gade timoun” nan, “Bèl akèy” la, “Kafou youn ede lòt”,
+“Youn montre lòt”, “Magazen gratis”). Register work on the record:
+the debt fence held with exactly the sanctioned exceptions (the
+formula in FAQ + member guide, the gift line, one legal-sense dèt
+in legal-aid, bail rendered descriptively with no invented
+loan-word); sòl/sabotay/sòld at absolute zero; the NGO register at
+zero even through the disaster playbooks (the relief hub is "Kote
+pou pataje pwovizyon lè katastwòf frape", every shelter a plain
+function); "Anyen sou nou san nou" keeps its first person; the
+compelled-biometrics passage passed line-by-line review. All
+sixteen registry entries are `content: "full"`.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from

@@ -148,6 +148,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "পরিষ্কার আর ভরে রাখার পালার দল গড়ুন",
       "জোগানের সম্পর্ক গড়ে তুলুন",
       "সমস্যার জন্য একটা যোগাযোগ ঠিক করুন"
+    ],
+    "ht": [
+      "Jwenn yon kote ki gen kouran ak moun k ap pase",
+      "Jwenn yon frijidè epi bati yon ti kay pou li",
+      "Mete règ yo epi make tout bagay",
+      "Monte yon lis tou pou netwayaj ak ranpli",
+      "Bati relasyon ak moun k ap bay manje",
+      "Mete yon kontak pou pwoblèm"
     ]
   },
   "community-garden": {
@@ -285,6 +293,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "নিজের এলাকা আর মৌসুম বুঝে লাগান",
       "সেচ আর নিড়ানির পালা ঠিক করুন",
       "ফসল তোলা আর বাড়তির পরিকল্পনা করুন"
+    ],
+    "ht": [
+      "Jwenn tè a ak pèmisyon an",
+      "Teste tè a epi planifye planch yo",
+      "Rasanble materyo epi bati",
+      "Deside kòman pataj la ap fèt",
+      "Plante selon klima ak sezon ou",
+      "Mete yon lis tou pou wouze ak sekle",
+      "Planifye rekòt la ak sa ki anplis"
     ]
   },
   "tool-lending-library": {
@@ -422,6 +439,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "নেওয়ার সময় লিখিয়ে নেওয়া চালু করুন",
       "লাইব্রেরিয়ানদের শিখিয়ে-পড়িয়ে নিন",
       "দেখভাল করুন, বাড়তে দিন"
+    ],
+    "ht": [
+      "Jwenn kote pou sere yo ak lè ouvèti",
+      "Kolekte epi triye zouti yo",
+      "Fè yon katalòg pou tout bagay",
+      "Ekri règ pou pran zouti",
+      "Monte fèy soti a",
+      "Montre bibliyotekè yo travay la",
+      "Okipe zouti yo epi fè koleksyon an grandi"
     ]
   },
   "neighborhood-care-network": {
@@ -559,6 +585,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "বিপদে কী করবেন, আগেই লিখে রাখুন",
       "হাতের কাজের সাহায্য গুছিয়ে দিন",
       "সাহায্যকারীদেরও পাশে থাকুন"
+    ],
+    "ht": [
+      "Chèche konnen ki moun ki la",
+      "Chèche moun ki vle ede epi tcheke referans yo",
+      "Matche ak refleksyon",
+      "Fikse yon ritm pase wè",
+      "Fè yon plan si bagay yo grav",
+      "Kowòdone èd pratik yo",
+      "Pran swen moun k ap ede yo tou"
     ]
   },
   "emergency-preparedness": {
@@ -696,6 +731,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "নিরাপদ জায়গাগুলো ঠিক করুন",
       "একটা মহড়া বা শেখার সন্ধ্যা করুন",
       "‘সেই দিনের’ কাজ কার, আগেই ঠিক করুন"
+    ],
+    "ht": [
+      "Fè kat risk katye a",
+      "Bati yon pyebwa kontak",
+      "Planifye kominikasyon san rezo",
+      "Fè rezèv pwovizyon ansanm",
+      "Jwenn kote ki an sekirite yo",
+      "Fè yon egzèsis oswa yon sware enfòmasyon",
+      "Defini wòl pou “jou a”"
     ]
   },
   "free-store": {
@@ -818,6 +862,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "সাজান এমনভাবে, যেন মাথা উঁচু করে বাছা যায়",
       "আয়োজনের দিনের হাতগুলো ভাগ করুন",
       "পড়ে-থাকা জিনিস সামলান"
+    ],
+    "ht": [
+      "Chwazi yon fòma ak yon espas",
+      "Fikse règ pou sa moun pote",
+      "Òganize resepsyon ak triyaj",
+      "Etale pou moun ka gade ak diyite",
+      "Mete moun nan jou a",
+      "Okipe rès yo"
     ]
   },
   "skill-share": {
@@ -925,6 +977,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "জায়গা আর সময় ঠিক করুন",
       "সূচিটা দাঁড় করান",
       "সবার নাগালে আনুন"
+    ],
+    "ht": [
+      "Mande sa moun konn fè ak sa yo vle aprann",
+      "Chèche moun pou montre epi prepare yo",
+      "Jwenn espas ak lè",
+      "Bati yon orè",
+      "Fè l louvri pou tout moun"
     ]
   },
   "bulk-buying-coop": {
@@ -1062,6 +1121,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "মাল পৌঁছানো আর বাছাইয়ের জায়গা ঠিক করুন",
       "ফরমাশ ভাগ করুন ন্যায্যভাবে",
       "কাজটা ঘুরিয়ে-ফিরিয়ে দিন"
+    ],
+    "ht": [
+      "Rasanble gwoup acha a",
+      "Jwenn yon machann an gwo",
+      "Monte sistèm kòmand la",
+      "Jere lajan an aklè",
+      "Ranje livrezon ak yon kote pou separe",
+      "Separe kòmand yo san patipri",
+      "Fè travay la chanje men"
     ]
   },
   "repair-cafe": {
@@ -1184,6 +1252,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "কে কী নিয়ে এলেন, তা লেখার ব্যবস্থা করুন",
       "নিরাপত্তা আর প্রত্যাশা সামলান",
       "দরকারি খুচরো জিনিস মজুত রাখুন"
+    ],
+    "ht": [
+      "Chèche moun ki konn repare selon domèn",
+      "Monte estasyon reparasyon yo",
+      "Chwazi yon dat fiks",
+      "Òganize fason moun antre",
+      "Veye sekirite ak sa moun ap tann",
+      "Fè rezèv pyès ak materyèl"
     ]
   },
   "rides-transportation": {
@@ -1321,6 +1397,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "কী কী এর মধ্যে পড়ে, ঠিক করুন",
       "খরচের দিকটা সামলান",
       "যাত্রী আর চালক — দুজনেই নিরাপদ থাকুন"
+    ],
+    "ht": [
+      "Chèche chofè epi tcheke yo",
+      "Regle asirans ak responsablite",
+      "Mete yon sistèm demann",
+      "Bati yon woutin pou voye chofè",
+      "Di klè ki vwayaj ki ladan",
+      "Regle kesyon depans yo",
+      "Pwoteje pasaje ak chofè"
     ]
   },
   "tenant-union": {
@@ -1458,6 +1543,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "‘নিজের অধিকার জানুন’ কর্মশালা করুন",
       "উচ্ছেদ এলে কী করণীয়, তার ধাপ সাজান",
       "আইনি সাহায্য আর টানা ভরসার সঙ্গে জুড়ুন"
+    ],
+    "ht": [
+      "Fòme yon ti nwayo k ap òganize",
+      "Fè kat kay yo ak pwoblèm yo",
+      "Rasanble bon enfòmasyon sou dwa lokatè",
+      "Bati yon sistèm kontak rapid",
+      "Fè yon atelye konn dwa ou",
+      "Ekri plan repons pou degèpisman",
+      "Kenbe lyen ak èd legal"
     ]
   },
   "childcare-collective": {
@@ -1595,6 +1689,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "স্বাস্থ্য, অ্যালার্জি আর বিপদের নিয়ম লিখুন",
       "যাঁরা দেখবেন, তাঁদের গোড়ার জিনিসগুলো শেখান",
       "একটা মহড়ার আসর করুন, মতামত নিন"
+    ],
+    "ht": [
+      "Rasanble fanmi fondatè yo epi chwazi yon modèl",
+      "Mete règ sekirite ak tcheke moun",
+      "Jwenn yon espas epi pare l pou timoun",
+      "Mete orè a ak kaye èdtan yo kanpe",
+      "Ekri règ sante, alèji, ak ka prese",
+      "Montre baz yo bay moun k ap gade timoun",
+      "Fè yon seyans esè epi koute retou yo"
     ]
   },
   "community-composting": {
@@ -1732,6 +1835,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "কী কী নেওয়া হয়, স্পষ্ট করুন",
       "পালা করে দেখাশোনার দল গড়ে শেখান",
       "তৈরি কম্পোস্ট বিলিয়ে দিন"
+    ],
+    "ht": [
+      "Jwenn yon kote pou konpòs la",
+      "Chwazi yon metòd konpòs",
+      "Jwenn bwat ak ekipman",
+      "Òganize jan restan yo rive",
+      "Fè klè sa ki ka antre",
+      "Fòme ekip k ap okipe pil la",
+      "Separe konpòs ki fin pare a"
     ]
   },
   "free-little-library": {
@@ -1839,6 +1951,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "শুরুর বইগুলো তুলুন",
       "সাইন আর সহজ কথাগুলো লাগান",
       "দেখাশোনার একজনকে ঠিক করুন"
+    ],
+    "ht": [
+      "Bati oswa jwenn yon bwat liv lapli pa antre",
+      "Chwazi epi prepare yon kote",
+      "Mete premye liv yo",
+      "Mete yon pankat ak règ senp",
+      "Jwenn yon moun k ap pran swen l"
     ]
   },
   "community-first-aid-training": {
@@ -1961,6 +2080,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "অংশ নেওয়ার মানুষ জোগাড় করুন",
       "ট্রেনিংয়ের আসরগুলো চালান",
       "কিট বিলোন, ঝালাইয়ের আসর রাখুন"
+    ],
+    "ht": [
+      "Jwenn enstriktè ki gen sètifika",
+      "Jwenn materyèl yo",
+      "Jwenn espas epi fikse seyans yo",
+      "Envite moun vin aprann",
+      "Fè seyans yo mache",
+      "Separe kit yo epi fè seyans rapèl"
     ]
   },
   "time-bank": {
@@ -2098,6 +2225,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "কে কী পারেন, তার তালিকা ছাড়ুন",
       "জোড় মেলান, আদান-প্রদান এগিয়ে দিন",
       "ভরসা আর নিরাপত্তার চর্চা গড়ুন"
+    ],
+    "ht": [
+      "Chèche manm fondatè epi make sa yo konn fè",
+      "Chwazi jan pou make èdtan yo",
+      "Mete règ yo",
+      "Akeyi nouvo manm yo",
+      "Fè lis sa moun ka bay",
+      "Konekte bezwen ak èd",
+      "Bati abitid konfyans ak sekirite"
     ]
   },
   "solidarity-fund": {
@@ -2235,6 +2371,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "টাকা তোলার ব্যবস্থা করুন",
       "সিদ্ধান্ত আর টাকা পাঠানোর ধাপ সাজান",
       "মাসের হিসাব খোলাখুলি জানান"
+    ],
+    "ht": [
+      "Fòme yon ti ekip serye",
+      "Mete yon sistèm lajan ki klè",
+      "Deside kritè pou demann ak peman",
+      "Fè yon fòm demann kout, san baryè",
+      "Òganize ranmase lajan",
+      "Bati yon pwosesis desizyon ak peman",
+      "Bay kominote a nouvèl aklè"
     ]
   },
   "diaper-hygiene-bank": {
@@ -2342,6 +2487,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "সাইজ আর ধরন ধরে গুছিয়ে হিসাব রাখুন",
       "বিলির ন্যায্য নিয়ম ঠিক করুন",
       "বিলির দিন ঠিক করুন আর মানুষ জোগাড় করুন"
+    ],
+    "ht": [
+      "Jwenn kote pou sere ak kote pou bay",
+      "Òganize kote pwovizyon yo ap soti",
+      "Triye epi konte pa gwosè ak kalite",
+      "Mete yon règ pataj ki jis",
+      "Fikse jou pou bay yo epi jwenn moun"
     ]
   },
   "community-bike-workshop": {
@@ -2464,6 +2616,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "মিস্ত্রি খুঁজুন যাঁরা শেখাতেও জানেন",
       "খোলা সময় আর খেটে-সাইকেল-জেতার নিয়ম ঠিক করুন",
       "নিরাপত্তার অভ্যাস দাঁড় করান"
+    ],
+    "ht": [
+      "Jwenn yon espas atelye",
+      "Rasanble zouti ak yon pye reparasyon",
+      "Ranmase bisiklèt ak pyès moun bay",
+      "Chache mekanisyen ki vle montre",
+      "Fikse lè ouvèti ak yon fòmil genyen-yon-bisiklèt",
+      "Mete pratik sekirite yo kanpe"
     ]
   },
   "newcomer-translation-network": {
@@ -2586,6 +2746,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "পথ চেনানোর কাগজপত্র বানান",
       "অ্যাপয়েন্টমেন্টে সঙ্গে যাওয়ার ব্যবস্থা রাখুন",
       "গোপনীয়তা আর নিরাপত্তার অভ্যাস ঠিক করুন"
+    ],
+    "ht": [
+      "Chache moun ki pale plizyè lang",
+      "Fè lis èd ki genyen nan zòn nan",
+      "Bati yon sistèm demann ak matche",
+      "Prepare materyèl oryantasyon",
+      "Akonpaye moun nan randevou",
+      "Mete pratik vi prive ak sekirite"
     ]
   },
   "community-meal": {
@@ -2723,6 +2891,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "রান্না আর বেড়ে দেওয়ার দল গড়ুন",
       "দিন ঠিক করুন আর খবর ছড়ান",
       "খাওয়ান আর ধোয়ামোছা সারুন"
+    ],
+    "ht": [
+      "Jwenn yon kizin ak yon espas pou sèvi",
+      "Regle sekirite manje ak pèmi",
+      "Òganize kote manje ap soti",
+      "Planifye meni pou kantite, rejim, ak alèji",
+      "Fòme yon ekip pou kwit ak sèvi",
+      "Fikse yon orè epi gaye nouvèl la",
+      "Fè repa a epi netwaye"
     ]
   },
   "seed-library": {
@@ -2830,6 +3007,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "সংগ্রহ গুছিয়ে নাম লিখুন",
       "নেওয়া আর ভাগ করার নিয়ম ঠিক করুন",
       "গজানোর ক্ষমতা ধরে রাখুন, নতুন বীজ ভরুন"
+    ],
+    "ht": [
+      "Jwenn yon kote ak yon sistèm pou sere",
+      "Jwenn premye semans yo",
+      "Klase epi make koleksyon an",
+      "Mete règ senp pou pran ak pataje",
+      "Kenbe semans yo bon, mete lòt"
     ]
   },
   "digital-literacy": {
@@ -2967,6 +3151,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "নতুনদের পাঠ সাজান",
       "ক্লাস আর যখন-তখন সাহায্যের সময় ঠিক করুন",
       "তথ্যের নিরাপত্তা আর ফেরতের নিয়ম ঠিক করুন"
+    ],
+    "ht": [
+      "Ranmase epi remete aparèy yo anfòm",
+      "Mete yon sistèm pou pran ak pote tounen",
+      "Regle aksè entènèt",
+      "Chache moun ki ka montre, prepare yo",
+      "Fè yon plan leson pou debitan",
+      "Fikse klas ak lè èd lib",
+      "Mete règ sekirite done ak retou"
     ]
   },
   "weatherization-brigade": {
@@ -3089,6 +3282,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "মালপত্র আর যন্ত্রপাতি জোগাড় করুন",
       "নিরাপত্তা আর বিমার ব্যবস্থা সারুন",
       "শ্রমদানের দিন ঠিক করে কাজ চালান"
+    ],
+    "ht": [
+      "Chache moun ki gen metye nan men yo",
+      "Fikse limit travay la",
+      "Bati yon sistèm demann ak vizit",
+      "Jwenn materyo ak zouti",
+      "Regle sekirite ak asirans",
+      "Planifye konbit yo epi fè yo"
     ]
   },
   "pet-food-bank": {
@@ -3196,6 +3397,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "প্রাণী আর মাপ ধরে সাজিয়ে হিসাব রাখুন",
       "বিলির নিয়ম ঠিক করুন",
       "বিলির দিন ঠিক করুন, লোক জোগাড় করুন"
+    ],
+    "ht": [
+      "Jwenn kote pou sere ak kote pou bay manje a",
+      "Monte yon sous manje bèt ki kontinye",
+      "Triye manje a pa bèt ak pa gwosè",
+      "Deside jan manje a ap separe",
+      "Mete lè yo epi jwenn moun pou jou yo"
     ]
   },
   "youth-mentorship": {
@@ -3333,6 +3541,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ভর্তি, অ্যালার্জি আর জরুরি তথ্য সামলান",
       "নাশতা আর জিনিসপত্র জোগাড় করুন",
       "আসর চালান, পরিবারের খোঁজ নিন"
+    ],
+    "ht": [
+      "Jwenn yon espas serye epi fikse lè yo",
+      "Mete règ sekirite timoun ak tcheke granmoun",
+      "Chèche gid yo epi prepare yo",
+      "Planifye aktivite yo",
+      "Okipe fich yo: alèji, kontak, otorizasyon",
+      "Jwenn ti goute ak materyèl",
+      "Fè seyans yo epi rete an kontak ak fanmi yo"
     ]
   },
   "gleaning-network": {
@@ -3470,6 +3687,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "দায়ের ঝুঁকি আর খাবারের নিরাপত্তা বুঝে নিন",
       "বিলির পথ তৈরি করুন",
       "কুড়ানোর দিন চালান, ওজনের হিসাব রাখুন"
+    ],
+    "ht": [
+      "Jwenn sous manje jaden",
+      "Monte ekip ranmase a",
+      "Regle transpò ak kote pou kenbe manje a",
+      "Monte sistèm alèt ak orè a",
+      "Regle responsablite legal ak pwòpte manje a",
+      "Fikse kote manje a prale",
+      "Fè jou ranmase yo epi make liv yo"
     ]
   },
   "community-mediation": {
@@ -3607,6 +3833,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "গোপনীয়তা আর গোড়ার নিয়ম ঠিক করুন",
       "এই সাহায্যের কথা ছড়ান",
       "ফলাফল টুকুন, মধ্যস্থদের পাশে থাকুন"
+    ],
+    "ht": [
+      "Chèche medyatè yo epi prepare yo",
+      "Monte fason pou moun mande medyasyon",
+      "Jwenn espas ki pa pou okenn bò",
+      "Fikse limit yo: sa ki antre, sa ki pa antre",
+      "Mete règ yo: sa ki di la rete la",
+      "Fè moun konnen èd sa a egziste",
+      "Swiv rezilta yo epi soutni medyatè yo"
     ]
   },
   "reentry-support": {
@@ -3744,6 +3979,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "কাজ আর থাকার জায়গার সঙ্গে জুড়ুন",
       "সমপথিক মেন্টরের ব্যবস্থা করুন",
       "গোপনীয়তা আর সীমার চর্চা ঠিক করুন"
+    ],
+    "ht": [
+      "Monte lis kote ki bay èd yo",
+      "Chèche moun k ap ede yo epi prepare yo",
+      "Kreye yon akèy ki gen diyite",
+      "Ede ak papye yo ak èd leta",
+      "Louvri pòt travay ak kay",
+      "Mete moun ak moun ki te pase menm chimen",
+      "Fikse règ prive ak limit yo"
     ]
   },
   "community-wood-bank": {
@@ -3881,6 +4125,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "চাওয়া আর পৌঁছানোর ব্যবস্থা বানান",
       "বিলির নিয়ম ঠিক করুন",
       "শ্রমদান আর শুকানোর সূচি বাঁধুন"
+    ],
+    "ht": [
+      "Jwenn yon sous bwa",
+      "Jwenn yon teren pou koupe ak sere bwa",
+      "Jwenn ekipman ak materyèl pwoteksyon",
+      "Monte ekip bwa a epi prepare l",
+      "Monte sistèm demann ak livrezon an",
+      "Deside jan bwa a ap separe",
+      "Planifye konbit yo ak sechaj la"
     ]
   },
   "community-wifi-mesh": {
@@ -4018,6 +4271,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "যন্ত্র বসানোর জায়গা খুঁজুন",
       "ব্যবহারের আর গোপনীয়তার নিয়ম ঠিক করুন",
       "নেটওয়ার্ক দেখভাল করুন, বাড়ান"
+    ],
+    "ht": [
+      "Fè kat bezwen yo ak twou yo",
+      "Jwenn liy entènèt prensipal la",
+      "Jwenn moun ki konn teknoloji",
+      "Jwenn ekipman yo epi konfigire yo",
+      "Jwenn kay pou resevwa pwen yo",
+      "Mete règ sèvi ak règ prive yo",
+      "Okipe rezo a epi grandi l"
     ]
   },
   "mental-health-peer-support": {
@@ -4155,6 +4417,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "গোপনীয়তা আর আসরের গোড়ার নিয়ম বাঁধুন",
       "আসরের সময় ঠিক করুন, খবর ছড়ান",
       "চালকদের পাশে থাকুন, নিঃশেষ হতে দেবেন না"
+    ],
+    "ht": [
+      "Chèche animatè yo epi prepare yo",
+      "Fikse sa wonn lan ye ak sa li pa ye",
+      "Prepare plan pou lè yon moun nan kriz",
+      "Jwenn yon espas prive e an sekirite",
+      "Mete règ yo: sa ki di la rete la",
+      "Fikse lè yo epi fè moun konnen",
+      "Soutni animatè yo pou yo pa bouke nèt"
     ]
   },
   "community-cleanup": {
@@ -4262,6 +4533,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "সরঞ্জাম আর নিরাপত্তার জিনিস জোগাড় করুন",
       "লোক জোগাড় করে দল সাজান",
       "পরিষ্কার বা সাজানোর দিনটা চালান"
+    ],
+    "ht": [
+      "Jwenn teren yo epi chwazi sa ki pi enpòtan",
+      "Jwenn pèmisyon ak yon plan pou fatra a",
+      "Rasanble materyèl ak ekipman sekirite",
+      "Rasanble moun epi òganize yo",
+      "Fè konbit netwayaj la"
     ]
   },
   "free-tax-prep": {
@@ -4399,6 +4677,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "যোগ্য প্রতিবেশীদের কাছে খবরটা পৌঁছান",
       "ডেটার নিরাপত্তা আর গোপনীয়তা নিশ্চিত করুন",
       "টাকাপয়সার হিসাব বোঝার পরের সাহায্যটাও রাখুন"
+    ],
+    "ht": [
+      "Fè preparatè yo fòme epi sètifye",
+      "Mete tèt ansanm ak yon rezo deklarasyon gratis",
+      "Prepare yon espas ak ekipman",
+      "Monte yon sistèm randevou ak akèy",
+      "Fè vwazen ki kalifye yo konnen",
+      "Pwoteje done ak vi prive moun yo",
+      "Ofri yon swivi sou zafè lajan"
     ]
   },
   "community-market": {
@@ -4536,6 +4823,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "লোক জোগাড় করুন, কাজ ভাগ করুন",
       "প্রচার করুন, বাঁধা সময় ঠিক করুন",
       "স্ট্যান্ড চালান, বাড়তিটা কাজে লাগান"
+    ],
+    "ht": [
+      "Jwenn sous manje fre ak pwodui yo",
+      "Chwazi yon kote epi monte estann lan",
+      "Deside ki jan estann lan ap mache",
+      "Ranje etalaj, konsèvasyon, ak sekirite manje",
+      "Rasanble moun epi fè orè a",
+      "Fè nouvèl la gaye epi fikse yon orè fiks",
+      "Fè jou mache a epi okipe rès manje a"
     ]
   },
   "welcome-wagon": {
@@ -4643,6 +4939,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "স্বাগতমের ঝুড়ি সাজান",
       "বরণকারী জোগাড় করুন, তৈরি করুন",
       "খোঁজ পাঠানো আর নাম দেওয়ার ব্যবস্থা গড়ুন"
+    ],
+    "ht": [
+      "Deside ki moun w ap akeyi e ki jan",
+      "Monte yon ti gid enfòmasyon lokal",
+      "Prepare panyen byenvini yo",
+      "Jwenn moun k ap akeyi epi prepare yo",
+      "Mete yon fason pou moun rive jwenn ou"
     ]
   },
   "library-of-things": {
@@ -4780,6 +5083,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "নেওয়ার নিয়ম আর ভরসার নীতিটা লিখুন",
       "নেওয়া-ফেরতের ব্যবস্থা গড়ুন, লাইব্রেরিয়ানদের শেখান",
       "যত্ন করুন, ধুয়ে রাখুন, সংগ্রহ বাড়ান"
+    ],
+    "ht": [
+      "Sonde sa kominote a ta vle pran",
+      "Jwenn yon kote ak lè ouvèti",
+      "Ranmase, netwaye, epi teste bagay yo",
+      "Fè katalòg ak foto envantè a",
+      "Ekri règ yo sou baz konfyans",
+      "Monte fèy soti a epi prepare bibliyotekè yo",
+      "Okipe, netwaye, epi grandi koleksyon an"
     ]
   },
   "laundry-shower-access": {
@@ -4902,6 +5214,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "পরিচ্ছন্নতা আর নিরাপত্তার নিয়ম দাঁড় করান",
       "লোক জোগাড় করুন, শিখিয়ে নিন",
       "সময় বাঁধুন, খবর ছড়ান"
+    ],
+    "ht": [
+      "Jwenn aksè ak machin ak douch",
+      "Jwenn materyèl yo",
+      "Monte yon sistèm tou ak lè",
+      "Fikse règ ijyèn ak sekirite",
+      "Jwenn moun epi prepare yo",
+      "Fikse yon orè epi fè nouvèl la gaye"
     ]
   },
   "voter-registration": {
@@ -5024,6 +5344,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ভিড়ের জায়গা আর আয়োজন বাছুন",
       "নাম তোলার টেবিল চালান",
       "পরের ধাপেও সাহায্য করুন"
+    ],
+    "ht": [
+      "Aprann règ pou kanpay enskripsyon",
+      "Prepare moun yo pou rete san pati",
+      "Rasanble materyèl ak enfòmasyon egzak",
+      "Chwazi kote ki gen anpil pasaj",
+      "Kenbe tab enskripsyon an",
+      "Ede ak pwochen etap yo"
     ]
   },
   "health-navigation": {
@@ -5161,6 +5489,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ডাক্তারের সময় আর ওষুধে সাহায্য দিন",
       "স্বাস্থ্য-তথ্যের গোপনীয়তার নিয়ম বাঁধুন",
       "ক্লিনিক আর ডাক্তারদের সাথে জানাশোনা গড়ুন"
+    ],
+    "ht": [
+      "Monte yon lis kote ki bay swen",
+      "Jwenn gid yo epi prepare yo",
+      "Monte yon fason pou moun mande èd",
+      "Ede moun jwenn asirans",
+      "Ede ak randevou ak preskripsyon",
+      "Fikse règ vi prive pou enfo sante",
+      "Bati relasyon ak klinik yo"
     ]
   },
   "toy-library": {
@@ -5268,6 +5605,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "তালিকায় তুলে সব টুকরোসহ ব্যাগে ভরুন",
       "বাড়ি নেওয়ার নিয়ম লিখুন",
       "লিখে-নেওয়ার ব্যবস্থা গড়ুন, সামলানোর মানুষদের শেখান"
+    ],
+    "ht": [
+      "Jwenn yon kote ak lè louvri",
+      "Kolekte, netwaye, tcheke jwèt yo",
+      "Fè katalòg, mete nan sache ak tout pyès",
+      "Ekri regleman pou pran jwèt",
+      "Monte fèy soti a, montre ekip la"
     ]
   },
   "food-preservation": {
@@ -5405,6 +5749,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "দলের বয়ামে ভরার আসর সাজান",
       "আসর চালান, নিরাপদে শেখান",
       "সংরক্ষণ করা খাবার ভাগ করুন, হিসাব রাখুন"
+    ],
+    "ht": [
+      "Jwenn yon bon kwizin",
+      "Aprann metòd ki san danje",
+      "Rasanble materyèl ak bokal",
+      "Jwenn danre",
+      "Planifye seyans yo",
+      "Mennen seyans yo san danje",
+      "Separe manje a, kenbe nòt"
     ]
   },
   "free-haircut": {
@@ -5512,6 +5865,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "সরঞ্জাম আর টুকিটাকি জোগাড় করুন",
       "জীবাণুমুক্তি আর লাইসেন্সের নিয়ম সাজান",
       "পরিপাটি হওয়ার দিনগুলো চালান"
+    ],
+    "ht": [
+      "Jwenn kwafè ki gen lisans",
+      "Jwenn yon espas ki pwòp",
+      "Rasanble materyèl",
+      "Regle pwòpte ak règ lisans yo",
+      "Fè jounen swen yo"
     ]
   },
   "mutual-aid-moving-crew": {
@@ -5649,6 +6009,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "সময়সূচি আর কে কোথায় যাবে ঠিক করুন",
       "কাজের সীমা ঠিক করুন",
       "বাসা-বদল চালান, পরে খোঁজ নিন"
+    ],
+    "ht": [
+      "Rasanble yon ekip ak machin",
+      "Rasanble materyèl demenajman",
+      "Monte yon sistèm demann",
+      "Regle sekirite ak responsablite",
+      "Fikse orè ak voye ekip",
+      "Fikse limit yo",
+      "Fè demenajman yo, pran nouvèl"
     ]
   },
   "disability-support-network": {
@@ -5786,6 +6155,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "সরঞ্জাম দেওয়া-নেওয়ার ভাণ্ডার গড়ুন",
       "পক্ষে দাঁড়ানো আর পথ চেনানোয় সাহায্য দিন",
       "সব ইভেন্টের জন্য নাগালের মাপকাঠি ঠিক করুন"
+    ],
+    "ht": [
+      "Mete moun ki gen andikap yo devan",
+      "Monte kominikasyon aksesib",
+      "Konnen bezwen yo ak sa ki la",
+      "Monte echanj youn-ede-lòt la",
+      "Fè yon rezèv ekipman pataje",
+      "Bay èd pou defann dwa",
+      "Fikse estanda aksè pou tout evenman"
     ]
   },
   "books-to-prisoners": {
@@ -5908,6 +6286,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "মানুষ জোগাড় করুন, শিখিয়ে নিন",
       "ডাকখরচ আর পাঠানোর ব্যবস্থা সামলান",
       "চিঠি লেখার আয়োজন গড়ুন"
+    ],
+    "ht": [
+      "Aprann règ lapòs prizon yo",
+      "Rasanble liv ak yon espas travay",
+      "Monte yon sistèm pou demann yo",
+      "Jwenn moun, montre yo travay la",
+      "Kouvri tenb ak lojistik",
+      "Òganize ekri lèt yo"
     ]
   },
   "community-music": {
@@ -6030,6 +6416,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "শেখা আর আসরের জায়গা খুঁজুন",
       "শেখা আর বাজনার আসরের সূচি সাজান",
       "যত্ন আর ফেরতের প্রত্যাশা বুঝিয়ে দিন"
+    ],
+    "ht": [
+      "Kolekte epi repare enstriman",
+      "Monte sistèm soti-tounen an",
+      "Jwenn moun pou montre mizik",
+      "Jwenn yon espas pou son an",
+      "Fikse orè leson ak seyans yo",
+      "Fikse swen ak regleman tounen"
     ]
   },
   "school-supply-program": {
@@ -6137,6 +6531,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ক্লাস ধরে বাছাই আর গোছানো",
       "রাখা আর বিলির জায়গা ঠিক করুন",
       "বিলির দিন আর মানুষ ঠিক করুন"
+    ],
+    "ht": [
+      "Jwenn lis yo, mezire bezwen an",
+      "Kolekte founiti, achte an gwo",
+      "Triye epi ranje pa klas",
+      "Jwenn kote pou sere ak kote pou bay",
+      "Fikse jou a, jwenn moun"
     ]
   },
   "legal-aid-clinic": {
@@ -6274,6 +6675,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "“নিজের অধিকার জানুন” গাইড আর কর্মশালা বানান",
       "ক্লিনিকের প্রচার করুন, দিন ঠিক করুন",
       "গোপনীয়তা রক্ষা করুন, স্বার্থের সংঘাত যাচাই করুন"
+    ],
+    "ht": [
+      "Fè lyen ak avoka ak èd legal",
+      "Defini limit ak chimen pou voye ka",
+      "Prepare yon espas ak pòt antre a",
+      "Bati yon sistèm randevou ki pwoteje moun",
+      "Prepare dokiman ak atelye konnen dwa ou",
+      "Fè konnen epi fikse dat klinik yo",
+      "Pwoteje sekrè moun yo epi tcheke konfli"
     ]
   },
   "resource-hub-dispatch": {
@@ -6411,6 +6821,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "সমন্বয়কারী জোগাড় করুন, শিখিয়ে নিন",
       "তথ্যের গোপনীয়তা আর খোঁজ নেওয়ার নিয়ম ঠিক করুন",
       "না-মেটা দরকার আর ফাঁকগুলো টুকে রাখুন"
+    ],
+    "ht": [
+      "Louvri yon sèl pòt antre pou bezwen ak èd",
+      "Bati lis moun ki ka ede ak sa ki disponib",
+      "Kreye chimen pou matche ak voye èd",
+      "Kenbe yon gwo anyè èd",
+      "Chèche epi montre moun k ap kowòdone yo",
+      "Fikse règ vi prive ak swivi",
+      "Swiv bezwen ki pa jwenn repons"
     ]
   },
   "harm-reduction-supplies": {
@@ -6533,6 +6952,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "সহজ ভাষার কাগজসহ কিট সাজান",
       "বিলির পথ আর বাঁধা জায়গা ঠিক করুন",
       "ভরে রাখুন, হিসাব রাখুন, প্রশিক্ষণ টাটকা রাখুন"
+    ],
+    "ht": [
+      "Aprann epi jwenn yon òganizasyon zanmi",
+      "Tcheke lwa lokal la sou materyèl yo",
+      "Jwenn naloxone ak materyèl kit yo",
+      "Monte kit yo ak fèy esplikasyon senp",
+      "Fikse wonn ak pwen fiks pou bay yo",
+      "Replen, swiv, epi kenbe konesans yo fre"
     ]
   },
   "court-support": {
@@ -6655,6 +7082,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "সঙ্গে যাওয়ার সাহায্যকারীদের শিখিয়ে নিন",
       "শুনানির দিনের গাড়ি আর বাচ্চাদের দেখাশোনা সাজান",
       "ডিফেন্স চাইলে পাশে-থাকার চিঠি জোগাড় করুন"
+    ],
+    "ht": [
+      "Konekte ak avoka piblik ak gwoup ki la deja",
+      "Ekri règ yo: prezans, pa konsèy legal",
+      "Monte pòt antre ak kalandriye odyans yo",
+      "Montre moun k ap akonpaye yo",
+      "Kowòdone woulib ak gade timoun pou odyans yo",
+      "Òganize lèt temwayaj lè avoka a mande"
     ]
   },
   "cooling-warming-center": {
@@ -6792,6 +7227,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "পালার ছক বানান",
       "মৌসুমের আগে খবর ছড়ান",
       "খুলুন, দেখাশোনা করুন, ফের গুছিয়ে রাখুন"
+    ],
+    "ht": [
+      "Jwenn yon kote ki gen è kondisyone ak chofaj",
+      "Fikse siy pou louvri ak yon plan alèt",
+      "Fè rezèv materyèl",
+      "Chèche epi montre moun k ap resevwa yo",
+      "Bati lis tou yo",
+      "Gaye nouvèl la anvan sezon an",
+      "Louvri, resevwa, epi remete an plas chak fwa"
     ]
   },
   "community-oral-history": {
@@ -6884,6 +7328,12 @@ export const TEMPLATE_TASK_NAMES: Record<
       "সরঞ্জাম আর প্রশ্নের তালিকা গোছান",
       "গল্পের বৈঠকগুলো রেকর্ড করুন",
       "তাঁর শর্তেই আগলে রাখুন, ফিরিয়ে দিন"
+    ],
+    "ht": [
+      "Ekri yon papye konsantman senp",
+      "Prepare zouti ak yon lis kesyon",
+      "Anrejistre seyans istwa yo",
+      "Klase yo epi bay kopi, jan moun yo vle"
     ]
   },
   "community-solar-coop": {
@@ -7021,6 +7471,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "ইনস্টলার আর সরবরাহকারীর সঙ্গে জুড়ুন",
       "বিলের সাশ্রয় আর সদস্যপদের হিসাব দাঁড় করান",
       "বিদ্যুৎ খরচ নিয়ে সদস্যদের শেখান"
+    ],
+    "ht": [
+      "Rasanble manm epi gade kiyès ki angaje",
+      "Aprann modèl yo ak règ lokal yo",
+      "Jwenn yon kote pou enstale oswa yon sistèm pou antre",
+      "Regle kote lajan an soti ak estrikti legal la",
+      "Chwazi enstalatè ak konpayi serye",
+      "Monte sistèm rabè bòdwo ak manm yo",
+      "Montre manm yo jere kouran yo"
     ]
   },
   "worker-coop-incubator": {
@@ -7158,6 +7617,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "শুরুর টাকার উৎসের সঙ্গে জুড়ে দিন",
       "পরামর্শদাতা জুড়ে দিন",
       "ব্যবসাগুলোর নিজেদের মধ্যে বাঁধন গড়ুন"
+    ],
+    "ht": [
+      "Gade sa manm yo konn fè ak sa yo vle",
+      "Fè seyans preparasyon travay ak metye",
+      "Montre modèl koperativ la",
+      "Akonpaye gwoup k ap fòme koperativ",
+      "Konekte yo ak kote pou jwenn lajan",
+      "Bay akonpayman",
+      "Bati tèt ansanm ant koperativ yo"
     ]
   },
   "elder-meal-delivery": {
@@ -7295,6 +7763,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "খাওয়াদাওয়া, অ্যালার্জি আর বিপদের তথ্য টুকে রাখুন",
       "খোঁজ নেওয়ার নিয়ম দাঁড় করান",
       "সাহায্যকারীদের পাশে থাকুন, মতামত শুনুন"
+    ],
+    "ht": [
+      "Jwenn granmoun ki pa ka soti yo",
+      "Chèche moun serye epi tcheke yo",
+      "Jwenn yon sous manje",
+      "Trase wout yo ak orè a",
+      "Ekri alèji ak kontak enpòtan yo",
+      "Mete yon plan si granmoun nan pa reponn",
+      "Pran nouvèl ekip la ak granmoun yo"
     ]
   },
   "disaster-relief-hub": {
@@ -7432,6 +7909,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "হঠাৎ ডাকে আসা সাহায্যকারীদের দল গড়ুন, শেখান",
       "অন্য সাড়া-দেওয়া দলগুলোর সাথে সমন্বয় করুন",
       "যোগাযোগ আর নিরাপত্তার পরিকল্পনা করুন"
+    ],
+    "ht": [
+      "Chwazi espas la ak yon rezèv davans",
+      "Ranje kote pwovizyon yo ap soti",
+      "Òganize resevwa, triye, ak konte",
+      "Mete yon sistèm pou bay pwovizyon yo",
+      "Fòme yon ekip ki ka kouri vini",
+      "Antann ou ak lòt ekip k ap reponn",
+      "Planifye kominikasyon ak sekirite"
     ]
   },
   "recovery-peer-support": {
@@ -7569,6 +8055,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "গোপনীয়তা আর আসরের নিয়ম ঠিক করুন",
       "আসরের সময় ঠিক করুন, খবর ছড়ান",
       "সঞ্চালকদের পাশে থাকুন, হাঁপিয়ে ওঠা ঠেকান"
+    ],
+    "ht": [
+      "Jwenn animatè parèy epi fòme yo",
+      "Ekri limit rezo a",
+      "Trase chemen pou kriz ak pwofesyonèl",
+      "Jwenn yon espas prive san alkòl san dwòg",
+      "Mete règ konfidansyalite ak règ gwoup la",
+      "Fikse lè rankont yo epi fè yo konnen",
+      "Soutni animatè yo pou yo pa bouke nèt"
     ]
   },
   "community-fitness": {
@@ -7706,6 +8201,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "নিরাপত্তা আর শরীরের খেয়াল রাখুন",
       "সময় বেঁধে দিন, খবর ছড়ান",
       "সম্পর্ক গড়ুন, ছন্দ ধরে রাখুন"
+    ],
+    "ht": [
+      "Mande moun sa yo ta renmen",
+      "Jwenn moun pou mennen aktivite yo",
+      "Jwenn espas ki an sekirite",
+      "Prepare aktivite pou tout nivo",
+      "Okipe sekirite ak sante",
+      "Fikse orè a epi gaye nouvèl la",
+      "Bati zanmitay ak regilarite"
     ]
   },
   "urban-orchard": {
@@ -7843,6 +8347,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "লাগানোর দিনগুলো আয়োজন করুন",
       "লম্বা মেয়াদের দেখভাল সাজান",
       "ফলন ভাগের পরিকল্পনা করুন"
+    ],
+    "ht": [
+      "Jwenn aksè tè alontèm",
+      "Fè desen plantasyon an",
+      "Jwenn pyebwa ak plant yo",
+      "Prepare teren an",
+      "Òganize konbit plantasyon yo",
+      "Òganize swen alontèm nan",
+      "Mete règ pataj rekòt la"
     ]
   },
   "new-parent-support": {
@@ -7980,6 +8493,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "সাথিদের আসর গড়ে তুলুন",
       "নিরাপত্তা আর সীমার নিয়ম ঠিক করুন",
       "অন্য প্রজেক্টগুলোর সাথে জুড়ে দিন"
+    ],
+    "ht": [
+      "Jwenn moun k ap ede ak parèy yo",
+      "Monte yon chenn manje",
+      "Bay èd pratik",
+      "Fè yon lis sèvis yo",
+      "Fè ti sèk parèy yo",
+      "Mete règ sekirite ak limit yo",
+      "Konekte ak lòt pwojè yo"
     ]
   },
   "foster-kinship-support": {
@@ -8117,6 +8639,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "সাথিদের আসর চালান",
       "দরকারি ঠিকানার তালিকা গড়ুন",
       "শিশু-নিরাপত্তা আর গোপনীয়তার নিয়ম বাঁধুন"
+    ],
+    "ht": [
+      "Rankontre fanmi k ap bay swen yo",
+      "Sanble rad ak materyèl",
+      "Prepare sak pare pou menm jou a",
+      "Òganize ti repo pou fanmi yo",
+      "Fè gwoup parèy pou fanmi yo",
+      "Fè lis sèvis ak èd leta yo",
+      "Ekri règ sekirite ak vi prive timoun yo"
     ]
   },
   "weather-survival-outreach": {
@@ -8254,6 +8785,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "বিলি আর রুটের পরিকল্পনা বানান",
       "রাত কাটানোর জায়গার সাথে জুড়ে দিন",
       "বিপদের জন্য তৈরি থাকুন"
+    ],
+    "ht": [
+      "Prepare kit dapre sezon an",
+      "Jwenn pwovizyon yo",
+      "Konnen ki kote moun yo ye",
+      "Jwenn moun pou wonn yo epi fòme yo",
+      "Trase wout yo ak plan an",
+      "Konekte moun ak kote pou pase nwit",
+      "Prepare pou ijans medikal yo"
     ]
   }
 };

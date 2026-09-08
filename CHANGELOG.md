@@ -10,6 +10,24 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Tout bibliyotèk la an Kreyòl — the whole library now reads in
+  Haitian Creole.** All 64 project playbooks with their task guides
+  and tips, the 14 event templates, the help pages, the
+  start-a-community guide, the twelve design principles, and the
+  member, opsec, and study guides. The same care as the interface
+  carried through: an hour is always èdtan and never debt — the
+  guides refuse the framing once, by name ("Mande èd se pa yon dèt —
+  ou pa prete anyen nan men pèsonn."), and the seed library's
+  returns stay "Se yon kado — se pa yon prè."; sòl never appears;
+  the NGO register never appears, even across the disaster
+  playbooks, where every shelter is named by its plain function; the
+  disability movement's slogan keeps its own first person ("Anyen
+  sou nou san nou"); and the compelled-biometrics warning survived
+  translation with full force. The advice speaks lakou life where it
+  fits anywhere Kreyòl is spoken — mache, lekòl, tap-tap, ti sachè
+  sewòm. The "content still in English" note for Kreyòl in Settings
+  retires. Still a new AI-assisted translation awaiting a
+  native-speaker read — the app says so.
 - **Kreyòl Ayisyen.** The sixteenth language: the entire interface —
   all ~2,950 strings — now speaks Haitian Creole the way neighbors
   talk across the lakou: ou and w, warmth from non and annou, never
