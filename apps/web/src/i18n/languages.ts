@@ -267,6 +267,31 @@ export const LANGUAGES = [
     reviewStatus: "new",
     content: "full",
   },
+  // Persian is the third right-to-left language, riding the rails
+  // Arabic proved and Urdu extended (docs/rtl-plan.md R1–R3 + both
+  // fleets). Its Naskh-style script renders on the same font stack as
+  // Arabic, so unlike Urdu's Nastaliq it needed no :lang() CSS spike.
+  // Three grammar/rendering facts shape fa.json
+  // (docs/i18n-glossary/fa.md): CLDR fa's "one" covers 0 AND 1 (like
+  // hi/bn), so every _one form interpolates {{count}}; fa's CLDR
+  // default numbering system is arabext (۱۲۳), so intlNumbering pins
+  // -u-nu-latn like Bengali — but ONLY digits are pinned: fa's Intl
+  // default calendar is the Solar Hijri, which is the calendar
+  // Iranian members actually use, and it is deliberately left in
+  // force; and ZWNJ (U+200C) is required Persian orthography (می‌رود,
+  // خانه‌ها), the one "invisible" character sanctioned in a locale
+  // file. The glossary's Dari-compatibility rule keeps the word
+  // choices readable in Afghanistan too. Ships UI-first; the
+  // authored corpus follows on the Phase 2 rails.
+  {
+    code: "fa",
+    endonym: "فارسی",
+    dir: "rtl",
+    speakLang: "fa",
+    reviewStatus: "new",
+    content: "ui-only",
+    intlNumbering: "latn",
+  },
 ] as const satisfies readonly LanguageInfo[];
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]["code"];

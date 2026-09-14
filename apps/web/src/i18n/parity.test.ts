@@ -35,6 +35,7 @@ import sw from "./locales/sw.json";
 import fil from "./locales/fil.json";
 import bn from "./locales/bn.json";
 import ht from "./locales/ht.json";
+import fa from "./locales/fa.json";
 import { LANGUAGES } from "./languages";
 
 // Every shipped locale, keyed for the gates below. Locale files are
@@ -58,6 +59,7 @@ const SHIPPED_LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   { code: "fil", data: fil },
   { code: "bn", data: bn },
   { code: "ht", data: ht },
+  { code: "fa", data: fa },
 ];
 
 /** Plural categories that match exactly ONE integer for a locale —

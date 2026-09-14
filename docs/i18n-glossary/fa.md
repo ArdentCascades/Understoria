@@ -375,6 +375,30 @@ reviewer; ban columns hold regardless.
 | display name | نامی که صدایتان کنند | Label: «نام شما (اسم واقعی لازم نیست — نام مستعار هم می‌شود)». Never تخلص (in Afghanistan the surname — rule 12). DON'T: نام کاربری (username), لقب (honorific), **اسم رمز** (code-name — informant-file register), نام مستعار as the LABEL alone (fine in the parenthetical; police-file flavor if it leads). |
 | invite (noun + verb) | دعوت / دعوت کردن | The everyday guest word, warm: «کسی را که می‌شناسید دعوت کنید»، «چه کسی شما را دعوت کرد». One family, greppable. DON'T: **عضوگیری** (recruitment — the political-organization word), لینک معرفی (referral growth-hacking), احضار (a summons — never). |
 | owed help | در انتظار تأیید شما | Badge: «در انتظار تأیید»؛ «{{hours}} در انتظار تأیید شما». Deliberately NOT طلب/بدهی/بستانکار — the app refuses debt framing (rule 4). |
+| pair / link a device | پیوند دادن / کد پیوند / دستگاهِ پیوندشده | Added by the fleet reconciliation (the table shipped without a row and four coinages appeared). پیوند is the grafting/bonding word — warm, exact. وصل stays reserved for connecting to the *server*; تأیید stays reserved for exchange confirmation, so approving a device is اجازه دادن and a fingerprint match is مطابقت. DON'T: جفت کردن (mating overtone), اتصال دستگاه (telecom register). |
+
+### Errata from the UI fleet reconciliation
+
+Recorded after the six-chunk fleet was reconciled; the review cycle
+should confirm these alongside the table above.
+
+- **Arrows mirror fully** (ur precedent): every en `→` renders `←`
+  (nav paths read `A ← B ← C`; forward links trail «←») and every
+  en `←` renders `→` (back links lead «→ برگشت …»). `↑↓` stay
+  literal. Back links use **برگشت** — بازگشت is reserved for a
+  removed member's *reinstatement* and the recovery-kit family.
+- **Dialog dismiss is «انصراف»**; لغو only cancels a thing (an
+  event, a request). Paste is the lived loanword **پیست** — چسباندن
+  reads as glue.
+- **"Transcribe" carries two coinages on purpose**: the Settings
+  section «پیاده کردن صدا» (its own en string) and the per-clip
+  button «تبدیل به نوشته». Quotes now name the surface they point
+  at; a native reviewer should pick one family and update both.
+- **Settings → Security renders «امنیت»** — judged rule-6-safe: the
+  plain noun on every phone's settings screen, not the apparatus
+  adjective امنیتی (which stays banned). Reviewer may confirm.
+- Spelling unified: **جست‌وجو** (not جستجو), **خوشامد** (not
+  خوش‌آمد), **مهروموم** (not مهر و موم).
 
 ## Known hard strings
 

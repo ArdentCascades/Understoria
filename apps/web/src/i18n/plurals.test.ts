@@ -36,6 +36,7 @@ import sw from "./locales/sw.json";
 import fil from "./locales/fil.json";
 import bn from "./locales/bn.json";
 import ht from "./locales/ht.json";
+import fa from "./locales/fa.json";
 import { LANGUAGES } from "./languages";
 
 // CLDR plural-suffix completeness for every shipped locale
@@ -69,6 +70,10 @@ const LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   // possible fallback (docs/i18n-glossary/ht.md, rule 12).
   { code: "ht", data: ht },
   { code: "bn", data: bn },
+  // fa's "one" covers 0 AND 1 (like hi/bn), so every _one form
+  // interpolates {{count}} — the category checks below derive that
+  // from Intl.PluralRules("fa") directly.
+  { code: "fa", data: fa },
 ];
 
 function flatKeys(obj: unknown, prefix = ""): string[] {

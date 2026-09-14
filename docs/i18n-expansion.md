@@ -231,6 +231,31 @@ pou pataje pwovizyon lè katastwòf frape", every shelter a plain
 function); "Anyen sou nou san nou" keeps its first person; the
 compelled-biometrics passage passed line-by-line review. All
 sixteen registry entries are `content: "full"`.
+Persian (fa) followed as the seventeenth language and the third
+RTL one, UI-first on the ar/ur rails — the first RTL language to
+need NO rendering spike (Naskh rides Arabic's font stack). The
+glossary (docs/i18n-glossary/fa.md) settled the fa-specific
+questions up front: CLDR fa "one" covers 0 AND 1 (every _one form
+interpolates {{count}}); fa's Intl defaults are arabext digits AND
+the Solar Hijri calendar — the registry pins `-u-nu-latn` digits
+like Bengali while the calendar is deliberately left in force
+(it is the calendar Iranian members live by; the month names are a
+recorded Dari compromise); and ZWNJ (U+200C), banned as an
+invisible everywhere else, is REQUIRED Persian orthography and is
+admitted — the fleet gates were adapted to allow exactly that one
+codepoint. Register decisions with no precedent elsewhere: شما
+without ta'arof (deference reads as hierarchy), the قرض‌الحسنه/صندوق
+absolute ban (the credit institutions a Persian-speaking timebank
+must not resemble), and a rule-6 fence around the security state's
+vocabulary — flagging is «با جمع در میان گذاشتن», never گزارش;
+no پرونده, no احضار; blocking is the loanword بلاک because مسدود
+is what the state does to bank accounts. Word choices held
+Dari-compatible throughout (تخلص never means pseudonym). The
+6-chunk fleet + reconciliation (pairing family unified on پیوند,
+two reserved-word breaches fixed where تأیید had leaked into
+device approval, full arrow mirroring, and a glossary erratum
+section recording what the fleet taught) shipped fa.json
+`content: "ui-only"`; the corpus follows on the Phase 2 rails.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from
