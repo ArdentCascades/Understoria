@@ -30,12 +30,14 @@ describe("language registry — the RTL gate", () => {
     // R4 retired the original all-ltr assertion deliberately — with
     // R1–R3's verification in hand, exactly as its comment required.
     // The gate's successor: every dir:"rtl" entry must be on this
-    // explicit list, so the NEXT rtl language (Urdu) is added here
+    // explicit list, so each next rtl language is added here
     // consciously, alongside its translation, never by accident.
+    // Urdu was added with the R5 fleet; Persian with the fa fleet
+    // (it rides Arabic's Naskh font stack, no new CSS spike).
     const rtlShipped = LANGUAGES.filter((l) => l.dir === "rtl").map(
       (l) => l.code,
     );
-    expect(rtlShipped).toEqual(["ar", "ur"]);
+    expect(rtlShipped).toEqual(["ar", "ur", "fa"]);
   });
 
   it("keeps the pseudo-locale out of the shipped registry and its counts", () => {
@@ -78,9 +80,29 @@ describe("intlLocale — the numbering-system pin", () => {
     ).toBe("beng");
   });
 
+  it("pins Persian to Western digits — and digits ONLY", () => {
+    // fa's CLDR default numbering is arabext (۱٬۲۳۴ against the
+    // locale file's Western digits), so the pin applies like bn's.
+    expect(intlLocale("fa")).toBe("fa-u-nu-latn");
+    expect(intlLocale("fa-IR")).toBe("fa-IR-u-nu-latn");
+    expect(new Intl.NumberFormat(intlLocale("fa")).format(1234)).toBe(
+      "1,234",
+    );
+    // The CALENDAR is deliberately not pinned: fa's Intl default is
+    // the Solar Hijri (persian) calendar, which is what Iranian
+    // members actually use — dates keep it under the digit pin
+    // (docs/i18n-glossary/fa.md, rule 10).
+    expect(
+      new Intl.DateTimeFormat(intlLocale("fa")).resolvedOptions().calendar,
+    ).toBe("persian");
+  });
+
   it("leaves every other shipped tag untouched", () => {
+    // bn and fa are the two registry entries carrying intlNumbering;
+    // each is excluded here consciously, alongside its own pin test
+    // above — never by accident.
     for (const l of LANGUAGES) {
-      if (l.code === "bn") continue;
+      if (l.code === "bn" || l.code === "fa") continue;
       expect(intlLocale(l.code)).toBe(l.code);
     }
     expect(intlLocale("es-MX")).toBe("es-MX");

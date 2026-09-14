@@ -118,6 +118,7 @@ describe("README: claims the code decides", () => {
       Filipino: "fil",
       Bengali: "bn",
       "Haitian Creole": "ht",
+      Persian: "fa",
     };
     const shipped = new Set<string>(LANGUAGES.map((l) => l.code));
     const claimed = Object.entries(endonymByEnglishName)

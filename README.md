@@ -134,19 +134,20 @@ Understoria is a platform where communities exchange help, tracked through **tim
 ### Who can join, and who runs it
 
 - **Invite-only mode** — Operators can flip the node from open-onboarding to invite-only at any time; invites are signed, and an invite is then the only way in.
-<!-- Sixteen languages: apps/web/src/i18n/languages.ts (LANGUAGES).
-     Fourteen carry reviewStatus: "new". Guarded by
+<!-- Seventeen languages: apps/web/src/i18n/languages.ts (LANGUAGES).
+     Fifteen carry reviewStatus: "new". Guarded by
      apps/web/src/lib/readme.guard.test.ts — update both together. -->
-- **Sixteen languages** — English, Spanish, French, Portuguese, Chinese, Hindi,
-  Vietnamese, Russian, Arabic and Urdu — both right-to-left, with the
-  whole interface mirrored — Tibetan, expedited for
-  communities responding to the 2026 Tibet flood, the
+- **Seventeen languages** — English, Spanish, French, Portuguese, Chinese, Hindi,
+  Vietnamese, Russian, Arabic, Urdu and Persian — all three
+  right-to-left, with the whole interface mirrored — Tibetan,
+  expedited for communities responding to the 2026 Tibet flood, the
   demand-driven wave (Indonesian, Swahili, Filipino, and Bengali),
-  and now Haitian Creole. All sixteen carry the whole authored
+  and Haitian Creole. Sixteen of them carry the whole authored
   corpus translated, not just the buttons: the help pages, the
-  project playbooks, the event templates. Fourteen are newly
-  translated and have not yet been read by a native speaker — the
-  app says that too.
+  project playbooks, the event templates (Persian's corpus is on the
+  way, and the app says so honestly while content falls back to
+  English). Fifteen are newly translated and have not yet been read
+  by a native speaker — the app says that too.
 - **Federation** — Each community runs its own node. Nodes can peer with each other to share needs and offers across groups. No central server, no single point of failure.
 
 ### Not built yet
@@ -473,7 +474,7 @@ Sign off every commit with `git commit -s`.
 - **Cryptography review** — Audit the identity and encryption implementations
 - **Federation protocol** — Design and test node-to-node communication
 - **Documentation** — Guides, tutorials, and translation review. The app
-  ships in sixteen languages; fourteen of them have not yet been read by a
+  ships in seventeen languages; fifteen of them have not yet been read by a
   native speaker, and that review is some of the most useful work going
 - **Community testing** — If you're part of a mutual aid network or organizing group and want to pilot Understoria, we want to hear from you
 - **Design** — UI/UX, illustrations, iconography that signals solidarity without being cheesy

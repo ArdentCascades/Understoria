@@ -34,6 +34,31 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **فارسی — Persian.** The seventeenth language and the third
+  right-to-left one: the entire interface — all ~2,950 strings —
+  now reads in Persian, riding the mirrored layout and the Naskh
+  font stack Arabic proved (no new CSS was needed). The register is
+  the respectful شما without ta'arof — an app that insists it has
+  no bosses must not bow. Hours are never debt: no بدهی, no قرض,
+  no طلب, and the community fund is never a صندوق or قرض‌الحسنه —
+  the credit institutions a timebank must not resemble; asking for
+  help "isn't a debt — nothing is borrowed, nothing is owed." The
+  vocabulary of the security state never appears: flagging a post
+  is «با جمع در میان گذاشتن» (bringing it before the community),
+  never گزارش (a report to authority); no پرونده, no احضار, no
+  خبرچین; the dashboard is the community's نبض (pulse), guardians
+  are امانت‌دارها (trusted holders), and vouching is «پشتِ کسی
+  ایستادن» — standing behind someone. Numbers are pinned to
+  Western digits (fa's Intl default is ۱٬۲۳۴) while dates
+  deliberately keep the Solar Hijri calendar Iranian members
+  actually live by; the ZWNJ Persian orthography requires is used
+  throughout; and word choices are held Dari-compatible so the
+  translation reads naturally in Kabul as well as Tehran. The
+  authored content library (playbooks, templates, FAQ, guides)
+  follows on the established rails — Settings says so honestly
+  until it lands. A new AI-assisted translation awaiting a
+  native-speaker read, ideally one Iranian and one Afghan reader
+  side by side — the app says that too.
 - **Tout bibliyotèk la an Kreyòl — the whole library now reads in
   Haitian Creole.** All 64 project playbooks with their task guides
   and tips, the 14 event templates, the help pages, the
