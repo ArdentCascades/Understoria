@@ -62,10 +62,9 @@ jobs:
         run: npm run build
 
   audit:
-    name: npm audit (informational)
+    name: npm audit
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -74,9 +73,13 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm ci --ignore-scripts
-      # Fail only on high+ severity advisories. Lower-severity
-      # findings are surfaced as a warning step; the job overall is
-      # set continue-on-error so an advisory does not block PRs.
+      # BLOCKING on high+ severity advisories. This job spent weeks
+      # as continue-on-error with a known-red baseline, which taught
+      # everyone to ignore it — an alarm that always rings protects
+      # nothing. The baseline is now zero; keep it that way by
+      # updating within-range (npm update <pkg>) rather than
+      # re-neutering the gate. Moderate and below still pass here —
+      # judge those case by case via Dependabot.
       - run: npm audit --audit-level=high
 
   dco:

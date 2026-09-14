@@ -9,6 +9,22 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Security
+- **Zero known vulnerabilities, and the alarm is armed again.** All
+  ten npm-audit findings cleared with in-range updates — most
+  importantly Fastify 5.10 → 5.12.4, which carried the one
+  runtime-facing advisory (fast-uri host confusion via a backslash
+  authority — the community node parses peer URLs with it). The
+  rest were build-tool advisories: sharp/libheif, js-yaml and
+  xmldom under electron-builder, postcss/nanoid, vitest's mocker,
+  brace-expansion. No package changed major version; the
+  recovery-kit (bip39) and encrypted-ledger (better-sqlite3)
+  libraries were deliberately not touched. The CI `npm audit` job
+  is no longer "informational": with the baseline at zero it now
+  BLOCKS merges on high-severity advisories, so the next real one
+  stops a PR instead of joining a known-red baseline everyone had
+  learned to skip.
+
 ### Added
 - **Tout bibliyotèk la an Kreyòl — the whole library now reads in
   Haitian Creole.** All 64 project playbooks with their task guides
