@@ -10,6 +10,14 @@ include breaking changes.
 ## [Unreleased]
 
 ### Security
+- **Desktop shell on Electron 44** (Chromium 152, Node 24 runtime) —
+  Chromium security content lands in the newest Electron major
+  first, and the AppImage now carries it. The 44 breaking-changes
+  list was audited against the shell's whole surface: nothing
+  applies (no Electron clipboard-module use — the pairing paste
+  rides navigator.clipboard behind the same Chromium permission
+  names; no client-certificate events, no net.request, no Unity
+  APIs, x64-only AppImage, no native modules).
 - **Zero known vulnerabilities, and the alarm is armed again.** All
   ten npm-audit findings cleared with in-range updates — most
   importantly Fastify 5.10 → 5.12.4, which carried the one
