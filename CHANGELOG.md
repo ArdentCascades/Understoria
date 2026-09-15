@@ -34,6 +34,44 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **The Inuktitut (ᐃᓄᒃᑎᑐᑦ) partnership track** — the fifth
+  language of the review-before-ship model, the
+  Inuit-Yupik-Unangan family's entry, closing the first round of
+  the one-per-family plan. Unique on the track: Inuktitut is an
+  official language (Nunavut, NWT) with a statutory language
+  authority — Inuit Uqausinginnik Taiguusiliuqtiit — whose
+  mandate already covers the terminology questions every
+  scaffold poses, and the deepest localization precedent
+  anywhere on the track (Windows/Office via Government of
+  Nunavut collaboration; the partnership document honestly notes
+  that machine translation exists here and changes nothing about
+  the speakers-translate model). Groundwork only: a verified
+  Stage-0 spike — native CLDR plural rules WITH A GRAMMATICAL
+  DUAL (one/two/other, the track's first; our computed gates
+  already sanction natural dual forms via the Arabic
+  single-integer precedent), dates/numbers falling back
+  harmlessly, both scripts rendering-safe (syllabics atomic and
+  unicameral on the UCAS stack; the unified Inuktut Qaliujaaqpait
+  Roman orthography's extended letters get one glyph check), the
+  script decision itself flagged as national and Inuit-led
+  (syllabics vs regional Roman vs ITK's 2019 unified
+  orthography), Inuinnaqtun (ikt, absent from CLDR) held room as
+  its own future entry, and an optional fr-first fallback for
+  Nunavik. A glossary scaffold (docs/i18n-glossary/iu.md) poses
+  every register decision as a question with its Inuit-specific
+  weight — Ikajuqtigiinniq/Piliriqatigiinniq flagged as
+  civic-use anchors from Inuit Qaujimajatuqangit,
+  Aajiiqatigiinniq mapped to the consensus-governance surfaces,
+  the community freezer named as the living analog of the app's
+  oldest template, the HBC ledger refused with the Arctic's
+  Inuit-owned co-op movement as friendly ground, and the
+  E-number identification discs held as the counting register's
+  resonance through every identity string: this app issues no
+  one a number. Plus a partnership document
+  (docs/i18n-partnership-inuktitut.md) with contacts (Pirurvik
+  Centre, the language authority, ITK, Nunavut Arctic College,
+  Avataq) and a draft outreach note. The next step is human, not
+  code.
 - **The Cree partnership track** — the fourth language of the
   review-before-ship model, the Algonquian family's entry, and
   the language whose question opened the whole track. Cree is a

@@ -318,7 +318,7 @@ into a broken layout.
 | **2** | Hindi `hi`, Vietnamese `vi`, Russian `ru` | large communities; exercises Devanagari, Vietnamese diacritics, and Slavic 3-form plurals — the hardest LTR plural case |
 | **3 (after RTL phase)** | Arabic `ar`, Urdu `ur` | top-ten languages that REQUIRE the RTL work first — see `docs/rtl-plan.md` |
 | demand-driven | Tagalog, Haitian Creole, Korean, Bengali, Indonesian, Swahili… | once Phase 0 lands, adding a language is cheap — communities can request or contribute their own |
-| partnership-first | Cherokee `chr` (Iroquoian), Navajo `nv` (Na-Dené), Lakota `lkt` (Siouan), and Cree `cr` (Algonquian — a continuum; per-dialect entries as communities engage) opened; one language per Indigenous language family of North America (candidate: Inuktitut) | the AI-fleet model is honest for high-resource languages and would not be here — speakers translate, we supply all tooling, and nothing ships before their review. See `docs/i18n-partnership-{cherokee,navajo,lakota,cree}.md` and the `chr.md`/`nv.md`/`lkt.md`/`cr.md` scaffolds |
+| partnership-first | Cherokee `chr` (Iroquoian), Navajo `nv` (Na-Dené), Lakota `lkt` (Siouan), Cree `cr` (Algonquian — a continuum; per-dialect entries as communities engage), and Inuktitut `iu` (Inuit-Yupik-Unangan) — the first round of one-per-family is fully opened; further families as communities appear | the AI-fleet model is honest for high-resource languages and would not be here — speakers translate, we supply all tooling, and nothing ships before their review. See `docs/i18n-partnership-{cherokee,navajo,lakota,cree,inuktitut}.md` and the `chr.md`/`nv.md`/`lkt.md`/`cr.md`/`iu.md` scaffolds |
 
 ## Phase 0 — Infrastructure (SHIPPED)
 
