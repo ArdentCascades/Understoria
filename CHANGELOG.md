@@ -34,6 +34,28 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **کلِ کتابخانه حالا فارسی می‌خواند — the whole library now reads
+  in Persian.** All 64 project playbooks with their task guides and
+  tips, the 14 event templates, the help pages, the
+  start-a-community guide, the twelve design principles, and the
+  member, opsec, and study guides. The same care as the interface
+  carried through: hours are never debt — the guides refuse the
+  framing once, by name («کمک خواستن بدهی نیست — نه قرضی در کار
+  است، نه طلبی.»), and the seed library's returns stay «هدیه است،
+  نه قرض.»; the solidarity fund renders without the banned صندوق
+  («پولِ مشترکِ همبستگی») because the one thing a Persian-speaking
+  timebank must not resemble is a قرض‌الحسنه; the security state's
+  vocabulary stays out even where the playbooks face it directly —
+  the disaster relief hub is «پخشِ وسایل پس از بلا» and every real
+  shelter is named by its plain function, while court-support names
+  وثیقه and «حکمِ جلب» only as the literal legal facts they are;
+  the disability movement's slogan keeps its own first person
+  («هیچ‌چیز دربارهٔ ما، بی ما»); and the compelled-biometrics
+  warning survived translation with full force, verified line by
+  line. The "content still in English" note for Persian in Settings
+  retires — all seventeen languages are now content-complete. Still
+  a new AI-assisted translation awaiting a native-speaker read —
+  the app says so.
 - **فارسی — Persian.** The seventeenth language and the third
   right-to-left one: the entire interface — all ~2,950 strings —
   now reads in Persian, riding the mirrored layout and the Naskh

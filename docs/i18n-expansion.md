@@ -255,7 +255,28 @@ Dari-compatible throughout (تخلص never means pseudonym). The
 two reserved-word breaches fixed where تأیید had leaked into
 device approval, full arrow mirroring, and a glossary erratum
 section recording what the fleet taught) shipped fa.json
-`content: "ui-only"`; the corpus follows on the Phase 2 rails.
+`content: "ui-only"`. The fa corpus then SHIPPED on the same
+11-agent rails (all eight template batches were cut off by a
+rate-limit outage and resumed in place, delivering clean):
+assembly verified invariants byte-equal, unified 13 divergent
+skills-tag families by majority (32 tags, no injectivity
+collisions), and repointed 19 cross-fragment references to their
+Persian names in guillemets. Register on the record: the debt
+formula exactly once in the FAQ balance answer and once in the
+member guide's credits; the gift line exactly once in
+seed-library; solidarity-fund rendered with zero صندوق («پولِ
+مشترکِ همبستگی»); the legal carve-outs confined to
+legal-aid/court-support (one legal-sense debt, وثیقه for bail,
+«حکمِ جلب» as the literal warrant); the rule-6 shelter fence held
+through the disaster playbooks (the relief hub is «پخشِ وسایل پس
+از بلا», every real structure named by plain function); the
+disability slogan keeps its first person («هیچ‌چیز دربارهٔ ما، بی
+ما»); the compelled-biometrics passage passed line-by-line
+fidelity review with a full en→fa table. Three corpus-round
+errata joined the glossary (the «اسم نوشتن» sign-up-sheet
+extension, بهبودی for addiction recovery, the امانت physical-
+lending family). All seventeen registry entries are
+`content: "full"`.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from

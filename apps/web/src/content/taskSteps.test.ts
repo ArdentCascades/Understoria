@@ -23,6 +23,7 @@ import { PROJECT_TEMPLATES_SW } from "@/content/projectTemplates.sw";
 import { PROJECT_TEMPLATES_FIL } from "@/content/projectTemplates.fil";
 import { PROJECT_TEMPLATES_BN } from "@/content/projectTemplates.bn";
 import { PROJECT_TEMPLATES_HT } from "@/content/projectTemplates.ht";
+import { PROJECT_TEMPLATES_FA } from "@/content/projectTemplates.fa";
 import { getTaskSteps } from "@/content/taskSteps";
 import { TASK_STEPS_EN } from "@/content/taskSteps.en";
 import { TASK_STEPS_ES } from "@/content/taskSteps.es";
@@ -40,6 +41,7 @@ import { TASK_STEPS_SW } from "@/content/taskSteps.sw";
 import { TASK_STEPS_FIL } from "@/content/taskSteps.fil";
 import { TASK_STEPS_BN } from "@/content/taskSteps.bn";
 import { TASK_STEPS_HT } from "@/content/taskSteps.ht";
+import { TASK_STEPS_FA } from "@/content/taskSteps.fa";
 
 // Coverage guard for the suggested-starter-steps content — the same
 // tie taskTips.test.ts provides for the tips: the steps are keyed by
@@ -133,6 +135,11 @@ describe("TASK_STEPS coverage", () => {
         tpl.tasks.length,
       );
     }
+    for (const tpl of PROJECT_TEMPLATES_FA) {
+      expect(TASK_STEPS_FA[tpl.id]?.length, `${tpl.id} (fa)`).toBe(
+        tpl.tasks.length,
+      );
+    }
   });
 
   it("gives every task 3-5 steps per locale, with matching counts", () => {
@@ -183,6 +190,9 @@ describe("TASK_STEPS coverage", () => {
           list.length,
         );
         expect(TASK_STEPS_HT[id]?.[i]?.length, `${id}[${i}] ht/en counts`).toBe(
+          list.length,
+        );
+        expect(TASK_STEPS_FA[id]?.[i]?.length, `${id}[${i}] fa/en counts`).toBe(
           list.length,
         );
       });
@@ -271,6 +281,11 @@ describe("TASK_STEPS coverage", () => {
           expect(s.length, `${id}[${i}].ht[${j}]`).toBeLessThanOrEqual(120);
           expect(s, `${id}[${i}].ht[${j}] ht===en`).not.toBe(enList[j]);
         });
+        (TASK_STEPS_FA[id]?.[i] ?? []).forEach((s, j) => {
+          expect(s.trim(), `${id}[${i}].fa[${j}]`).not.toBe("");
+          expect(s.length, `${id}[${i}].fa[${j}]`).toBeLessThanOrEqual(120);
+          expect(s, `${id}[${i}].fa[${j}] fa===en`).not.toBe(enList[j]);
+        });
       });
     }
   });
@@ -330,6 +345,9 @@ describe("getTaskSteps", () => {
     const tplHt = PROJECT_TEMPLATES_HT.find((t) => t.id === tpl.id)!;
     const htSteps = getTaskSteps(tpl.id, tplHt.tasks[0].name, "ht");
     expect(htSteps).toEqual([...TASK_STEPS_HT[tpl.id][0]]);
+    const tplFa = PROJECT_TEMPLATES_FA.find((t) => t.id === tpl.id)!;
+    const faSteps = getTaskSteps(tpl.id, tplFa.tasks[0].name, "fa");
+    expect(faSteps).toEqual([...TASK_STEPS_FA[tpl.id][0]]);
   });
 
   it("yields null for from-scratch projects, unknown templates, and renamed tasks", () => {

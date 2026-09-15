@@ -281,15 +281,17 @@ export const LANGUAGES = [
   // force; and ZWNJ (U+200C) is required Persian orthography (می‌رود,
   // خانه‌ها), the one "invisible" character sanctioned in a locale
   // file. The glossary's Dari-compatibility rule keeps the word
-  // choices readable in Afghanistan too. Ships UI-first; the
-  // authored corpus follows on the Phase 2 rails.
+  // choices readable in Afghanistan too. Shipped UI-first; the full
+  // authored corpus (templates, tips, steps, FAQ, guides,
+  // principles) has since shipped on the Phase 2 rails
+  // (content/bundles/fa.ts), so content is "full" like the others.
   {
     code: "fa",
     endonym: "فارسی",
     dir: "rtl",
     speakLang: "fa",
     reviewStatus: "new",
-    content: "ui-only",
+    content: "full",
     intlNumbering: "latn",
   },
 ] as const satisfies readonly LanguageInfo[];

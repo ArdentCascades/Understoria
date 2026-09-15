@@ -156,6 +156,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Monte yon lis tou pou netwayaj ak ranpli",
       "Bati relasyon ak moun k ap bay manje",
       "Mete yon kontak pou pwoblèm"
+    ],
+    "fa": [
+      "میزبانی با برق و رفت‌وآمد پیدا کنید",
+      "یخچال و سایبانی ضد باران جور کنید",
+      "قاعده‌ها را بگذارید و همه‌چیز را برچسب بزنید",
+      "برای تمیز کردن و پر کردن نوبت بچینید",
+      "با تأمین‌کننده‌ها رابطه بسازید",
+      "یک شمارهٔ تماس برای مشکل‌ها بگذارید"
     ]
   },
   "community-garden": {
@@ -302,6 +310,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Plante selon klima ak sezon ou",
       "Mete yon lis tou pou wouze ak sekle",
       "Planifye rekòt la ak sa ki anplis"
+    ],
+    "fa": [
+      "زمین و اجازه‌اش را قطعی کنید",
+      "خاک را آزمایش کنید و جای باغچه‌ها را بکشید",
+      "مصالح را جمع کنید و بسازید",
+      "مدل تقسیم را با هم تصمیم بگیرید",
+      "به فراخور آب‌وهوا و فصل بکارید",
+      "نوبت آبیاری و وجین بچینید",
+      "برای برداشت و مازاد نقشه بریزید"
     ]
   },
   "tool-lending-library": {
@@ -448,6 +465,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Monte fèy soti a",
       "Montre bibliyotekè yo travay la",
       "Okipe zouti yo epi fè koleksyon an grandi"
+    ],
+    "fa": [
+      "جای نگهداری و ساعت‌های باز بودن را پیدا کنید",
+      "ابزارها را جمع و دسته‌بندی کنید",
+      "همه‌چیز را فهرست کنید",
+      "قاعده‌های امانت گرفتن را بنویسید",
+      "برگهٔ امانت راه بیندازید",
+      "کتابدارها را آماده کنید",
+      "نگه دارید و بزرگش کنید"
     ]
   },
   "neighborhood-care-network": {
@@ -594,6 +620,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fè yon plan si bagay yo grav",
       "Kowòdone èd pratik yo",
       "Pran swen moun k ap ede yo tou"
+    ],
+    "fa": [
+      "ببینید چه کسانی دور و برند",
+      "کمک‌کننده‌ها را پیدا کنید و بشناسید",
+      "با فکر جور کنید",
+      "آهنگ سر زدن را مشخص کنید",
+      "برای وقت نگرانی نقشه بریزید",
+      "کمک‌های روزمره را هماهنگ کنید",
+      "هوای خودِ کمک‌کننده‌ها را هم داشته باشید"
     ]
   },
   "emergency-preparedness": {
@@ -740,6 +775,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Jwenn kote ki an sekirite yo",
       "Fè yon egzèsis oswa yon sware enfòmasyon",
       "Defini wòl pou “jou a”"
+    ],
+    "fa": [
+      "خطرهای محله‌تان را روی نقشه بیاورید",
+      "زنجیرهٔ تماس بسازید",
+      "راه باخبر شدن بدون اینترنت را بچینید",
+      "لوازم مشترک را جمع کنید",
+      "جاهای امن را نشان کنید",
+      "یک تمرین یا شب آشنایی برگزار کنید",
+      "نقش هر نفر برای خودِ روز روشن باشد"
     ]
   },
   "free-store": {
@@ -870,6 +914,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Etale pou moun ka gade ak diyite",
       "Mete moun nan jou a",
       "Okipe rès yo"
+    ],
+    "fa": [
+      "شکل کار و جا را انتخاب کنید",
+      "معیار اهدایی را بگذارید",
+      "تحویل و سوا کردن را سامان بدهید",
+      "طوری بچینید که مردم با عزت نگاه کنند",
+      "برای رویداد نفر بچینید",
+      "باقی‌مانده‌ها را سروسامان بدهید"
     ]
   },
   "skill-share": {
@@ -984,6 +1036,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Jwenn espas ak lè",
       "Bati yon orè",
       "Fè l louvri pou tout moun"
+    ],
+    "fa": [
+      "مهارت‌ها و علاقه‌ها را بپرسید",
+      "معلم‌ها را پیدا و آماده کنید",
+      "جا و زمان پیدا کنید",
+      "زمان‌بندی را بچینید",
+      "دسترس‌پذیرش کنید"
     ]
   },
   "bulk-buying-coop": {
@@ -1130,6 +1189,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ranje livrezon ak yon kote pou separe",
       "Separe kòmand yo san patipri",
       "Fè travay la chanje men"
+    ],
+    "fa": [
+      "گروه خریدتان را جمع کنید",
+      "عمده‌فروش پیدا کنید",
+      "سفارش‌گیری را راه بیندازید",
+      "پول را شفاف بگردانید",
+      "تحویل و جای تقسیم را جور کنید",
+      "سفارش‌ها را عادلانه تقسیم کنید",
+      "کار را بچرخانید"
     ]
   },
   "repair-cafe": {
@@ -1260,6 +1328,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Òganize fason moun antre",
       "Veye sekirite ak sa moun ap tann",
       "Fè rezèv pyès ak materyèl"
+    ],
+    "fa": [
+      "برای هر جور تعمیر، تعمیرکار پیدا کنید",
+      "ایستگاه‌های تعمیر را آماده کنید",
+      "یک تاریخِ تکرارشونده بگذارید",
+      "روالِ پذیرش بسازید",
+      "ایمنی و انتظارها را روشن نگه دارید",
+      "قطعه‌ها و مصرفی‌های رایج را ذخیره کنید"
     ]
   },
   "rides-transportation": {
@@ -1406,6 +1482,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Di klè ki vwayaj ki ladan",
       "Regle kesyon depans yo",
       "Pwoteje pasaje ak chofè"
+    ],
+    "fa": [
+      "راننده پیدا کنید و بشناسید",
+      "تکلیفِ بیمه و مسئولیتِ قانونی را روشن کنید",
+      "راهِ درخواست بسازید",
+      "روالِ هماهنگی بسازید",
+      "روشن کنید چه سفرهایی را می‌برید",
+      "تکلیفِ هزینه‌ها را روشن کنید",
+      "مسافرها و راننده‌ها را امن نگه دارید"
     ]
   },
   "tenant-union": {
@@ -1552,6 +1637,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fè yon atelye konn dwa ou",
       "Ekri plan repons pou degèpisman",
       "Kenbe lyen ak èd legal"
+    ],
+    "fa": [
+      "هستهٔ اصلی را جمع کنید",
+      "ساختمان‌ها و مشکل‌های مستأجرها را نقشه کنید",
+      "اطلاعِ درست از حق‌های مستأجر جمع کنید",
+      "راهِ تماسِ سریع بسازید",
+      "جلسهٔ “حق‌هایتان را بدانید” برگزار کنید",
+      "قدم‌به‌قدمِ وقتِ تخلیه را بنویسید",
+      "به کمکِ حقوقی و پشتیبانیِ ادامه‌دار وصل شوید"
     ]
   },
   "childcare-collective": {
@@ -1698,6 +1792,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ekri règ sante, alèji, ak ka prese",
       "Montre baz yo bay moun k ap gade timoun",
       "Fè yon seyans esè epi koute retou yo"
+    ],
+    "fa": [
+      "خانواده‌های بنیان‌گذار را جمع کنید و سرِ مدل توافق کنید",
+      "معیارهای ایمنی و سنجیدن را بگذارید",
+      "جایی پیدا و برای بچه‌ها امن کنید",
+      "سیستمِ زمان‌بندی و دفترِ ساعت‌ها بسازید",
+      "قاعده‌های سلامت، حساسیت و وقتِ خطر را بنویسید",
+      "مراقب‌ها را برای پایه‌ها آماده کنید",
+      "یک جلسهٔ آزمایشی برگزار کنید و بازخورد بگیرید"
     ]
   },
   "community-composting": {
@@ -1844,6 +1947,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fè klè sa ki ka antre",
       "Fòme ekip k ap okipe pil la",
       "Separe konpòs ki fin pare a"
+    ],
+    "fa": [
+      "محلِ کمپوست پیدا کنید",
+      "روشِ کمپوست را انتخاب کنید",
+      "سطل و وسایل جور کنید",
+      "سیستمِ جمع‌آوری راه بیندازید",
+      "روشن کنید چه چیزی پذیرفته می‌شود",
+      "گروهِ نوبتیِ رسیدگی را پیدا و آماده کنید",
+      "کمپوستِ آماده را پخش کنید"
     ]
   },
   "free-little-library": {
@@ -1958,6 +2070,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Mete premye liv yo",
       "Mete yon pankat ak règ senp",
       "Jwenn yon moun k ap pran swen l"
+    ],
+    "fa": [
+      "جعبهٔ کتابِ ضدآب بسازید یا پیدا کنید",
+      "جا را انتخاب و آماده کنید",
+      "کتاب‌های اول را بچینید",
+      "تابلو و رسم‌های ساده اضافه کنید",
+      "مراقب پیدا کنید"
     ]
   },
   "community-first-aid-training": {
@@ -2088,6 +2207,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Envite moun vin aprann",
       "Fè seyans yo mache",
       "Separe kit yo epi fè seyans rapèl"
+    ],
+    "fa": [
+      "با مربی‌های مدرک‌دار همراه شوید",
+      "وسایل جور کنید",
+      "جا پیدا کنید و جلسه‌ها را زمان‌بندی کنید",
+      "شرکت‌کننده دعوت کنید",
+      "جلسه‌های آموزش را برگزار کنید",
+      "کیت‌ها و جلسه‌های یادآوری را برسانید"
     ]
   },
   "time-bank": {
@@ -2234,6 +2361,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fè lis sa moun ka bay",
       "Konekte bezwen ak èd",
       "Bati abitid konfyans ak sekirite"
+    ],
+    "fa": [
+      "اعضای بنیان‌گذار را پیدا کنید و مهارت‌ها را فهرست کنید",
+      "راهِ نوشتنِ ساعت‌ها را انتخاب کنید",
+      "قاعده‌ها را بگذارید",
+      "اعضای تازه را راه بیندازید",
+      "فهرستِ کمک‌ها را راه بیندازید",
+      "تبادل‌ها را هماهنگ و جور کنید",
+      "رسم‌های اعتماد و ایمنی بسازید"
     ]
   },
   "solidarity-fund": {
@@ -2380,6 +2516,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Òganize ranmase lajan",
       "Bati yon pwosesis desizyon ak peman",
       "Bay kominote a nouvèl aklè"
+    ],
+    "fa": [
+      "یک گروهِ کوچکِ قابل‌اعتماد جمع کنید",
+      "سازوکارِ شفافِ پول را راه بیندازید",
+      "معیارهای درخواست و پرداخت را روشن کنید",
+      "برگهٔ درخواستِ ساده و بی‌مانع بسازید",
+      "جمع کردنِ پول را راه بیندازید",
+      "روندِ تصمیم و پرداخت را بچینید",
+      "حساب و کتاب را جلوی چشمِ همه بگذارید"
     ]
   },
   "diaper-hygiene-bank": {
@@ -2494,6 +2639,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Triye epi konte pa gwosè ak kalite",
       "Mete yon règ pataj ki jis",
       "Fikse jou pou bay yo epi jwenn moun"
+    ],
+    "fa": [
+      "جای نگهداری و نقطهٔ پخش پیدا کنید",
+      "راه‌های رسیدنِ اقلام را جور کنید",
+      "بر اساسِ سایز و نوع دسته‌بندی و شمارش کنید",
+      "قاعدهٔ پخشِ منصفانه بگذارید",
+      "روزهای پخش را بگذارید و نفراتش را جور کنید"
     ]
   },
   "community-bike-workshop": {
@@ -2624,6 +2776,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Chache mekanisyen ki vle montre",
       "Fikse lè ouvèti ak yon fòmil genyen-yon-bisiklèt",
       "Mete pratik sekirite yo kanpe"
+    ],
+    "fa": [
+      "جای کارگاه را پیدا کنید",
+      "ابزار و پایهٔ تعمیر جمع کنید",
+      "دوچرخه و قطعهٔ اهدایی جمع کنید",
+      "تعمیرکارهای پیشقدم را پیدا کنید",
+      "ساعت‌های باز و راهِ صاحب‌شدنِ دوچرخه را بگذارید",
+      "قاعده‌های ایمنی را جا بیندازید"
     ]
   },
   "newcomer-translation-network": {
@@ -2754,6 +2914,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Prepare materyèl oryantasyon",
       "Akonpaye moun nan randevou",
       "Mete pratik vi prive ak sekirite"
+    ],
+    "fa": [
+      "کمک‌کننده‌های دوزبانه و چندزبانه پیدا کنید",
+      "جاهای کمک‌رسان و همراهانِ محلی را فهرست کنید",
+      "راهِ درخواست و جور کردن را بسازید",
+      "جزوه‌های آشنایی بسازید",
+      "برای قرارها همراه بفرستید",
+      "قاعده‌های حریمِ خصوصی و امن بودن را بگذارید"
     ]
   },
   "community-meal": {
@@ -2900,6 +3068,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fòme yon ekip pou kwit ak sèvi",
       "Fikse yon orè epi gaye nouvèl la",
       "Fè repa a epi netwaye"
+    ],
+    "fa": [
+      "آشپزخانه و جای پذیرایی پیدا کنید",
+      "بهداشتِ غذا و مجوزها را ردیف کنید",
+      "جریانِ رسیدنِ مواد را بسازید",
+      "منو را برای حجم، رژیم و حساسیت‌ها بچینید",
+      "گروهِ پخت‌وپز و پذیرایی را جمع کنید",
+      "روز و ساعت را بگذارید و خبر را بپیچید",
+      "وعده را برگزار کنید و جمع کنید"
     ]
   },
   "seed-library": {
@@ -3014,6 +3191,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Klase epi make koleksyon an",
       "Mete règ senp pou pran ak pataje",
       "Kenbe semans yo bon, mete lòt"
+    ],
+    "fa": [
+      "میزبان و جای نگهداری پیدا کنید",
+      "بذرهای اول را جور کنید",
+      "مجموعه را بچینید و برچسب بزنید",
+      "رسم و راهِ برداشتن و برگرداندن را بنویسید",
+      "سبز شدن را بپایید و دوباره پر کنید"
     ]
   },
   "digital-literacy": {
@@ -3160,6 +3344,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fè yon plan leson pou debitan",
       "Fikse klas ak lè èd lib",
       "Mete règ sekirite done ak retou"
+    ],
+    "fa": [
+      "دستگاه جمع کنید و راه بیندازید",
+      "راهِ امانت را بچینید",
+      "اینترنت را جور کنید",
+      "مربی پیدا و آماده کنید",
+      "درس‌های تازه‌کارها را طراحی کنید",
+      "کلاس‌ها و ساعتِ کمکِ سرزده را بگذارید",
+      "قاعده‌های امنِ داده و پس دادن را بگذارید"
     ]
   },
   "weatherization-brigade": {
@@ -3290,6 +3483,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Jwenn materyo ak zouti",
       "Regle sekirite ak asirans",
       "Planifye konbit yo epi fè yo"
+    ],
+    "fa": [
+      "اهلِ فنِ پیشقدم پیدا کنید",
+      "خطِ کار را روشن کنید",
+      "راهِ درخواست و بازدید را بسازید",
+      "مصالح و ابزار جور کنید",
+      "ایمنی و مسئولیتِ قانونی را ردیف کنید",
+      "روزهای کارِ جمعی را بگذارید و اجرا کنید"
     ]
   },
   "pet-food-bank": {
@@ -3404,6 +3605,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Triye manje a pa bèt ak pa gwosè",
       "Deside jan manje a ap separe",
       "Mete lè yo epi jwenn moun pou jou yo"
+    ],
+    "fa": [
+      "پیدا کردن جای نگهداری و نقطهٔ پخش",
+      "راه انداختن جریان غذای حیوانات",
+      "جدا کردن و شمردن به تفکیک حیوان و اندازه",
+      "تعیین قاعدهٔ پخش",
+      "زمان‌بندی پخش و پای کار آوردن آدم‌ها"
     ]
   },
   "youth-mentorship": {
@@ -3550,6 +3758,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Okipe fich yo: alèji, kontak, otorizasyon",
       "Jwenn ti goute ak materyèl",
       "Fè seyans yo epi rete an kontak ak fanmi yo"
+    ],
+    "fa": [
+      "جور کردن فضای امن و تعیین ساعت‌ها",
+      "نوشتن قاعده‌های ایمنی بچه‌ها و بررسی بزرگسال‌ها",
+      "پیدا کردن و آماده کردن همراه‌ها",
+      "چیدن برنامهٔ هفتگی",
+      "نام‌نویسی، حساسیت‌ها و شماره‌های ضروری",
+      "جور کردن خوراکی و وسایل",
+      "گرداندن جلسه‌ها و احوال‌پرسی با خانواده‌ها"
     ]
   },
   "gleaning-network": {
@@ -3696,6 +3913,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Regle responsablite legal ak pwòpte manje a",
       "Fikse kote manje a prale",
       "Fè jou ranmase yo epi make liv yo"
+    ],
+    "fa": [
+      "پیدا کردن منبع‌های محصول",
+      "جمع کردن گروه خوشه‌چینی",
+      "جور کردن رفت‌وآمد و جای نگهداری",
+      "راه انداختن خبررسانی سریع",
+      "روشن کردن مسئولیت حقوقی و ایمنی غذا",
+      "ساختن مسیرهای پخش",
+      "چیدن و شمردن کیلوها"
     ]
   },
   "community-mediation": {
@@ -3842,6 +4068,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Mete règ yo: sa ki di la rete la",
       "Fè moun konnen èd sa a egziste",
       "Swiv rezilta yo epi soutni medyatè yo"
+    ],
+    "fa": [
+      "پیدا کردن و آموزش میانجی‌ها",
+      "راه انداختن درخواست و گفتگوی اولیه",
+      "پیدا کردن جاهای بی‌طرف برای نشستن",
+      "روشن کردن دامنه و حدها",
+      "نوشتن رازداری و قاعده‌های گفتگو",
+      "شناساندن میانجیگری به محل",
+      "پیگیری نتیجه‌ها و هوای میانجی‌ها را داشتن"
     ]
   },
   "reentry-support": {
@@ -3988,6 +4223,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Louvri pòt travay ak kay",
       "Mete moun ak moun ki te pase menm chimen",
       "Fikse règ prive ak limit yo"
+    ],
+    "fa": [
+      "ساختن راهنمای جاها و نهادهای همکار",
+      "پیدا کردن و آماده کردن کمک‌کننده‌ها",
+      "ساختن خوشامد و گفتگوی نیازها",
+      "کمک به مدارک و کمک‌هزینه‌ها",
+      "وصل کردن به کار و خانه",
+      "همراهی همتا",
+      "نوشتن قاعده‌های حریم خصوصی و حد و مرز"
     ]
   },
   "community-wood-bank": {
@@ -4134,6 +4378,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Monte sistèm demann ak livrezon an",
       "Deside jan bwa a ap separe",
       "Planifye konbit yo ak sechaj la"
+    ],
+    "fa": [
+      "جور کردن منبع چوب",
+      "پیدا کردن جای آماده‌سازی و نگهداری",
+      "تهیهٔ ابزار و وسایل ایمنی",
+      "جمع کردن و آموزش گروه چوب",
+      "راه انداختن درخواست و رساندن",
+      "تعیین قاعدهٔ پخش",
+      "برنامه‌ریزی روزهای کار و خشکاندن چوب"
     ]
   },
   "community-wifi-mesh": {
@@ -4280,6 +4533,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Jwenn kay pou resevwa pwen yo",
       "Mete règ sèvi ak règ prive yo",
       "Okipe rezo a epi grandi l"
+    ],
+    "fa": [
+      "نقشهٔ نیازها و نقطه‌های بی‌پوشش",
+      "جور کردن خط اصلی اینترنت",
+      "پیدا کردن نفرات فنی",
+      "تهیه و تنظیم دستگاه‌ها",
+      "پیدا کردن میزبان برای دستگاه‌ها",
+      "نوشتن قاعده‌های استفاده و حریم خصوصی",
+      "نگهداری و گسترش شبکه"
     ]
   },
   "mental-health-peer-support": {
@@ -4426,6 +4688,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Mete règ yo: sa ki di la rete la",
       "Fikse lè yo epi fè moun konnen",
       "Soutni animatè yo pou yo pa bouke nèt"
+    ],
+    "fa": [
+      "پیدا کردن و آموزش گرداننده‌ها",
+      "روشن کردن دامنه و حد و مرز حلقه",
+      "ساختن برنامهٔ سپردن به کمک فوری",
+      "پیدا کردن فضایی خلوت و امن",
+      "نوشتن رازداری و قاعده‌های حلقه",
+      "زمان‌بندی و خبر رساندن نشست‌ها",
+      "هوای گرداننده‌ها را داشتن و جلوگیری از فرسودگی"
     ]
   },
   "community-cleanup": {
@@ -4540,6 +4811,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Rasanble materyèl ak ekipman sekirite",
       "Rasanble moun epi òganize yo",
       "Fè konbit netwayaj la"
+    ],
+    "fa": [
+      "شناسایی و اولویت‌بندی زمین‌ها",
+      "گرفتن اجازه و روشن کردن مقصد زباله",
+      "جمع کردن وسایل و لوازم ایمنی",
+      "پیدا کردن و هماهنگ کردن کمک‌کننده‌ها",
+      "برگزاری روزِ پاکیزه‌کاری"
     ]
   },
   "free-tax-prep": {
@@ -4686,6 +4964,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fè vwazen ki kalifye yo konnen",
       "Pwoteje done ak vi prive moun yo",
       "Ofri yon swivi sou zafè lajan"
+    ],
+    "fa": [
+      "آموزش و مدرک برای تنظیم‌کننده‌ها",
+      "هم‌پیمانی با یک نهادِ رسمیِ مالیاتِ رایگان",
+      "آماده کردن فضا و تجهیزات",
+      "راه انداختن وقت‌دهی و فهرست مدارک",
+      "خبررسانی به همسایه‌هایی که شاملشان می‌شود",
+      "امنیت و خلوت ماندن داده‌ها",
+      "پیگیری برای سروسامانِ پول"
     ]
   },
   "community-market": {
@@ -4832,6 +5119,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Rasanble moun epi fè orè a",
       "Fè nouvèl la gaye epi fikse yon orè fiks",
       "Fè jou mache a epi okipe rès manje a"
+    ],
+    "fa": [
+      "جور کردن منبعِ محصول و خواربار",
+      "پیدا کردن محل و برپایی بساط",
+      "انتخاب راه‌ورسمِ بساط",
+      "چیدمان، نگهداری و بهداشت غذا",
+      "پیدا کردن کمک‌کننده‌ها و چیدن نوبت‌ها",
+      "خبررسانی و زمان‌بندیِ ثابت",
+      "گرداندن بساط و رساندن باقی‌مانده‌ها"
     ]
   },
   "welcome-wagon": {
@@ -4946,6 +5242,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Prepare panyen byenvini yo",
       "Jwenn moun k ap akeyi epi prepare yo",
       "Mete yon fason pou moun rive jwenn ou"
+    ],
+    "fa": [
+      "انتخابِ اینکه به چه کسی و چطور خوشامد بگویید",
+      "ساختن جزوهٔ آشنایی با محل",
+      "بستن سبدهای خوشامد",
+      "پیدا کردن و آماده کردن خوشامدگوها",
+      "راه انداختن معرفیِ با اجازه"
     ]
   },
   "library-of-things": {
@@ -5092,6 +5395,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ekri règ yo sou baz konfyans",
       "Monte fèy soti a epi prepare bibliyotekè yo",
       "Okipe, netwaye, epi grandi koleksyon an"
+    ],
+    "fa": [
+      "نظرخواهی: جمع چه چیزی امانت می‌گیرد",
+      "پیدا کردن جای نگهداری و ساعت‌های باز",
+      "جمع کردن، تمیز کردن و آزمودن وسایل",
+      "فهرست‌برداری و عکاسی از اقلام",
+      "نوشتن قواعدِ امانت بر پایهٔ اعتماد",
+      "راه انداختن دفترِ امانت و آماده کردن کتابدارها",
+      "نگهداری، بهداشت و بزرگ کردن مجموعه"
     ]
   },
   "laundry-shower-access": {
@@ -5222,6 +5534,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fikse règ ijyèn ak sekirite",
       "Jwenn moun epi prepare yo",
       "Fikse yon orè epi fè nouvèl la gaye"
+    ],
+    "fa": [
+      "جور کردن دسترسی به لباس‌شویی و دوش",
+      "جور کردن وسایل",
+      "راه انداختن نوبت‌ها",
+      "قواعد بهداشت و ایمنی",
+      "پیدا کردن و آماده کردن کمک‌کننده‌ها",
+      "زمان‌بندی ثابت و خبررسانی"
     ]
   },
   "voter-registration": {
@@ -5352,6 +5672,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Chwazi kote ki gen anpil pasaj",
       "Kenbe tab enskripsyon an",
       "Ede ak pwochen etap yo"
+    ],
+    "fa": [
+      "یاد گرفتن قواعد این پویش‌ها",
+      "آماده کردن کمک‌کننده‌های بی‌طرف",
+      "جمع کردن برگه‌ها و اطلاعِ درست",
+      "انتخاب جاها و رویدادهای پررفت‌وآمد",
+      "برپایی میزِ اسم نوشتن",
+      "کمک به قدم‌های بعدی"
     ]
   },
   "health-navigation": {
@@ -5498,6 +5826,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ede ak randevou ak preskripsyon",
       "Fikse règ vi prive pou enfo sante",
       "Bati relasyon ak klinik yo"
+    ],
+    "fa": [
+      "ساختن فهرستِ جاهای درمان",
+      "پیدا کردن و آماده کردن راه‌بلدها",
+      "راه انداختن درخواست و پذیرش",
+      "کمک برای بیمه و درخواستش",
+      "همراهی برای وقتِ دکتر و دارو",
+      "قواعدِ خلوت ماندن اطلاعات سلامت",
+      "هم‌پیمانی با درمانگاه‌ها"
     ]
   },
   "toy-library": {
@@ -5612,6 +5949,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fè katalòg, mete nan sache ak tout pyès",
       "Ekri regleman pou pran jwèt",
       "Monte fèy soti a, montre ekip la"
+    ],
+    "fa": [
+      "پیدا کردنِ جای نگه‌داری و ساعت‌های باز بودن",
+      "جمع کردن، شستن و وارسیِ ایمنیِ اسباب‌بازی‌ها",
+      "فهرست کردن و کیسه‌بندی با همهٔ تکه‌ها",
+      "نوشتنِ قواعدِ امانت گرفتن",
+      "راه انداختنِ میزِ امانت و آموزشِ کمک‌کننده‌ها"
     ]
   },
   "food-preservation": {
@@ -5758,6 +6102,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Planifye seyans yo",
       "Mennen seyans yo san danje",
       "Separe manje a, kenbe nòt"
+    ],
+    "fa": [
+      "پیدا کردنِ آشپزخانهٔ مناسب",
+      "یاد گرفتنِ روش‌های امنِ نگه‌داری",
+      "جور کردنِ وسایل و شیشه‌ها",
+      "جور کردنِ محصول",
+      "چیدنِ جلسه‌های کنسروِ گروهی",
+      "یاد دادن و گرداندنِ امنِ جلسه‌ها",
+      "قسمت کردنِ غذای نگه‌داری‌شده و یادداشتِ کار"
     ]
   },
   "free-haircut": {
@@ -5872,6 +6225,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Rasanble materyèl",
       "Regle pwòpte ak règ lisans yo",
       "Fè jounen swen yo"
+    ],
+    "fa": [
+      "پیدا کردنِ آرایشگرهای دارای پروانه",
+      "پیدا کردنِ فضایی با آب و بهداشت",
+      "جور کردنِ ابزار و لوازم",
+      "چیدنِ بهداشت و رعایتِ قواعدِ پروانه",
+      "برگزاریِ روزهای اصلاح"
     ]
   },
   "mutual-aid-moving-crew": {
@@ -6018,6 +6378,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fikse orè ak voye ekip",
       "Fikse limit yo",
       "Fè demenajman yo, pran nouvèl"
+    ],
+    "fa": [
+      "جمع کردنِ گروه و ماشین‌ها",
+      "جور کردنِ لوازمِ اسباب‌کشی",
+      "ساختنِ راهِ درخواست و برانداز",
+      "سروسامان دادنِ ایمنی و مسئولیت",
+      "چیدنِ زمان‌بندی و راهی کردنِ گروه",
+      "تعیینِ حدوحدود",
+      "انجامِ اسباب‌کشی و پیگیری"
     ]
   },
   "disability-support-network": {
@@ -6164,6 +6533,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fè yon rezèv ekipman pataje",
       "Bay èd pou defann dwa",
       "Fikse estanda aksè pou tout evenman"
+    ],
+    "fa": [
+      "سپردنِ سکان به افرادِ دارای معلولیت",
+      "ساختنِ راهِ ارتباطیِ دسترس‌پذیر",
+      "نقشه کردنِ نیازها و منابع",
+      "راه انداختنِ تبادلِ کمک",
+      "راه انداختنِ امانتِ وسایلِ کمکی",
+      "همراهی در پیگیریِ حق و راه بلد شدن",
+      "تعیینِ معیارهای دسترس‌پذیری برای همهٔ رویدادها"
     ]
   },
   "books-to-prisoners": {
@@ -6294,6 +6672,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Jwenn moun, montre yo travay la",
       "Kouvri tenb ak lojistik",
       "Òganize ekri lèt yo"
+    ],
+    "fa": [
+      "یاد گرفتنِ قواعدِ پستیِ زندان‌ها",
+      "جمع کردنِ کتاب و یک جای کار",
+      "راه انداختنِ رسیدگی به درخواست‌ها",
+      "پیدا کردن و آموزشِ کمک‌کننده‌ها",
+      "جور کردنِ هزینهٔ تمبر و پست",
+      "راه انداختنِ نامه‌نگاری"
     ]
   },
   "community-music": {
@@ -6424,6 +6810,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Jwenn yon espas pou son an",
       "Fikse orè leson ak seyans yo",
       "Fikse swen ak regleman tounen"
+    ],
+    "fa": [
+      "جمع کردن و تعمیرِ سازها",
+      "راه انداختنِ امانتِ ساز",
+      "پیدا کردنِ آموزگارها",
+      "پیدا کردنِ فضا برای درس و هم‌نوازی",
+      "چیدنِ درس‌ها و هم‌نوازی‌ها",
+      "جا انداختنِ نگه‌داری و برگرداندن"
     ]
   },
   "school-supply-program": {
@@ -6538,6 +6932,13 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Triye epi ranje pa klas",
       "Jwenn kote pou sere ak kote pou bay",
       "Fikse jou a, jwenn moun"
+    ],
+    "fa": [
+      "گرفتنِ فهرستِ لوازم و اندازهٔ نیاز",
+      "جمع‌آوری و خریدِ عمده",
+      "جدا کردن و بستن بر اساسِ پایه",
+      "چیدنِ جای نگه‌داری و نقطهٔ پخش",
+      "زمان‌بندی و چیدنِ آدم‌های روزِ پخش"
     ]
   },
   "legal-aid-clinic": {
@@ -6684,6 +7085,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Prepare dokiman ak atelye konnen dwa ou",
       "Fè konnen epi fikse dat klinik yo",
       "Pwoteje sekrè moun yo epi tcheke konfli"
+    ],
+    "fa": [
+      "با وکلا و نهادهای کمکِ حقوقی همراه شوید",
+      "دامنهٔ کار و مسیرهای ارجاع را روشن کنید",
+      "جا و پذیرش را آماده کنید",
+      "سازوکارِ قرارِ محرمانه بسازید",
+      "جزوه‌ها و جلسه‌های آشنایی با حقوق آماده کنید",
+      "کلینیک‌ها را زمان‌بندی کنید و خبرش را برسانید",
+      "رازداری را نگه دارید و تداخلِ منافع را بسنجید"
     ]
   },
   "resource-hub-dispatch": {
@@ -6830,6 +7240,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Chèche epi montre moun k ap kowòdone yo",
       "Fikse règ vi prive ak swivi",
       "Swiv bezwen ki pa jwenn repons"
+    ],
+    "fa": [
+      "برای نیازها و کمک‌ها یک درِ ورودی بسازید",
+      "فهرستِ کمک‌کننده‌ها و امکانات را بسازید",
+      "روندِ جور کردن و رساندنِ کمک را بچینید",
+      "راهنمای اصلیِ امکانات را زنده نگه دارید",
+      "هماهنگ‌کننده پیدا کنید و آموزش بدهید",
+      "قاعدهٔ حریمِ خصوصی و پیگیری را بگذارید",
+      "نیازهای برنیامده و جاهای خالی را یادداشت کنید"
     ]
   },
   "harm-reduction-supplies": {
@@ -6960,6 +7379,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Monte kit yo ak fèy esplikasyon senp",
       "Fikse wonn ak pwen fiks pou bay yo",
       "Replen, swiv, epi kenbe konesans yo fre"
+    ],
+    "fa": [
+      "آموزش ببینید و همکارِ کاهشِ آسیب پیدا کنید",
+      "قانونِ محل را دربارهٔ وسایل روشن کنید",
+      "نالوکسان و وسایلِ کیت را تهیه کنید",
+      "کیت‌ها را با برگهٔ راهنمای ساده ببندید",
+      "گشت‌های پخش و نقطه‌های ثابت را راه بیندازید",
+      "پر کنید، بشمارید و آموزش را تازه نگه دارید"
     ]
   },
   "court-support": {
@@ -7090,6 +7517,14 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Montre moun k ap akonpaye yo",
       "Kowòdone woulib ak gade timoun pou odyans yo",
       "Òganize lèt temwayaj lè avoka a mande"
+    ],
+    "fa": [
+      "با وکلای تسخیری و گروه‌های حاضر در دادگاه آشنا شوید",
+      "قاعده‌های پایه را بنویسید: همراهی، نه وکالت",
+      "پذیرش و تقویمِ جلسه‌ها را بسازید",
+      "همراه‌ها را آماده کنید",
+      "ماشین و نگهداریِ بچه‌ها را برای جلسه‌ها هماهنگ کنید",
+      "وقتی وکیلِ مدافع خواست، نامه‌های پشتیبانی جور کنید"
     ]
   },
   "cooling-warming-center": {
@@ -7236,6 +7671,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Bati lis tou yo",
       "Gaye nouvèl la anvan sezon an",
       "Louvri, resevwa, epi remete an plas chak fwa"
+    ],
+    "fa": [
+      "جایی میزبان با سرمایش و گرمایش پیدا کنید",
+      "آستانهٔ برپایی و خبررسانی را روشن کنید",
+      "وسایل را فراهم کنید",
+      "میزبانِ نوبت‌ها را پیدا و آماده کنید",
+      "جدولِ نوبت‌ها را بچینید",
+      "پیش از فصل خبرش را برسانید",
+      "هر بار باز کنید، میزبانی کنید و سرِ جا برگردانید"
     ]
   },
   "community-oral-history": {
@@ -7334,6 +7778,12 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Prepare zouti ak yon lis kesyon",
       "Anrejistre seyans istwa yo",
       "Klase yo epi bay kopi, jan moun yo vle"
+    ],
+    "fa": [
+      "برگهٔ رضایت را به زبانِ ساده بنویسید",
+      "وسایل و فهرستِ سؤال‌ها را جور کنید",
+      "جلسه‌های قصه را ضبط کنید",
+      "به شرطِ خودشان نگه دارید و برگردانید"
     ]
   },
   "community-solar-coop": {
@@ -7480,6 +7930,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Chwazi enstalatè ak konpayi serye",
       "Monte sistèm rabè bòdwo ak manm yo",
       "Montre manm yo jere kouran yo"
+    ],
+    "fa": [
+      "عضو جمع کنید و پایبندی را بسنجید",
+      "مدل‌ها و قاعده‌های محل را یاد بگیرید",
+      "جایی برای نصب یا برنامه‌ای برای پیوستن پیدا کنید",
+      "تأمینِ مالی و ساختارِ حقوقی را سامان بدهید",
+      "با نصاب‌ها و تأمین‌کننده‌ها همراه شوید",
+      "سازوکارِ قبض و عضویت را بچینید",
+      "مصرفِ انرژی را به اعضا یاد بدهید"
     ]
   },
   "worker-coop-incubator": {
@@ -7626,6 +8085,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Konekte yo ak kote pou jwenn lajan",
       "Bay akonpayman",
       "Bati tèt ansanm ant koperativ yo"
+    ],
+    "fa": [
+      "مهارت‌ها و خواسته‌های اعضا را بشناسید",
+      "آموزشِ آمادگیِ کار و مهارت بگذارید",
+      "مدلِ تعاونی را آموزش بدهید",
+      "شکل گرفتنِ تعاونی را همراهی کنید",
+      "به منابعِ راه‌اندازی وصل کنید",
+      "راهنمای باتجربه کنارشان بگذارید",
+      "کسب‌وکارهای نوپا را به هم برسانید"
     ]
   },
   "elder-meal-delivery": {
@@ -7772,6 +8240,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Ekri alèji ak kontak enpòtan yo",
       "Mete yon plan si granmoun nan pa reponn",
       "Pran nouvèl ekip la ak granmoun yo"
+    ],
+    "fa": [
+      "سالمندانِ خانه‌نشین را پیدا کنید",
+      "کمک‌کننده پیدا کنید و بسنجید",
+      "منبعِ غذا جور کنید",
+      "مسیرها و برنامهٔ تحویل را بچینید",
+      "حساسیت‌ها و شماره‌های ضروری را بنویسید",
+      "قاعدهٔ سر زدن و خبر گرفتن را بنویسید",
+      "هوای کمک‌کننده‌ها را داشته باشید و نظر بگیرید"
     ]
   },
   "disaster-relief-hub": {
@@ -7918,6 +8395,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fòme yon ekip ki ka kouri vini",
       "Antann ou ak lòt ekip k ap reponn",
       "Planifye kominikasyon ak sekirite"
+    ],
+    "fa": [
+      "جای پخش و جایگزینش را از پیش پیدا کنید",
+      "راهِ رسیدنِ وسایل را از پیش بچینید",
+      "تحویل، دسته‌بندی و شمارش را طراحی کنید",
+      "روشِ پخش را بسازید",
+      "گروهِ فوری را جمع کنید و آموزش بدهید",
+      "با بقیهٔ کمک‌رسان‌ها هماهنگ شوید",
+      "خبررسانی و ایمنی را برنامه‌ریزی کنید"
     ]
   },
   "recovery-peer-support": {
@@ -8064,6 +8550,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Mete règ konfidansyalite ak règ gwoup la",
       "Fikse lè rankont yo epi fè yo konnen",
       "Soutni animatè yo pou yo pa bouke nèt"
+    ],
+    "fa": [
+      "گرداننده‌های هم‌قدم پیدا کنید و آموزش بدهید",
+      "چارچوب و مرزها را تعیین کنید",
+      "راهِ معرفی و برنامهٔ بحران را بسازید",
+      "جایی امن، خلوت و بدونِ مواد پیدا کنید",
+      "رازداری و قاعده‌های گروه را بگذارید",
+      "جلسه‌ها را زمان‌بندی و اعلام کنید",
+      "هوای گرداننده‌ها را داشته باشید و نگذارید فرسوده شوند"
     ]
   },
   "community-fitness": {
@@ -8210,6 +8705,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Okipe sekirite ak sante",
       "Fikse orè a epi gaye nouvèl la",
       "Bati zanmitay ak regilarite"
+    ],
+    "fa": [
+      "سلیقه‌ها و توانِ حرکتی را بپرسید",
+      "گرداننده‌های برنامه‌ها را پیدا کنید",
+      "جاهای امن پیدا کنید",
+      "برنامه‌ها را برای همه‌جور توانی طراحی کنید",
+      "ایمنی و سلامت را جدی بگیرید",
+      "برنامهٔ ثابت بگذارید و خبرش را پخش کنید",
+      "پیوند و نظم را بسازید"
     ]
   },
   "urban-orchard": {
@@ -8356,6 +8860,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Òganize konbit plantasyon yo",
       "Òganize swen alontèm nan",
       "Mete règ pataj rekòt la"
+    ],
+    "fa": [
+      "دسترسیِ بلندمدت به زمین را قطعی کنید",
+      "نقشهٔ کاشت را بکشید",
+      "درخت و گیاه تهیه کنید",
+      "زمین را آماده کنید",
+      "روزهای کاشت برگزار کنید",
+      "مراقبتِ بلندمدت را بچینید",
+      "تقسیمِ محصول را برنامه بریزید"
     ]
   },
   "new-parent-support": {
@@ -8502,6 +9015,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fè ti sèk parèy yo",
       "Mete règ sekirite ak limit yo",
       "Konekte ak lòt pwojè yo"
+    ],
+    "fa": [
+      "کمک‌کننده‌ها و همراه‌ها را پیدا کنید",
+      "زنجیرهٔ غذا راه بیندازید",
+      "کمکِ عملی برسانید",
+      "دفترچهٔ راهنما بسازید",
+      "حلقه‌های هم‌تجربه‌ها را راه بیندازید",
+      "قاعده‌های ایمنی و مرزها را بگذارید",
+      "به پروژه‌های دیگر وصل شوید"
     ]
   },
   "foster-kinship-support": {
@@ -8648,6 +9170,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Fè gwoup parèy pou fanmi yo",
       "Fè lis sèvis ak èd leta yo",
       "Ekri règ sekirite ak vi prive timoun yo"
+    ],
+    "fa": [
+      "با خانواده‌های مراقب آشنا شوید",
+      "انبارِ لباس و وسایل بسازید",
+      "سیستمِ رساندنِ فوری بسازید",
+      "نفس‌گرفتنِ مراقب‌ها را سامان بدهید",
+      "گروه‌های هم‌تجربه‌ها را برگزار کنید",
+      "دفترچهٔ راهنما بسازید",
+      "قاعده‌های ایمنیِ بچه‌ها و رازداری را بنویسید"
     ]
   },
   "weather-survival-outreach": {
@@ -8794,6 +9325,15 @@ export const TEMPLATE_TASK_NAMES: Record<
       "Trase wout yo ak plan an",
       "Konekte moun ak kote pou pase nwit",
       "Prepare pou ijans medikal yo"
+    ],
+    "fa": [
+      "بسته‌های جورِ هر فصل ببندید",
+      "وسایل را تهیه کنید",
+      "نقشهٔ جاهای آدم‌ها را دربیاورید",
+      "کمک‌کننده‌ها را پیدا کنید و آموزش بدهید",
+      "برنامهٔ پخش و مسیرها را بچینید",
+      "آدم‌ها را به جاهای شب‌مانی و خدمات وصل کنید",
+      "برای وقتِ خطر برنامه بریزید"
     ]
   }
 };

@@ -400,6 +400,26 @@ should confirm these alongside the table above.
 - Spelling unified: **جست‌وجو** (not جستجو), **خوشامد** (not
   خوش‌آمد), **مهروموم** (not مهر و موم).
 
+Recorded after the corpus fleet (the authored-content round):
+
+- **«اسم نوشتن» extends to physical sign-up sheets.** The UI reserves
+  it for shifts; the corpus fleet independently reached for it for
+  paper sign-up sheets (a voter-drive clipboard, a lesson-slot sheet
+  at the space) — the same gesture of writing your name on a list.
+  Sanctioned as one deliberate extension; app-side enrollment stays
+  fenced (school enrollment is نام‌نویسی, its literal register).
+- **Addiction recovery is بهبودی** — the reserved-word fence on
+  بازیابی is a UI-vocabulary rule (account recovery only); recovery
+  in the recovery-peer-support sense is the ordinary بهبودی.
+- **Physical lending uses the امانت verb family** (امانت گرفتن /
+  امانت دادن / مبلغ امانتی for a tool deposit) — the living Persian
+  borrow-a-thing words once قرض is banned. Hours NEVER borrow, and
+  the noun امانت‌دار stays reserved for shard guardians.
+- **خیریه survives only when naming an actual external charity**
+  (rule 5's own carve-out — free-store's thrift partners, the study
+  prompts' charity-model contrast); it never frames the app or its
+  help.
+
 ## Known hard strings
 
 - **In my care** (`nav.myWork`, `myWork.title`) → «به عهدهٔ من» —
