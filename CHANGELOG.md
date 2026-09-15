@@ -34,6 +34,26 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **The Quechua (Runasimi) partnership track** — round two's
+  second language and the track's first step beyond North
+  America: the Quechuan family, seven-to-ten million speakers,
+  marginalized rather than small — and the one language whose
+  culture already names the app's core concepts (ayni, mink'a,
+  ayllu, with mita as the refused opposite built into the
+  lexicon). Stage-0 verified: qu is a partial CLDR locale in the
+  inverse of Inuktitut's profile (native date/number formats and
+  the endonym Runasimi; plural rules fall back — softened by
+  -kuna being optional after numerals); the variety question is
+  Cree-shaped (qu Southern first, qug Kichwa as a possible
+  sibling); the tri- vs pentavocalic orthography dispute is
+  flagged as the institutional partner decision; and the
+  fallback chain is qu → es → en — the strongest case yet for a
+  non-uniform chain, with the app's complete Spanish corpus
+  doubling as a translators' bridge no other track has. Scaffold
+  (docs/i18n-glossary/qu.md) and partnership doc
+  (docs/i18n-partnership-quechua.md) with academy/EIB/university
+  contacts and an outreach note that welcomes redirection
+  between varieties. The next step is human, not code.
 - **The Choctaw (Chahta anumpa) partnership track** — round two
   of the review-before-ship model opens with the Muskogean
   family's entry. Same inverted pipeline; groundwork only.
