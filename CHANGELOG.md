@@ -34,6 +34,83 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **The FirstVoices / FPCC umbrella** — round three's fourth
+  piece, and deliberately not a scaffold: British Columbia's
+  ~34 languages across seven families are stewarded by the
+  First Peoples' Cultural Council and its community-owned
+  FirstVoices platform, so the right outreach is one
+  conversation at the umbrella, with individual nations reached
+  only through channels they control. The document
+  (docs/i18n-partnership-firstvoices.md) applies the new
+  track-wide policy on its face — no BC language is scaffolded,
+  probed, or listed unbidden — commits that FirstVoices data
+  stays theirs (interoperate, never ingest), and notes that BC
+  orthographies' machine-hostile characters (the Sḵwx̱wú7mesh
+  digit-7 glottal, underline and caron diacritics) are the same
+  solved problem-class as the sibling tracks' syllabics and
+  Kanien'kéha's length colon. The next step is human, not code.
+- **The Hawaiian (ʻŌlelo Hawaiʻi) partnership track** — round
+  three's third language, the Māori track's Polynesian sibling
+  in language and in history (ʻAha Pūnana Leo's nests were
+  modeled on kōhanga reo, and took a few hundred child speakers
+  in the 1980s to a K-through-doctorate Hawaiian-medium
+  pipeline). Stage-0 verified: Hawaiian is a first-class CLDR
+  locale — native one/other plurals with one = exactly 1,
+  dates rendering «Poʻalua, 15 Kepakemapa» free, the endonym
+  supplied with its ʻokina — and the orthography note that
+  matters: the ʻokina is U+02BB (not an apostrophe, not U+02BC),
+  enforced as a single codepoint so autocorrect can never
+  corrupt it. The scaffold flags kuleana as the claim/"In my
+  care" anchor (the feature's word-shaped hole), kōkua/laulima/
+  mālama as discussion anchors, kākou-never-mākou as the
+  inclusive-we gift, the ʻohana question left honestly to
+  speakers, and plantation scrip behind the debt fence.
+  Partnership doc with ʻAha Pūnana Leo, UH Hilo/Mānoa,
+  Kamehameha Schools, and OHA contacts. The next step is human,
+  not code.
+- **The Anishinaabemowin (Ojibwe) partnership track** — round
+  three's second language, Cree's Algonquian sibling and a
+  continuum like it (per-variety registry entries as
+  communities engage). Stage-0 verified: the entire continuum
+  (oj/ojb/ojs/ciw/otw) is absent from CLDR — the no-ICU pattern
+  per variety, with real noun plurals making the fallback-safe
+  strategy a translator's craft call as in Cree; two writing
+  systems mapped to the continuum (the ASCII-complete Fiero
+  double-vowel orthography south, syllabics on the UCAS stack
+  for Oji-Cree and the north). The concept fit is the plainest
+  on the track: wiidookodaadiwin — helping one another — is
+  already the name of an immersion school
+  ("Waadookodaading", the place where people help each other),
+  flagged as the anchor to confirm; mino-bimaadiziwin as the
+  civic-values discussion anchor; treaty annuities and trader
+  credit behind the debt fence; manoomin stewardship as the
+  region's lived commons. Partnership doc with immersion-school,
+  dictionary-team, and tribal-college contacts and an outreach
+  note opening Boozhoo and closing Miigwech. The next step is
+  human, not code.
+- **The Mohawk (Kanien'kéha) partnership track** — round three
+  opens with the track's second Iroquoian language, earned on
+  its own: the Akwesasne Freedom School (immersion since 1979),
+  Onkwawenna Kentyohkwa's adult immersion, and Kahnawà:ke's
+  language center make this one of the most sustained
+  revitalization movements anywhere. Stage-0 verified: moh
+  absent from CLDR (the proven no-ICU pattern) — and one
+  genuinely novel finding: Kanien'kéha writes vowel length with
+  a word-internal COLON (á:we, Ohén:ton), so every
+  punctuation-aware gate must treat orthographic U+003A as a
+  letter (recorded so it is never "fixed" as a typo; the
+  U+A789 alternative noted as a partner decision). The scaffold
+  records the grammatical-gender register question (Iroquoian
+  pronominal prefixes make generic member reference a real
+  decision), the inclusive/exclusive-plus-dual pronoun gift,
+  and the Two Row Wampum offered — never imposed — as the
+  federation's own image, with the Akwesasne border split and
+  Oka within living memory behind the standing fences.
+  Partnership doc with immersion-program contacts and an
+  outreach note opening Shé:kon and closing Niá:wen. Also this
+  round: the track-wide policy that oral-by-choice languages
+  are never scaffolded unbidden, recorded in the model's
+  canonical document. The next step is human, not code.
 - **The Māori (te reo Māori) partnership track** — round two's
   third language, and a special case: te reo is invited as much
   for what its community can teach this model as for the

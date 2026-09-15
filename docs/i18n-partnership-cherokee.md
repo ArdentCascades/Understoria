@@ -29,6 +29,37 @@ So this track inverts the pipeline:
 | Glossary records decisions made | Glossary scaffold poses decisions as questions (`docs/i18n-glossary/chr.md`) |
 | We supply language + tooling | We supply tooling only; partners supply language |
 
+## Languages this track will never scaffold unbidden
+
+This section is track-wide policy, recorded here because this
+document is the model's canonical home; every sibling partnership
+document inherits it.
+
+Some nations hold their languages as spoken, not written, **by
+choice** — several Pueblo communities among them, and others
+elsewhere. That choice is language sovereignty exercised, not a
+gap waiting for tooling, and the respectful form of this track
+toward such communities is silence until invited: no scaffold,
+no Stage-0 probe published, no outreach note drafted, no entry
+in any candidate list. Their languages do not appear in this
+repository unless and until they open that door themselves —
+and "no", including a permanent no, is a designed outcome of
+this track, not a failure of it.
+
+Two corollaries:
+
+- **Candidate lists in these documents name only languages whose
+  communities have public, community-led writing and teaching
+  traditions.** Before adding any language to a future round,
+  the first check is whether writing it down is something its
+  community does and wants — and when in doubt, the answer is to
+  ask nothing publicly and build nothing.
+- If a community that keeps its language oral ever wants
+  something from this project — which might not be a written
+  interface at all (the app's spoken-interface work exists) —
+  that conversation starts on their initiative and their terms,
+  and nothing about it is designed in advance here.
+
 ## Why Cherokee first
 
 One language per Indigenous language family is the goal (Iroquoian
