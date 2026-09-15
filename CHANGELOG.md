@@ -34,6 +34,31 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **The Māori (te reo Māori) partnership track** — round two's
+  third language, and a special case: te reo is invited as much
+  for what its community can teach this model as for the
+  translation. Kōhanga reo invented the language-nest model the
+  world's revitalization movements adopted, and Te Hiku Media's
+  Kaitiakitanga License articulated community guardianship over
+  language data before almost anyone — the review-before-ship
+  posture is that principle applied to a translation pipeline,
+  and the outreach note honestly asks for their critique of the
+  track alongside the invitation. Stage-0 verified: mi is a
+  formats-strong partial CLDR locale (native date/number
+  formats — «Tūrei, 15 Hepetema» free at every call site;
+  plural rules fall back, nearly costless since te reo marks
+  number on determiners, not nouns); settled macron orthography,
+  precomposed and NFC-stable, no rendering risk. The scaffold
+  (docs/i18n-glossary/mi.md) flags koha as THE anchor for the
+  hours register (a contribution that is neither price nor
+  payment), manaakitanga/whanaungatanga/mahi tahi as civic-use
+  discussion anchors, explicitly defers the kaitiaki question on
+  the guardians feature, and records the pronoun gift: the
+  corporate-we ban states itself as «tātou, never mātou».
+  Partnership doc (docs/i18n-partnership-maori.md) with contacts
+  (Te Taura Whiri, Te Hiku Media, Te Mātāwai, Te Ipukarea, the
+  wānanga) and the two-ask outreach note. The next step is
+  human, not code.
 - **The Quechua (Runasimi) partnership track** — round two's
   second language and the track's first step beyond North
   America: the Quechuan family, seven-to-ten million speakers,
