@@ -34,6 +34,25 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **The Navajo (Diné bizaad) partnership track** — the second
+  language of the review-before-ship model, and the
+  Na-Dené/Athabaskan family's entry. Same inverted pipeline as
+  Cherokee: Diné speakers translate, the project supplies all
+  tooling, nothing ships before their review. Groundwork only:
+  a verified Stage-0 spike (Navajo is NOT in CLDR/ICU — the
+  runtime falls back to English rules, so the Haitian Creole
+  no-ICU precedent applies; the tone-nasal vowels ą́ ę́ į́ ǫ́ have no
+  precomposed Unicode forms, so combining-mark rendering gets a
+  visual check before anything ships; the glottal-stop codepoint
+  is recorded as a partner decision), a glossary scaffold
+  (docs/i18n-glossary/nv.md) posing every register decision as a
+  question — including the trading-post ledger as the
+  debt-fence's Navajo-specific resemblance risk, the
+  counting/enrollment register's weight after livestock reduction,
+  k'é flagged as the one suggestion brought to confirm and hózhǫ́
+  explicitly NOT proposed — and a partnership document
+  (docs/i18n-partnership-navajo.md) with contacts and a draft
+  outreach note. The next step is human, not code.
 - **The Cherokee partnership track — a new, review-before-ship
   translation model.** One language from each Indigenous language
   family of North America, starting with Cherokee (ᏣᎳᎩ), and
