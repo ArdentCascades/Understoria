@@ -575,6 +575,45 @@
   line-height: 1.5;
 }
 
+/* Burmese typography (docs/i18n-glossary/my.md, "Script, typography
+ * and rendering"). Two facts drive this block:
+ *
+ * 1. The shared stack (Inter → system fallbacks) has no Myanmar
+ *    coverage. Named faces cover Android/Linux and the Google
+ *    webfont (Noto Sans Myanmar), Windows (Myanmar Text), and
+ *    macOS/iOS (Myanmar MN), with Padauk — the face much of
+ *    Myanmar's web has standardized on — behind them. All four are
+ *    Unicode faces; my.json is canonical Unicode and never Zawgyi,
+ *    so no legacy face belongs here.
+ *
+ * 2. Burmese stacks ink both above and below the Latin extents:
+ *    medial signs and the ု/ူ/ျ below-marks descend well past the
+ *    Latin descender while upper vowels rise past the cap height.
+ *    Tailwind's leading-none/tight/snug (1.0–1.375) let adjacent
+ *    Burmese lines collide; the floor below is 1.6 — Tibetan's
+ *    floor, which the taller stacked clusters here also need —
+ *    wherever the content language is Burmese.
+ */
+:lang(my) {
+  font-family:
+    "Noto Sans Myanmar",
+    "Myanmar Text",
+    "Myanmar MN",
+    Padauk,
+    Inter,
+    system-ui,
+    sans-serif;
+}
+
+:lang(my) .leading-none,
+:lang(my) .leading-tight,
+:lang(my) .leading-snug,
+:lang(my).leading-none,
+:lang(my).leading-tight,
+:lang(my).leading-snug {
+  line-height: 1.6;
+}
+
 /* Paper is always light. Belt to the JS print-theme guard's braces:
    whatever theme class survives into the print snapshot (iOS defers
    print requests past beforeprint), the sheet's own canvas prints
