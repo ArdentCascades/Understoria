@@ -34,6 +34,26 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **The Anishinaabemowin (Ojibwe) partnership track** — round
+  three's second language, Cree's Algonquian sibling and a
+  continuum like it (per-variety registry entries as
+  communities engage). Stage-0 verified: the entire continuum
+  (oj/ojb/ojs/ciw/otw) is absent from CLDR — the no-ICU pattern
+  per variety, with real noun plurals making the fallback-safe
+  strategy a translator's craft call as in Cree; two writing
+  systems mapped to the continuum (the ASCII-complete Fiero
+  double-vowel orthography south, syllabics on the UCAS stack
+  for Oji-Cree and the north). The concept fit is the plainest
+  on the track: wiidookodaadiwin — helping one another — is
+  already the name of an immersion school
+  ("Waadookodaading", the place where people help each other),
+  flagged as the anchor to confirm; mino-bimaadiziwin as the
+  civic-values discussion anchor; treaty annuities and trader
+  credit behind the debt fence; manoomin stewardship as the
+  region's lived commons. Partnership doc with immersion-school,
+  dictionary-team, and tribal-college contacts and an outreach
+  note opening Boozhoo and closing Miigwech. The next step is
+  human, not code.
 - **The Mohawk (Kanien'kéha) partnership track** — round three
   opens with the track's second Iroquoian language, earned on
   its own: the Akwesasne Freedom School (immersion since 1979),
