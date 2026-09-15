@@ -34,6 +34,26 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **The Choctaw (Chahta anumpa) partnership track** — round two
+  of the review-before-ship model opens with the Muskogean
+  family's entry. Same inverted pipeline; groundwork only.
+  Stage-0 verified: Choctaw is absent from CLDR/ICU (the proven
+  ht/nv no-ICU pattern applies, softened as in Navajo by number
+  living in the verb — including suppletive singular/plural
+  stems); Latin script with multiple live orthographic
+  conventions (missionary-era, the Choctaw Nation's School of
+  Choctaw Language, Mississippi Band) — the first-order partner
+  decision, substantially ASCII either way with one nasal-glyph
+  check recorded. The scaffold (docs/i18n-glossary/cho.md) poses
+  the register questions with their Choctaw-specific weight —
+  the 1847 gift to famine Ireland named as the app's whole
+  premise in one story, the Dawes Rolls against living CDIB
+  enrollment vocabulary, and the Choctaw code talkers (the
+  original code talkers, WWI) as the coinage tradition tech
+  vocabulary could stand in. Partnership document
+  (docs/i18n-partnership-choctaw.md) with contacts (School of
+  Choctaw Language, Mississippi Band programs, Jena Band) and a
+  draft outreach note. The next step is human, not code.
 - **The Inuktitut (ᐃᓄᒃᑎᑐᑦ) partnership track** — the fifth
   language of the review-before-ship model, the
   Inuit-Yupik-Unangan family's entry, closing the first round of
