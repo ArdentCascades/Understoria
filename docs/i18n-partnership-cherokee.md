@@ -60,6 +60,21 @@ Two corollaries:
   that conversation starts on their initiative and their terms,
   and nothing about it is designed in advance here.
 
+**Access-by-choice generalizes the same rule.** Some communities
+write their languages but restrict who may learn or use them:
+reclamation projects that reserve the language for their own
+citizens (the Wôpanâak Language Reclamation Project states this
+plainly), languages with registers held under cultural
+protocols (Australian ICIP protocols, avoidance registers,
+knowledge that is gendered or initiatory), and others. The
+track treats restricted-access languages exactly like
+oral-by-choice ones — nothing scaffolded, probed, or listed
+unbidden — and if such a community ever invites contact, their
+access rules are terms we accept as given, never terms we
+negotiate. A language is not "open source" because it is
+written down; it is the community's, on the community's terms,
+in every case.
+
 ## Why Cherokee first
 
 One language per Indigenous language family is the goal (Iroquoian
