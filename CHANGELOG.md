@@ -34,6 +34,29 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **The Cherokee partnership track — a new, review-before-ship
+  translation model.** One language from each Indigenous language
+  family of North America, starting with Cherokee (ᏣᎳᎩ), and
+  deliberately NOT on the AI-fleet rails the seventeen shipped
+  languages rode: for a low-resource language whose community
+  survived deliberate linguistic erasure, machine translation would
+  carry an error rate no gate could catch, and language authority
+  rests with speakers. So the pipeline inverts — Cherokee speakers
+  translate, the project supplies every piece of tooling, and
+  nothing ships until they approve it. This release lands the
+  groundwork only: a verified Stage-0 spike (Cherokee is a
+  first-class ICU locale with clean one/other plurals, syllabary
+  month names, and OS-wide font coverage — the Cherokee Nation's
+  own earlier software-localization work made that true; one real
+  hazard found and fenced: case-mapping would remap syllabary into
+  a poorly-supported Unicode block, so `text-transform` stays
+  banned on member-visible surfaces), a glossary scaffold
+  (docs/i18n-glossary/chr.md) that poses the register decisions as
+  questions for partners with the concept lessons of seventeen
+  glossaries attached, and a partnership document
+  (docs/i18n-partnership-cherokee.md) with the offer — credit,
+  control, pace, compensation discussed plainly — and a draft
+  outreach note. The next step is human, not code.
 - **کلِ کتابخانه حالا فارسی می‌خواند — the whole library now reads
   in Persian.** All 64 project playbooks with their task guides and
   tips, the 14 event templates, the help pages, the
