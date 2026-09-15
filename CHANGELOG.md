@@ -34,6 +34,33 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **The Cree partnership track** — the fourth language of the
+  review-before-ship model, the Algonquian family's entry, and
+  the language whose question opened the whole track. Cree is a
+  dialect continuum, so the scaffold's first-order question is
+  "which Cree" — and the plan holds room for more than one
+  answer, with per-dialect registry entries as communities
+  engage. Groundwork only: a verified Stage-0 spike with a real
+  finding — **the dialects have different ICU profiles**: Swampy
+  Cree (csw) is a first-class CLDR locale (native plural rules
+  whose "one" covers 0 AND 1, syllabics month/weekday names free
+  at every date call site, endonym ᓀᐦᐃᓇᐍᐏᐣ), while Plains,
+  Woods, Moose, and East Cree are absent and ride the proven
+  no-ICU pattern; both writing systems (syllabics and Standard
+  Roman Orthography) verified rendering-safe with the font plan
+  recorded; East Cree may take an ht-style fr-first fallback. A
+  glossary scaffold (docs/i18n-glossary/cr.md) poses every
+  register decision as a question with its Cree-specific weight —
+  the Hudson's Bay outfit-and-debt ledger as the debt fence's
+  resemblance risk, the pass system making authorization
+  vocabulary radioactive, treaty paylists and trapline
+  registration behind the counting register, wîcihitowin flagged
+  as the one suggestion to confirm, animacy assignments as a
+  once-made corpus-wide decision — and a partnership document
+  (docs/i18n-partnership-cree.md) with contacts across the
+  continuum and a draft outreach note that explicitly welcomes
+  redirection between dialect communities. The next step is
+  human, not code.
 - **The Lakota (Lakȟólʼiyapi) partnership track** — the third
   language of the review-before-ship model, and the Siouan
   family's entry. Same inverted pipeline: Lakota speakers
