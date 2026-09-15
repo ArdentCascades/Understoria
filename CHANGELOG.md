@@ -34,6 +34,33 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **The Lakota (Lakȟólʼiyapi) partnership track** — the third
+  language of the review-before-ship model, and the Siouan
+  family's entry. Same inverted pipeline: Lakota speakers
+  translate, the project supplies all tooling, nothing ships
+  before their review — a posture the Lakota communities
+  themselves publicly enforced in the 2022 Standing Rock dispute
+  over outside claims to language materials, which the partnership
+  document names plainly (ownership on the table first, in
+  writing). Groundwork only: a verified Stage-0 spike (Lakota is
+  a PARTIAL CLDR/ICU locale — native single-category plural rules
+  matching the grammar, Lakota month/weekday names free at every
+  date call site, harmless number-format fallback; all orthography
+  codepoints precomposed and NFC-stable; CLDR supplies a candidate
+  endonym and U+02BC glottal-stop convention, recorded as defaults
+  for partners to confirm since the orthography decision itself
+  carries community weight), a glossary scaffold
+  (docs/i18n-glossary/lkt.md) posing every register decision as a
+  question — the gendered-speech enclitic question as the headline
+  ("whose speech does an app speak?"), the agency ration/annuity
+  ledger as the debt fence's local resemblance risk, thiyóšpaye
+  flagged as a discussion anchor with its child-welfare
+  institutionalization caveat, Mitákuye Oyásʼiŋ explicitly NOT
+  proposed, and the Očhéthi Šakówiŋ camps named as lived
+  mutual-aid precedent — and a partnership document
+  (docs/i18n-partnership-lakota.md) with tribal-college and
+  community contacts and a draft outreach note. The next step is
+  human, not code.
 - **The Navajo (Diné bizaad) partnership track** — the second
   language of the review-before-ship model, and the
   Na-Dené/Athabaskan family's entry. Same inverted pipeline as
