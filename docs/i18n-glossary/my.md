@@ -236,6 +236,38 @@ review adjudicates first — more of them than fa carried, honestly.
 | skills | တတ်တဲ့အရာများ | plain "things you can do" |
 | tagline | see hard strings | |
 
+### Errata from the UI fleet reconciliation
+
+Recorded after the six-chunk fleet was reconciled into one voice;
+the native-review cycle should confirm these alongside the table
+above.
+
+- **timebank = «အချိန်ဘဏ်»** — a coinage (lit. "time bank") the
+  fleet adopted where the en names the mechanism itself; the table
+  shipped without a row. Reviewer decides whether the compound
+  reads naturally or needs a phrase.
+- **The tagline's inner quotes are curly** («…"ငါတို့"…»,
+  U+201C/U+201D), not the ASCII quotes the Known-hard-strings
+  section below shows — rule 12 (curly quotes everywhere) wins
+  over the hard string's literal form. The line below should be
+  read with curly quotes; my.json carries them.
+- **task = လုပ်စရာ fleet-wide** (the table's choice, enforced over
+  a chunk's အလုပ် drift — အလုပ် stays reserved for work/job
+  senses).
+- **post (noun) = အသိပေးချက်**; the verb "notify" stays အသိပေး.
+  The table's bare အသိပေး row is the verb.
+- **reinstatement = «ပြန်ကြိုဆို»** (lit. "welcome back") — a new
+  coinage for a removed member's return, chosen against any
+  bureaucratic re-admission register. ⚠ speaker review requested.
+- **co-founder nomination = «အမည်တင်သွင်းမှု»** (verb
+  အမည်တင်သွင်း) — keeps "nomination" distinct from proposals
+  (အဆိုပြုချက်) and avoids the banned စာရင်းသွင်း root. ⚠
+- **guardian release code = «လွှတ်ပေးကုဒ်»** — suggested
+  term-table addition.
+- Disputes settled on သဘောကွဲလွဲမှု; proposals on အဆိုပြုချက်;
+  co-founder on ပူးတွဲတည်ထောင်သူ; exchange on ဖလှယ်မှု —
+  fleet-wide, per the softer-register rules.
+
 ## Known hard strings
 
 - **The tagline** — "The unit of progress is 'we', not 'I'." —

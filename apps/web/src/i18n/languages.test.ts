@@ -97,12 +97,27 @@ describe("intlLocale — the numbering-system pin", () => {
     ).toBe("persian");
   });
 
+  it("pins Burmese to Western digits", () => {
+    // my's CLDR default numbering is mymr (၁,၂၃၄ against the locale
+    // file's Western digits), so the pin applies like bn's and fa's
+    // (docs/i18n-glossary/my.md, Stage-0 finding 2).
+    expect(intlLocale("my")).toBe("my-u-nu-latn");
+    expect(intlLocale("my-MM")).toBe("my-MM-u-nu-latn");
+    expect(new Intl.NumberFormat(intlLocale("my")).format(1234)).toBe(
+      "1,234",
+    );
+    expect(
+      new Intl.NumberFormat("my").resolvedOptions().numberingSystem,
+      "if this fails, the ICU default changed and the pin may be moot",
+    ).toBe("mymr");
+  });
+
   it("leaves every other shipped tag untouched", () => {
-    // bn and fa are the two registry entries carrying intlNumbering;
-    // each is excluded here consciously, alongside its own pin test
-    // above — never by accident.
+    // bn, fa and my are the three registry entries carrying
+    // intlNumbering; each is excluded here consciously, alongside its
+    // own pin test above — never by accident.
     for (const l of LANGUAGES) {
-      if (l.code === "bn" || l.code === "fa") continue;
+      if (l.code === "bn" || l.code === "fa" || l.code === "my") continue;
       expect(intlLocale(l.code)).toBe(l.code);
     }
     expect(intlLocale("es-MX")).toBe("es-MX");

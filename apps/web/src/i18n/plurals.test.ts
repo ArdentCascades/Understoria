@@ -37,6 +37,7 @@ import fil from "./locales/fil.json";
 import bn from "./locales/bn.json";
 import ht from "./locales/ht.json";
 import fa from "./locales/fa.json";
+import my from "./locales/my.json";
 import { LANGUAGES } from "./languages";
 
 // CLDR plural-suffix completeness for every shipped locale
@@ -74,6 +75,11 @@ const LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   // interpolates {{count}} — the category checks below derive that
   // from Intl.PluralRules("fa") directly.
   { code: "fa", data: fa },
+  // my has a single cardinal category ("other"), so _one/_other
+  // pairs are identical with {{count}} in both — the zh/bo shape,
+  // derived from Intl.PluralRules("my") directly
+  // (docs/i18n-glossary/my.md, Stage-0 finding 1).
+  { code: "my", data: my },
 ];
 
 function flatKeys(obj: unknown, prefix = ""): string[] {
