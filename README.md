@@ -142,12 +142,11 @@ Understoria is a platform where communities exchange help, tracked through **tim
   right-to-left, with the whole interface mirrored — Tibetan,
   expedited for communities responding to the 2026 Tibet flood, the
   demand-driven wave (Indonesian, Swahili, Filipino, and Bengali),
-  and Haitian Creole. Sixteen of them carry the whole authored
+  and Haitian Creole. All seventeen carry the whole authored
   corpus translated, not just the buttons: the help pages, the
-  project playbooks, the event templates (Persian's corpus is on the
-  way, and the app says so honestly while content falls back to
-  English). Fifteen are newly translated and have not yet been read
-  by a native speaker — the app says that too.
+  project playbooks, the event templates. Fifteen are newly
+  translated and have not yet been read by a native speaker — the
+  app says that too.
 - **Federation** — Each community runs its own node. Nodes can peer with each other to share needs and offers across groups. No central server, no single point of failure.
 
 ### Not built yet
