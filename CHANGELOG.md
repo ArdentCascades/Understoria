@@ -34,6 +34,29 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **The Mohawk (Kanien'kéha) partnership track** — round three
+  opens with the track's second Iroquoian language, earned on
+  its own: the Akwesasne Freedom School (immersion since 1979),
+  Onkwawenna Kentyohkwa's adult immersion, and Kahnawà:ke's
+  language center make this one of the most sustained
+  revitalization movements anywhere. Stage-0 verified: moh
+  absent from CLDR (the proven no-ICU pattern) — and one
+  genuinely novel finding: Kanien'kéha writes vowel length with
+  a word-internal COLON (á:we, Ohén:ton), so every
+  punctuation-aware gate must treat orthographic U+003A as a
+  letter (recorded so it is never "fixed" as a typo; the
+  U+A789 alternative noted as a partner decision). The scaffold
+  records the grammatical-gender register question (Iroquoian
+  pronominal prefixes make generic member reference a real
+  decision), the inclusive/exclusive-plus-dual pronoun gift,
+  and the Two Row Wampum offered — never imposed — as the
+  federation's own image, with the Akwesasne border split and
+  Oka within living memory behind the standing fences.
+  Partnership doc with immersion-program contacts and an
+  outreach note opening Shé:kon and closing Niá:wen. Also this
+  round: the track-wide policy that oral-by-choice languages
+  are never scaffolded unbidden, recorded in the model's
+  canonical document. The next step is human, not code.
 - **The Māori (te reo Māori) partnership track** — round two's
   third language, and a special case: te reo is invited as much
   for what its community can teach this model as for the
