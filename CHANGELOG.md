@@ -34,6 +34,33 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **Partnership track round four — a new policy, four languages,
+  two umbrellas.** The **access-by-choice policy** joins
+  oral-by-choice in the track's canonical document: communities
+  that restrict who may learn or use their language (Wôpanâak's
+  citizens-only reclamation, ICIP-protected registers) are never
+  scaffolded, probed, or listed unbidden, and their access rules
+  are terms accepted as given, never negotiated. Then four
+  languages on the standing model: **Chickasaw** (cic, Muskogean
+  II — very few first-language speakers, and a Master-Apprentice
+  program that is this track's model in miniature), **K'iche'**
+  (quc, Mayan — the ALMG statutory academy, the Popol Wuj, the
+  U+02BC gate for a name that contains it twice, a deliberately
+  suggestion-free term table, and safety fences carrying their
+  heaviest historical weight on the track), **Guaraní** (gn,
+  Tupian — the co-official majority language of Paraguay, the
+  Jopara-vs-Guaraniete register question put with the Academia,
+  jopói and ñande-vs-ore flagged, the g̃ combining-mark check
+  found precisely, and the pyragué named as the surveillance
+  fence's local word), and **Northern Sámi** (se, Uralic —
+  first-class CLDR WITH a grammatical dual, Giellatekno/Divvun
+  as the world's best minority-language tech we arrive junior
+  to, siida and verdde flagged). Plus two FirstVoices-model
+  umbrellas: **First Languages Australia** and **Taiwan's
+  Council of Indigenous Peoples** (sixteen recognized languages,
+  the Austronesian homeland) — one door each, no unbidden
+  scaffolds, communities choose. All docs-only; every next step
+  is human, not code.
 - **The FirstVoices / FPCC umbrella** — round three's fourth
   piece, and deliberately not a scaffold: British Columbia's
   ~34 languages across seven families are stewarded by the
