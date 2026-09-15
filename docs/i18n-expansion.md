@@ -318,6 +318,7 @@ into a broken layout.
 | **2** | Hindi `hi`, Vietnamese `vi`, Russian `ru` | large communities; exercises Devanagari, Vietnamese diacritics, and Slavic 3-form plurals — the hardest LTR plural case |
 | **3 (after RTL phase)** | Arabic `ar`, Urdu `ur` | top-ten languages that REQUIRE the RTL work first — see `docs/rtl-plan.md` |
 | demand-driven | Tagalog, Haitian Creole, Korean, Bengali, Indonesian, Swahili… | once Phase 0 lands, adding a language is cheap — communities can request or contribute their own |
+| partnership-first | Cherokee `chr` first; one language per Indigenous language family of North America (candidates: Diné bizaad, Lakota, Cree, Inuktitut) | the AI-fleet model is honest for high-resource languages and would not be here — speakers translate, we supply all tooling, and nothing ships before their review. See `docs/i18n-partnership-cherokee.md` and the `chr.md` scaffold |
 
 ## Phase 0 — Infrastructure (SHIPPED)
 
