@@ -34,6 +34,21 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **The FirstVoices / FPCC umbrella** — round three's fourth
+  piece, and deliberately not a scaffold: British Columbia's
+  ~34 languages across seven families are stewarded by the
+  First Peoples' Cultural Council and its community-owned
+  FirstVoices platform, so the right outreach is one
+  conversation at the umbrella, with individual nations reached
+  only through channels they control. The document
+  (docs/i18n-partnership-firstvoices.md) applies the new
+  track-wide policy on its face — no BC language is scaffolded,
+  probed, or listed unbidden — commits that FirstVoices data
+  stays theirs (interoperate, never ingest), and notes that BC
+  orthographies' machine-hostile characters (the Sḵwx̱wú7mesh
+  digit-7 glottal, underline and caron diacritics) are the same
+  solved problem-class as the sibling tracks' syllabics and
+  Kanien'kéha's length colon. The next step is human, not code.
 - **The Hawaiian (ʻŌlelo Hawaiʻi) partnership track** — round
   three's third language, the Māori track's Polynesian sibling
   in language and in history (ʻAha Pūnana Leo's nests were
