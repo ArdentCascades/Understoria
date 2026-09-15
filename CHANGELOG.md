@@ -34,6 +34,71 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **The Māori (te reo Māori) partnership track** — round two's
+  third language, and a special case: te reo is invited as much
+  for what its community can teach this model as for the
+  translation. Kōhanga reo invented the language-nest model the
+  world's revitalization movements adopted, and Te Hiku Media's
+  Kaitiakitanga License articulated community guardianship over
+  language data before almost anyone — the review-before-ship
+  posture is that principle applied to a translation pipeline,
+  and the outreach note honestly asks for their critique of the
+  track alongside the invitation. Stage-0 verified: mi is a
+  formats-strong partial CLDR locale (native date/number
+  formats — «Tūrei, 15 Hepetema» free at every call site;
+  plural rules fall back, nearly costless since te reo marks
+  number on determiners, not nouns); settled macron orthography,
+  precomposed and NFC-stable, no rendering risk. The scaffold
+  (docs/i18n-glossary/mi.md) flags koha as THE anchor for the
+  hours register (a contribution that is neither price nor
+  payment), manaakitanga/whanaungatanga/mahi tahi as civic-use
+  discussion anchors, explicitly defers the kaitiaki question on
+  the guardians feature, and records the pronoun gift: the
+  corporate-we ban states itself as «tātou, never mātou».
+  Partnership doc (docs/i18n-partnership-maori.md) with contacts
+  (Te Taura Whiri, Te Hiku Media, Te Mātāwai, Te Ipukarea, the
+  wānanga) and the two-ask outreach note. The next step is
+  human, not code.
+- **The Quechua (Runasimi) partnership track** — round two's
+  second language and the track's first step beyond North
+  America: the Quechuan family, seven-to-ten million speakers,
+  marginalized rather than small — and the one language whose
+  culture already names the app's core concepts (ayni, mink'a,
+  ayllu, with mita as the refused opposite built into the
+  lexicon). Stage-0 verified: qu is a partial CLDR locale in the
+  inverse of Inuktitut's profile (native date/number formats and
+  the endonym Runasimi; plural rules fall back — softened by
+  -kuna being optional after numerals); the variety question is
+  Cree-shaped (qu Southern first, qug Kichwa as a possible
+  sibling); the tri- vs pentavocalic orthography dispute is
+  flagged as the institutional partner decision; and the
+  fallback chain is qu → es → en — the strongest case yet for a
+  non-uniform chain, with the app's complete Spanish corpus
+  doubling as a translators' bridge no other track has. Scaffold
+  (docs/i18n-glossary/qu.md) and partnership doc
+  (docs/i18n-partnership-quechua.md) with academy/EIB/university
+  contacts and an outreach note that welcomes redirection
+  between varieties. The next step is human, not code.
+- **The Choctaw (Chahta anumpa) partnership track** — round two
+  of the review-before-ship model opens with the Muskogean
+  family's entry. Same inverted pipeline; groundwork only.
+  Stage-0 verified: Choctaw is absent from CLDR/ICU (the proven
+  ht/nv no-ICU pattern applies, softened as in Navajo by number
+  living in the verb — including suppletive singular/plural
+  stems); Latin script with multiple live orthographic
+  conventions (missionary-era, the Choctaw Nation's School of
+  Choctaw Language, Mississippi Band) — the first-order partner
+  decision, substantially ASCII either way with one nasal-glyph
+  check recorded. The scaffold (docs/i18n-glossary/cho.md) poses
+  the register questions with their Choctaw-specific weight —
+  the 1847 gift to famine Ireland named as the app's whole
+  premise in one story, the Dawes Rolls against living CDIB
+  enrollment vocabulary, and the Choctaw code talkers (the
+  original code talkers, WWI) as the coinage tradition tech
+  vocabulary could stand in. Partnership document
+  (docs/i18n-partnership-choctaw.md) with contacts (School of
+  Choctaw Language, Mississippi Band programs, Jena Band) and a
+  draft outreach note. The next step is human, not code.
 - **The Inuktitut (ᐃᓄᒃᑎᑐᑦ) partnership track** — the fifth
   language of the review-before-ship model, the
   Inuit-Yupik-Unangan family's entry, closing the first round of
