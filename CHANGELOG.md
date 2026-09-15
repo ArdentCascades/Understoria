@@ -34,6 +34,43 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **Partnership track round five — the threat-model-first
+  policy, four languages, one umbrella.** The third standing
+  policy joins the canonical document: for communities where
+  state surveillance makes the language itself treated as
+  suspect, the first conversation is a threat-model conversation
+  with community organizations and diaspora security
+  researchers, with "not yet," "diaspora-only," and "never" as
+  designed outcomes — and the repository deliberately names no
+  such language anywhere, because a list of surveilled
+  communities is itself the kind of list this app refuses to
+  keep. Then four languages: **Santali** (sat, Munda — the
+  track's first South Asian entry: first-class CLDR WITH a
+  grammatical dual, the community-created Ol Chiki script whose
+  own digits invert the bn/fa pinning question, the 1855 Hul
+  giving the debt fence its oldest pedigree on the track, and a
+  deliberately guess-free term table), **Adlam/Fulfulde**
+  (ff-Adlm, Atlantic — the track's first African language and
+  prospective fourth RTL: the Barry brothers' alphabet as
+  community language authority in script form, first-class CLDR
+  with Adlam digits and dates, the noun-class assignment as the
+  richest once-made decision on the track, and the fa
+  glossary's قرض‌الحسنه fence meeting its qard-hasan analog),
+  **Hmong** (mww/hnj — the clearest institutional rhyme: the
+  diaspora's Mutual Assistance Associations have been named
+  mutual aid for fifty years; kev sib pab as the reciprocal-
+  grammar anchor; the RPA's tone-final letters gated against
+  truncation; the sacred scripts under access-by-choice), and
+  **Western Armenian** (hyw — the first diaspora-endangered
+  entry: not a dying language but a murdered homeland's branch
+  choosing itself anew each generation; Eastern Armenian
+  deliberately not treated as a substitute; the agoump as
+  warmth anchor and the benevolent-union tension named
+  honestly). Plus the **INALI/Mexico umbrella** — sixty-eight
+  national-language groups, one statutory door, the Spanish
+  bridge already built, and tequio/guelaguetza as living
+  register ground. All docs-only; every next step is human,
+  not code.
 - **Partnership track round four — a new policy, four languages,
   two umbrellas.** The **access-by-choice policy** joins
   oral-by-choice in the track's canonical document: communities

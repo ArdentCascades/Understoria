@@ -60,6 +60,23 @@ Two corollaries:
   that conversation starts on their initiative and their terms,
   and nothing about it is designed in advance here.
 
+**Threat-model-first is the third rule, and it protects people,
+not only choices.** For some communities, state surveillance
+makes the language itself treated as suspect — installing a
+minority-language app can be incriminating, and a translation
+could endanger the very members it means to serve. For any such
+language, the first conversation is a **threat-model
+conversation** — held with community organizations and diaspora
+security researchers before any glossary, scaffold, or probe —
+and its designed outcomes include "not yet," "diaspora-only,"
+and "never." The app's own operational-security honesty (the
+compelled-biometrics door sentence, the threat-model document)
+applies to the project itself here. **We deliberately do not
+name these languages anywhere in this repository**: the category
+is recognized; its membership is not enumerated, because a list
+of surveilled communities is itself the kind of list this app
+refuses to keep.
+
 **Access-by-choice generalizes the same rule.** Some communities
 write their languages but restrict who may learn or use them:
 reclamation projects that reserve the language for their own
