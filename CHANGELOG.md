@@ -34,6 +34,25 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **The Hawaiian (ʻŌlelo Hawaiʻi) partnership track** — round
+  three's third language, the Māori track's Polynesian sibling
+  in language and in history (ʻAha Pūnana Leo's nests were
+  modeled on kōhanga reo, and took a few hundred child speakers
+  in the 1980s to a K-through-doctorate Hawaiian-medium
+  pipeline). Stage-0 verified: Hawaiian is a first-class CLDR
+  locale — native one/other plurals with one = exactly 1,
+  dates rendering «Poʻalua, 15 Kepakemapa» free, the endonym
+  supplied with its ʻokina — and the orthography note that
+  matters: the ʻokina is U+02BB (not an apostrophe, not U+02BC),
+  enforced as a single codepoint so autocorrect can never
+  corrupt it. The scaffold flags kuleana as the claim/"In my
+  care" anchor (the feature's word-shaped hole), kōkua/laulima/
+  mālama as discussion anchors, kākou-never-mākou as the
+  inclusive-we gift, the ʻohana question left honestly to
+  speakers, and plantation scrip behind the debt fence.
+  Partnership doc with ʻAha Pūnana Leo, UH Hilo/Mānoa,
+  Kamehameha Schools, and OHA contacts. The next step is human,
+  not code.
 - **The Anishinaabemowin (Ojibwe) partnership track** — round
   three's second language, Cree's Algonquian sibling and a
   continuum like it (per-variety registry entries as
