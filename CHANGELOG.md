@@ -34,6 +34,25 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **Burmese (မြန်မာ) interface — the eighteenth language.** All
+  ~2,950 UI strings, produced by the six-chunk fleet against
+  `docs/i18n-glossary/my.md` and reconciled into one voice
+  (twenty-two cross-chunk drift items settled — task = လုပ်စရာ,
+  disputes = သဘောကွဲလွဲမှု, the «အချိန်ဘဏ်» timebank coinage
+  adopted, ~296 strings unified). The file is canonical Unicode
+  only: assembly gates reject Zawgyi-indicative sequences by
+  ordering heuristics, ban every invisible character including
+  ZWSP (Burmese line-breaks by ICU dictionary, verified), and
+  hold the register ungendered — Burmese politeness particles
+  encode the speaker's gender, so the app, which has none, uses
+  ပါ politeness and no gendered particle anywhere. Digits are
+  pinned Western (`-u-nu-latn`, the bn/fa rail) because my's
+  Intl default is mymr. New `:lang(my)` typography: a
+  Noto Sans Myanmar → Myanmar Text → Myanmar MN → Padauk stack
+  and a 1.6 line-height floor under Tailwind's tight leadings —
+  stacked clusters collide at Latin line heights. The authored
+  corpus follows; Settings discloses the English fallback until
+  it lands.
 - **Partnership track round five — the threat-model-first
   policy, four languages, one umbrella.** The third standing
   policy joins the canonical document: for communities where

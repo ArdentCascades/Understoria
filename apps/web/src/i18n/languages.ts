@@ -294,6 +294,32 @@ export const LANGUAGES = [
     content: "full",
     intlNumbering: "latn",
   },
+  // Burmese. Four script facts shape my.json
+  // (docs/i18n-glossary/my.md): CLDR my has a single cardinal
+  // category ("other"), so _one/_other pairs are identical with
+  // {{count}} in both (the zh/bo/ht shape); my's CLDR default
+  // numbering is mymr (၁၂၃), so intlNumbering pins -u-nu-latn like
+  // bn/fa — the locale file is written in Western digits and bare
+  // {{count}} must not mix mymr digits into it; Burmese writes no
+  // word spaces and every modern renderer line-breaks it by ICU
+  // dictionary, so the file carries NO invisible characters at all —
+  // unlike fa's sanctioned ZWNJ, the gates here ban even ZWSP; and
+  // the file must be canonical Unicode, never Zawgyi, which the
+  // assembly gates enforce by ordering heuristics. Register-wise the
+  // glossary builds an ungendered voice: Burmese politeness particles
+  // and first-person pronouns encode the SPEAKER's gender, so the app
+  // (which has none) uses ပါ politeness and no gendered particle
+  // anywhere. Ships UI-first; the authored corpus follows on the
+  // Phase 2 rails, and Settings discloses the fallback until then.
+  {
+    code: "my",
+    endonym: "မြန်မာ",
+    dir: "ltr",
+    speakLang: "my",
+    reviewStatus: "new",
+    content: "ui-only",
+    intlNumbering: "latn",
+  },
 ] as const satisfies readonly LanguageInfo[];
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]["code"];

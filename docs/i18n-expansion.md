@@ -277,6 +277,30 @@ errata joined the glossary (the «اسم نوشتن» sign-up-sheet
 extension, بهبودی for addiction recovery, the امانت physical-
 lending family). All seventeen registry entries are
 `content: "full"`.
+
+Burmese (my) followed as the eighteenth language, on the standing
+next-language recommendation (fourth-largest speaker base with no
+interface among the majors still missing, a large displaced and
+diaspora population, and a script the shared font stack cannot
+render). The glossary settled four script questions before any
+translation ran, each verified in Stage-0 rather than assumed:
+digits pinned Western (`-u-nu-latn` — my's Intl default is mymr,
+and bare `{{count}}` would mix ၁၂၃ into a Western-digit file);
+no invisible characters at all, ZWSP included, because every
+modern renderer line-breaks Burmese by ICU dictionary (proven
+with Intl.Segmenter, so the fa-style ZWNJ exemption does not
+recur here); Zawgyi rejected by canonical-ordering heuristics in
+the assembly gates; and an ungendered voice — Burmese politeness
+particles and first-person pronouns encode the speaker's gender,
+so the app speaks with ပါ politeness and no gendered particle,
+which also forces the no-corporate-we rule grammatically. The
+six-chunk fleet ran on the fa rails (one chunk overflow-killed
+and resumed in place), reconciliation settled twenty-two drift
+items (~296 strings unified into one voice, the safety surfaces
+read line-by-line against the glossary, the admin-negation budget
+audited exactly), and wiring shipped `content: "ui-only"` with a
+new `:lang(my)` font stack and a 1.6 leading floor. The corpus
+follows on the Phase 2 rails.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from
