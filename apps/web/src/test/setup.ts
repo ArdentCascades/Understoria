@@ -40,3 +40,4 @@ await ensureContent("fil");
 await ensureContent("bn");
 await ensureContent("ht");
 await ensureContent("fa");
+await ensureContent("my");

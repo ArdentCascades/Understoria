@@ -300,7 +300,28 @@ items (~296 strings unified into one voice, the safety surfaces
 read line-by-line against the glossary, the admin-negation budget
 audited exactly), and wiring shipped `content: "ui-only"` with a
 new `:lang(my)` font stack and a 1.6 leading floor. The corpus
-follows on the Phase 2 rails.
+then SHIPPED on the same 11-agent rails (the whole fleet was cut
+off by a usage-credit outage and resumed in place, delivering
+clean): assembly verified invariants byte-equal, unified 13
+divergent skills-tag families by majority (32 tags, one
+injectivity override), and repointed 19 cross-fragment references
+to their Burmese names. Register on the record: the debt formula
+exactly once in the FAQ balance answer and once in the member
+guide's credits, with the time-bank playbook itself holding the
+debt fence with zero exceptions; the gift line exactly where en
+refuses repayment framing in seed-library; the merit-and-alms
+fence — Burmese's own rule — at zero everywhere, with စတုဒိသာ
+referenced once as lived practice in community-meal content and
+the solidarity fund rendered as contributions between equals; the
+surveillance fence held through the civic templates (voter
+registration written entirely without the enrollment root) and
+the legal templates' carve-outs confined to legal-aid and
+court-support (ဝရမ်း as the literal warrant, detention instead of
+arrest); the reentry playbook rendered without the prison word;
+the disability slogan in authentic member first person; the
+compelled-biometrics passage passed line-by-line fidelity review
+with the canonical refusal sentence verbatim. All eighteen
+registry entries are `content: "full"`.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from

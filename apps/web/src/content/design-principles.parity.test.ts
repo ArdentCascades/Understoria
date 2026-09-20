@@ -27,6 +27,7 @@ import { DESIGN_PRINCIPLES_FIL } from "./design-principles.fil";
 import { DESIGN_PRINCIPLES_BN } from "./design-principles.bn";
 import { DESIGN_PRINCIPLES_HT } from "./design-principles.ht";
 import { DESIGN_PRINCIPLES_FA } from "./design-principles.fa";
+import { DESIGN_PRINCIPLES_MY } from "./design-principles.my";
 
 // Guardrail against translation drift, same shape as faq.parity.
 // Principle ids are stable anchors shared across languages: WhyTooltip
@@ -54,6 +55,7 @@ describe.each([
   ["Bengali", DESIGN_PRINCIPLES_BN],
   ["Haitian Creole", DESIGN_PRINCIPLES_HT],
   ["Persian", DESIGN_PRINCIPLES_FA],
+  ["Burmese", DESIGN_PRINCIPLES_MY],
 ] as const)(
   "design principles parity — English ↔ %s",
   (localeName, PRINCIPLES_TR) => {

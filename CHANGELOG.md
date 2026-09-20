@@ -34,6 +34,34 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **The Burmese authored-content corpus — all eighteen languages
+  content-complete.** Every authored surface now reads in Burmese:
+  all 64 project playbooks with their task steps and tips, the 14
+  event templates, the help pages, the start-a-community guide, the
+  twelve design principles, and the member/opsec/study guides. The
+  registry entry flips to `content: "full"` and the Settings
+  fallback note for Burmese retires. Eleven fragment agents
+  translated against the glossary contract, each self-validating;
+  assembly verified locale-invariant fields byte-equal and counts
+  index-aligned, unified 13 divergent skills-tag families by
+  majority (32 tags, one injectivity override keeping graphic
+  design distinct from design), and repointed 19 cross-fragment
+  references to their Burmese names. The fences held corpus-wide
+  with exactly the sanctioned exceptions: the debt formula once in
+  the FAQ balance answer and once in the member guide's credits —
+  and the time-bank playbook itself holding the debt fence with
+  zero exceptions; the seed library's «လက်ဆောင်ပါ —
+  ပြန်ဆပ်စရာမဟုတ်ပါ။» exactly where en refuses repayment framing;
+  one legal-sense debt in legal-aid's caseload; ဝရမ်း as the
+  literal warrant confined to court-support; စတုဒိသာ referenced
+  once as lived practice in community-meal content, never as the
+  app's frame; the merit-and-alms fence (Burmese's own rule) at
+  zero everywhere else — the solidarity fund is contributions
+  between equals; the reentry playbook rendered without the prison
+  word; the disability movement's slogan in authentic member first
+  person; the compelled-biometrics passage passed line-by-line
+  fidelity review. The lazy `lazy-content-my` chunk keeps first
+  load untouched, and every content parity suite gains my rows.
 - **Burmese (မြန်မာ) interface — the eighteenth language.** All
   ~2,950 UI strings, produced by the six-chunk fleet against
   `docs/i18n-glossary/my.md` and reconciled into one voice
