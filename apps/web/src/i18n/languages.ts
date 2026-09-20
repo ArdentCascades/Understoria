@@ -309,15 +309,17 @@ export const LANGUAGES = [
   // glossary builds an ungendered voice: Burmese politeness particles
   // and first-person pronouns encode the SPEAKER's gender, so the app
   // (which has none) uses ပါ politeness and no gendered particle
-  // anywhere. Ships UI-first; the authored corpus follows on the
-  // Phase 2 rails, and Settings discloses the fallback until then.
+  // anywhere. Shipped UI-first; the full authored corpus (templates,
+  // tips, steps, FAQ, guides, principles) has since shipped on the
+  // Phase 2 rails (content/bundles/my.ts), so content is "full" like
+  // the others.
   {
     code: "my",
     endonym: "မြန်မာ",
     dir: "ltr",
     speakLang: "my",
     reviewStatus: "new",
-    content: "ui-only",
+    content: "full",
     intlNumbering: "latn",
   },
 ] as const satisfies readonly LanguageInfo[];

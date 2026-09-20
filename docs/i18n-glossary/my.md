@@ -268,6 +268,33 @@ above.
   co-founder on ပူးတွဲတည်ထောင်သူ; exchange on ဖလှယ်မှု —
   fleet-wide, per the softer-register rules.
 
+### Errata from the content-corpus round
+
+- **The guest-list refusal went unused** — rule 6 sanctions
+  «ဒီမှာ ဧည့်စာရင်းမရှိပါ» for a single use, but the English
+  corpus never actually refuses a guest list, and inserting a
+  sentence en does not carry would break structural fidelity.
+  The permission stands for future en content that says it.
+- **Reentry without the prison word**: the reentry-support
+  playbook renders its whole subject via အကျဉ်းကျ /
+  အကျဉ်းကျခဲ့ဖူးသူ, so ထောင် appears only in books-to-prisoners
+  (literal facility referents) — a pattern worth keeping.
+- **Detention over arrest**: where en names being detained, the
+  corpus uses ထိန်းသိမ်းခံရ, never the banned ဖမ်း family;
+  "warrant" is ဝရမ်း (court-support only).
+- **balance = လက်ကျန်** (FAQ section title «လက်ကျန်နဲ့ နာရီများ»)
+  — suggested term-table addition.
+- **Skills tags corpus-wide** (32, unified with one injectivity
+  override): design = ဒီဇိုင်း vs graphic design =
+  ဂရပ်ဖစ်ဒီဇိုင်း kept distinct; outreach = ဆက်သွယ်ရှာဖွေ,
+  organizing = စုစည်း, facilitation = ဆွေးနွေးမှုဦးဆောင်,
+  teaching = သင်ပေး, writing = စာရေး by majority.
+- **Cross-project references in prose** use the sibling
+  playbook's leading name (the head before its " / " or " — "
+  separator) in curly quotes — the full name stays on the board;
+  emergency-preparedness drops only its trailing ကွန်ရက် where
+  the sentence supplies that word itself.
+
 ## Known hard strings
 
 - **The tagline** — "The unit of progress is 'we', not 'I'." —
