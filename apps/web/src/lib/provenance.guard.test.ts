@@ -46,12 +46,14 @@ const ALLOWED = new Set([
   "pages/MyWork.tsx",
   "pages/Calendar.tsx",
   "pages/Present.tsx",
+  "pages/PlugIn.tsx",
   "lib/gatheringSlides.ts",
   "lib/gatheringSlides.test.ts",
   "lib/calendar.ts",
   "lib/calendar.test.ts",
   "components/ProjectCard.tsx",
-  // display-view plumbing (type-only imports)
+  // display-view plumbing, plus the "Follows:" upstream-title lines
+  // (compact, marker-free — each dep links/scrolls to its task)
   "components/TaskCard.tsx",
   "components/TaskDetailBody.tsx",
   // stages the template description with the shared composition —

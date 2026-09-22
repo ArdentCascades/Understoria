@@ -41,7 +41,10 @@ import { suggestSplitting } from "@/lib/taskPresentation";
 import { getTaskTips } from "@/content/taskTips";
 import { usePendingAction } from "@/lib/usePendingAction";
 import type { Project, ProjectTask, Urgency } from "@/types";
-import type { ProvenanceView } from "@/lib/useTemplateProvenance";
+import {
+  useProvenanceText,
+  type ProvenanceView,
+} from "@/lib/useTemplateProvenance";
 
 // The "act" half of the per-task-page split. Renders everything the
 // slim project-list `TaskCard` deliberately drops: the full edit form,
@@ -131,13 +134,19 @@ export function TaskDetailBody({
   // "Follows" badge, but the task's OWN page deliberately dropped it —
   // so a member who deep-links straight to this task never saw what has
   // to happen first. Surface it here, linking to each upstream task.
+  // Titles render through provenance like the pages they link to
+  // (the stored strings stayed in the creation language otherwise).
+  const provText = useProvenanceText();
   const unmetDeps = useMemo(
     () =>
       task.dependencies
         .map((id) => allTasks.find((tk) => tk.id === id))
         .filter((d): d is ProjectTask => !!d && d.status !== "completed")
-        .map((d) => ({ id: d.id, title: d.title })),
-    [task.dependencies, allTasks],
+        .map((d) => ({
+          id: d.id,
+          title: provText.taskTitle(templateId, d.title),
+        })),
+    [task.dependencies, allTasks, provText, templateId],
   );
 
   // Positive-only skill fit (never surfaces what's missing).
