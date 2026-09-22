@@ -3850,5 +3850,11 @@
       "unreachable": "联系不上社区节点。检查网络连接后再试。",
       "rejected": "节点拒绝了。查看服务器日志了解详情。"
     }
+  },
+  "provenance": {
+    "note": "以你的语言显示：这个项目由手册创建，这段文字未经改动。",
+    "viewOriginal": "查看原文",
+    "showTranslated": "显示为你的语言",
+    "mixedNote": "组织者自己写的内容会原样显示——Understoria 绝不会机器翻译成员写的文字。"
   }
 }

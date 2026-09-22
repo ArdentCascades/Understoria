@@ -3850,5 +3850,11 @@
       "unreachable": "Impossible de joindre le nœud communautaire. Vérifie ta connexion et réessaie.",
       "rejected": "Le nœud a refusé. Regarde les journaux du serveur pour les détails."
     }
+  },
+  "provenance": {
+    "note": "Affiché dans votre langue : le projet part d'un guide et ce texte est resté tel quel.",
+    "viewOriginal": "Voir l'original",
+    "showTranslated": "Afficher dans votre langue",
+    "mixedNote": "Ce que la personne organisatrice a écrit elle-même apparaît exactement tel quel — Understoria ne traduit jamais automatiquement ce qu'écrivent les membres."
   }
 }

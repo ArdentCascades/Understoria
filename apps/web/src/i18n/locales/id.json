@@ -3850,5 +3850,11 @@
       "unreachable": "Node komunitas tidak bisa dihubungi. Periksa koneksimu dan coba lagi.",
       "rejected": "Node menolak. Periksa log server untuk detailnya."
     }
+  },
+  "provenance": {
+    "note": "Ditampilkan dalam bahasamu: proyek ini berawal dari panduan dan teks ini dibiarkan apa adanya.",
+    "viewOriginal": "Lihat aslinya",
+    "showTranslated": "Tampilkan dalam bahasamu",
+    "mixedNote": "Apa pun yang ditulis sendiri oleh penggerak tampil persis seperti aslinya — Understoria tidak pernah menerjemahkan tulisan anggota dengan mesin."
   }
 }

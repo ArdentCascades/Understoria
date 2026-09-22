@@ -3850,5 +3850,11 @@
       "unreachable": "Couldn't reach the community node. Check your connection and try again.",
       "rejected": "The node refused. Check the server logs for details."
     }
+  },
+  "provenance": {
+    "note": "Shown in your language: this project began from a playbook, and this text was left as it was.",
+    "viewOriginal": "View original",
+    "showTranslated": "Show in your language",
+    "mixedNote": "What the organizer wrote themselves appears exactly as written — Understoria never machine-translates what members write."
   }
 }

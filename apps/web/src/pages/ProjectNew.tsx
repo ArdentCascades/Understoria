@@ -28,6 +28,7 @@ import { MarkdownHint } from "@/components/MarkdownHint";
 import { PendingLinkComposerNote } from "@/components/PendingLinkComposerNote";
 import { TemplatePicker } from "@/components/TemplatePicker";
 import { getProjectTemplates, getTemplate } from "@/content/projectTemplates";
+import { composeTemplateDescription } from "@/content/templateProvenance";
 import { findFaqEntry } from "@/lib/templateContext";
 import { getActiveProjectsForTemplate } from "@/lib/templateUsage";
 import {
@@ -252,9 +253,10 @@ export default function ProjectNewPage() {
     const tpl = getTemplate(templateId, i18n.resolvedLanguage ?? "en");
     if (!tpl) return;
     setTitle(tpl.name);
-    setDescription(
-      `${tpl.purpose}\n\n${tpl.whoItServes}\n\n${tpl.whatYoullNeed}`,
-    );
+    // The composition lives in templateProvenance so an unmodified
+    // description keeps byte-matching the corpus for display
+    // translation (docs/provenance-translation.md).
+    setDescription(composeTemplateDescription(tpl));
     setCategory(tpl.defaultCategory);
     setTargetHours(String(tpl.setupHours));
     setStagedTasks(buildStagedTasks(tpl));

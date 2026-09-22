@@ -3850,5 +3850,11 @@
       "unreachable": "Haikuwezekana kuifikia node ya jumuiya. Kagua muunganisho wako kisha ujaribu tena.",
       "rejected": "Node imekataa. Angalia kumbukumbu za seva kwa maelezo zaidi."
     }
+  },
+  "provenance": {
+    "note": "Inaonyeshwa kwa lugha yako: mradi ulianza kutoka mwongozo na maandishi haya yameachwa yalivyo.",
+    "viewOriginal": "Ona asili",
+    "showTranslated": "Onyesha kwa lugha yako",
+    "mixedNote": "Alichokiandika mratibu mwenyewe kinaonekana sawasawa na alivyokiandika — Understoria haitafsiri kamwe kwa mashine maandishi ya wanachama."
   }
 }

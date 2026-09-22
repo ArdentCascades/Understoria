@@ -21,6 +21,7 @@ import { creditHoursForTask } from "@/lib/timebank";
 import { HighlightedText } from "@/components/HighlightedText";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { usePendingAction } from "@/lib/usePendingAction";
+import type { ProvenanceView } from "@/lib/useTemplateProvenance";
 import { useTaskCommentCount } from "@/lib/useTaskCommentCount";
 import { statusChipClass, capitalize } from "@/lib/taskPresentation";
 import { getTaskTips } from "@/content/taskTips";
@@ -136,6 +137,8 @@ export function TaskCard({
   searchQuery,
   taskCheckInDays,
   templateId,
+  titleView,
+  descriptionView,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -160,6 +163,12 @@ export function TaskCard({
    *  the first concrete step lands exactly when momentum is highest
    *  and the claimer hasn't left the list. */
   templateId: string | null;
+  /** Provenance-verified display views from the surface's
+   *  useTemplateProvenance (docs/provenance-translation.md). When
+   *  set, they replace the RENDERED title/description only — the
+   *  stored strings keep driving tips/steps lookups and links. */
+  titleView?: ProvenanceView;
+  descriptionView?: ProvenanceView;
 }) {
   const { t, i18n } = useTranslation();
   const [followsExpanded, setFollowsExpanded] = useState(false);
@@ -294,11 +303,16 @@ export function TaskCard({
           to={`/project/${task.projectId}/task/${task.id}`}
           className="text-moss-900 after:absolute after:inset-0 after:z-[1] after:content-[''] hover:text-canopy-700 focus:outline-none dark:text-moss-50 dark:hover:text-canopy-300"
         >
-          {searchQuery && searchQuery.trim() !== "" ? (
-            <HighlightedText text={task.title} query={searchQuery} />
-          ) : (
-            task.title
-          )}
+          <span lang={titleView?.lang} dir={titleView?.dir}>
+            {searchQuery && searchQuery.trim() !== "" ? (
+              <HighlightedText
+                text={titleView?.text ?? task.title}
+                query={searchQuery}
+              />
+            ) : (
+              (titleView?.text ?? task.title)
+            )}
+          </span>
         </Link>
       </h3>
       {/* One-line preview only — NO whitespace-pre-wrap, so a multi-line
@@ -306,8 +320,12 @@ export function TaskCard({
           untruncated description lives on the task page. line-clamp-1 is
           a literal class so Tailwind generates it. */}
       {task.description && (
-        <p className="line-clamp-1 text-sm text-moss-600 dark:text-moss-300">
-          {stripMarkdown(task.description)}
+        <p
+          className="line-clamp-1 text-sm text-moss-600 dark:text-moss-300"
+          lang={descriptionView?.lang}
+          dir={descriptionView?.dir}
+        >
+          {stripMarkdown(descriptionView?.text ?? task.description)}
         </p>
       )}
       <div className="flex flex-wrap items-center gap-2">

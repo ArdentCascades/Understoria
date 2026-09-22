@@ -3850,5 +3850,11 @@
       "unreachable": "Pa t ka jwenn node kominote a. Tcheke koneksyon ou epi eseye ankò.",
       "rejected": "Node la refize. Gade jounal sèvè a pou plis detay."
     }
+  },
+  "provenance": {
+    "note": "Parèt nan lang pa w: pwojè a soti nan yon gid epi tèks sa a rete jan l te ye a.",
+    "viewOriginal": "Gade orijinal la",
+    "showTranslated": "Montre nan lang pa w",
+    "mixedNote": "Sa moun k ap òganize a ekri limenm parèt egzakteman jan li ekri l la — Understoria pa janm fè machin tradui sa manm yo ekri."
   }
 }
