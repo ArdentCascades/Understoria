@@ -1,8 +1,12 @@
 # Quiet by default — opt-in notifications
 
-Status: DESIGNED (this document is the contract). PR ladder at the
-end. Nothing here ships until its PR lands; every decision below
-was settled with the project owner on 2026-09-22.
+Status: SHIPPED (this document remains the contract). Every rung of
+the PR ladder at the end has landed — #633 (this doc), #634 (dark
+plumbing), #635 (the Settings switchboard), #636 (the content
+pass). Every decision below was settled with the project owner on
+2026-09-22, and changing any of them starts with amending this
+file: the guard tests pin the enum, the defaults, and the
+allowlisted API surfaces to what is written here.
 
 ## Why this exists, and why it is not a betrayal
 
@@ -172,21 +176,52 @@ records each choice as a glossary erratum.
 
 ## PR ladder
 
-- **A (this doc):** `docs/notifications.md` + the threat-model
-  section + CHANGELOG.
-- **B (plumbing, dark):** node subscribe/renew/unsubscribe
-  endpoints with VAPID + TTL + prune; the service-worker push
-  handler (generateSW stays — the handler rides
-  `workbox.importScripts` from a static script); client
+- **A (this doc) — SHIPPED, #633:** `docs/notifications.md` + the
+  threat-model section + CHANGELOG.
+- **B (plumbing, dark) — SHIPPED, #634:** node
+  subscribe/renew/unsubscribe endpoints with VAPID + TTL + prune;
+  the service-worker push handler (generateSW stays — the handler
+  rides `workbox.importScripts` from `public/push-sw.js`); client
   subscription lib; panic teardown; device-unlink pruning; the
   guard tests. No UI.
-- **C (the switchboard):** the Settings section (master mute,
-  categories, tier picker, neutral title, platform states,
-  pre-permission disclosure) + the ~20–25 UI strings in all
-  eighteen languages with the per-glossary term decisions.
-- **D (the content pass):** the reworded `no-notifications`
-  principle in all eighteen languages, the README "Why nothing
+- **C (the switchboard) — SHIPPED, #635:** the Settings section
+  (categories, tier picker, neutral title, platform states,
+  pre-permission disclosure, all-off teardown that keeps display
+  choices) + 34 UI strings in all eighteen languages with the
+  per-glossary term decisions (fa آگاه‌سازی, my သတိပေးချက် — both
+  recorded in their glossaries, since each language's word for
+  "notification" was already spent on the board post).
+- **D (the content pass) — SHIPPED, #636:** the reworded
+  `no-notifications` principle in all eighteen languages (ID kept
+  stable — thirty-one screens look it up), the README "Why nothing
   buzzes" rewrite, and the opsec-guide additions on lock screens
   and the neutral title.
 - **Follow-up (designed, unscheduled):** coalesced sender-blind
   message pings.
+
+## Field notes (rules learned after shipping)
+
+- **The server-state message must tell the true story.** The
+  Settings section probes `GET /push/vapid-key` before offering
+  the switches, and the first build collapsed every failure into
+  "this device isn't connected to a community server" — which a
+  connected member read minutes after receiving an app update from
+  that very server, because their node was still running
+  pre-notifications software and 404ed the route. The probe now
+  distinguishes three states with three messages, and a component
+  test pins the distinction: *unconfigured* (no node set up on the
+  device — the only case "not connected" is true), *unsupported*
+  (the node answered without the route/key: it predates push
+  support, and the message says the operator can fix it with an
+  update while everything else keeps working), and *unreachable*
+  (no answer at all — a connection hiccup with a Try-again button,
+  never a verdict about the node's software). A member already
+  subscribed keeps their switchboard regardless of the probe: the
+  key is only needed to create a subscription.
+- **Web and server deploy separately.** A member seeing the new
+  Settings UI proves nothing about the node: the static bundle
+  updates through the service worker, the API needs
+  `npm install` (web-push is a new dependency),
+  `npm run build:server`, and a process restart. The operator
+  guide (§6, "Opt-in push notifications") carries the steps and
+  the ten-second check.

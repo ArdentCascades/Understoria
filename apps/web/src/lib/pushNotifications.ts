@@ -180,25 +180,47 @@ async function nodeCall(
 }
 
 /**
- * The node's VAPID public key — what the browser subscription is
- * created against. Null when this device has no community node (or
- * it can't be reached), which the Settings surface states plainly.
+ * The Settings surface owes the member the RIGHT explanation, so the
+ * three ways this can fail stay distinguishable — collapsing them
+ * once shipped a screen that told a connected member their device
+ * "isn't connected to a community server" when the truth was that
+ * their server predated push support.
+ */
+export type VapidKeyResult =
+  /** The node answered with its key — notifications can be set up. */
+  | { kind: "ok"; publicKey: string }
+  /** This device has no community node configured (or node submit is
+   *  off) — the only case where "not connected" is the true story. */
+  | { kind: "unconfigured" }
+  /** The node ANSWERED, but without a usable key (404 on the route,
+   *  odd body): it is running software from before opt-in
+   *  notifications existed. The operator fixes this, not the member. */
+  | { kind: "unsupported" }
+  /** The request never got an answer — offline, DNS, the node down.
+   *  Says nothing about whether the node offers push; try again. */
+  | { kind: "unreachable" };
+
+/**
+ * Ask the node for its VAPID public key — what the browser
+ * subscription is created against.
  */
 export async function fetchVapidKey(
   deps: NodeCallDeps = {},
-): Promise<string | null> {
+): Promise<VapidKeyResult> {
   const config = await readSubmitConfig();
-  if (!config.enabled || config.url.trim() === "") return null;
+  if (!config.enabled || config.url.trim() === "") {
+    return { kind: "unconfigured" };
+  }
   const doFetch = deps.fetchImpl ?? fetch;
   try {
     const res = await doFetch(`${config.url}/push/vapid-key`);
-    if (!res.ok) return null;
+    if (!res.ok) return { kind: "unsupported" };
     const { publicKey } = (await res.json()) as { publicKey?: unknown };
     return typeof publicKey === "string" && publicKey !== ""
-      ? publicKey
-      : null;
+      ? { kind: "ok", publicKey }
+      : { kind: "unsupported" };
   } catch {
-    return null;
+    return { kind: "unreachable" };
   }
 }
 

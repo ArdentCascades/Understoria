@@ -711,6 +711,61 @@ aid.our-union.example {
 Members' PWA POSTs signed exchanges to `/api/exchanges`; Caddy
 forwards them to the node.
 
+### Opt-in push notifications (what your node does, and what an update needs)
+
+Since the quiet-by-default release (docs/notifications.md), the
+node can send three kinds of opt-in web push — shift reminders,
+guardian requests, awaiting-your-confirmation — to members who
+turned them on in Settings. Everything is off by default and stays
+off until a member opts in; nothing about running the node changes
+until then. What the node holds and sends:
+
+- **Routes:** `GET /push/vapid-key` (public — the key devices
+  subscribe against) and member-signed
+  `POST /push/subscriptions[/renew|/delete]`.
+- **VAPID keys** are minted automatically on first boot after the
+  update and stored in the encrypted ledger's `meta` table. Do not
+  rotate them casually: a new key silently invalidates every
+  member's subscription, and each member must re-enable from
+  Settings. Treat rotation as deliberate surgery, announced.
+- **One table** (`push_subscriptions`, migration v35, runs itself
+  on start): one row per member device — endpoint, encryption
+  keys, chosen categories, a renewal clock. Members' lock-screen
+  wording, custom titles, and message contents are never in it and
+  never pass through the node. Rows a device stops renewing expire
+  after 21 days via the retention sweep — that's the designed
+  cleanup for devices that were wiped while offline.
+- **Payloads are sent by your node directly** (standard Web Push,
+  no Firebase/OneSignal/etc.). The browser vendor's relay sees
+  that something small arrived and when, never what — the cost the
+  threat model discloses to members before they opt in.
+
+**Updating an existing node for this** is the usual sequence, but
+all three steps matter — the release adds a server dependency
+(`web-push`):
+
+```bash
+git pull
+npm install
+npm run build:server
+# then restart the node process (systemd, docker compose, …)
+npm run build   # the web bundle, if this box serves it too
+```
+
+The web bundle and the node deploy separately: members can be
+running the newest PWA (it updates through the service worker)
+against your older node. They'll see an honest message in
+Settings → Notifications — "your community's server doesn't offer
+notifications yet… the person who runs the server can fix this
+with an update" — until the node restarts on the new build. The
+ten-second check that your node is ready:
+
+```bash
+curl -s https://aid.our-union.example/api/push/vapid-key
+# ready:      {"publicKey":"B..."}
+# not yet:    a 404
+```
+
 ## 7. Backups
 
 If you're running PWA-only: members' device exports are the backup.
