@@ -1,0 +1,230 @@
+/*
+ * Understoria — Federated mutual aid timebank
+ * Copyright (C) 2026 Understoria Contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License along with this program. If not, see
+ * <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+// The send triggers (docs/notifications.md) — the last leg between a
+// member's opt-in and a real ping. Two of the three categories have a
+// node-visible signal today and are wired here:
+//
+//  - awaiting_confirmation: event-driven, off the signed
+//    awaiting-transition artifact the app already posts when an
+//    exchange or task enters its confirmation window. The ping goes
+//    to the ONE party whose word is missing — never the signer, who
+//    just acted. Dedupe is the artifact's own first-writer-wins
+//    insert: the route only notifies on a 201.
+//
+//  - shift_reminder: a sweep, because "before it begins" is a clock,
+//    not an event. Every few minutes it scans shifts whose start
+//    falls inside the reminder lead window and pings each signed-up
+//    member once — a durable (kind, dedupe_key) ledger row makes
+//    "once" survive restarts. Cancelled events and tombstoned
+//    shifts/signups send nothing (the doc's "cancelled things cancel
+//    their pings" — with a sweep, checking at send time IS the
+//    cancellation).
+//
+//  - guardian_request has NO node-visible signal yet: guardian
+//    recovery runs device-to-device and through end-to-end messages
+//    the node cannot (and must not) classify. The category exists
+//    and gates; sends begin when a recovery-request record the node
+//    can see is designed. Recorded in the doc's field notes.
+//
+// Payloads remain CATEGORY DATA ONLY: a category and a path. Titles,
+// tiers and wording are applied on the member's device by the
+// service worker; nothing here knows what any lock screen will show.
+import type { Database as DatabaseType } from "better-sqlite3-multiple-ciphers";
+import type {
+  AwaitingTransition,
+  EventShiftState,
+  ShiftSignupState,
+} from "@understoria/shared";
+import type { PushSender } from "./push.js";
+
+/** How far ahead of a shift's start the reminder fires. One hour:
+ *  early enough to travel, late enough to matter — and comfortably
+ *  inside the 4-hour delivery TTL, so a phone that comes online
+ *  before the shift still hears about it, and one that doesn't never
+ *  gets a stale buzz after the fact. */
+export const SHIFT_REMINDER_LEAD_MS = 60 * 60 * 1000;
+
+/** Sweep cadence. Five minutes of jitter on a one-hour lead is
+ *  invisible to a member and cheap for the node. */
+export const SHIFT_REMINDER_SWEEP_INTERVAL_MS = 5 * 60 * 1000;
+
+/** Send-once rows older than this can never match a live window
+ *  again (shifts don't time-travel); the sweep prunes them. */
+const SENT_LEDGER_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Where the confirmation is waiting, as an app path. The artifact's
+ * postId is either a board post id or the `project:<pid>/task:<tid>`
+ * label (docs/auto-confirm-key.md §5).
+ */
+export function awaitingConfirmationPath(postId: string): string {
+  const m = postId.match(/^project:([^/]+)\/task:(.+)$/);
+  return m ? `/project/${m[1]}/task/${m[2]}` : `/post/${postId}`;
+}
+
+/**
+ * The one member whose word is missing: the transition's OTHER
+ * party. `signedBy` just marked the work done — pinging them would
+ * be an engagement notification, exactly what the contract bans.
+ */
+export function awaitingConfirmationTarget(
+  record: Pick<AwaitingTransition, "helperKey" | "helpedKey" | "signedBy">,
+): string {
+  return record.signedBy === record.helperKey
+    ? record.helpedKey
+    : record.helperKey;
+}
+
+/**
+ * Fire the awaiting-your-confirmation ping for a NEWLY inserted
+ * transition artifact. Best-effort and non-blocking by contract: a
+ * push-service outage must never fail the federation write that
+ * triggered it, so callers do not await this.
+ */
+export function notifyAwaitingConfirmation(
+  sender: PushSender,
+  record: Pick<
+    AwaitingTransition,
+    "postId" | "helperKey" | "helpedKey" | "signedBy"
+  >,
+  log: (msg: string) => void = () => {},
+): void {
+  void sender
+    .sendToMember(awaitingConfirmationTarget(record), {
+      category: "awaiting_confirmation",
+      path: awaitingConfirmationPath(record.postId),
+    })
+    .catch(() => log("awaiting-confirmation push failed"));
+}
+
+export interface ShiftReminderSweepOptions {
+  db: DatabaseType;
+  sender: PushSender;
+  intervalMs?: number;
+  leadMs?: number;
+  now?: () => number;
+  log?: (msg: string) => void;
+}
+
+export interface ShiftReminderSweep {
+  /** One pass — exported for tests and for the interval to drive.
+   *  Returns how many member-reminders were sent this pass. */
+  sweepOnce(): Promise<number>;
+  stop(): void;
+}
+
+export function startShiftReminderSweep({
+  db,
+  sender,
+  intervalMs = SHIFT_REMINDER_SWEEP_INTERVAL_MS,
+  leadMs = SHIFT_REMINDER_LEAD_MS,
+  now = Date.now,
+  log = () => {},
+}: ShiftReminderSweepOptions): ShiftReminderSweep {
+  const listShifts = db.prepare("SELECT payload FROM event_shifts");
+  const eventCancelled = db.prepare(
+    "SELECT 1 FROM event_cancellations WHERE event_id = ?",
+  );
+  const listSignups = db.prepare(
+    "SELECT payload FROM shift_signups WHERE shift_id = ?",
+  );
+  // INSERT OR IGNORE is the atomic claim on "this reminder": whoever
+  // inserts the row sends; a second pass (or a restart mid-pass)
+  // changes nothing.
+  const claimSend = db.prepare(
+    "INSERT OR IGNORE INTO push_reminders_sent (kind, dedupe_key, sent_at) VALUES ('shift_reminder', ?, ?)",
+  );
+  const releaseClaim = db.prepare(
+    "DELETE FROM push_reminders_sent WHERE kind = 'shift_reminder' AND dedupe_key = ?",
+  );
+  const pruneLedger = db.prepare(
+    "DELETE FROM push_reminders_sent WHERE sent_at < ?",
+  );
+
+  async function sweepOnce(): Promise<number> {
+    const at = now();
+    let sent = 0;
+    // Community-scale table (a node hosts one community's events);
+    // a full scan every few minutes is cheaper than being clever.
+    for (const row of listShifts.all() as { payload: string }[]) {
+      let shift: EventShiftState;
+      try {
+        shift = JSON.parse(row.payload) as EventShiftState;
+      } catch {
+        continue;
+      }
+      if (shift.deletedAt !== null) continue;
+      if (shift.startsAt <= at || shift.startsAt > at + leadMs) continue;
+      if (eventCancelled.get(shift.eventId)) continue;
+      for (const signupRow of listSignups.all(shift.id) as {
+        payload: string;
+      }[]) {
+        let signup: ShiftSignupState;
+        try {
+          signup = JSON.parse(signupRow.payload) as ShiftSignupState;
+        } catch {
+          continue;
+        }
+        if (signup.deletedAt !== null) continue;
+        const dedupeKey = `${shift.id}|${signup.memberKey}`;
+        const claimed = claimSend.run(dedupeKey, at);
+        if (claimed.changes === 0) continue;
+        try {
+          const devices = await sender.sendToMember(signup.memberKey, {
+            category: "shift_reminder",
+            path: `/events/${shift.eventId}`,
+          });
+          if (devices > 0) {
+            sent += 1;
+          } else {
+            // Nothing subscribed (the default). Release the claim so
+            // a member who flips the category on while the window is
+            // still open gets their reminder on a later pass.
+            releaseClaim.run(dedupeKey);
+          }
+        } catch {
+          // The enum gate can't throw here (the category is ours);
+          // transport failures are already logged-and-skipped inside
+          // the sender. Keep the claim: a broken send this close to
+          // the shift is better silent than double.
+          log("shift-reminder push failed");
+        }
+      }
+    }
+    pruneLedger.run(at - SENT_LEDGER_RETENTION_MS);
+    return sent;
+  }
+
+  const timer =
+    intervalMs > 0
+      ? setInterval(() => {
+          void sweepOnce().catch(() => log("shift-reminder sweep failed"));
+        }, intervalMs)
+      : null;
+  timer?.unref?.();
+
+  return {
+    sweepOnce,
+    stop() {
+      if (timer) clearInterval(timer);
+    },
+  };
+}

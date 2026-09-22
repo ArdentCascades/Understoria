@@ -98,6 +98,17 @@ export interface PushSender {
    *  one device's outage never starves the rest. Returns how many
    *  sends were attempted. */
   sendCategoryPush(payload: PushPayload, now?: number): Promise<number>;
+  /** Send `payload` to ONE member's opted-in devices — what every
+   *  real trigger uses, because each ping has a person on the other
+   *  end (docs/notifications.md: a shift YOU signed up for, work
+   *  waiting on YOUR word). Same enum gate, same pruning; a member
+   *  with the category off (or no subscription) gets zero sends,
+   *  silently — the send-time filtering the doc requires. */
+  sendToMember(
+    memberKey: string,
+    payload: PushPayload,
+    now?: number,
+  ): Promise<number>;
 }
 
 export function createPushSender(
@@ -136,20 +147,39 @@ export function createPushSender(
     }
   }
 
+  async function sendRows(
+    rows: readonly PushSubscriptionRow[],
+    payload: PushPayload,
+  ): Promise<number> {
+    const body = JSON.stringify(payload);
+    await Promise.all(rows.map((row) => sendOne(row, body)));
+    return rows.length;
+  }
+
+  function gate(payload: PushPayload): void {
+    // The category enum is the contract (docs/notifications.md
+    // nevers): nothing outside it can ever be sent, whatever a
+    // future caller tries.
+    if (!isNotificationCategory(payload.category)) {
+      throw new Error(
+        `push category ${JSON.stringify(payload.category)} is not in the documented list`,
+      );
+    }
+  }
+
   return {
     async sendCategoryPush(payload, now = Date.now()) {
-      // The category enum is the contract (docs/notifications.md
-      // nevers): nothing outside it can ever be sent, whatever a
-      // future caller tries.
-      if (!isNotificationCategory(payload.category)) {
-        throw new Error(
-          `push category ${JSON.stringify(payload.category)} is not in the documented list`,
-        );
-      }
-      const targets = store.listForCategory(payload.category, now);
-      const body = JSON.stringify(payload);
-      await Promise.all(targets.map((row) => sendOne(row, body)));
-      return targets.length;
+      gate(payload);
+      return sendRows(store.listForCategory(payload.category, now), payload);
+    },
+    async sendToMember(memberKey, payload, now = Date.now()) {
+      gate(payload);
+      return sendRows(
+        store
+          .listForCategory(payload.category, now)
+          .filter((row) => row.memberKey === memberKey),
+        payload,
+      );
     },
   };
 }

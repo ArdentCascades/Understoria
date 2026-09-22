@@ -11,6 +11,7 @@
  */
 import type { FastifyInstance } from "fastify";
 import { verifyAwaitingTransition } from "@understoria/shared/crypto";
+import type { AwaitingTransition } from "@understoria/shared";
 import type { AwaitingTransitionStore } from "../db.js";
 import { parseAwaitingTransition } from "../validate.js";
 
@@ -18,6 +19,12 @@ interface Deps {
   store: AwaitingTransitionStore;
   /** Test seam — defaults to Date.now. */
   now?: () => number;
+  /** Opt-in push trigger (docs/notifications.md): called for a NEWLY
+   *  stored artifact only — the insert's first-writer-wins is the
+   *  dedupe — so the party whose confirmation is awaited can be
+   *  pinged. Fire-and-forget by contract: a push outage must never
+   *  fail this federation write. */
+  onNewTransition?: (record: AwaitingTransition) => void;
 }
 
 /**
@@ -56,6 +63,7 @@ export async function registerAwaitingTransitionRoutes(
       return { error: "bad_signature" };
     }
     const inserted = deps.store.insert(record, now());
+    if (inserted) deps.onNewTransition?.(record);
     reply.code(inserted ? 201 : 200);
     return { stored: inserted, postId: record.postId };
   });

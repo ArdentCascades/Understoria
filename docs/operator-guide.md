@@ -714,9 +714,12 @@ forwards them to the node.
 ### Opt-in push notifications (what your node does, and what an update needs)
 
 Since the quiet-by-default release (docs/notifications.md), the
-node can send three kinds of opt-in web push — shift reminders,
-guardian requests, awaiting-your-confirmation — to members who
-turned them on in Settings. Everything is off by default and stays
+node sends opt-in web push to members who turned it on in Settings:
+a reminder an hour before a shift they signed up for, and a ping
+when an exchange or task is waiting on their confirmation. (The
+third category members can enable, guardian requests, has no
+node-visible signal yet — guardian recovery runs device-to-device —
+so enabling it currently receives nothing.) Everything is off by default and stays
 off until a member opts in; nothing about running the node changes
 until then. What the node holds and sends:
 
