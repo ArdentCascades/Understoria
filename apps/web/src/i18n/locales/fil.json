@@ -3850,5 +3850,11 @@
       "unreachable": "Hindi maabot ang node ng komunidad. Suriin ang koneksiyon mo at subukan ulit.",
       "rejected": "Tumanggi ang node. Tingnan ang mga log ng server para sa detalye."
     }
+  },
+  "provenance": {
+    "note": "Ipinapakita sa wika mo: nagsimula ang proyekto mula sa gabay at hindi binago ang tekstong ito.",
+    "viewOriginal": "Tingnan ang orihinal",
+    "showTranslated": "Ipakita sa wika mo",
+    "mixedNote": "Ang isinulat mismo ng nag-aayos ay lumalabas nang eksakto sa pagkakasulat — hinding-hindi nagma-machine translate ang Understoria ng isinulat ng mga miyembro."
   }
 }

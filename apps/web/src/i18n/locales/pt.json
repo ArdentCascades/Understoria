@@ -3850,5 +3850,11 @@
       "unreachable": "Não foi possível alcançar o nó comunitário. Verifique sua conexão e tente de novo.",
       "rejected": "O nó recusou. Confira os registros do servidor para ver os detalhes."
     }
+  },
+  "provenance": {
+    "note": "Exibido no seu idioma: o projeto partiu de um guia e este texto ficou como estava.",
+    "viewOriginal": "Ver original",
+    "showTranslated": "Mostrar no seu idioma",
+    "mixedNote": "O que quem organiza escreveu aparece exatamente como foi escrito — o Understoria nunca traduz automaticamente o que os membros escrevem."
   }
 }

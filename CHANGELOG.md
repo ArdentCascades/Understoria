@@ -34,6 +34,26 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **Provenance-verified display translation** — a project created
+  from a playbook in one language now reads in YOURS, wherever the
+  organizer left the playbook's text unchanged
+  (docs/provenance-translation.md). Verification is client-side and
+  trusts nothing in the record: a stored title, description, or
+  task must byte-match the shipped corpus — same template, exact
+  bytes, same task row across every matching language — before the
+  viewer's own reviewed translation is displayed; anything the
+  organizer wrote or edited appears exactly as signed, and member
+  text is never machine-translated (nothing leaves the device).
+  Each surface carries one honest note with a View original
+  toggle; the toggled original is lang-tagged and bidi-isolated so
+  mixed-direction pages behave. Dispute, flag, removal and
+  confirmation surfaces never substitute — an allowlist guard test
+  pins the importers. Ships on the project and task pages;
+  in-project task search matches both the signed text and the
+  displayed translation. The generated task-title index gains the
+  template display names and a single canonical regenerator
+  (`npm run generate:task-index`) replacing hand-splicing, and the
+  note strings ship in all eighteen languages.
 - **The Burmese authored-content corpus — all eighteen languages
   content-complete.** Every authored surface now reads in Burmese:
   all 64 project playbooks with their task steps and tips, the 14

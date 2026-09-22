@@ -22,6 +22,8 @@ import { creditHoursForTask } from "@/lib/timebank";
 import { statusChipClass, capitalize } from "@/lib/taskPresentation";
 import { BackLink } from "@/components/BackLink";
 import { TaskDetailBody } from "@/components/TaskDetailBody";
+import { ProvenanceNote } from "@/components/ProvenanceNote";
+import { useTemplateProvenance } from "@/lib/useTemplateProvenance";
 import { HistoryTimeline } from "@/pages/ProjectDetail";
 
 // Per-task page — `/project/:id/task/:taskId`. Renders the task's "act"
@@ -43,6 +45,18 @@ export default function TaskDetailPage() {
   const { showToast } = useToast();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  // Provenance-verified display translation for template-derived
+  // text (docs/provenance-translation.md); scoped to THIS task so
+  // the page's View-original toggle covers exactly what it shows.
+  // Before the guards below run, ctx.project/the task may be absent
+  // — the hook takes null and returns as-is views.
+  const provTask = ctx.project
+    ? ctx.tasks.find((tk) => tk.id === taskId)
+    : undefined;
+  const prov = useTemplateProvenance(
+    ctx.project,
+    provTask ? [provTask] : [],
+  );
 
   // Page-level action wrapper, reconstructed verbatim from
   // `ProjectDetail.tsx`'s `run<T>` — surfaces failures both inline and
@@ -133,11 +147,19 @@ export default function TaskDetailPage() {
           to={`/project/${id}`}
           className="text-moss-600 underline-offset-2 hover:underline dark:text-moss-300"
         >
-          {project.title}
+          <span lang={prov.title.lang} dir={prov.title.dir}>
+            {prov.title.text}
+          </span>
         </Link>
         <span className="text-moss-400 dark:text-moss-500">{" / "}</span>
-        {task.title}
+        <span
+          lang={prov.taskTitle(task.id)?.lang}
+          dir={prov.taskTitle(task.id)?.dir}
+        >
+          {prov.taskTitle(task.id)?.text ?? task.title}
+        </span>
       </h1>
+      <ProvenanceNote prov={prov} />
       {/* Status + hours chips — the chip row TaskDetailBody drops,
           rebuilt here so the page header still names the task's state
           and credit at a glance. Reuses the shared palette/formatters so
@@ -179,6 +201,7 @@ export default function TaskDetailPage() {
         viewerSkills={currentMember?.skills ?? []}
         templateId={project.templateId}
         organizerKey={project.organizerKey}
+        descriptionView={prov.taskDescription(task.id)}
       />
       {/* Completed/archived projects keep their history reachable from
           the task page too. */}

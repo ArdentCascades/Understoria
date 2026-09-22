@@ -3850,5 +3850,11 @@
       "unreachable": "No se pudo contactar el nodo comunitario. Revisa tu conexión e inténtalo de nuevo.",
       "rejected": "El nodo se negó. Revisa los registros del servidor para más detalles."
     }
+  },
+  "provenance": {
+    "note": "Se muestra en tu idioma: el proyecto partió de una guía y este texto quedó tal cual.",
+    "viewOriginal": "Ver original",
+    "showTranslated": "Ver en tu idioma",
+    "mixedNote": "Lo que quien organiza escribió aparece exactamente como lo escribió — Understoria nunca traduce automáticamente lo que escriben los miembros."
   }
 }

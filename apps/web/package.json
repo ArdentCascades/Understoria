@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "rtl:verify": "node scripts/rtl-verify.mjs"
+    "rtl:verify": "node scripts/rtl-verify.mjs",
+    "generate:task-index": "tsx scripts/generate-task-title-index.mts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -51,6 +52,7 @@
     "postcss": "^8.4.49",
     "sharp": "^0.35.0",
     "tailwindcss": "^3.4.15",
+    "tsx": "^4.23.15",
     "typescript": "^5.6.3",
     "vite": "^8.1.3",
     "vite-plugin-pwa": "^1.3.0",

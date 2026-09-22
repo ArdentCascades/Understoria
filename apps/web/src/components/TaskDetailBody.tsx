@@ -41,6 +41,7 @@ import { suggestSplitting } from "@/lib/taskPresentation";
 import { getTaskTips } from "@/content/taskTips";
 import { usePendingAction } from "@/lib/usePendingAction";
 import type { Project, ProjectTask, Urgency } from "@/types";
+import type { ProvenanceView } from "@/lib/useTemplateProvenance";
 
 // The "act" half of the per-task-page split. Renders everything the
 // slim project-list `TaskCard` deliberately drops: the full edit form,
@@ -72,6 +73,7 @@ export function TaskDetailBody({
   viewerSkills,
   templateId,
   organizerKey,
+  descriptionView,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -111,6 +113,11 @@ export function TaskDetailBody({
    *  organizer's task links render non-tappable like all their
    *  content. */
   organizerKey: string;
+  /** Provenance-verified display view of the description from the
+   *  page's useTemplateProvenance (docs/provenance-translation.md).
+   *  Display only — the stored description keeps driving edits,
+   *  wire payloads, and everything that must stay signed-bytes. */
+  descriptionView?: ProvenanceView;
 }) {
   const { t, i18n } = useTranslation();
   const { showToast } = useToast();
@@ -459,11 +466,13 @@ export function TaskDetailBody({
             // answers for the project's content — without this proxy a
             // pending member could route clickable links through task
             // descriptions, bypassing the gate everywhere else.
-            <Markdown
-              text={task.description}
-              authorKey={organizerKey}
-              className="text-sm text-moss-600 dark:text-moss-300"
-            />
+            <div lang={descriptionView?.lang} dir={descriptionView?.dir}>
+              <Markdown
+                text={descriptionView?.text ?? task.description}
+                authorKey={organizerKey}
+                className="text-sm text-moss-600 dark:text-moss-300"
+              />
+            </div>
           )}
         </div>
         <div className="shrink-0">

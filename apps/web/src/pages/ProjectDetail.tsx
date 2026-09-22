@@ -80,6 +80,11 @@ import { useReducedMotion } from "@/lib/a11y/useReducedMotion";
 import { IconMessages, Sprig } from "@/components/visual";
 import { usePendingAction } from "@/lib/usePendingAction";
 import { TaskCard } from "@/components/TaskCard";
+import { ProvenanceNote } from "@/components/ProvenanceNote";
+import {
+  useTemplateProvenance,
+  type TemplateProvenance,
+} from "@/lib/useTemplateProvenance";
 import { intlLocale } from "@/i18n";
 import type {
   CoOrganizerInvitation,
@@ -129,6 +134,10 @@ export default function ProjectDetailPage() {
           : 2;
     return [...rawTasks].sort((a, b) => rank(a) - rank(b));
   }, [rawTasks, project?.status]);
+  // Provenance-verified display translation for template-derived
+  // text (docs/provenance-translation.md) — one hook per surface,
+  // owning this page's View-original toggle.
+  const prov = useTemplateProvenance(project, tasks);
   // Fields the context doesn't cover — read directly from AppContext.
   const {
     members,
@@ -187,12 +196,17 @@ export default function ProjectDetailPage() {
       .filter((task) => matchesFilter(task, taskFilter, currentMember?.publicKey))
       .filter((task) => {
         if (trimmedQuery === "") return true;
+        // Both the signed text and any provenance-translated display
+        // text match, so what the member sees is findable and what
+        // the organizer wrote stays findable too.
         return matchesQuery(
-          `${task.title} ${task.description ?? ""}`,
+          `${task.title} ${task.description ?? ""} ${
+            prov.taskTitle(task.id)?.text ?? ""
+          } ${prov.taskDescription(task.id)?.text ?? ""}`,
           trimmedQuery,
         );
       });
-  }, [tasks, taskFilter, trimmedQuery, currentMember?.publicKey]);
+  }, [tasks, taskFilter, trimmedQuery, currentMember?.publicKey, prov]);
   // "Mine" pill only renders when the current member is actually
   // carrying something on this project — open-only projects show
   // the three baseline pills instead of a perpetually-empty "Mine."
@@ -634,7 +648,11 @@ export default function ProjectDetailPage() {
                 items={projectMenuItems}
               />
             </div>
-            <h1 className="text-2xl font-bold leading-tight">{project.title}</h1>
+            <h1 className="text-2xl font-bold leading-tight">
+              <span lang={prov.title.lang} dir={prov.title.dir}>
+                {prov.title.text}
+              </span>
+            </h1>
             <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">
               {/* Reuse the existing "Organized by {{name}}" string but
                   render the name as a profile link. Interpolating with
@@ -650,13 +668,16 @@ export default function ProjectDetailPage() {
               </Link>
             </p>
             {project.description && (
-              <Markdown
-                collapsible
-                text={project.description}
-                authorKey={project.organizerKey}
-                className="mt-2 text-sm text-moss-700 dark:text-moss-200"
-              />
+              <div lang={prov.description.lang} dir={prov.description.dir}>
+                <Markdown
+                  collapsible
+                  text={prov.description.text}
+                  authorKey={project.organizerKey}
+                  className="mt-2 text-sm text-moss-700 dark:text-moss-200"
+                />
+              </div>
             )}
+            <ProvenanceNote prov={prov} />
             {currentMember?.publicKey !== project.organizerKey && (
               <div className="mt-3">
                 <Link
@@ -852,6 +873,7 @@ export default function ProjectDetailPage() {
                   onRun={run}
                   searchQuery={debouncedQuery}
                   highlightTaskId={highlightTaskId}
+                  prov={prov}
                 />
                 <div aria-live="polite" aria-atomic="true" className="sr-only">
                   {deepLinkAnnouncement}
@@ -942,6 +964,7 @@ export default function ProjectDetailPage() {
                     onRun={run}
                     searchQuery={debouncedQuery}
                     highlightTaskId={highlightTaskId}
+                    prov={prov}
                   />
                 )}
                 <div aria-live="polite" aria-atomic="true" className="sr-only">
@@ -2066,6 +2089,7 @@ function TaskList({
   onRun,
   searchQuery,
   highlightTaskId,
+  prov,
 }: {
   tasks: readonly ProjectTask[];
   visibleTasks: readonly ProjectTask[];
@@ -2080,6 +2104,9 @@ function TaskList({
    *  (used by the card's FollowsBadge in-page jump); this only adds
    *  the ring. */
   highlightTaskId?: string | null;
+  /** The page's provenance-translation state — display views for
+   *  each row (docs/provenance-translation.md). */
+  prov: TemplateProvenance;
 }) {
   return (
     <ul className="flex flex-col gap-2">
@@ -2108,6 +2135,8 @@ function TaskList({
             searchQuery={searchQuery}
             taskCheckInDays={nodeConfig.taskCheckInDays}
             templateId={project.templateId}
+            titleView={prov.taskTitle(task.id)}
+            descriptionView={prov.taskDescription(task.id)}
           />
         </li>
       ))}
