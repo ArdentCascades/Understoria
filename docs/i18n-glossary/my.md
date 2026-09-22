@@ -203,6 +203,7 @@ review adjudicates first — more of them than fa carried, honestly.
 | dashboard | ⚠ «အသက်» (gloss: အသင်းရဲ့အသက် — the community's breath) | ht's Souf precedent; review confirms or renames |
 | board (posts) | ⚠ «သင်ပုန်း» (the slate) | never ကြော်ငြာ (advert) |
 | post (need/offer) | အသိပေး / «လိုအပ်ချက်» / «ကူညီမယ်» | pills: လိုအပ်ချက်များ / ကူညီမယ့်သူများ ⚠ |
+| push notification (opt-in, docs/notifications.md) | သတိပေးချက် | Deliberately DISTINCT from the post family (အသိပေး/အသိပေးချက်) — the fa/my collision the notifications doc records. သတိပေးချက် is the reminder/alert register the file already uses for "Understoria never sends notifications" (the ics hint) and the spoken purge warnings, so the feature keeps that established word. DON'T: အသိပေးချက် (taken — the post), နိုတီ (loanword). |
 | claim / "In my care" | တာဝန်ယူ / «ကျွန်ုပ်တာဝန်» ⚠ | ကျွန်ုပ် is the one acceptable neutral I-form, sparingly |
 | confirm (exchange ONLY) | အတည်ပြု | rule 7 reservation |
 | check / verify (non-exchange) | စစ်ကြည့် | rule 7; never စစ်ဆေး |

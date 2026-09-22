@@ -16,6 +16,7 @@ import { LanguageSection } from "@/components/LanguageSection";
 import { ReadAloudSection } from "@/components/ReadAloudSection";
 import { TranscriptionSection } from "@/components/TranscriptionSection";
 import { AppearanceSection } from "@/components/AppearanceSection";
+import { NotificationsSection } from "@/components/NotificationsSection";
 import { NodeSection } from "@/components/NodeSection";
 import { ReseedSection } from "@/components/ReseedSection";
 import { RecoveryKitCard } from "@/components/RecoveryKitCard";
@@ -99,6 +100,11 @@ export default function SettingsPage() {
         <TranscriptionSection />
 
         <AppearanceSection />
+
+        {/* The opt-in notifications switchboard (docs/notifications.md
+            — quiet by default): device zone because the choices are
+            this device's alone; the node learns category picks only. */}
+        <NotificationsSection />
 
         <BlockedContactsPanel />
 

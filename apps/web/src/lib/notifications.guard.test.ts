@@ -51,9 +51,9 @@ describe("notifications guard — quiet by default", () => {
     // Browser permission may be requested ONLY at the moment a member
     // flips their first category on, from Settings — never during
     // onboarding, never on app open (docs/notifications.md decision
-    // 2). When the Settings PR lands its opt-in flow, IT joins this
-    // allowlist; nothing else ever does.
-    const allowed = new Set<string>([]);
+    // 2). pushBrowser.ts is that flow's one API surface; nothing
+    // else ever joins this list.
+    const allowed = new Set<string>(["src/lib/pushBrowser.ts"]);
     const offenders = walk(join(WEB_ROOT, "src"))
       .filter((f) => {
         const src = readFileSync(f, "utf8");

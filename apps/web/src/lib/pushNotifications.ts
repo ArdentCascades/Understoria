@@ -180,6 +180,29 @@ async function nodeCall(
 }
 
 /**
+ * The node's VAPID public key — what the browser subscription is
+ * created against. Null when this device has no community node (or
+ * it can't be reached), which the Settings surface states plainly.
+ */
+export async function fetchVapidKey(
+  deps: NodeCallDeps = {},
+): Promise<string | null> {
+  const config = await readSubmitConfig();
+  if (!config.enabled || config.url.trim() === "") return null;
+  const doFetch = deps.fetchImpl ?? fetch;
+  try {
+    const res = await doFetch(`${config.url}/push/vapid-key`);
+    if (!res.ok) return null;
+    const { publicKey } = (await res.json()) as { publicKey?: unknown };
+    return typeof publicKey === "string" && publicKey !== ""
+      ? publicKey
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Register (or re-register) this device's subscription with the
  * node for the given categories. The caller (Settings, later) has
  * already obtained browser permission and a PushSubscription; this

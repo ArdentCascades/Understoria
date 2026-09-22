@@ -98,7 +98,7 @@
       "warning": "Estas palavras são a chave inteira pelos próximos 15 minutos — quem digitar primeiro fica com a sua identidade. Não diga as palavras perto de outras pessoas e nunca envie por mensagem.",
       "afterImport": "Quando o dispositivo novo disser que entrou, toque em Concluído. O código morre sozinho quando o tempo termina, e só funciona uma vez.",
       "qrInstead": "Dispositivo novo sem internet, ou prefere que nada fique guardado no nó (o servidor da sua comunidade)? Mostre um QR em vez disso",
-      "fallbackNotice": "Não deu para alcançar o nó da sua comunidade (o servidor compartilhado) agora — usando o método por QR no lugar."
+      "fallbackNotice": "Não deu para alcançar o servidor da sua comunidade (o servidor compartilhado) agora — usando o método por QR no lugar."
     },
     "expired": {
       "title": "O tempo acabou.",
@@ -2604,6 +2604,38 @@
     "removeModel": "Remover o modelo deste dispositivo",
     "verifyFailed": "O modelo baixado não bateu com a soma de verificação que o nó declarou, então foi recusado. Avise quem opera o nó — isso não deveria acontecer.",
     "downloadFailed": "O download não terminou. Confira sua conexão e tente de novo."
+  },
+  "push": {
+    "title": "Notificações",
+    "intro": "O Understoria nunca vibra sozinho, e muita gente nunca liga as notificações — o app foi feito para ser aberto quando você escolher, e o trilho de atenção estará esperando. Se há momentos em que você quer ser interrompido — um turno em que se inscreveu, alguém que nomeou você como guardião — é exatamente isso que você escolhe aqui.",
+    "unsupported": "Este navegador ou aparelho não consegue receber notificações push. Nada se perde — tudo o que precisa de você está no trilho de atenção quando você abre o app.",
+    "noNode": "As notificações são enviadas pelo servidor da sua comunidade, e este aparelho não está ligado a nenhum — então não há nada para ligar aqui ainda.",
+    "locked": "Este aparelho está bloqueado. Desbloqueie antes de mudar as notificações.",
+    "whatTitle": "O que pode chegar até você",
+    "catShift": "Lembretes de turno",
+    "catShiftDesc": "Antes de começar um turno em que você se inscreveu.",
+    "catGuardian": "Pedidos de guardião",
+    "catGuardianDesc": "Quando alguém que nomeou você como guardião precisa da sua ajuda para voltar a entrar.",
+    "catConfirm": "Esperando a sua confirmação",
+    "catConfirmDesc": "Quando uma troca está pronta e só falta a sua palavra.",
+    "disclosureTitle": "Antes de ligar isto",
+    "disclosure": "Os avisos push passam pelo relé do fabricante do seu navegador — Google, Mozilla ou Apple, conforme o navegador. O relé não consegue lê-los (cada um vai selado para este aparelho), mas vê que algo pequeno chegou, e quando. O servidor da sua comunidade só fica sabendo quais tipos você escolheu — nunca o texto da sua tela de bloqueio, nunca uma mensagem. Se esse rastro não é um custo que você queira, pule: o app é completo sem isso.",
+    "disclosureContinue": "Entendi — pergunte ao navegador",
+    "disclosureCancel": "Agora não",
+    "permissionDenied": "Este navegador está com as notificações bloqueadas para o Understoria, então nada pode aparecer. Se mudar de ideia, permita nas configurações do site no navegador e volte aqui — o app não vai perguntar de novo por conta própria.",
+    "lockTitle": "Na sua tela de bloqueio",
+    "tierSilent": "Só um sinal quieto — sem palavras, sem som.",
+    "tierGeneric": "Um toque simples — “Algo precisa de você”, nunca o quê nem quem.",
+    "tierNamed": "Dizer o tipo — “Um turno está chegando” — mas nunca um nome, nunca uma mensagem.",
+    "titleLabel": "Como as notificações se apresentam",
+    "titleHint": "Por padrão elas dizem “Understoria”. Escolha outra palavra se preferir que o app não se nomeie na sua tela.",
+    "turnAllOff": "Desligar todas as notificações",
+    "allOff": "Está tudo desligado. Nada vai vibrar.",
+    "saveFailed": "Não deu para alcançar o servidor da sua comunidade, então essa mudança não ficou salva. Tente de novo quando estiver conectado.",
+    "bodyGeneric": "Algo precisa de você",
+    "bodyShift": "Um turno em que você se inscreveu está chegando",
+    "bodyGuardian": "Um pedido de guardião espera por você",
+    "bodyConfirm": "Uma troca espera a sua confirmação"
   },
   "betaNotice": {
     "dismiss": "Entendi",
