@@ -29,9 +29,9 @@ export const DESIGN_PRINCIPLES_SW: readonly DesignPrinciple[] = [
   },
   {
     "id": "no-notifications",
-    "title": "Hakuna arifa za kukuita",
-    "statement": "Programu inakuonyesha kinachohitaji umakini wako unapoifungua. Hakuna mtetemo, hakuna namba zinazokufukuza kutoka skrini hadi skrini, hakuna igizo la uharaka.",
-    "example": "Waandaaji wa kusaidiana wa enzi za COVID walieleza kwa wingi kwamba zana zinazoendeshwa kwa arifa ziliwachosha kabisa kwanza wanajumuiya wenye bidii zaidi — watu ambao jumuiya hazingeweza kumudu kuwapoteza. Uzoefu huo, si utafiti rasmi, ndio msingi wa kanuni hii."
+    "title": "Kimya ndiyo kawaida",
+    "statement": "Hakuna kinachopiga kelele kamwe ili kukurudisha. Tunakuonyesha kinachohitaji usikivu wako unapofungua programu; arifa ipo tu kama uliiomba mwenyewe, kwa mambo yenye mtu au saa upande wa pili — na kila kitu huja kimezimwa.",
+    "example": "Waandaaji wa kusaidiana wa enzi za COVID walieleza kwa wingi kwamba zana zinazoendeshwa kwa arifa ziliwachosha kabisa kwanza wanajumuiya wenye bidii zaidi — watu ambao jumuiya hazingeweza kumudu kuwapoteza. Uzoefu huo, si utafiti rasmi, ndio msingi wa kanuni hii. Vikumbusho vya hiari vilipofika, msingi huu ulirekebishwa, haukufutwa: mbinu za kuvuta watu bado zimepigwa marufuku — kilichobadilika ni kwamba aliyeomba kuamshwa kwa zamu yake sasa anaweza kuamshwa."
   },
   {
     "id": "solidarity-not-shame",

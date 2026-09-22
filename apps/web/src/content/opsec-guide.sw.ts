@@ -19,7 +19,8 @@ export const OPSEC_GUIDE_SW: readonly GuideSection[] = [
     "id": "device",
     "title": "Kwenye kifaa chako",
     "body": [
-      "Funga simu yako kwa PIN ya tarakimu sita au maneno ya siri imara. Washa usimbaji wa diski nzima (kwenye kila simu ya kisasa tayari umewashwa tangu mwanzo; kwenye laptop tumia FileVault, BitLocker, au LUKS). Hakikisha mfumo wa kifaa chako unasasishwa kila mara — mashambulizi mengi ya ulimwengu halisi hutumia hitilafu ambazo tayari zimeshazibwa."
+      "Funga simu yako kwa PIN ya tarakimu sita au maneno ya siri imara. Washa usimbaji wa diski nzima (kwenye kila simu ya kisasa tayari umewashwa tangu mwanzo; kwenye laptop tumia FileVault, BitLocker, au LUKS). Hakikisha mfumo wa kifaa chako unasasishwa kila mara — mashambulizi mengi ya ulimwengu halisi hutumia hitilafu ambazo tayari zimeshazibwa.",
+      "Arifa huja zimezimwa, na wanachama wengi huziacha hivyo. Ukiwasha baadhi (Mipangilio → Arifa), chagua skrini yako ya kufunga inaruhusiwa kusema nini: viwango vya kimya havionyeshi chochote, au “kuna kinachokuhitaji” tu; kiwango cha kutaja kinasema ni aina gani — na maudhui ya ujumbe hayaonekani kamwe kwenye arifa yoyote, kwa kiwango chochote. Unaweza pia kubadilisha arifa zijiite nini, ili jina la programu hii lisilazimike kuonekana kwenye skrini ambayo mtu mwingine anaweza kuitupia macho."
     ]
   },
   {

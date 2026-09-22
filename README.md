@@ -202,13 +202,16 @@ in the [Threat Model](docs/threat-model.md).
 
 <!-- The honest version. Enforced by apps/web/src/lib/noNotifications.guard.test.ts,
      which fails if a Notification/push/badge/vibrate call site or a push
-     dependency appears. The costs below are real and were found by
-     auditing the code, not by asking the code to agree with us. -->
+     dependency appears anywhere outside the few files the opt-in design
+     (docs/notifications.md) names, each pinned to its one capability.
+     The costs below are real and were found by auditing the code, not
+     by asking the code to agree with us. -->
 
-Most software of this kind reaches for your phone. Understoria doesn't,
-and that is the single biggest way it departs from what you are used to.
-It's worth being precise about what that means, because the polite
-version would be marketing.
+Most software of this kind reaches for your phone. Understoria doesn't —
+not unless you ask it to, and by default you haven't. That is the single
+biggest way it departs from what you are used to, and it's worth being
+precise about what it means, because the polite version would be
+marketing.
 
 **What it does instead.** The top of the board is a rail listing what
 actually needs you — someone finished work and is waiting on you to
@@ -221,28 +224,44 @@ that is the only time you see it.
 the most committed organizers first — the people a community can least
 afford to lose — and that a badge is a claim on your attention that you
 never agreed to. That is a belief this project holds, not a finding it
-can cite; the principle behind it is `no-notifications`, and you can read
-it in the app, on the surfaces where a notification would otherwise have
-been.
+can cite; the principle behind it is `no-notifications` — *quiet by
+default* — and you can read it in the app, on the surfaces where a
+notification would otherwise have been.
+
+**What you can ask for.** There are exactly three notifications a member
+may turn on, all off until they do: a reminder before a shift they
+signed up for, a guardian request from someone whose recovery they
+agreed to help, and work waiting on their confirmation. Each has a
+person or a clock on the other end; none is the app wanting you back.
+You choose what your lock screen may say (nothing, a bare "something
+needs you", or the kind), and message contents never appear in any
+notification, at any level — there is deliberately no message
+notification at all, because your block list never leaves your device
+and a notification your device filters is one an abuser can still make
+buzz. The permission prompt appears once, from Settings, after the costs
+are stated — never at onboarding, never again after a no.
 
 **What it does not mean.** The app does hold an open connection to your
 community's node while you're using it. That connection carries no
 record, no sender and no subject — it is a content-free "something
 changed" tap that makes the screen you're already looking at refresh.
-There are no push notifications; there is server push. Those are
-different sentences, and the second one is also true.
+By default there are no push notifications; there is server push. Those
+are different sentences, and the second one is also true.
 
 ### What it costs
 
 Four things, plainly, because an organizer deciding whether to trust
 this deserves them before they find out the hard way.
 
-**It is not a rapid-response tool.** How fast someone learns about
-something is exactly how soon they next open the app, which for a
-quieter member can be days. If your community needs to reach people
-within hours — an eviction defence, a raid response, a shift that just
-lost its only cover — keep the phone tree and the group thread.
-Understoria is the layer underneath that, not the alarm.
+**It is not a rapid-response tool.** For anyone who hasn't opted in —
+the default, and for many members the permanent state — how fast they
+learn about something is exactly how soon they next open the app, which
+for a quieter member can be days. Even with every notification on, no
+message ever buzzes and nothing outside the three named kinds exists to
+buzz. If your community needs to reach people within hours — an eviction
+defence, a raid response, a shift that just lost its only cover — keep
+the phone tree and the group thread. Understoria is the layer underneath
+that, not the alarm.
 
 **Screen-reader users are announced to.** The rail is a live region, so
 a new item arriving while the app is open is spoken. "You only see it

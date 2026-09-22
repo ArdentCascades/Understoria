@@ -19,7 +19,8 @@ export const OPSEC_GUIDE_ID: readonly GuideSection[] = [
     "id": "device",
     "title": "Di perangkatmu",
     "body": [
-      "Kunci ponselmu dengan PIN enam digit atau frasa sandi yang kuat. Nyalakan enkripsi seluruh disk (setiap ponsel modern sudah menyalakannya sejak bawaan; di laptop pakai FileVault, BitLocker, atau LUKS). Jaga sistem operasimu selalu terbarui — kebanyakan serangan di dunia nyata memanfaatkan celah yang sebenarnya sudah ditambal."
+      "Kunci ponselmu dengan PIN enam digit atau frasa sandi yang kuat. Nyalakan enkripsi seluruh disk (setiap ponsel modern sudah menyalakannya sejak bawaan; di laptop pakai FileVault, BitLocker, atau LUKS). Jaga sistem operasimu selalu terbarui — kebanyakan serangan di dunia nyata memanfaatkan celah yang sebenarnya sudah ditambal.",
+      "Notifikasi datang dalam keadaan mati, dan banyak anggota membiarkannya begitu. Kalau kamu menyalakan beberapa (Pengaturan → Notifikasi), pilih apa yang boleh dikatakan layar kuncimu: tingkat senyap tidak menampilkan apa-apa, atau sekadar “ada yang membutuhkanmu”; tingkat bernama menyebut jenisnya — dan isi pesan tidak pernah muncul di notifikasi mana pun, di tingkat mana pun. Kamu juga bisa mengubah notifikasi menyebut dirinya apa, supaya nama aplikasi ini tak pernah harus tampil di layar yang mungkin dilirik orang lain."
     ]
   },
   {

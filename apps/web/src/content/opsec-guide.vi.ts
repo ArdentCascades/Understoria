@@ -28,6 +28,7 @@ export const OPSEC_GUIDE_VI: readonly GuideSection[] = [
         "LUKS). Giữ hệ điều hành luôn được cập nhật — phần lớn các " +
         "vụ tấn công ngoài đời khai thác những lỗi đã có bản vá từ " +
         "lâu.",
+      "Thông báo tắt sẵn, và nhiều thành viên cứ để vậy. Nếu bật vài loại (Cài đặt → Thông báo), hãy chọn màn hình khóa được nói gì: các mức lặng lẽ không hiện gì, hoặc chỉ một câu “có việc cần bạn”; mức nêu loại sẽ nói đó là loại nào — còn nội dung tin nhắn thì không bao giờ xuất hiện trong bất kỳ thông báo nào, ở bất kỳ mức nào. Bạn cũng đổi được cách thông báo tự xưng, để tên ứng dụng này không bao giờ phải hiện trên màn hình mà người khác có thể liếc thấy.",
     ],
   },
   {

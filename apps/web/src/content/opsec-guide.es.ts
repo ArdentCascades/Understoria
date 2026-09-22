@@ -28,6 +28,7 @@ export const OPSEC_GUIDE_ES: readonly GuideSection[] = [
         "FileVault, BitLocker o LUKS). Mantén tu sistema operativo " +
         "actualizado — la mayoría de los ataques reales explotan " +
         "errores que ya fueron corregidos.",
+      "Las notificaciones vienen apagadas, y hay quien las deja así. Si enciendes alguna (Ajustes → Notificaciones), elige qué puede decir tu pantalla de bloqueo: los niveles discretos no muestran nada, o apenas un «algo te necesita»; el nivel con nombre dice de qué tipo es — y el contenido de los mensajes no aparece jamás en ninguna notificación, en ningún nivel. También puedes cambiar cómo se presentan, para que el nombre de esta app nunca tenga que verse en una pantalla que otra persona pueda mirar.",
     ],
   },
   {

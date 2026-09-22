@@ -29,9 +29,9 @@ export const DESIGN_PRINCIPLES_FIL: readonly DesignPrinciple[] = [
   },
   {
     "id": "no-notifications",
-    "title": "Walang push notification",
-    "statement": "Kapag binuksan mo ang app, ipinapakita nito ang nangangailangan ng atensyon mo. Walang pag-vibrate, walang bilang na humahabol sa iyo mula screen hanggang screen, walang palabas na pagkaapura.",
-    "example": "Malawakang ikinuwento ng mga nag-aayos ng tulungan noong panahon ng COVID na ang mga kasangkapang hatak ng notification ang unang umuubos sa kanilang pinakatapat na miyembro — ang mga taong pinakahindi kayang mawala ng komunidad. Ang karanasang iyon, hindi isang pormal na pag-aaral, ang pinagtatayuan ng prinsipyong ito."
+    "title": "Tahimik bilang default",
+    "statement": "Walang kailanman tumutunog para hilahin ka pabalik. Ipinapakita namin ang nangangailangan ng pansin mo kapag binuksan mo ang app; may notipikasyon lang kung ikaw mismo ang humingi nito, para lang sa mga bagay na may tao o orasan sa kabilang dulo — at lahat ay nakapatay pagdating.",
+    "example": "Malawakang ikinuwento ng mga nag-aayos ng tulungan noong panahon ng COVID na ang mga kasangkapang hatak ng notification ang unang umuubos sa kanilang pinakatapat na miyembro — ang mga taong pinakahindi kayang mawala ng komunidad. Ang karanasang iyon, hindi isang pormal na pag-aaral, ang pinagtatayuan ng prinsipyong ito. Nang dumating ang mga paalalang pinili mo mismo, sinusugan ang prinsipyo, hindi binawi: bawal pa rin ang mga pang-akit na mekanismo — ang nagbago lang, puwede nang gisingin ang miyembrong humiling na gisingin para sa turno niya."
   },
   {
     "id": "solidarity-not-shame",
