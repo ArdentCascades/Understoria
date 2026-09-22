@@ -11,6 +11,7 @@
  */
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
+import { useProvenanceText } from "@/lib/useTemplateProvenance";
 import type { MyOrganizedProjectsView, OrganizedProject } from "@/lib/myProjects";
 import { computeProjectMomentum } from "@/lib/projectMomentum";
 import { ProjectMomentumChip } from "@/components/ProjectMomentumChip";
@@ -46,6 +47,7 @@ function ProjectCard({
   exchanges: readonly Exchange[];
 }) {
   const { t } = useTranslation();
+  const provText = useProvenanceText();
   const {
     project,
     role,
@@ -69,7 +71,7 @@ function ProjectCard({
             to={`/project/${project.id}`}
             className="underline-offset-2 hover:underline focus-visible:underline"
           >
-            {project.title}
+            {provText.projectTitle(project.templateId, project.title)}
           </Link>
         </h2>
         {/* No separate status chip: the momentum chip already names

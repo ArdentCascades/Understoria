@@ -31,6 +31,10 @@ import { useApp } from "@/state/AppContext";
 import { trustStatusWithInvites, type TrustStatus } from "@/lib/vouch";
 import { PostCard } from "@/components/PostCard";
 import { ProjectCard } from "@/components/ProjectCard";
+import {
+  useProjectListProvenance,
+  type ProjectListProvenance,
+} from "@/lib/useTemplateProvenance";
 import { AttentionSection } from "@/components/AttentionSection";
 import { EmptyState } from "@/components/EmptyState";
 import { ContextualHint } from "@/components/ContextualHint";
@@ -308,6 +312,10 @@ export default function BoardPage() {
     return ids;
   }, [onlyNeedsMoreHands, projectTasks, nodeConfig]);
 
+  // Provenance-translated card views for every project (not just the
+  // visible slice) so the search haystack below can match the
+  // translated text of a project the query is about to reveal.
+  const listProv = useProjectListProvenance(projects);
   const visibleProjects = useMemo(() => {
     const q = debouncedQuery.trim();
     return projects.filter((p) => {
@@ -322,11 +330,21 @@ export default function BoardPage() {
       if (onlyWithOpenTasks && !hasOpenTasks(p.id, projectTasks)) return false;
       if (onlyNeedsMoreHands && !needsMoreHandsIds?.has(p.id)) return false;
       if (onlyHourSized && !hasHourSizedTasks(p.id, projectTasks)) return false;
-      if (q !== "" && !matchesQuery(`${p.title} ${p.description}`, q))
+      // Signed text AND the provenance-translated display text both
+      // match: what the member sees is findable, and what the
+      // organizer wrote stays findable (docs/provenance-translation.md).
+      if (
+        q !== "" &&
+        !matchesQuery(
+          `${p.title} ${p.description} ${listProv.searchText(p.id)}`,
+          q,
+        )
+      )
         return false;
       return true;
     });
   }, [
+    listProv,
     projects,
     projectTasks,
     projectCategoryFilter,
@@ -1046,6 +1064,7 @@ export default function BoardPage() {
               onClearFilters={resetProjectFilters}
               panelOpen={postPanelOpen}
               tendedScope={scope === "tended"}
+              prov={listProv}
             />
 
             {/* Bottom jump-offs, grouped by JOB into two tiers so
@@ -1215,6 +1234,7 @@ function ProjectList({
   onClearFilters,
   panelOpen,
   tendedScope,
+  prov,
 }: {
   /** Projects to render. Already filtered by the parent — this
    *  component does NOT re-apply category / status / open-task
@@ -1233,6 +1253,9 @@ function ProjectList({
    *  Clear-filters button on the filter-empty state so a member
    *  who narrowed too far has a one-tap escape. */
   onClearFilters: () => void;
+  /** Provenance-translated display views for the cards
+   *  (docs/provenance-translation.md). */
+  prov: ProjectListProvenance;
   /** True while the docked post panel is open — the reading column
    *  is narrower, so the card grid dials its columns back. */
   panelOpen: boolean;
@@ -1334,6 +1357,8 @@ function ProjectList({
               openTaskCount={counts.open}
               searchQuery={searchQuery}
               careLine={careByProject.get(p.id)}
+              titleView={prov.view(p.id)?.title}
+              descriptionView={prov.view(p.id)?.description}
             />
           </li>
         );

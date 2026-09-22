@@ -12,6 +12,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
+import { useProvenanceText } from "@/lib/useTemplateProvenance";
 import { intlLocale } from "@/i18n";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/db/database";
@@ -445,6 +446,7 @@ function AskedRow({
   memberNames: Map<string, string>;
 }) {
   const { t } = useTranslation();
+  const provText = useProvenanceText();
   const { comment, task, project } = item;
   const asker =
     memberNames.get(comment.authorKey) ?? t("common.memberFallback");
@@ -456,7 +458,7 @@ function AskedRow({
       >
         <span className="flex flex-wrap items-center gap-2">
           <span className="min-w-0 flex-1 truncate text-sm font-medium">
-            {task.title}
+            {provText.taskTitle(project.templateId, task.title)}
           </span>
           <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
             {formatRelativeTime(comment.createdAt)}

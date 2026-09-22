@@ -17,6 +17,10 @@ import {
   type GatheringSlidesInput,
 } from "./gatheringSlides";
 import type { Event, Member, Post, Project, ProjectTask } from "@/types";
+import {
+  TEMPLATE_NAMES,
+  TEMPLATE_TASK_NAMES,
+} from "@/content/taskTitleIndex";
 
 const NOW = 1_000_000_000_000;
 const ORIGIN = "https://hub.example";
@@ -311,5 +315,71 @@ describe("absoluteUrl", () => {
   it("joins origin and path, tolerating a trailing slash", () => {
     expect(absoluteUrl("https://x.test", "/a")).toBe("https://x.test/a");
     expect(absoluteUrl("https://x.test/", "/a")).toBe("https://x.test/a");
+  });
+});
+
+describe("provenance-verified titles on task slides", () => {
+  // docs/provenance-translation.md: with a viewer locale, a task
+  // slide's titles render in that language when the stored text
+  // byte-matches the playbook corpus; anything edited (and every
+  // call without a locale) keeps the stored bytes.
+  const TID = "community-fridge";
+  const filName = TEMPLATE_NAMES[TID].fil;
+  const filTask0 = TEMPLATE_TASK_NAMES[TID].fil[0];
+
+  function inputWith(over: Partial<GatheringSlidesInput> = {}) {
+    return baseInput({
+      projects: [
+        project({
+          id: "p1",
+          status: "active",
+          templateId: TID,
+          title: filName,
+        }),
+      ],
+      projectTasks: [
+        taskRow({
+          id: "t1",
+          projectId: "p1",
+          status: "open",
+          title: filTask0,
+        }),
+      ],
+      ...over,
+    });
+  }
+
+  it("translates unmodified template titles for the viewer locale", () => {
+    const task = buildGatheringSlides(inputWith({ locale: "en" })).find(
+      (s) => s.kind === "task",
+    );
+    expect(task).toMatchObject({
+      taskTitle: TEMPLATE_TASK_NAMES[TID].en[0],
+      projectTitle: TEMPLATE_NAMES[TID].en,
+    });
+  });
+
+  it("keeps stored bytes without a locale, and for edited titles", () => {
+    const raw = buildGatheringSlides(inputWith()).find(
+      (s) => s.kind === "task",
+    );
+    expect(raw).toMatchObject({
+      taskTitle: filTask0,
+      projectTitle: filName,
+    });
+    const edited = buildGatheringSlides(
+      inputWith({
+        locale: "en",
+        projectTasks: [
+          taskRow({
+            id: "t1",
+            projectId: "p1",
+            status: "open",
+            title: `${filTask0}!`,
+          }),
+        ],
+      }),
+    ).find((s) => s.kind === "task");
+    expect(edited).toMatchObject({ taskTitle: `${filTask0}!` });
   });
 });

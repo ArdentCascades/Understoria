@@ -58,7 +58,7 @@ function useViewportMin(): number {
 }
 
 export default function PresentPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const app = useApp();
   const navigate = useNavigate();
   const reduced = useReducedMotion();
@@ -94,6 +94,7 @@ export default function PresentPage() {
     currentMemberKey: app.currentMember?.publicKey ?? null,
     now,
     anonymousName: anonymous,
+    locale: i18n.resolvedLanguage,
   };
   const slides = buildGatheringSlides({
     ...baseInput,

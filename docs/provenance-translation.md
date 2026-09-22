@@ -1,6 +1,9 @@
 # Provenance-verified display translation
 
-Status: PHASE 1 SHIPPED (project page + task page). Phases below.
+Status: PHASE 1 SHIPPED (project page + task page). PHASE 2a
+SHIPPED (list surfaces: board project cards, my-work rows, the
+calendar's project filter, gathering-screen task slides — plus the
+board search rule below). Remaining phases at the end.
 
 ## The problem
 
@@ -67,6 +70,14 @@ Substitution and disclosure are two halves of one contract:
   original carries the matched source locale's `lang` attribute and
   bidi isolation, so RTL/LTR mixing and the per-language
   line-height floors behave.
+- **Compact list surfaces** (cards, rows, dropdown options, wall
+  slides) substitute with NO inline marker — a badge per row would
+  be the per-string noise this design refuses. The contract holds
+  because every such row links to (or QR-opens) the project or task
+  page, where the note and the toggle live one tap away. Board
+  search matches BOTH the signed text and the substituted display
+  text, so what the member sees is findable and what the organizer
+  wrote stays findable.
 - When a surface mixes substituted and organizer-authored text, the
   note adds the second half: what the organizer wrote themselves
   appears exactly as written — the app never machine-translates
@@ -125,12 +136,22 @@ Substitution and disclosure are two halves of one contract:
 - **Fuzzy-match creep**: byte-exact or nothing is a NEVER, stated
   here so a future "optimization" has to argue with this document.
 
-## Phase 2 (not in this change)
+## Phase 2a (shipped)
+
+Board project cards (title + description via a list-level hook —
+one candidate-bundle load per list, views handed to cards as
+props), My-work task and project rows, MyTasks group headers, the
+calendar's project-filter options, and gathering-screen task
+slides (`buildGatheringSlides` takes an optional viewer `locale`;
+omitting it keeps the stored text for non-UI callers). Board
+search matches signed + substituted text per the rule above. All
+compact surfaces are marker-free by the one-tap-away contract; the
+guard test's allowlist names each one.
+
+## Remaining phases (not yet shipped)
 
 - Historical wording sets in the generated index (pre-native-review
   prerequisite — ship before the first reviewed-language reword).
-- Board/MyWork/calendar/gathering-screen substitution + the search
-  index decision.
 - FAQ + member-guide entries stating the rule ("the app translates
   its own words, never yours") — content-tier, so it rides the
   full 18-language content pipeline as its own change.
