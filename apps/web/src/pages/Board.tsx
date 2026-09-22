@@ -53,7 +53,7 @@ import {
   projectNeedsMoreHands,
 } from "@/lib/projectFilter";
 import { parseTabParam, tabToParam, type BoardTab } from "@/lib/boardTab";
-import { CATEGORY_META } from "@/lib/categories";
+import { CATEGORY_META, projectCategoryMeta } from "@/lib/categories";
 import { SETTING_KEYS } from "@/db/database";
 import { PostFilterRail } from "@/components/board/PostFilterRail";
 import { ProjectFilterRail } from "@/components/board/ProjectFilterRail";
@@ -478,12 +478,14 @@ export default function BoardPage() {
       ? [
           {
             id: "projectCategory",
-            // The three project-only extension categories mirror the
-            // inline <option> labels in ProjectFilterRail (they have
-            // no categories.* keys — see the note there).
-            label:
-              PROJECT_EXTENSION_CATEGORY_LABELS[projectCategoryFilter] ??
-              `${CATEGORY_META[projectCategoryFilter as Category].emoji} ${t(`categories.${projectCategoryFilter}`)}`,
+            // projectCategoryMeta is total over every project
+            // category, the three project-only extensions included —
+            // and categories.* keys exist for all of them in every
+            // locale (a hand-kept English label map here shipped an
+            // untranslated filter chip).
+            label: `${projectCategoryMeta(projectCategoryFilter).emoji} ${t(
+              `categories.${projectCategoryMeta(projectCategoryFilter).id}`,
+            )}`,
             onRemove: () => setProjectCategoryFilter(""),
           },
         ]
@@ -1216,14 +1218,6 @@ function boardPrintParams(
 // pattern. The board-calm reasoning (ONE pill disclosure at every
 // width, chips keep applied state visible and one-tap removable,
 // count as plain label text — no badge, no dot) travels with them.
-
-// Project-only extension categories (no `categories.*` i18n keys —
-// they mirror ProjectFilterRail's inline <option> labels).
-const PROJECT_EXTENSION_CATEGORY_LABELS: Record<string, string> = {
-  infrastructure: "\u{1F3D7}\uFE0F Infrastructure",
-  organizing: "\u{1F4CB} Organizing",
-  mutual_aid_drive: "\u{1F49B} Mutual aid drive",
-};
 
 function ProjectList({
   projects,

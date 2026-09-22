@@ -19,7 +19,11 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { useTranslation } from "react-i18next";
-import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
+import {
+  ALL_CATEGORIES,
+  CATEGORY_META,
+  PROJECT_CATEGORY_META,
+} from "@/lib/categories";
 import { ToggleChip } from "@/components/board/ToggleChip";
 import type { Project, ProjectCategory } from "@/types";
 
@@ -91,14 +95,18 @@ export function ProjectFilterRail({
             {CATEGORY_META[c].emoji} {t(`categories.${c}`)}
           </option>
         ))}
-        {/* Project-only extension categories. Mirrors the
-            hardcoded options in ProjectNew.tsx — these three
-            don't have entries in the `categories.*` i18n
-            namespace (post types never use them), so they're
-            written out inline rather than gaining new keys. */}
-        <option value="infrastructure">🏗️ Infrastructure</option>
-        <option value="organizing">📋 Organizing</option>
-        <option value="mutual_aid_drive">💛 Mutual aid drive</option>
+        {/* Project-only extension categories, same rendering as
+            ProjectNew's picker. (An earlier note here claimed these
+            three had no categories.* keys and hardcoded English —
+            the keys exist in all eighteen locales, and the
+            hardcoding shipped an untranslated dropdown tail.) */}
+        {(["infrastructure", "organizing", "mutual_aid_drive"] as const).map(
+          (c) => (
+            <option key={c} value={c}>
+              {PROJECT_CATEGORY_META[c].emoji} {t(`categories.${c}`)}
+            </option>
+          ),
+        )}
       </select>
       <label className="sr-only" htmlFor="project-status-filter">
         {t("board.projectFilters.status.ariaLabel")}
