@@ -76,6 +76,16 @@ const ALLOWED: Readonly<Record<string, readonly string[]>> = {
   // "pushManager" too, which is why the entry exists per-file, not
   // per-pattern-everywhere.
   "apps/web/src/lib/panic.ts": ["registration.pushManager"],
+  // THE browser half: the one file that may prompt for permission
+  // and create a subscription — from the Settings flow alone, after
+  // the disclosure, never re-asking a denial (doc decision 2). The
+  // Settings component composes it and touches no API itself.
+  "apps/web/src/lib/pushBrowser.ts": [
+    "notification permission prompt",
+    "PushManager",
+    "registration.pushManager",
+    "VAPID application server key",
+  ],
 };
 
 /** Guard tests that name the forbidden patterns as literals. */

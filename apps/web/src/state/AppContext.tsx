@@ -403,6 +403,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, [ready]);
 
+  // Push-subscription TTL feed (docs/notifications.md): a member who
+  // opted into notifications renews their node row on app open,
+  // throttled inside the lib to once a day. For the (default) member
+  // with nothing enabled it is one tiny local read and no network,
+  // and failure is silent: an expired row just means the Settings
+  // surface re-subscribes on its next visit.
+  useEffect(() => {
+    if (!ready || !currentMemberKey) return;
+    void import("@/lib/pushNotifications").then(
+      ({ renewPushSubscriptionOnOpen }) =>
+        renewPushSubscriptionOnOpen(currentMemberKey).catch(() => {}),
+    );
+  }, [ready, currentMemberKey]);
+
   // Federation sync — pull cross-node records from the community node
   // on startup AND on a steady interval, so long-lived tabs and
   // installed apps converge without a reload (project & task state
