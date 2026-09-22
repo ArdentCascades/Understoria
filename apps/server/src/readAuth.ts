@@ -65,8 +65,23 @@ export const READ_AUTH_MAX_SKEW_MS = 10 * 60 * 1000;
  *  - /device-link, /link-request: a brand-new device has no identity
  *    yet; those surfaces authenticate by unguessable ids/ciphertext
  *    and carry their own TTLs and caps (docs/device-pairing.md §6).
+ *  - /push/vapid-key: the node's VAPID PUBLIC key, open like /config
+ *    by the notifications contract (docs/notifications.md) — it
+ *    ships inside every push the browser vendor relays, discloses
+ *    nothing about any member, and the Settings probe reads it with
+ *    a bare fetch. EXACT path only: every /push/subscriptions write
+ *    stays member-signed, and any future push GET is deny-by-default
+ *    like everything else. (Field bug: this entry was missing, so
+ *    read-auth nodes answered member_read_required and Settings told
+ *    members their updated server "doesn't offer notifications".)
  */
-const OPEN_PATH_PREFIXES = ["/health", "/config", "/device-link", "/link-request"];
+const OPEN_PATH_PREFIXES = [
+  "/health",
+  "/config",
+  "/device-link",
+  "/link-request",
+  "/push/vapid-key",
+];
 
 export interface MembershipResolver {
   isMember(publicKey: string): boolean;
