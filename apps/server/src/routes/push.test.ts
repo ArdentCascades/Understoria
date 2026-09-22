@@ -250,6 +250,46 @@ describe("push subscription lifecycle", () => {
   });
 });
 
+describe("under read-auth enforcement (the deployed posture)", () => {
+  // Field bug: real communities run READ_AUTH=on, and the vapid-key
+  // route was missing from the open-path list — so a fully updated
+  // node answered member_read_required and Settings told members
+  // their server "doesn't offer notifications yet". The key is open
+  // by the notifications contract (public by nature, like /config);
+  // everything else under /push stays deny-by-default, and the
+  // member-signed writes need no read headers.
+  it("serves the vapid key openly, keeps other push GETs guarded, and takes signed writes", async () => {
+    await app.close();
+    db.close();
+    db = openDatabase(":memory:");
+    member = generateKeyPair();
+    const config = readConfigFromEnv({
+      LOG_LEVEL: "fatal",
+      READ_AUTH: "on",
+      NODE_ID: "node_test",
+      NODE_FOUNDER_KEYS: member.publicKey,
+      RATE_LIMIT_MAX: "10000",
+    } as unknown as NodeJS.ProcessEnv);
+    const built = await buildServer({ config, database: db });
+    app = built.app;
+    await app.ready();
+
+    const key = await app.inject({ method: "GET", url: "/push/vapid-key" });
+    expect(key.statusCode).toBe(200);
+    expect(
+      (key.json() as { publicKey: string }).publicKey.length,
+    ).toBeGreaterThan(20);
+    // The exemption is the exact key path, not a /push umbrella.
+    const other = await app.inject({ method: "GET", url: "/push/anything" });
+    expect(other.statusCode).toBe(401);
+    expect((other.json() as { error: string }).error).toBe(
+      "member_read_required",
+    );
+    // The signed lifecycle writes carry their own authentication.
+    expect((await subscribe()).statusCode).toBe(200);
+  });
+});
+
 describe("the send helper (injected transport — nothing real is sent)", () => {
   it("sends only to subscribers of the payload's category and prunes dead endpoints", async () => {
     await subscribe();
