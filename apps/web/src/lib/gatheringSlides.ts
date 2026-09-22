@@ -19,6 +19,10 @@ import type {
   ProjectTask,
 } from "@/types";
 import { selectUpcomingGatherings } from "@/lib/upcomingEvents";
+import {
+  provenanceTaskTitle,
+  provenanceTitle,
+} from "@/content/templateProvenance";
 
 // The gathering-screen slide model (docs/gathering-screen.md §6.3). A
 // PURE selector from live community state to a rotation of glanceable,
@@ -89,6 +93,13 @@ export interface GatheringSlidesInput {
    *  device-local, all operating on already-public content, so it carries
    *  no privacy weight. */
   filter?: GatheringSlideFilter;
+  /** Viewer locale for provenance-verified display translation of
+   *  template-derived task/project titles on the wall
+   *  (docs/provenance-translation.md). Slides are compact, marker-free
+   *  surfaces: the QR on each slide opens the task page, which
+   *  carries the note and the View-original toggle. Omit for the
+   *  stored text (tests, non-UI callers). */
+  locale?: string;
 }
 
 export interface GatheringSlideFilter {
@@ -196,7 +207,20 @@ export function buildGatheringSlides(
       .filter((p) => p.status === "active" || p.status === "tended")
       .map((p) => p.id),
   );
-  const projectTitle = new Map(input.projects.map((p) => [p.id, p.title]));
+  const projectOf = new Map(input.projects.map((p) => [p.id, p]));
+  const displayProjectTitle = (projectId: string) => {
+    const p = projectOf.get(projectId);
+    if (!p) return "";
+    return input.locale
+      ? provenanceTitle(p.templateId, p.title, input.locale).text
+      : p.title;
+  };
+  const displayTaskTitle = (projectId: string, title: string) => {
+    const p = projectOf.get(projectId);
+    return input.locale && p
+      ? provenanceTaskTitle(p.templateId, title, input.locale).text
+      : title;
+  };
   const taskSlides: GatheringSlide[] = !on("tasks")
     ? []
     : input.projectTasks
@@ -205,8 +229,8 @@ export function buildGatheringSlides(
         .map((t) => ({
           kind: "task",
           id: t.id,
-          taskTitle: t.title,
-          projectTitle: projectTitle.get(t.projectId) ?? "",
+          taskTitle: displayTaskTitle(t.projectId, t.title),
+          projectTitle: displayProjectTitle(t.projectId),
           href: absoluteUrl(
             input.origin,
             `/project/${t.projectId}/task/${t.id}`,

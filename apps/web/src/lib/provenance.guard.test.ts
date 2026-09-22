@@ -28,11 +28,26 @@ const ALLOWED = new Set([
   "content/templateProvenance.test.ts",
   "lib/useTemplateProvenance.ts",
   "lib/provenance.guard.test.ts",
-  // the marker component every substituting surface must render
+  // the marker component the detail surfaces render
   "components/ProvenanceNote.tsx",
-  // phase-1 surfaces (each renders ProvenanceNote)
+  // detail surfaces (each renders ProvenanceNote — asserted below)
   "pages/ProjectDetail.tsx",
   "pages/TaskDetail.tsx",
+  // compact LIST surfaces (phase 2a): substitute without an inline
+  // marker BY DESIGN — every row/card/slide links to the project or
+  // task page, where the note and the View-original toggle live one
+  // tap away (docs/provenance-translation.md, "Honesty on the
+  // surface"). Exact-words surfaces (dispute, flag, removal,
+  // confirmation) stay off this list, always.
+  "pages/Board.tsx",
+  "pages/MyProjects.tsx",
+  "pages/MyTasks.tsx",
+  "pages/MyWork.tsx",
+  "pages/Calendar.tsx",
+  "pages/Present.tsx",
+  "lib/gatheringSlides.ts",
+  "lib/gatheringSlides.test.ts",
+  "components/ProjectCard.tsx",
   // display-view plumbing (type-only imports)
   "components/TaskCard.tsx",
   "components/TaskDetailBody.tsx",

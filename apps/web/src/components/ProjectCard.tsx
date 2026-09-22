@@ -15,6 +15,7 @@ import type { Project } from "@/types";
 import { formatHours, formatRelativeTime } from "@/lib/format";
 import { CategoryBadge } from "./CategoryBadge";
 import { HighlightedText } from "./HighlightedText";
+import type { ProvenanceView } from "@/lib/useTemplateProvenance";
 
 export function ProjectCard({
   project,
@@ -24,6 +25,8 @@ export function ProjectCard({
   searchQuery,
   closureLine,
   careLine,
+  titleView,
+  descriptionView,
 }: {
   project: Project;
   organizerName: string;
@@ -42,6 +45,12 @@ export function ProjectCard({
    *  check · monthly") — computed at the call site from the soonest
    *  open recurring task. Rendered only in the tended variant. */
   careLine?: string;
+  /** Provenance-translated display views from the list's
+   *  useProjectListProvenance (docs/provenance-translation.md).
+   *  Display only, no inline marker — the project page this card
+   *  opens carries the note and the View-original toggle. */
+  titleView?: ProvenanceView;
+  descriptionView?: ProvenanceView;
 }) {
   const { t } = useTranslation();
   // A commons card drops the progress bar entirely: a progress bar
@@ -78,14 +87,17 @@ export function ProjectCard({
       </div>
       <h3 className="text-base font-semibold leading-snug">
         {searchQuery && searchQuery.trim() !== "" ? (
-          <HighlightedText text={project.title} query={searchQuery} />
+          <HighlightedText
+            text={titleView?.text ?? project.title}
+            query={searchQuery}
+          />
         ) : (
-          project.title
+          (titleView?.text ?? project.title)
         )}
       </h3>
       {project.description && (
         <p className="mt-1 line-clamp-2 text-sm text-moss-600 dark:text-moss-300">
-          {project.description}
+          {descriptionView?.text ?? project.description}
         </p>
       )}
       {!isCommons && (

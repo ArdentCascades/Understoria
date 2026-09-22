@@ -83,6 +83,119 @@ function toView(pt: ProvenanceText, showOriginal: boolean): ProvenanceView {
   };
 }
 
+/** Sync, title-only provenance rendering for compact list rows
+ *  (My-work rows, calendar options, grouping headers). Titles verify
+ *  against the eager index, so no bundle loading and no async state.
+ *  These surfaces carry NO inline marker by design: every row links
+ *  to the project/task page, where the note and the View-original
+ *  toggle live one tap away (docs/provenance-translation.md,
+ *  "Honesty on the surface"). */
+export function useProvenanceText(): {
+  projectTitle: (templateId: string | null, title: string) => string;
+  taskTitle: (templateId: string | null, title: string) => string;
+} {
+  const { i18n } = useTranslation();
+  const lang = i18n.resolvedLanguage;
+  return useMemo(
+    () => ({
+      projectTitle: (templateId: string | null, title: string) =>
+        provenanceTitle(templateId, title, lang).text,
+      taskTitle: (templateId: string | null, title: string) =>
+        provenanceTaskTitle(templateId, title, lang).text,
+    }),
+    [lang],
+  );
+}
+
+export interface ProjectListProvenance {
+  /** Display views for one listed project (undefined when the id
+   *  isn't in the list). */
+  view: (projectId: string) =>
+    | { title: ProvenanceView; description: ProvenanceView }
+    | undefined;
+  /** The substituted text for one project ("" when nothing
+   *  translated) — appended to search haystacks so what the member
+   *  SEES is findable alongside what the organizer wrote. */
+  searchText: (projectId: string) => string;
+}
+
+/** List-level provenance for project card grids (the board's
+ *  Projects tab): one candidate-bundle load and one recompute for
+ *  the whole list, views handed to each card as props — the TaskList
+ *  pattern. Cards carry no inline marker; the project page they open
+ *  does. */
+export function useProjectListProvenance(
+  projects: readonly {
+    id: string;
+    templateId: string | null;
+    title: string;
+    description: string;
+  }[],
+): ProjectListProvenance {
+  const { i18n } = useTranslation();
+  const viewer = contentLocale(i18n.resolvedLanguage);
+  const [bundlesReady, setBundlesReady] = useState(0);
+
+  const candidates = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of projects) {
+      if (!p.templateId) continue;
+      for (const code of matchedNameLocales(p.templateId, p.title)) {
+        set.add(code);
+      }
+    }
+    set.delete(viewer);
+    return [...set].sort();
+  }, [projects, viewer]);
+
+  const candidatesKey = candidates.join(",");
+  useEffect(() => {
+    if (!candidatesKey) return;
+    let cancelled = false;
+    void Promise.all(
+      candidatesKey.split(",").map((c) => ensureContent(c)),
+    ).then(() => {
+      if (!cancelled) setBundlesReady((n) => n + 1);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [candidatesKey]);
+
+  return useMemo(() => {
+    void bundlesReady;
+    const views = new Map<
+      string,
+      { title: ProvenanceView; description: ProvenanceView }
+    >();
+    for (const p of projects) {
+      const titlePt = provenanceTitle(p.templateId, p.title, viewer);
+      const descPt = provenanceDescription(
+        p.templateId,
+        p.description,
+        titlePt.translated && titlePt.sourceLocale
+          ? [titlePt.sourceLocale, ...candidates]
+          : candidates,
+        viewer,
+      );
+      views.set(p.id, {
+        title: toView(titlePt, false),
+        description: toView(descPt, false),
+      });
+    }
+    return {
+      view: (id: string) => views.get(id),
+      searchText: (id: string) => {
+        const v = views.get(id);
+        if (!v) return "";
+        return `${v.title.translated ? v.title.text : ""} ${
+          v.description.translated ? v.description.text : ""
+        }`.trim();
+      },
+    };
+  }, [projects, viewer, candidates, bundlesReady]);
+}
+
 export function useTemplateProvenance(
   project:
     | { templateId: string | null; title: string; description: string }

@@ -34,6 +34,24 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **Provenance-verified display translation reaches the list
+  surfaces (phase 2a).** The board's project cards (title and
+  description, via a list-level hook that loads candidate bundles
+  once per list), the my-work task and project rows, MyTasks group
+  headers, the calendar's project filter, and the gathering
+  screen's task slides now render provenance-verified playbook
+  text in the viewer's language — closing the seam where a card
+  stayed in the organizer's language while the page it opened was
+  translated. Board search matches BOTH the signed text and the
+  substituted display text, so what the member sees is findable
+  and what the organizer wrote stays findable. Compact surfaces
+  carry no inline marker by design: every row, card and slide
+  links (or QR-opens) to the project or task page, where the note
+  and the View-original toggle live one tap away — the decision is
+  recorded in docs/provenance-translation.md and the guard test's
+  allowlist names each surface. `buildGatheringSlides` takes an
+  optional viewer locale; omitting it keeps stored text for
+  non-UI callers.
 - **Provenance-verified display translation** — a project created
   from a playbook in one language now reads in YOURS, wherever the
   organizer left the playbook's text unchanged

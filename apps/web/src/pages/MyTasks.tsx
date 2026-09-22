@@ -20,6 +20,7 @@
  */
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
+import { useProvenanceText } from "@/lib/useTemplateProvenance";
 import { intlLocale } from "@/i18n";
 import type { MyClaimedTasksView, MyTaskGroup } from "@/lib/myTasks";
 import { localDayString } from "@/db/taskPlans";
@@ -91,6 +92,7 @@ function TaskRow({
   plannedDay?: string;
 }) {
   const { t, i18n } = useTranslation();
+  const provText = useProvenanceText();
   const awaiting = task.status === "awaiting_confirmation";
 
   // Private planned-day line. Three shapes, all quiet: today, a
@@ -125,7 +127,7 @@ function TaskRow({
         <span className="flex flex-wrap items-center gap-2">
           <CategoryBadge category={task.category} size="sm" />
           <span className="min-w-0 flex-1 truncate text-sm font-medium">
-            {task.title}
+            {provText.taskTitle(project.templateId, task.title)}
           </span>
           {/* Status chips reuse the project page's palette so the
               same state reads the same everywhere. */}
@@ -179,6 +181,7 @@ function ProjectGroup({
   plannedDays?: ReadonlyMap<string, string>;
 }) {
   const { t } = useTranslation();
+  const provText = useProvenanceText();
   const { project, tasks } = group;
   return (
     <section className="card" aria-labelledby={`my-tasks-${project.id}`}>
@@ -191,7 +194,7 @@ function ProjectGroup({
             to={`/project/${project.id}`}
             className="underline-offset-2 hover:underline focus-visible:underline"
           >
-            {project.title}
+            {provText.projectTitle(project.templateId, project.title)}
           </Link>
         </h2>
         {/* Honest context when the project itself isn't moving — a

@@ -21,6 +21,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Outlet, useMatch } from "react-router";
 import { useTranslation } from "react-i18next";
+import { useProvenanceText } from "@/lib/useTemplateProvenance";
 import { useApp } from "@/state/AppContext";
 import {
   WEEK_MS,
@@ -127,6 +128,7 @@ export default function CalendarPage() {
     eventRsvps,
   } = useApp();
   const { t, i18n } = useTranslation();
+  const provText = useProvenanceText();
   const keyboardOpen = useVirtualKeyboardOpen();
   // The docked event panel (nested /calendar/event/:eventId route).
   // While it's open the FAB unmounts — same discipline as the Board
@@ -603,7 +605,7 @@ export default function CalendarPage() {
               <option value="">{t("calendar.filters.allProjects")}</option>
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.title}
+                  {provText.projectTitle(p.templateId, p.title)}
                 </option>
               ))}
             </select>
