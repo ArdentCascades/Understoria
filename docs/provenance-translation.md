@@ -3,7 +3,8 @@
 Status: PHASE 1 SHIPPED (project page + task page). PHASE 2a
 SHIPPED (list surfaces: board project cards, my-work rows, the
 calendar's project filter, gathering-screen task slides — plus the
-board search rule below). Remaining phases at the end.
+board search rule below). PHASE 2b SHIPPED (historical wording
+sets). Remaining phases at the end.
 
 ## The problem
 
@@ -113,13 +114,25 @@ Substitution and disclosure are two halves of one contract:
   string): bounded by the three keys above; the worst case
   displays the same template row's reviewed translation, which is
   semantically identical. Byte-exact only, whole field only.
-- **Translation revisions orphan old projects** (GUARANTEED once
-  native review lands — reworded template text stops matching
-  projects created under the old wording): Phase 2 adds
-  **append-only historical text/hash sets** to the generated index
-  so prior wordings keep verifying while the *current* translation
-  is displayed. Until then the fallback shows the original —
-  honest, never wrong.
+- **Translation revisions** (native review rewording template text)
+  are handled by the **historical wording sets** (phase 2b): every
+  `npm run generate:task-index` diffs the new corpus against the
+  previous generated files and moves each vanished wording into an
+  append-only history — plaintext for names and task names (rows
+  stay aligned to the current corpus), truncated-SHA-256 hashes for
+  descriptions (`templateProvenanceManifest.ts`, generator-only,
+  carries the current corpus hashes so the next run can diff; the
+  runtime history file stays tiny until rewords happen). A history
+  match licenses substitution with the CURRENT viewer-language
+  text, needs no source bundle, and obeys the same byte-exact and
+  row-agreement rules; a wording that reverts to current is pruned
+  as redundant, while transient intermediates are kept. Structural
+  changes — a template's task count changing — are breaking by
+  design: task history for that template/locale is dropped with a
+  generator warning, and old projects fall back honestly. The hash
+  (`wordingHash`, 128-bit truncated SHA-256, one definition shared
+  by runtime and generator) must remain a real cryptographic hash:
+  a history match licenses substitution.
 - **App-version skew across federation**: an unknown wording fails
   the match and falls back to the original. Safe degradation.
 - **Unreviewed translations attributed to a person**: the marker
@@ -150,8 +163,6 @@ guard test's allowlist names each one.
 
 ## Remaining phases (not yet shipped)
 
-- Historical wording sets in the generated index (pre-native-review
-  prerequisite — ship before the first reviewed-language reword).
 - FAQ + member-guide entries stating the rule ("the app translates
   its own words, never yours") — content-tier, so it rides the
   full 18-language content pipeline as its own change.

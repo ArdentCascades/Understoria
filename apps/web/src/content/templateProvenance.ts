@@ -33,6 +33,21 @@
 // with the original one toggle away.
 import { getContentBundle, contentLocale } from "./registry";
 import { TEMPLATE_NAMES, TEMPLATE_TASK_NAMES } from "./taskTitleIndex";
+import { sha256Hex } from "@/lib/sha256";
+import {
+  TEMPLATE_WORDING_HISTORY,
+  type TemplateWordingHistory,
+} from "./templateProvenanceHistory";
+
+/** The truncated (128-bit) SHA-256 the wording history stores for
+ *  descriptions — one definition shared with the index generator so
+ *  runtime matching and generated hashes can never drift. Truncation
+ *  keeps the generated files half the size; 128 bits still makes a
+ *  crafted second preimage infeasible, which is what licenses a
+ *  history match to substitute (docs/provenance-translation.md). */
+export function wordingHash(text: string): string {
+  return sha256Hex(text).slice(0, 32);
+}
 
 /** A single displayable field after provenance checking. `translated`
  *  is true only when `text` came from the viewer's bundle; `original`
@@ -52,14 +67,24 @@ const asIs = (s: string): ProvenanceText => ({
   translated: false,
 });
 
-/** Locales whose template display name is byte-identical to `title`. */
+/** Locales whose template display name is byte-identical to `title`
+ *  — in the current corpus or in the append-only wording history
+ *  (docs/provenance-translation.md: a native-review reword must not
+ *  orphan projects created under the old wording; display always
+ *  uses the CURRENT viewer-language text). `history` is injectable
+ *  for tests and defaults to the generated module. */
 export function matchedNameLocales(
   templateId: string,
   title: string,
+  history: Record<string, TemplateWordingHistory> = TEMPLATE_WORDING_HISTORY,
 ): string[] {
   const table = TEMPLATE_NAMES[templateId];
   if (!table) return [];
-  return Object.keys(table).filter((code) => table[code] === title);
+  const hist = history[templateId]?.names ?? {};
+  return Object.keys(table).filter(
+    (code) =>
+      table[code] === title || (hist[code]?.includes(title) ?? false),
+  );
 }
 
 /** The task row `title` byte-matches in the template — null when it
@@ -69,13 +94,20 @@ export function matchedNameLocales(
 export function matchedTaskRow(
   templateId: string,
   title: string,
+  history: Record<string, TemplateWordingHistory> = TEMPLATE_WORDING_HISTORY,
 ): { row: number; locales: string[] } | null {
   const tables = TEMPLATE_TASK_NAMES[templateId];
   if (!tables) return null;
+  const hist = history[templateId]?.taskNames ?? {};
   let row = -1;
   const locales: string[] = [];
   for (const [code, names] of Object.entries(tables)) {
-    const idx = names.indexOf(title);
+    let idx = names.indexOf(title);
+    if (idx < 0) {
+      // Historical wording: rows are aligned to the CURRENT corpus,
+      // so a hit licenses the same row-agreement rule as a live one.
+      idx = (hist[code] ?? []).findIndex((olds) => olds.includes(title));
+    }
     if (idx < 0) continue;
     if (row >= 0 && idx !== row) return null;
     row = idx;
@@ -90,10 +122,11 @@ export function provenanceTitle(
   templateId: string | null,
   title: string,
   viewerLocale: string | undefined,
+  history: Record<string, TemplateWordingHistory> = TEMPLATE_WORDING_HISTORY,
 ): ProvenanceText {
   if (!templateId) return asIs(title);
   const viewer = contentLocale(viewerLocale);
-  const locales = matchedNameLocales(templateId, title);
+  const locales = matchedNameLocales(templateId, title, history);
   if (locales.length === 0 || locales.includes(viewer)) return asIs(title);
   const ours = TEMPLATE_NAMES[templateId]?.[viewer];
   if (!ours) return asIs(title);
@@ -111,10 +144,11 @@ export function provenanceTaskTitle(
   templateId: string | null,
   title: string,
   viewerLocale: string | undefined,
+  history: Record<string, TemplateWordingHistory> = TEMPLATE_WORDING_HISTORY,
 ): ProvenanceText {
   if (!templateId) return asIs(title);
   const viewer = contentLocale(viewerLocale);
-  const match = matchedTaskRow(templateId, title);
+  const match = matchedTaskRow(templateId, title, history);
   if (!match || match.locales.includes(viewer)) return asIs(title);
   const ours = TEMPLATE_TASK_NAMES[templateId]?.[viewer]?.[match.row];
   if (!ours) return asIs(title);
@@ -200,15 +234,36 @@ export function provenanceDescription(
   description: string,
   candidateLocales: readonly string[],
   viewerLocale: string | undefined,
+  history: Record<string, TemplateWordingHistory> = TEMPLATE_WORDING_HISTORY,
 ): ProvenanceText {
   if (!templateId || !description) return asIs(description);
-  return verifyAgainstBundles(
+  const viewer = contentLocale(viewerLocale);
+  const live = verifyAgainstBundles(
     templateId,
     description,
     candidateLocales,
-    contentLocale(viewerLocale),
+    viewer,
     (tpl) => (tpl ? composeTemplateDescription(tpl) : undefined),
   );
+  if (live.translated) return live;
+  // Historical wording: hash membership licenses substitution with
+  // the CURRENT viewer text — and needs no source bundle at all.
+  const hist = history[templateId]?.descHashes;
+  if (!hist) return live;
+  const h = wordingHash(description);
+  for (const [code, hashes] of Object.entries(hist)) {
+    if (code === viewer || !hashes.includes(h)) continue;
+    const tpl = findTemplate(viewer, templateId);
+    const ours = tpl ? composeTemplateDescription(tpl) : undefined;
+    if (!ours || ours === description) return live;
+    return {
+      text: ours,
+      original: description,
+      translated: true,
+      sourceLocale: code,
+    };
+  }
+  return live;
 }
 
 /** Same, for a TASK description at a row already fixed by its
@@ -219,13 +274,31 @@ export function provenanceTaskDescription(
   description: string,
   candidateLocales: readonly string[],
   viewerLocale: string | undefined,
+  history: Record<string, TemplateWordingHistory> = TEMPLATE_WORDING_HISTORY,
 ): ProvenanceText {
   if (!templateId || !description || row < 0) return asIs(description);
-  return verifyAgainstBundles(
+  const viewer = contentLocale(viewerLocale);
+  const live = verifyAgainstBundles(
     templateId,
     description,
     candidateLocales,
-    contentLocale(viewerLocale),
+    viewer,
     (tpl) => tpl?.tasks[row]?.description,
   );
+  if (live.translated) return live;
+  const hist = history[templateId]?.taskDescHashes;
+  if (!hist) return live;
+  const h = wordingHash(description);
+  for (const [code, rows] of Object.entries(hist)) {
+    if (code === viewer || !(rows[row]?.includes(h) ?? false)) continue;
+    const ours = findTemplate(viewer, templateId)?.tasks[row]?.description;
+    if (!ours || ours === description) return live;
+    return {
+      text: ours,
+      original: description,
+      translated: true,
+      sourceLocale: code,
+    };
+  }
+  return live;
 }
