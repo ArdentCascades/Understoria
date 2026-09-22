@@ -35,6 +35,7 @@ import {
   type LockScreenTier,
   type PushDisplayStrings,
   type PushPrefs,
+  type VapidKeyResult,
 } from "@/lib/pushNotifications";
 import {
   currentBrowserSubscription,
@@ -94,8 +95,8 @@ export function NotificationsSection() {
   const { currentMember, lockState } = useApp();
   const supported = pushSupported();
   const [prefs, setPrefs] = useState<PushPrefs | null>(null);
-  /** null = still checking; "" = no node configured. */
-  const [vapidKey, setVapidKey] = useState<string | null | "">(null);
+  /** null = still checking. */
+  const [vapid, setVapid] = useState<VapidKeyResult | null>(null);
   const [flow, setFlow] = useState<Flow>({ kind: "idle" });
 
   useEffect(() => {
@@ -104,8 +105,8 @@ export function NotificationsSection() {
     void getPushPrefs().then((p) => {
       if (alive) setPrefs(p);
     });
-    void fetchVapidKey().then((key) => {
-      if (alive) setVapidKey(key ?? "");
+    void fetchVapidKey().then((result) => {
+      if (alive) setVapid(result);
     });
     if (currentPermission() === "denied") setFlow({ kind: "denied" });
     return () => {
@@ -122,15 +123,35 @@ export function NotificationsSection() {
       </Shell>
     );
   }
-  if (prefs === null || vapidKey === null) {
+  if (prefs === null || vapid === null) {
     return <Shell />;
   }
-  if (vapidKey === "" && prefs.categories.length === 0) {
+  // A member already subscribed keeps their switchboard whatever the
+  // key probe said — the key is only needed to CREATE a subscription.
+  // Everyone else gets the truthful story for their exact situation:
+  // three different problems, three different fixes, three messages.
+  if (vapid.kind !== "ok" && prefs.categories.length === 0) {
     return (
       <Shell>
         <p className="text-sm text-moss-600 dark:text-moss-300">
-          {t("push.noNode")}
+          {vapid.kind === "unconfigured"
+            ? t("push.noNode")
+            : vapid.kind === "unsupported"
+              ? t("push.serverNoPush")
+              : t("push.serverUnreachable")}
         </p>
+        {vapid.kind === "unreachable" && (
+          <button
+            type="button"
+            className="btn-secondary mt-3"
+            onClick={() => {
+              setVapid(null);
+              void fetchVapidKey().then(setVapid);
+            }}
+          >
+            {t("common.tryAgain")}
+          </button>
+        )}
       </Shell>
     );
   }
@@ -169,7 +190,10 @@ export function NotificationsSection() {
     }
     let subscription = await currentBrowserSubscription();
     if (!subscription) {
-      subscription = vapidKey ? await subscribeBrowserPush(vapidKey) : null;
+      subscription =
+        vapid?.kind === "ok"
+          ? await subscribeBrowserPush(vapid.publicKey)
+          : null;
     }
     const ok =
       subscription !== null &&

@@ -50,7 +50,7 @@ vi.mock("@/lib/pushNotifications", () => {
     savePushPrefs: vi.fn(async (p: typeof mockPrefs) => {
       mockPrefs = { ...p };
     }),
-    fetchVapidKey: vi.fn(async () => "test-vapid-key"),
+    fetchVapidKey: vi.fn(async () => mockVapid),
     registerPushSubscription: vi.fn(
       async (
         _m: string,
@@ -84,6 +84,7 @@ import type { Member } from "@/types";
 let mockPermission: NotificationPermission;
 let mockPermissionAnswer: NotificationPermission;
 let mockPrefs: ReturnType<typeof defaultPushPrefs>;
+let mockVapid: import("@/lib/pushNotifications").VapidKeyResult;
 let mockState: {
   currentMember: Member | null;
   lockState: "unprotected" | "locked" | "unlocked";
@@ -100,6 +101,7 @@ beforeEach(() => {
   mockPermission = "default";
   mockPermissionAnswer = "granted";
   mockPrefs = defaultPushPrefs();
+  mockVapid = { kind: "ok", publicKey: "test-vapid-key" };
   mockState = {
     currentMember: {
       publicKey: "me-key",
@@ -152,6 +154,49 @@ function buttonByText(text: string): HTMLButtonElement {
 }
 
 describe("NotificationsSection", () => {
+  it("tells the true story for each server situation — never the wrong one", async () => {
+    // The three non-ok probe outcomes are three different problems
+    // with three different fixes; the field bug this pins against
+    // was a connected member being told their device "isn't
+    // connected" when their server just predated push support.
+    mockVapid = { kind: "unsupported" };
+    await render();
+    expect(container.textContent).toContain(
+      "doesn't offer notifications yet",
+    );
+    expect(container.textContent).not.toContain("isn't set up with one");
+    act(() => root.unmount());
+
+    mockVapid = { kind: "unconfigured" };
+    await render();
+    expect(container.textContent).toContain("isn't set up with one");
+    act(() => root.unmount());
+
+    mockVapid = { kind: "unreachable" };
+    await render();
+    expect(container.textContent).toContain("couldn't be reached just now");
+    // The transient case gets a retry, and a successful retry opens
+    // the switchboard.
+    mockVapid = { kind: "ok", publicKey: "test-vapid-key" };
+    await act(async () => {
+      buttonByText("Try again").click();
+    });
+    expect(checkboxes()).toHaveLength(3);
+  });
+
+  it("keeps the switchboard for an already-subscribed member even when the probe fails", async () => {
+    mockVapid = { kind: "unreachable" };
+    mockPermission = "granted";
+    mockPrefs = {
+      ...defaultPushPrefs(),
+      categories: ["shift_reminder"],
+      endpoint: "https://push.example/sub/1",
+    };
+    await render();
+    expect(checkboxes()).toHaveLength(3);
+    expect(container.textContent).not.toContain("couldn't be reached");
+  });
+
   it("renders everything off by default and asks the browser nothing", async () => {
     await render();
     expect(checkboxes()).toHaveLength(3);

@@ -34,6 +34,36 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **Opt-in notifications, shipped end to end** — the design
+  contract's whole PR ladder is built (docs/notifications.md now
+  reads SHIPPED). The node sends standard Web Push itself
+  (per-node VAPID keys minted on first boot, no vendor SDK) to
+  members who opted in: member-signed subscribe/renew/delete
+  routes, one row per device with a 21-day renewal dead-man swept
+  by retention, and a send helper that refuses any category
+  outside the documented three. The service worker's display
+  handler applies the member's lock-screen choice on the device —
+  silent, generic, or named — from pre-localized strings saved at
+  Settings time; tier, title, and wording never reach the node,
+  and message bodies exist in no payload. The Settings switchboard
+  ships everything OFF and leads with trying the app without: the
+  vendor-metadata disclosure stands between a member's first
+  toggle and the browser permission prompt, a denial is stated
+  plainly and never re-asked, turning everything off tears down
+  the node row and browser subscription, and both panic purges do
+  the same before destroying keys. All of it lands in the
+  eighteen languages (Farsi and Burmese each needed a push term
+  distinct from their word for a board post — recorded in the
+  glossaries), the `no-notifications` principle is reworded
+  ID-stable to "Quiet by default", README's "Why nothing buzzes"
+  tells the amended truth, and the opsec guide covers lock-screen
+  exposure. The old absolutist notifications guard survives as
+  the amended-principle guard: OS-surface call sites are allowed
+  only in named files with named capabilities, vendor push SDKs
+  stay forbidden everywhere. Settings also now tells the truth
+  about the server: a node running pre-notifications software
+  gets "the operator can fix this with an update" — never a false
+  "this device isn't connected".
 - **Opt-in notifications: the design contract**
   (docs/notifications.md). The no-notifications principle is being
   AMENDED, not repealed: quiet by default — nothing ever buzzes to

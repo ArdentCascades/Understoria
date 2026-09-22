@@ -64,6 +64,42 @@ beforeEach(async () => {
   await setSetting(SETTING_KEYS.communityNodeEnabled, "1");
 });
 
+describe("fetchVapidKey", () => {
+  it("distinguishes unconfigured, unsupported (old server), and unreachable", async () => {
+    const { fetchVapidKey } = await import("./pushNotifications");
+    // Configured (beforeEach) + answering node → ok with the key.
+    const okFetch = vi.fn(async () =>
+      new Response('{"publicKey":"BKey"}', { status: 200 }),
+    ) as unknown as typeof fetch;
+    expect(await fetchVapidKey({ fetchImpl: okFetch })).toEqual({
+      kind: "ok",
+      publicKey: "BKey",
+    });
+    // Node answers but has no such route: it predates push support —
+    // NOT the same story as "no node configured".
+    const notFound = vi.fn(async () =>
+      new Response("Not Found", { status: 404 }),
+    ) as unknown as typeof fetch;
+    expect(await fetchVapidKey({ fetchImpl: notFound })).toEqual({
+      kind: "unsupported",
+    });
+    // No answer at all: says nothing about the node's software.
+    const dead = vi.fn(async () => {
+      throw new Error("network down");
+    }) as unknown as typeof fetch;
+    expect(await fetchVapidKey({ fetchImpl: dead })).toEqual({
+      kind: "unreachable",
+    });
+    // And with node submit off, nothing is even attempted.
+    await setSetting(SETTING_KEYS.communityNodeEnabled, "0");
+    const spy = vi.fn() as unknown as typeof fetch;
+    expect(await fetchVapidKey({ fetchImpl: spy })).toEqual({
+      kind: "unconfigured",
+    });
+    expect(spy).not.toHaveBeenCalled();
+  });
+});
+
 describe("registerPushSubscription", () => {
   it("sends a signed, category-only body and saves the prefs on success", async () => {
     const { calls, impl } = fakeFetch();
