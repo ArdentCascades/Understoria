@@ -196,6 +196,18 @@ records each choice as a glossary erratum.
   stable — thirty-one screens look it up), the README "Why nothing
   buzzes" rewrite, and the opsec-guide additions on lock screens
   and the neutral title.
+- **E (the send triggers) — SHIPPED:** the leg between the opt-in
+  and a real ping. `awaiting_confirmation` is event-driven off the
+  signed awaiting-transition artifact (posts AND tasks — the
+  artifact's `project:<pid>/task:<tid>` label covers both), pinging
+  only the party whose word is missing, deduped by the artifact's
+  first-writer-wins insert. `shift_reminder` is a five-minute sweep
+  pinging each signed-up member once, an hour before the shift
+  starts (inside the 4-hour delivery TTL), with a durable send-once
+  ledger (migration v36) and send-time checks that make cancelled
+  events, tombstoned shifts and withdrawn signups ping no one.
+  Every send is per-member (`sendToMember`) through the same
+  category gate.
 - **Follow-up (designed, unscheduled):** coalesced sender-blind
   message pings.
 
@@ -218,6 +230,14 @@ records each choice as a glossary erratum.
   never a verdict about the node's software). A member already
   subscribed keeps their switchboard regardless of the probe: the
   key is only needed to create a subscription.
+- **`guardian_request` has no node-visible signal yet.** Guardian
+  recovery runs device-to-device and through end-to-end messages
+  the node cannot (and must not) read, so there is nothing for the
+  node to send on. The category stays in the switchboard and the
+  enum — it gates what the node MAY send — and its trigger begins
+  the day a node-visible recovery-request record is designed.
+  Until then a member who enables it simply receives nothing,
+  which is quiet, not broken.
 - **Web and server deploy separately.** A member seeing the new
   Settings UI proves nothing about the node: the static bundle
   updates through the service worker, the API needs

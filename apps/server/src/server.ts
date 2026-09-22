@@ -75,7 +75,13 @@ import { registerInviteRevocationRoutes } from "./routes/inviteRevocations.js";
 import { registerInviteAnnouncementRoutes } from "./routes/inviteAnnouncements.js";
 import { registerNudgeRoutes } from "./routes/nudges.js";
 import { registerPushRoutes } from "./routes/push.js";
-import { ensureVapidKeys } from "./push.js";
+import {
+  createPushSender,
+  ensureVapidKeys,
+  type PushSender,
+  type PushTransport,
+} from "./push.js";
+import { notifyAwaitingConfirmation } from "./pushTriggers.js";
 import { createNudgeBus } from "./nudgeBus.js";
 import { registerAwaitingTransitionRoutes } from "./routes/awaitingTransitions.js";
 import { registerTaskCommentRoutes } from "./routes/taskComments.js";
@@ -133,6 +139,12 @@ export interface BuildOptions {
    * global fetch.
    */
   blobFetcher?: BlobFetcher;
+  /**
+   * Optional injected push transport (docs/notifications.md) —
+   * tests capture sends with it; production uses the real web-push
+   * client. Nothing real is ever sent from a test.
+   */
+  pushTransport?: PushTransport;
 }
 
 export interface BuiltServer {
@@ -152,6 +164,12 @@ export interface BuiltServer {
    * validation all still apply.
    */
   internalBypassToken: string;
+  /**
+   * The category-gated push sender, for the schedule-driven trigger
+   * the entry point owns (the shift-reminder sweep in index.ts).
+   * Event-driven triggers are wired inside buildServer itself.
+   */
+  pushSender: PushSender;
 }
 
 /**
@@ -163,6 +181,7 @@ export async function buildServer({
   config,
   database,
   blobFetcher,
+  pushTransport,
 }: BuildOptions): Promise<BuiltServer> {
   const app = Fastify({
     logger: {
@@ -287,11 +306,19 @@ export async function buildServer({
   const pullStore = createPeerPullStore(db);
   const awaitingTransitionStore = createAwaitingTransitionStore(db);
   const deviceLinkStore = createDeviceLinkStore(db);
-  // Opt-in push (docs/notifications.md): the subscription store and
-  // this node's VAPID pair. The lifecycle ships DARK — no trigger
-  // sends anything yet; the routes below only manage rows.
+  // Opt-in push (docs/notifications.md): the subscription store,
+  // this node's VAPID pair, and the category-gated sender. The
+  // event-driven trigger (awaiting-your-confirmation) hooks the
+  // transition route below; the clock-driven one (shift reminders)
+  // is a sweep the entry point starts with the returned sender.
   const pushSubscriptionStore = createPushSubscriptionStore(db);
   const vapidKeys = ensureVapidKeys(db);
+  const pushSender = createPushSender(
+    pushSubscriptionStore,
+    vapidKeys,
+    pushTransport,
+    (msg) => app.log.warn(msg),
+  );
   const linkRequestStore = createLinkRequestStore(db);
   const projectStateStore = createProjectStateStore(db);
   const taskStateStore = createTaskStateStore(db);
@@ -702,6 +729,13 @@ export async function buildServer({
   });
   await registerAwaitingTransitionRoutes(app, {
     store: awaitingTransitionStore,
+    // Opt-in push: a newly stored transition means someone's word is
+    // now the only thing missing — ping exactly that member, on the
+    // devices where they asked for it (docs/notifications.md).
+    onNewTransition: (record) =>
+      notifyAwaitingConfirmation(pushSender, record, (msg) =>
+        app.log.warn(msg),
+      ),
   });
   await registerAutoConfirmRoutes(app, {
     store,
@@ -717,7 +751,7 @@ export async function buildServer({
     configuredPeers: config.peerNodeUrls,
   });
 
-  return { app, database: db, internalBypassToken };
+  return { app, database: db, internalBypassToken, pushSender };
 }
 
 /**

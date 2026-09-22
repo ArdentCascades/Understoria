@@ -39,12 +39,14 @@ import { startPeerPullWorker } from "./peerPull.js";
 import { startMirrorPullWorker } from "./mirrorPull.js";
 import { startCapacitySampler } from "./capacitySampler.js";
 import { startRetentionSweep } from "./retentionSweep.js";
+import { startShiftReminderSweep } from "./pushTriggers.js";
 import { createCapacityEmitter } from "./capacityEmitter.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
 
 async function main(): Promise<void> {
   const config = readConfigFromEnv();
-  const { app, database, internalBypassToken } = await buildServer({ config });
+  const { app, database, internalBypassToken, pushSender } =
+    await buildServer({ config });
 
   // Start the federation pull worker after the server is built so it
   // shares the same database. Without configured peers this is a
@@ -184,6 +186,16 @@ async function main(): Promise<void> {
     log: app.log,
   });
 
+  // Opt-in push, the clock-driven trigger (docs/notifications.md):
+  // pings each signed-up member once, shortly before a shift starts.
+  // A member with the category off — the default — is filtered at
+  // send time inside the sender and never contacted.
+  const shiftReminders = startShiftReminderSweep({
+    db: database,
+    sender: pushSender,
+    log: (msg) => app.log.warn(msg),
+  });
+
   const stop = async (signal: string) => {
     app.log.info(`received ${signal}, closing`);
     try {
@@ -191,6 +203,7 @@ async function main(): Promise<void> {
       mirrorWorker.stop();
       capacitySampler.stop();
       retentionSweep.stop();
+      shiftReminders.stop();
       await app.close();
     } catch (err) {
       app.log.error({ err }, "error during close");

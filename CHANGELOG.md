@@ -63,7 +63,14 @@ include breaking changes.
   stay forbidden everywhere. Settings also now tells the truth
   about the server: a node running pre-notifications software
   gets "the operator can fix this with an update" — never a false
-  "this device isn't connected".
+  "this device isn't connected". And the pings are real: the node
+  now reminds each signed-up member an hour before their shift
+  (send-once ledger; cancelled events, deleted shifts and withdrawn
+  signups ping no one) and pings the one party whose confirmation
+  an exchange or task is waiting on, the moment it starts waiting.
+  Guardian requests have no node-visible signal yet — the category
+  gates, and its trigger lands with a future recovery-request
+  record.
 - **Opt-in notifications: the design contract**
   (docs/notifications.md). The no-notifications principle is being
   AMENDED, not repealed: quiet by default — nothing ever buzzes to

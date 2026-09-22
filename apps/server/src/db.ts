@@ -1639,6 +1639,32 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '35')",
     ).run();
   }
+
+  // Schema v36 — send-once ledger for scheduled push reminders
+  // (docs/notifications.md, the send triggers). Event-driven pings
+  // (awaiting-confirmation) dedupe on their source record's
+  // first-writer-wins insert and need no row here; the shift-reminder
+  // SWEEP re-scans a time window every few minutes, so it needs a
+  // durable "already sent" mark that survives restarts — one row per
+  // (kind, dedupe key), e.g. ('shift_reminder', '<shiftId>|<member>').
+  // Rows say only that a category ping went out, never what any
+  // notification showed (nothing here ever knows that). Pruned by the
+  // sweep itself once old enough that the window can't recur.
+  if (current < 36) {
+    db.exec(`
+      CREATE TABLE push_reminders_sent (
+        kind TEXT NOT NULL,
+        dedupe_key TEXT NOT NULL,
+        sent_at INTEGER NOT NULL,
+        PRIMARY KEY (kind, dedupe_key)
+      );
+      CREATE INDEX push_reminders_sent_at_idx
+        ON push_reminders_sent (sent_at);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '36')",
+    ).run();
+  }
 }
 
 /**
