@@ -132,6 +132,33 @@ We are not trying to protect against:
 
 ## 7. Known gaps (tracked work)
 
+- **Opt-in push notifications: DESIGNED, not yet shipped**
+  (`docs/notifications.md` — quiet by default; every category off
+  until a member turns it on in Settings). What enabling costs, so
+  members can weigh it honestly: (a) *push-service metadata* — a
+  PWA's pushes transit the browser vendor's push service
+  (Apple/Google/Mozilla); payloads are encrypted to the device
+  (RFC 8291) and the sender is the community's own node (per-node
+  VAPID, no vendor SDK), but the vendor learns THAT this device
+  receives pings from this node, and when — timing metadata alone
+  can matter to surveilled members, and the Electron desktop shell
+  is the no-third-party path; (b) *a new node table* — a seized
+  node reveals which members enabled notifications, their
+  categories, and push endpoints (which the push vendor can map
+  toward a device); the table lives in the encrypted ledger and
+  rows expire by TTL, but the surface exists and this line is its
+  disclosure; (c) *lock-screen exposure* — mitigated by content
+  tiers (silent/generic/named), the rule that message bodies never
+  appear in any notification, and a member-chosen neutral title so
+  the lock screen need not name the app (mitigation, not
+  invisibility — an unlocked phone's notification settings still
+  name it); (d) *the offline-purge residual* — a device hard-purged
+  while offline cannot unsubscribe, so its pings continue until the
+  node-side subscription TTL lapses (days, not minutes); the
+  dead-man TTL bounds the window and this line states it. Blocks
+  never leave the device, which is why no message-notification
+  category ships until the sender-blind coalesced design lands.
+
 - **Onion-service front door: OPT-IN, SHIPPED.** A node can publish
   a Tor onion service as a second front door (`docs/tor-onion.md`).
   What it gives: reachability under DNS/IP blocking or domain

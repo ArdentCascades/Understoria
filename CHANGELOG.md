@@ -34,6 +34,28 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **Opt-in notifications: the design contract**
+  (docs/notifications.md). The no-notifications principle is being
+  AMENDED, not repealed: quiet by default — nothing ever buzzes to
+  bring you back; a notification exists only when a member asked
+  for it, only for things with a person or a clock on the other
+  end. The document settles every decision before any code ships:
+  all defaults off with the browser permission requested only at
+  the moment of enabling; three v1 categories (shift reminders,
+  guardian requests, awaiting-your-confirmation) and deliberately
+  NO messages category until the sender-blind coalesced design
+  lands, because blocks never leave the device and per-message
+  pings would let a blocked person buzz their target's phone;
+  lock-screen content tiers with message bodies banned from
+  payloads forever; a member-chosen neutral notification title as
+  a safety feature; community-node web push (per-node VAPID, no
+  vendor SDK) with the push-vendor metadata cost disclosed before
+  the permission prompt; TTL dead-man subscriptions so an
+  offline-purged device goes quiet in days; panic teardown and
+  per-device pruning; and the guard-tested nevers (no engagement
+  notifications, no category outside the documented list, no
+  block lists leaving the device). The threat model gains the
+  matching disclosure section.
 - **Provenance translation for events (phase 2c).** Events created
   from the fourteen gathering templates now translate too: an
   unedited description renders in the viewer's language under the
