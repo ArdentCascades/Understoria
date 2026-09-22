@@ -52,6 +52,7 @@ import { shareOrigin } from "@/lib/appOrigin";
 import { matchesQuery } from "@/lib/messageSearch";
 import { matchesFilter, type TaskFilter } from "@/lib/taskFilter";
 import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
+import { CategoryBadge } from "@/components/CategoryBadge";
 import {
   formatDeadline,
   formatHours,
@@ -635,9 +636,14 @@ export default function ProjectDetailPage() {
                 >
                   {t(`projects.status${capitalize(project.status)}` as `projects.statusActive`)}
                 </span>
-                <span className="chip bg-canopy-50 text-canopy-900 dark:bg-canopy-950/50 dark:text-canopy-100">
-                  {project.category.replace(/_/g, " ")}
-                </span>
+                {/* The house badge, not the raw stored id — the id
+                    is English-ish machine text ("childcare",
+                    "mutual_aid_drive") and rendered untranslated
+                    here for every non-English member until a field
+                    report caught it. CategoryBadge translates via
+                    categories.* and folds stale ids to Other. */}
+                <CategoryBadge category={project.category} />
+
                 <ProjectMomentumChip
                   state={momentum.state}
                   hoursLast7Days={momentum.hoursLast7Days}
