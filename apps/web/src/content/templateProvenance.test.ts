@@ -21,6 +21,7 @@ import {
   provenanceTaskDescription,
   provenanceTaskTitle,
   provenanceTitle,
+  wordingHash,
 } from "./templateProvenance";
 import { TEMPLATE_NAMES, TEMPLATE_TASK_NAMES } from "./taskTitleIndex";
 
@@ -175,5 +176,83 @@ describe("corpus gates the mechanism depends on", () => {
         whatYoullNeed: "c",
       }),
     ).toBe("a\n\nb\n\nc");
+  });
+});
+
+describe("historical wording sets (docs/provenance-translation.md)", () => {
+  // A native-review reword moves the old wording into the generated
+  // history; projects created under it keep verifying and display
+  // the CURRENT viewer-language text. History is injectable here —
+  // in production it is the generated (initially empty) module.
+  const OLD_ES_NAME = "Refrigerador comunitario (redacción antigua)";
+  const OLD_ES_TASK0 = "Encuentra un sitio (redacción antigua)";
+  const OLD_ES_DESC = "Una descripción antigua\n\ncompuesta\n\ncomo siempre";
+  const OLD_ES_TASK0_DESC = "Una descripción de tarea antigua.";
+  const HIST = {
+    [TID]: {
+      names: { es: [OLD_ES_NAME] },
+      taskNames: {
+        es: TEMPLATE_TASK_NAMES[TID].es.map((_, i) =>
+          i === 0 ? [OLD_ES_TASK0] : [],
+        ),
+      },
+      descHashes: { es: [wordingHash(OLD_ES_DESC)] },
+      taskDescHashes: {
+        es: TEMPLATE_TASK_NAMES[TID].es.map((_, i) =>
+          i === 0 ? [wordingHash(OLD_ES_TASK0_DESC)] : [],
+        ),
+      },
+    },
+  };
+
+  it("translates a title stored under a historical wording", () => {
+    const pt = provenanceTitle(TID, OLD_ES_NAME, "en", HIST);
+    expect(pt).toMatchObject({
+      text: enName,
+      original: OLD_ES_NAME,
+      translated: true,
+      sourceLocale: "es",
+    });
+    // Same wording viewed in the language it belongs to: no-op.
+    expect(provenanceTitle(TID, OLD_ES_NAME, "es", HIST).translated).toBe(
+      false,
+    );
+  });
+
+  it("recovers a task row from a historical task name", () => {
+    const pt = provenanceTaskTitle(TID, OLD_ES_TASK0, "en", HIST);
+    expect(pt).toMatchObject({ text: enTask0, translated: true });
+  });
+
+  it("verifies a historical description by hash — no source bundle needed", () => {
+    const pt = provenanceDescription(TID, OLD_ES_DESC, [], "en", HIST);
+    expect(pt.translated).toBe(true);
+    expect(pt.sourceLocale).toBe("es");
+    expect(pt.original).toBe(OLD_ES_DESC);
+    // And per-row for task descriptions.
+    const tp = provenanceTaskDescription(
+      TID,
+      0,
+      OLD_ES_TASK0_DESC,
+      [],
+      "en",
+      HIST,
+    );
+    expect(tp.translated).toBe(true);
+    // Wrong row: same bytes, different address — no substitution.
+    expect(
+      provenanceTaskDescription(TID, 1, OLD_ES_TASK0_DESC, [], "en", HIST)
+        .translated,
+    ).toBe(false);
+  });
+
+  it("still refuses anything outside history — byte-exact or nothing", () => {
+    expect(
+      provenanceTitle(TID, `${OLD_ES_NAME}!`, "en", HIST).translated,
+    ).toBe(false);
+    expect(
+      provenanceDescription(TID, `${OLD_ES_DESC} `, [], "en", HIST)
+        .translated,
+    ).toBe(false);
   });
 });

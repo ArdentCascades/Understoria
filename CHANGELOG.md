@@ -34,6 +34,25 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **Historical wording sets for provenance translation (phase
+  2b).** Native review is expected to reword template text, and a
+  reword would silently orphan every project created under the old
+  wording — its fields would stop byte-matching and fall back to
+  the organizer's language. Now `npm run generate:task-index`
+  diffs each regeneration against the previous generated files and
+  moves every vanished wording into an append-only history:
+  plaintext for template and task names, truncated-SHA-256 hashes
+  for descriptions (a generator-only manifest carries the current
+  corpus hashes so the next run can diff; the runtime history file
+  stays tiny until rewords happen). A history match licenses
+  substitution with the CURRENT viewer-language text, needs no
+  source bundle, and obeys the same byte-exact and row-agreement
+  rules; reverted wordings are pruned, transient intermediates are
+  kept, and structural changes (task-count changes) drop history
+  with a warning so old projects fall back honestly. The hash is a
+  dependency-free synchronous SHA-256 pinned against FIPS-180
+  vectors and cross-checked with Web Crypto — shared by runtime
+  and generator so they can never drift.
 - **Provenance-verified display translation reaches the list
   surfaces (phase 2a).** The board's project cards (title and
   description, via a list-level hook that loads candidate bundles
