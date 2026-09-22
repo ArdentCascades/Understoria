@@ -27,6 +27,7 @@ export const OPSEC_GUIDE_PT: readonly GuideSection[] = [
         "portátil, use FileVault, BitLocker ou LUKS). Mantenha o " +
         "sistema atualizado — a maioria dos ataques do mundo real " +
         "explora falhas que já foram corrigidas.",
+      "As notificações vêm desligadas, e muita gente as deixa assim. Se ligar alguma (Configurações → Notificações), escolha o que a sua tela de bloqueio pode dizer: os níveis discretos não mostram nada, ou apenas um “algo precisa de você”; o nível nomeado diz de que tipo é — e o conteúdo das mensagens nunca aparece em notificação nenhuma, em nível nenhum. Você também pode mudar como elas se apresentam, para que o nome deste app nunca precise aparecer numa tela que outra pessoa possa ver.",
     ],
   },
   {

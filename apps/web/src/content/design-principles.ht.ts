@@ -29,9 +29,9 @@ export const DESIGN_PRINCIPLES_HT: readonly DesignPrinciple[] = [
   },
   {
     "id": "no-notifications",
-    "title": "Pa gen notifikasyon push",
-    "statement": "Lè ou louvri aplikasyon an, li montre w sa ki bezwen atansyon ou. Pa gen vibrasyon, pa gen ti nimewo k ap kouri dèyè w sou chak ekran, pa gen teyat prese-prese.",
-    "example": "Moun ki t ap òganize youn ede lòt nan tan COVID la te di l anpil fwa: zouti ki mache ak notifikasyon te fè manm ki pi angaje yo bouke anvan tout lòt — moun kominote yo pa t kapab pèdi menm nan. Se eksperyans sa a, se pa yon etid fòmèl, ki kenbe prensip sa a."
+    "title": "Silans se defo a",
+    "statement": "Anyen pa janm sonnen pou fè w tounen. Nou montre w sa ki bezwen atansyon w lè ou louvri app la; yon notifikasyon egziste sèlman si ou menm ou te mande l, sèlman pou bagay ki gen yon moun oswa yon revèy lòtbò a — epi tout bagay vini fèmen.",
+    "example": "Moun ki t ap òganize youn ede lòt nan tan COVID la te di l anpil fwa: zouti ki mache ak notifikasyon te fè manm ki pi angaje yo bouke anvan tout lòt — moun kominote yo pa t kapab pèdi menm nan. Se eksperyans sa a, se pa yon etid fòmèl, ki kenbe prensip sa a. Lè rapèl ou chwazi yo rive, prensip la te amande, li pa t aboli: mekanik pou rale moun yo ret entèdi — sa ki chanje a, se ke manm ki te mande pou yo leve l pou tou li a ka leve kounye a."
   },
   {
     "id": "solidarity-not-shame",

@@ -38,11 +38,11 @@ export const DESIGN_PRINCIPLES_FR: readonly DesignPrinciple[] = [
   },
   {
     id: "no-notifications",
-    title: "Pas de notifications push",
+    title: "Silencieux par défaut",
     statement:
-      "On te montre ce qui a besoin de toi quand tu ouvres l'app. Rien ne vibre, aucun compteur ne te poursuit d'écran en écran, pas de théâtre de l'urgence.",
+      "Rien ne vibre jamais pour te faire revenir. On te montre ce qui a besoin de toi quand tu ouvres l'appli ; une notification n'existe que si tu l'as demandée, seulement pour ce qui a une personne ou une horloge à l'autre bout — et tout arrive éteint.",
     example:
-      "Les personnes qui organisaient l'entraide pendant le COVID ont largement décrit les outils à notifications comme épuisant d'abord leurs membres les plus engagés — ceux que les communautés pouvaient le moins se permettre de perdre. C'est ce vécu, pas une étude formelle, qui fonde ce principe.",
+      "Les personnes qui organisaient l'entraide pendant le COVID ont largement décrit les outils à notifications comme épuisant d'abord leurs membres les plus engagés — ceux que les communautés pouvaient le moins se permettre de perdre. C'est ce vécu, pas une étude formelle, qui fonde ce principe. Quand les rappels sur demande sont arrivés, le principe a été amendé, pas abrogé : la mécanique d'accroche reste bannie — ce qui a changé, c'est que la personne qui a demandé d'être réveillée pour son créneau peut l'être désormais.",
   },
   {
     id: "solidarity-not-shame",

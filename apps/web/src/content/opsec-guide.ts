@@ -27,6 +27,7 @@ export const OPSEC_GUIDE: readonly GuideSection[] = [
     title: "On your device",
     body: [
       "Lock your phone with a six-digit PIN or strong passphrase. Turn on full-disk encryption (every modern phone has it on by default; on a laptop use FileVault, BitLocker, or LUKS). Keep your OS updated — most real-world attacks exploit bugs that have been patched.",
+      "Notifications are off by default, and many members leave them off. If you turn some on (Settings → Notifications), choose what your lock screen may say: the quiet levels show nothing, or a bare \"something needs you\"; the named level says which kind — and message contents never appear in any notification, at any level. You can also change what the notifications call themselves, so this app's name never has to show on a screen someone else might glance at.",
     ],
   },
   {

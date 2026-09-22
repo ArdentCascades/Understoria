@@ -19,7 +19,8 @@ export const OPSEC_GUIDE_HT: readonly GuideSection[] = [
     "id": "device",
     "title": "Sou aparèy ou",
     "body": [
-      "Klete telefòn ou ak yon PIN sis chif oswa yon passphrase solid. Limen chifreman tout disk la (tout telefòn modèn gen li limen depi nan faktori; sou yon laptòp, sèvi ak FileVault, BitLocker, oswa LUKS). Kenbe sistèm aparèy la ajou — pifò atak tout bon yo pase nan twou ki te deja bouche ak mizajou."
+      "Klete telefòn ou ak yon PIN sis chif oswa yon passphrase solid. Limen chifreman tout disk la (tout telefòn modèn gen li limen depi nan faktori; sou yon laptòp, sèvi ak FileVault, BitLocker, oswa LUKS). Kenbe sistèm aparèy la ajou — pifò atak tout bon yo pase nan twou ki te deja bouche ak mizajou.",
+      "Notifikasyon yo vini fèmen, e anpil manm kite yo konsa. Si ou limen kèk (Paramèt → Notifikasyon), chwazi sa ekran bloke w la gen dwa di: nivo silans yo pa montre anyen, oswa jis yon «gen yon bagay ki bezwen ou»; nivo ki nonmen an di ki kalite li ye — e sa ki nan mesaj yo pa janm parèt nan okenn notifikasyon, nan okenn nivo. Ou ka chanje tou ki jan notifikasyon yo rele tèt yo, pou non app sa a pa janm oblije parèt sou yon ekran yon lòt moun ka wè."
     ]
   },
   {

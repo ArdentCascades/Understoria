@@ -29,9 +29,9 @@ export const DESIGN_PRINCIPLES_ID: readonly DesignPrinciple[] = [
   },
   {
     "id": "no-notifications",
-    "title": "Tanpa notifikasi push",
-    "statement": "Yang butuh perhatianmu ditampilkan saat kamu membuka aplikasi. Tidak ada yang berdengung, tidak ada angka yang mengejarmu dari layar ke layar, tidak ada sandiwara serba mendesak.",
-    "example": "Para penggerak tolong-menolong di masa COVID banyak bercerita bahwa alat yang digerakkan notifikasi justru lebih dulu membuat anggota yang paling berdedikasi kehabisan tenaga — orang-orang yang paling tidak boleh hilang dari komunitas. Pengalaman itulah, bukan studi formal, yang menjadi pijakan prinsip ini."
+    "title": "Senyap sejak awal",
+    "statement": "Tidak pernah ada yang berbunyi untuk menarikmu kembali. Kami menunjukkan yang butuh perhatianmu saat kamu membuka aplikasi; notifikasi hanya ada kalau kamu sendiri memintanya, hanya untuk hal yang ada orang atau jam di ujung sana — dan semuanya datang dalam keadaan mati.",
+    "example": "Para penggerak tolong-menolong di masa COVID banyak bercerita bahwa alat yang digerakkan notifikasi justru lebih dulu membuat anggota yang paling berdedikasi kehabisan tenaga — orang-orang yang paling tidak boleh hilang dari komunitas. Pengalaman itulah, bukan studi formal, yang menjadi pijakan prinsip ini. Ketika pengingat pilihan sendiri hadir, prinsip ini diamendemen, bukan dicabut: mekanisme pancingan tetap terlarang — yang berubah hanyalah anggota yang minta dibangunkan untuk sesinya kini bisa dibangunkan."
   },
   {
     "id": "solidarity-not-shame",

@@ -39,11 +39,11 @@ export const DESIGN_PRINCIPLES_VI: readonly DesignPrinciple[] = [
   },
   {
     id: "no-notifications",
-    title: "Không thông báo đẩy",
+    title: "Mặc định im lặng",
     statement:
-      "Khi bạn mở ứng dụng, những gì cần bạn để tâm đã nằm ngay đó. Không rung, không con số nào bám theo bạn từ màn hình này sang màn hình khác, không diễn kịch khẩn cấp.",
+      "Không bao giờ có gì tự kêu để kéo bạn quay lại. Mở ứng dụng, bạn thấy ngay những gì cần mình; một thông báo chỉ tồn tại khi chính bạn đã xin nó, chỉ cho những việc có một con người hay một chiếc đồng hồ ở đầu kia — và mọi thứ đều tắt sẵn.",
     example:
-      "Những người tổ chức tương trợ thời COVID kể đi kể lại rằng công cụ chạy bằng thông báo vắt kiệt trước hết chính những thành viên tận tâm nhất — những người mà cộng đồng ít có thể để mất nhất. Nguyên tắc này đứng trên trải nghiệm đó, không phải trên một nghiên cứu chính thức.",
+      "Những người tổ chức tương trợ thời COVID kể đi kể lại rằng công cụ chạy bằng thông báo vắt kiệt trước hết chính những thành viên tận tâm nhất — những người mà cộng đồng ít có thể để mất nhất. Nguyên tắc này đứng trên trải nghiệm đó, không phải trên một nghiên cứu chính thức. Khi nhắc việc tự chọn xuất hiện, nguyên tắc này được sửa đổi chứ không bị bãi bỏ: các chiêu níu kéo vẫn bị cấm — điều thay đổi là thành viên đã tự xin được gọi dậy cho ca của mình, giờ có thể được gọi.",
   },
   {
     id: "solidarity-not-shame",

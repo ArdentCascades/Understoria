@@ -43,11 +43,11 @@ export const DESIGN_PRINCIPLES: readonly DesignPrinciple[] = [
   },
   {
     id: "no-notifications",
-    title: "No push notifications",
+    title: "Quiet by default",
     statement:
-      "We show what needs your attention when you open the app. No buzzing, no counts chasing you from screen to screen, no urgency theater.",
+      "Nothing ever buzzes to bring you back. We show what needs your attention when you open the app; a notification exists only if you asked for it, only for things with a person or a clock on the other end — and everything ships off.",
     example:
-      "COVID-era mutual aid organizers widely described notification-driven tools as burning out their most committed members first — the people communities could least afford to lose. That experience, not a formal study, is what this principle stands on.",
+      "COVID-era mutual aid organizers widely described notification-driven tools as burning out their most committed members first — the people communities could least afford to lose. That experience, not a formal study, is what this principle stands on. It was amended, not repealed, when opt-in reminders arrived: engagement mechanics stay banned — what changed is that the member who asked to be woken for their shift now can be.",
   },
   {
     id: "solidarity-not-shame",

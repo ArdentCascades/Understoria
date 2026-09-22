@@ -38,11 +38,11 @@ export const DESIGN_PRINCIPLES_ES: readonly DesignPrinciple[] = [
   },
   {
     id: "no-notifications",
-    title: "Sin notificaciones push",
+    title: "Silencio por defecto",
     statement:
-      "Te mostramos lo que necesita tu atención cuando abres la app. Nada vibra, ningún contador te persigue de pantalla en pantalla, nada de teatro de urgencia.",
+      "Nada vibra jamás para hacerte volver. Te mostramos lo que necesita tu atención cuando abres la app; una notificación solo existe si tú la pediste, solo para cosas con una persona o un reloj al otro lado — y todo viene apagado.",
     example:
-      "Quienes organizaron apoyo mutuo durante el COVID contaron una y otra vez que las herramientas movidas por notificaciones quemaban primero a sus miembros más comprometidos — la gente que las comunidades menos podían permitirse perder. Esa experiencia, no un estudio formal, es lo que sostiene este principio.",
+      "Quienes organizaron apoyo mutuo durante el COVID contaron una y otra vez que las herramientas movidas por notificaciones quemaban primero a sus miembros más comprometidos — la gente que las comunidades menos podían permitirse perder. Esa experiencia, no un estudio formal, es lo que sostiene este principio. Cuando llegaron los recordatorios opcionales, el principio se enmendó, no se derogó: la mecánica de enganche sigue prohibida — lo que cambió es que quien pidió que le despierten para su turno ahora puede ser despertado.",
   },
   {
     id: "solidarity-not-shame",

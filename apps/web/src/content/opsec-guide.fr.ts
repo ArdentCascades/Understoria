@@ -30,6 +30,7 @@ export const OPSEC_GUIDE_FR: readonly GuideSection[] = [
         "portable, utilise FileVault, BitLocker ou LUKS). Garde ton système " +
         "à jour — la plupart des attaques réelles exploitent des failles " +
         "déjà corrigées.",
+      "Les notifications arrivent éteintes, et beaucoup les laissent ainsi. Si tu en allumes (Réglages → Notifications), choisis ce que ton écran de verrouillage peut dire : les niveaux discrets ne montrent rien, ou un simple « quelque chose a besoin de toi » ; le niveau nommé dit de quel genre il s'agit — et le contenu des messages n'apparaît jamais dans aucune notification, à aucun niveau. Tu peux aussi changer comment elles se nomment, pour que le nom de cette appli n'ait jamais à s'afficher sur un écran qu'un autre pourrait voir.",
     ],
   },
   {

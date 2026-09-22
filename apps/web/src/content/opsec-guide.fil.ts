@@ -19,7 +19,8 @@ export const OPSEC_GUIDE_FIL: readonly GuideSection[] = [
     "id": "device",
     "title": "Sa device mo",
     "body": [
-      "I-lock ang phone mo gamit ang anim na digit na PIN o matibay na passphrase. I-on ang full-disk encryption (naka-on na ito sa bawat modernong phone mula sa simula; sa laptop, gamitin ang FileVault, BitLocker, o LUKS). Panatilihing updated ang OS mo — karamihan sa mga totoong atake ay sumasakay sa mga bug na na-patch na."
+      "I-lock ang phone mo gamit ang anim na digit na PIN o matibay na passphrase. I-on ang full-disk encryption (naka-on na ito sa bawat modernong phone mula sa simula; sa laptop, gamitin ang FileVault, BitLocker, o LUKS). Panatilihing updated ang OS mo — karamihan sa mga totoong atake ay sumasakay sa mga bug na na-patch na.",
+      "Nakapatay ang mga notipikasyon pagdating, at marami ang hinahayaan itong ganoon. Kung may bubuksan ka (Settings → Mga notipikasyon), piliin kung ano ang puwedeng sabihin ng lock screen mo: walang ipinapakita ang mga tahimik na antas, o isang payak na “may nangangailangan sa iyo”; sinasabi ng antas na nagpapangalan kung anong uri — at ang laman ng mensahe ay hindi kailanman lumalabas sa anumang notipikasyon, sa anumang antas. Puwede mo ring palitan kung ano ang itatawag ng mga notipikasyon sa sarili, para hindi na kailangang lumitaw ang pangalan ng app na ito sa screen na maaaring masulyapan ng iba."
     ]
   },
   {
