@@ -30,6 +30,10 @@ import type {
   ProjectCategory,
 } from "@/types";
 import { authoritativeCancelledEventIds } from "./eventCancellation";
+import {
+  provenanceEventTitle,
+  provenanceTitle,
+} from "@/content/templateProvenance";
 
 /**
  * Community calendar data layer — aggregates date-shaped fields from
@@ -145,6 +149,9 @@ export type CalendarEntry =
     };
 
 export interface BuildCalendarInput {
+  /** Viewer locale for provenance-verified display translation of
+   *  template-derived titles; omit for stored text. */
+  locale?: string;
   projects: readonly Project[];
   posts: readonly Post[];
   exchanges: readonly Exchange[];
@@ -214,6 +221,19 @@ export interface BuildCalendarInput {
 const MAX_EVENT_DAYS = 92;
 
 export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
+  // Provenance-verified display translation of template-derived
+  // titles (docs/provenance-translation.md): entries are compact,
+  // marker-free surfaces — each opens the project/event page, where
+  // the note and the View-original toggle live. Omit `locale` to
+  // keep stored text (tests, non-UI callers).
+  const displayProjectTitle = (p: { templateId: string | null; title: string }) =>
+    input.locale
+      ? provenanceTitle(p.templateId, p.title, input.locale).text
+      : p.title;
+  const displayEventTitle = (ev: { templateId: string | null; title: string }) =>
+    input.locale
+      ? provenanceEventTitle(ev.templateId, ev.title, input.locale).text
+      : ev.title;
   const entries: CalendarEntry[] = [];
 
   for (const p of input.projects) {
@@ -233,7 +253,7 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
       id: `project_deadline:${p.id}`,
       date: startOfUTCDay(p.deadline),
       projectId: p.id,
-      projectTitle: p.title,
+      projectTitle: displayProjectTitle(p),
       category: p.category,
     });
   }
@@ -339,7 +359,7 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
         id: `event:${ev.id}:${dayKey(dayMs)}`,
         date: dayMs,
         eventId: ev.id,
-        title: ev.title,
+        title: displayEventTitle(ev),
         category: ev.category,
         viewerGoing: viewerGoingIds.has(ev.id),
         startsAt: ev.startsAt,

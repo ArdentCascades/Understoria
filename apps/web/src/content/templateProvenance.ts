@@ -32,7 +32,11 @@
 // what the allowlisted surfaces (see provenance.guard.test.ts) show,
 // with the original one toggle away.
 import { getContentBundle, contentLocale } from "./registry";
-import { TEMPLATE_NAMES, TEMPLATE_TASK_NAMES } from "./taskTitleIndex";
+import {
+  EVENT_TITLE_SCAFFOLDS,
+  TEMPLATE_NAMES,
+  TEMPLATE_TASK_NAMES,
+} from "./taskTitleIndex";
 import { sha256Hex } from "@/lib/sha256";
 import {
   TEMPLATE_WORDING_HISTORY,
@@ -301,4 +305,113 @@ export function provenanceTaskDescription(
     };
   }
   return live;
+}
+
+// ---- Event templates (docs/provenance-translation.md, phase 2c) ----
+//
+// An event stages title = the template's titleScaffold (which ends
+// " — "; the member's own words follow) and description = the
+// descriptionScaffold verbatim until edited. So descriptions get the
+// same byte-exact rule as projects, and titles get the SCAFFOLD
+// COMPOSITION rule: when the stored title starts with a locale's
+// scaffold (current or historical), the scaffold segment is provably
+// app text and renders as the viewer's scaffold, while the member's
+// suffix stays verbatim, always. The longest matching scaffold wins
+// (a longer byte-exact prefix is strictly more evidence); the suffix
+// is member text embedded mid-string, so per-segment lang tagging is
+// impossible — the marker on the event page owns the disclosure.
+
+/** The longest current-or-historical scaffold `title` starts with,
+ *  with every locale that carries a scaffold of that exact text. */
+export function matchedEventScaffold(
+  templateId: string,
+  title: string,
+  history: Record<string, TemplateWordingHistory> = TEMPLATE_WORDING_HISTORY,
+): { scaffold: string; locales: string[] } | null {
+  const table = EVENT_TITLE_SCAFFOLDS[templateId];
+  if (!table) return null;
+  const hist = history[templateId]?.eventScaffolds ?? {};
+  let best: { scaffold: string; locales: string[] } | null = null;
+  const consider = (code: string, scaffold: string) => {
+    if (!scaffold || !title.startsWith(scaffold)) return;
+    if (best && scaffold.length < best.scaffold.length) return;
+    if (best && scaffold.length === best.scaffold.length) {
+      if (!best.locales.includes(code)) best.locales.push(code);
+      return;
+    }
+    best = { scaffold, locales: [code] };
+  };
+  for (const [code, scaffold] of Object.entries(table)) {
+    consider(code, scaffold);
+    for (const old of hist[code] ?? []) consider(code, old);
+  }
+  return best;
+}
+
+/** Viewer-language rendering of an event title: the matched scaffold
+ *  segment substitutes, the member's suffix stays verbatim. */
+export function provenanceEventTitle(
+  templateId: string | null,
+  title: string,
+  viewerLocale: string | undefined,
+  history: Record<string, TemplateWordingHistory> = TEMPLATE_WORDING_HISTORY,
+): ProvenanceText {
+  if (!templateId) return asIs(title);
+  const viewer = contentLocale(viewerLocale);
+  const match = matchedEventScaffold(templateId, title, history);
+  if (!match) return asIs(title);
+  const ours = EVENT_TITLE_SCAFFOLDS[templateId]?.[viewer];
+  if (!ours) return asIs(title);
+  const text = ours + title.slice(match.scaffold.length);
+  if (text === title) return asIs(title);
+  return {
+    text,
+    original: title,
+    translated: true,
+    sourceLocale: match.locales[0],
+  };
+}
+
+/** Viewer-language rendering of an event description, byte-verified
+ *  against the candidate locales' descriptionScaffold (or the
+ *  wording history's hashes — no source bundle needed there). */
+export function provenanceEventDescription(
+  templateId: string | null,
+  description: string,
+  candidateLocales: readonly string[],
+  viewerLocale: string | undefined,
+  history: Record<string, TemplateWordingHistory> = TEMPLATE_WORDING_HISTORY,
+): ProvenanceText {
+  if (!templateId || !description) return asIs(description);
+  const viewer = contentLocale(viewerLocale);
+  const findEvent = (code: string) =>
+    getContentBundle(code).EVENT_TEMPLATES.find((t) => t.id === templateId);
+  for (const code of candidateLocales) {
+    if (code === viewer) continue;
+    const theirs = findEvent(code)?.descriptionScaffold;
+    if (theirs !== description) continue;
+    const ours = findEvent(viewer)?.descriptionScaffold;
+    if (!ours || ours === description) return asIs(description);
+    return {
+      text: ours,
+      original: description,
+      translated: true,
+      sourceLocale: loaded(code) ? code : "en",
+    };
+  }
+  const hist = history[templateId]?.eventDescHashes;
+  if (!hist) return asIs(description);
+  const h = wordingHash(description);
+  for (const [code, hashes] of Object.entries(hist)) {
+    if (code === viewer || !hashes.includes(h)) continue;
+    const ours = findEvent(viewer)?.descriptionScaffold;
+    if (!ours || ours === description) return asIs(description);
+    return {
+      text: ours,
+      original: description,
+      translated: true,
+      sourceLocale: code,
+    };
+  }
+  return asIs(description);
 }

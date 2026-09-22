@@ -360,6 +360,7 @@ export default function CalendarPage() {
   const allEntries = useMemo(
     () =>
       buildCalendar({
+        locale: i18n.resolvedLanguage,
         projects: filteredProjects,
         posts: filteredPosts,
         exchanges: filteredExchanges,

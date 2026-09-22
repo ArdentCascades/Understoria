@@ -20,6 +20,7 @@ import type {
 } from "@/types";
 import { selectUpcomingGatherings } from "@/lib/upcomingEvents";
 import {
+  provenanceEventTitle,
   provenanceTaskTitle,
   provenanceTitle,
 } from "@/content/templateProvenance";
@@ -188,7 +189,9 @@ export function buildGatheringSlides(
   }).map(({ event, viewerGoing }) => ({
     kind: "event",
     id: event.id,
-    title: event.title,
+    title: input.locale
+      ? provenanceEventTitle(event.templateId, event.title, input.locale).text
+      : event.title,
     startsAt: event.startsAt,
     endsAt: event.endsAt,
     location: event.location,

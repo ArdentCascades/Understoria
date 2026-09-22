@@ -18,12 +18,18 @@ import {
   matchedNameLocales,
   matchedTaskRow,
   provenanceDescription,
+  provenanceEventDescription,
+  provenanceEventTitle,
   provenanceTaskDescription,
   provenanceTaskTitle,
   provenanceTitle,
   wordingHash,
 } from "./templateProvenance";
-import { TEMPLATE_NAMES, TEMPLATE_TASK_NAMES } from "./taskTitleIndex";
+import {
+  EVENT_TITLE_SCAFFOLDS,
+  TEMPLATE_NAMES,
+  TEMPLATE_TASK_NAMES,
+} from "./taskTitleIndex";
 
 const TID = "community-fridge";
 const esName = TEMPLATE_NAMES[TID].es;
@@ -254,5 +260,85 @@ describe("historical wording sets (docs/provenance-translation.md)", () => {
       provenanceDescription(TID, `${OLD_ES_DESC} `, [], "en", HIST)
         .translated,
     ).toBe(false);
+  });
+});
+
+describe("event-template provenance (scaffold composition)", () => {
+  // Events stage title = the template's titleScaffold (ends " — ",
+  // the member's own words follow) and description = the
+  // descriptionScaffold verbatim. The scaffold segment is app text
+  // and substitutes; the member's suffix stays verbatim, always.
+  const EID = "potluck";
+  const esScaffold = EVENT_TITLE_SCAFFOLDS[EID].es;
+  const enScaffold = EVENT_TITLE_SCAFFOLDS[EID].en;
+
+  it("ships a scaffold for every event template in every locale, ending in the composition boundary", () => {
+    for (const [eid, table] of Object.entries(EVENT_TITLE_SCAFFOLDS)) {
+      for (const [code, scaffold] of Object.entries(table)) {
+        // The boundary is the trailing em dash + space; what precedes
+        // it is script-specific (Tibetan's tsheg replaces the space).
+        expect(scaffold.endsWith("— "), `${eid} (${code})`).toBe(true);
+      }
+    }
+  });
+
+  it("substitutes the scaffold segment and keeps the member's suffix verbatim", () => {
+    const stored = `${esScaffold}tamales y música`;
+    const pt = provenanceEventTitle(EID, stored, "en");
+    expect(pt).toMatchObject({
+      text: `${enScaffold}tamales y música`,
+      original: stored,
+      translated: true,
+      sourceLocale: "es",
+    });
+    // Bare scaffold (member typed nothing yet) substitutes whole.
+    expect(provenanceEventTitle(EID, esScaffold, "en").text).toBe(enScaffold);
+  });
+
+  it("is a no-op when the scaffold is already the viewer's, and for non-scaffold titles", () => {
+    expect(
+      provenanceEventTitle(EID, `${enScaffold}potluck in the park`, "en")
+        .translated,
+    ).toBe(false);
+    expect(
+      provenanceEventTitle(EID, "A fully rewritten title", "en").translated,
+    ).toBe(false);
+    expect(provenanceEventTitle(null, esScaffold, "en").translated).toBe(
+      false,
+    );
+  });
+
+  it("verifies an unedited description against the source scaffold, and a historical one by hash", async () => {
+    await ensureContent("es");
+    const esDesc = getContentBundle("es").EVENT_TEMPLATES.find(
+      (t) => t.id === EID,
+    )!.descriptionScaffold;
+    const enDesc = getContentBundle("en").EVENT_TEMPLATES.find(
+      (t) => t.id === EID,
+    )!.descriptionScaffold;
+    const pt = provenanceEventDescription(EID, esDesc, ["es"], "en");
+    expect(pt).toMatchObject({ text: enDesc, translated: true });
+    expect(
+      provenanceEventDescription(EID, `${esDesc}!`, ["es"], "en").translated,
+    ).toBe(false);
+    // History: an old scaffold wording verifies by hash, bundle-free.
+    const OLD = "Una redacción antigua de la descripción del convite.";
+    const HIST = {
+      [EID]: { eventDescHashes: { es: [wordingHash(OLD)] } },
+    };
+    const hp = provenanceEventDescription(EID, OLD, [], "en", HIST);
+    expect(hp).toMatchObject({ text: enDesc, translated: true, sourceLocale: "es" });
+  });
+
+  it("matches a historical scaffold prefix", () => {
+    const OLD_SCAFFOLD = "Convite (redacción antigua) — ";
+    const HIST = { [EID]: { eventScaffolds: { es: [OLD_SCAFFOLD] } } };
+    const stored = `${OLD_SCAFFOLD}tamales`;
+    const pt = provenanceEventTitle(EID, stored, "en", HIST);
+    expect(pt).toMatchObject({
+      text: `${enScaffold}tamales`,
+      translated: true,
+      sourceLocale: "es",
+    });
   });
 });

@@ -39,21 +39,33 @@ interface Tpl {
   suggestsWorkDays?: boolean;
   tasks: readonly { name: string }[];
 }
+interface EvTpl {
+  id: string;
+  titleScaffold: string;
+  descriptionScaffold: string;
+}
 
 const names: Record<string, Record<string, string>> = {};
 const taskNames: Record<string, Record<string, readonly string[]>> = {};
 const workDays: Record<string, boolean> = {};
+const eventScaffolds: Record<string, Record<string, string>> = {};
 
 for (const code of locales) {
   const bundle = (await import(
     join(ROOT, "src", "content", "bundles", `${code}.ts`)
-  )) as { PROJECT_TEMPLATES: readonly Tpl[] };
+  )) as {
+    PROJECT_TEMPLATES: readonly Tpl[];
+    EVENT_TEMPLATES: readonly EvTpl[];
+  };
   for (const tpl of bundle.PROJECT_TEMPLATES) {
     (taskNames[tpl.id] ??= {})[code] = tpl.tasks.map((t) => t.name);
     (names[tpl.id] ??= {})[code] = tpl.name;
     // Sparse like the hand-rolled table: only templates that carry
     // the flag appear; absent reads as falsy at every call site.
     if (code === "en" && tpl.suggestsWorkDays) workDays[tpl.id] = true;
+  }
+  for (const ev of bundle.EVENT_TEMPLATES) {
+    (eventScaffolds[ev.id] ??= {})[code] = ev.titleScaffold;
   }
 }
 
@@ -106,6 +118,9 @@ out += JSON.stringify(workDays, null, 2);
 out +=
   ";\n\n// Template display names in every content language — the match table\n// for provenance-verified translation of an unmodified project title\n// (docs/provenance-translation.md).\nexport const TEMPLATE_NAMES: Record<\n  string,\n  Record<string, string>\n> = ";
 out += JSON.stringify(names, null, 2);
+out +=
+  ";\n\n// Event-template title scaffolds in every content language — the\n// prefix-match table for provenance-verified translation of an event\n// title's app-authored segment (the scaffold ends \" — \" and the\n// member's own words follow verbatim; docs/provenance-translation.md).\nexport const EVENT_TITLE_SCAFFOLDS: Record<\n  string,\n  Record<string, string>\n> = ";
+out += JSON.stringify(eventScaffolds, null, 2);
 out += ";\n";
 writeFileSync(OUT, out);
 console.log(
@@ -132,23 +147,28 @@ import {
 } from "../src/content/templateProvenance";
 import { TEMPLATE_WORDING_HISTORY as OLD_HISTORY } from "../src/content/templateProvenanceHistory";
 import { TEMPLATE_DESC_MANIFEST as OLD_MANIFEST } from "../src/content/templateProvenanceManifest";
-import {
-  TEMPLATE_NAMES as OLD_NAMES,
-  TEMPLATE_TASK_NAMES as OLD_TASK_NAMES,
-} from "../src/content/taskTitleIndex";
+import * as OLD_INDEX from "../src/content/taskTitleIndex";
+const OLD_NAMES = OLD_INDEX.TEMPLATE_NAMES;
+const OLD_TASK_NAMES = OLD_INDEX.TEMPLATE_TASK_NAMES;
+// Tolerate an index generated before event scaffolds existed.
+const OLD_EVENT_SCAFFOLDS: Record<string, Record<string, string>> =
+  (OLD_INDEX as { EVENT_TITLE_SCAFFOLDS?: Record<string, Record<string, string>> })
+    .EVENT_TITLE_SCAFFOLDS ?? {};
 
 interface Hist {
   names?: Record<string, string[]>;
   taskNames?: Record<string, string[][]>;
   descHashes?: Record<string, string[]>;
   taskDescHashes?: Record<string, string[][]>;
+  eventScaffolds?: Record<string, string[]>;
+  eventDescHashes?: Record<string, string[]>;
 }
 
 // Current-corpus manifest (per template, per locale): the description
 // composition hash and per-row task-description hashes.
 const manifest: Record<
   string,
-  Record<string, { d: string; t: string[] }>
+  Record<string, { d?: string; t?: string[]; e?: string }>
 > = {};
 for (const code of locales) {
   const bundle = (await import(
@@ -160,11 +180,22 @@ for (const code of locales) {
       whatYoullNeed: string;
       tasks: readonly { name: string; description: string }[];
     })[];
+    EVENT_TEMPLATES: readonly EvTpl[];
   };
   for (const tpl of bundle.PROJECT_TEMPLATES) {
     (manifest[tpl.id] ??= {})[code] = {
       d: wordingHash(composeTemplateDescription(tpl)),
       t: tpl.tasks.map((task) => wordingHash(task.description)),
+    };
+  }
+  // Event templates share the map, and the id namespaces are NOT
+  // disjoint (skill-share and repair-cafe exist as both) — safety
+  // comes from field-level namespacing instead: d/t and the
+  // name/task history keys are project data, e and the event history
+  // keys are event data, so a shared id never mixes the two.
+  for (const ev of bundle.EVENT_TEMPLATES) {
+    (manifest[ev.id] ??= {})[code] = {
+      e: wordingHash(ev.descriptionScaffold),
     };
   }
 }
@@ -208,6 +239,16 @@ for (const [tid, h] of Object.entries(OLD_HISTORY as Record<string, Hist>)) {
     if (outRows.some((r) => r.length))
       (out.taskDescHashes ??= {})[code] = outRows;
   }
+  for (const [code, olds] of Object.entries(h.eventScaffolds ?? {})) {
+    const arr: string[] = [];
+    for (const v of olds) push(arr, v, eventScaffolds[tid]?.[code]);
+    if (arr.length) (out.eventScaffolds ??= {})[code] = arr;
+  }
+  for (const [code, olds] of Object.entries(h.eventDescHashes ?? {})) {
+    const arr: string[] = [];
+    for (const v of olds) push(arr, v, manifest[tid]?.[code]?.e);
+    if (arr.length) (out.eventDescHashes ??= {})[code] = arr;
+  }
   if (Object.keys(out).length) history[tid] = out;
 }
 // Append wordings that just vanished (old generated files vs new
@@ -243,26 +284,48 @@ for (const [tid, tables] of Object.entries(
     if (!rows.some((r) => r.length)) delete h.taskNames[code];
   }
 }
+for (const [tid, tables] of Object.entries(OLD_EVENT_SCAFFOLDS)) {
+  for (const [code, oldScaffold] of Object.entries(tables)) {
+    const cur = eventScaffolds[tid]?.[code];
+    if (cur !== undefined && oldScaffold !== cur) {
+      const h = (history[tid] ??= {});
+      push(((h.eventScaffolds ??= {})[code] ??= []), oldScaffold, cur);
+    }
+  }
+}
 for (const [tid, tables] of Object.entries(
-  OLD_MANIFEST as Record<string, Record<string, { d: string; t: string[] }>>,
+  OLD_MANIFEST as Record<
+    string,
+    Record<string, { d?: string; t?: string[]; e?: string }>
+  >,
 )) {
   for (const [code, old] of Object.entries(tables)) {
     const cur = manifest[tid]?.[code];
     if (!cur) continue;
     const h = (history[tid] ??= {});
-    if (old.d !== cur.d) {
+    if (old.d && cur.d && old.d !== cur.d) {
       push(((h.descHashes ??= {})[code] ??= []), old.d, cur.d);
     }
-    if (old.t.length === cur.t.length) {
+    if (old.t && cur.t && old.t.length === cur.t.length) {
       const rows = ((h.taskDescHashes ??= {})[code] ??= cur.t.map(() => []));
-      old.t.forEach((oh, i) => push(rows[i], oh, cur.t[i]));
+      old.t.forEach((oh, i) => push(rows[i], oh, cur.t![i]));
       if (!rows.some((r) => r.length)) delete h.taskDescHashes[code];
+    }
+    if (old.e && cur.e && old.e !== cur.e) {
+      push(((h.eventDescHashes ??= {})[code] ??= []), old.e, cur.e);
     }
   }
 }
 // Drop empty shells so the emitted file stays tidy.
 for (const [tid, h] of Object.entries(history)) {
-  for (const k of ["names", "taskNames", "descHashes", "taskDescHashes"] as const) {
+  for (const k of [
+    "names",
+    "taskNames",
+    "descHashes",
+    "taskDescHashes",
+    "eventScaffolds",
+    "eventDescHashes",
+  ] as const) {
     if (h[k] && !Object.keys(h[k]!).length) delete h[k];
   }
   if (!Object.keys(h).length) delete history[tid];
@@ -280,7 +343,7 @@ let hist = HEADER.replace(
 `,
 );
 hist +=
-  "export interface TemplateWordingHistory {\n  names?: Record<string, readonly string[]>;\n  taskNames?: Record<string, readonly (readonly string[])[]>;\n  descHashes?: Record<string, readonly string[]>;\n  taskDescHashes?: Record<string, readonly (readonly string[])[]>;\n}\n\n";
+  "export interface TemplateWordingHistory {\n  names?: Record<string, readonly string[]>;\n  taskNames?: Record<string, readonly (readonly string[])[]>;\n  descHashes?: Record<string, readonly string[]>;\n  taskDescHashes?: Record<string, readonly (readonly string[])[]>;\n  eventScaffolds?: Record<string, readonly string[]>;\n  eventDescHashes?: Record<string, readonly string[]>;\n}\n\n";
 hist +=
   "export const TEMPLATE_WORDING_HISTORY: Record<\n  string,\n  TemplateWordingHistory\n> = ";
 hist += JSON.stringify(history, null, 2);
@@ -300,7 +363,7 @@ let man = HEADER.replace(
 `,
 );
 man +=
-  "export const TEMPLATE_DESC_MANIFEST: Record<\n  string,\n  Record<string, { d: string; t: readonly string[] }>\n> = ";
+  "export const TEMPLATE_DESC_MANIFEST: Record<\n  string,\n  Record<string, { d?: string; t?: readonly string[]; e?: string }>\n> = ";
 man += JSON.stringify(manifest, null, 2);
 man += ";\n";
 writeFileSync(
