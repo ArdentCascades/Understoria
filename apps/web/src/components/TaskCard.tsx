@@ -21,7 +21,10 @@ import { creditHoursForTask } from "@/lib/timebank";
 import { HighlightedText } from "@/components/HighlightedText";
 import { WhyTooltip } from "@/components/WhyTooltip";
 import { usePendingAction } from "@/lib/usePendingAction";
-import type { ProvenanceView } from "@/lib/useTemplateProvenance";
+import {
+  useProvenanceText,
+  type ProvenanceView,
+} from "@/lib/useTemplateProvenance";
 import { useTaskCommentCount } from "@/lib/useTaskCommentCount";
 import { statusChipClass, capitalize } from "@/lib/taskPresentation";
 import { getTaskTips } from "@/content/taskTips";
@@ -183,12 +186,21 @@ export function TaskCard({
 
   // Only unmet (non-completed) deps render in the Follows badge — a
   // completed upstream is no longer informative on the downstream row.
+  // Upstream titles go through the same provenance rendering as the
+  // cards they name (field report: every card on a French-created
+  // project translated except the "Follows:" blurbs, which kept the
+  // stored French). Compact and marker-free like all list rows — the
+  // badge scrolls to the upstream card, whose page carries the note.
+  const provText = useProvenanceText();
   const unmetDepTitles = useMemo(() => {
     return task.dependencies
       .map((id) => allTasks.find((tk) => tk.id === id))
       .filter((dep): dep is ProjectTask => !!dep && dep.status !== "completed")
-      .map((dep) => ({ id: dep.id, title: dep.title }));
-  }, [task.dependencies, allTasks]);
+      .map((dep) => ({
+        id: dep.id,
+        title: provText.taskTitle(templateId, dep.title),
+      }));
+  }, [task.dependencies, allTasks, provText, templateId]);
   const hasUnmetDeps = unmetDepTitles.length > 0;
 
   // Capacity mirror for the claim-moment block: how many OTHER active

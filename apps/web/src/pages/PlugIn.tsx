@@ -32,6 +32,7 @@ import {
   type ShelfTask,
 } from "@/lib/plugIn";
 import { CategoryBadge } from "@/components/CategoryBadge";
+import { useProvenanceText } from "@/lib/useTemplateProvenance";
 import { WhyTooltip } from "@/components/WhyTooltip";
 
 // "Ways to plug in" — the browsable shelf (docs/ways-to-plug-in.md).
@@ -281,6 +282,10 @@ function MatchedOn({ tokens }: { tokens: string[] }) {
 function ShiftRow({ entry }: { entry: ShelfShift }) {
   const { t, i18n } = useTranslation();
   const { shift, event, spotsOpen, matchedOn } = entry;
+  // Same compact-surface provenance as My-work's shift rows: the
+  // event title translates when it is the template's unedited
+  // wording; the shift label is the organizer's own text, verbatim.
+  const provText = useProvenanceText();
   const dateFmt = new Intl.DateTimeFormat(intlLocale(i18n.language), {
     weekday: "short",
     month: "short",
@@ -311,7 +316,7 @@ function ShiftRow({ entry }: { entry: ShelfShift }) {
           </span>
         </span>
         <span className="mt-1 block text-xs text-moss-600 dark:text-moss-300">
-          {event.title}
+          {provText.eventTitle(event.templateId, event.title)}
         </span>
         <MatchedOn tokens={matchedOn} />
       </Link>
@@ -349,6 +354,12 @@ function TaskRow({ entry }: { entry: ShelfTask }) {
   const { t } = useTranslation();
   const { task, project, blockedByTitles, matchedOn } = entry;
   const blocked = blockedByTitles.length > 0;
+  // A compact list surface like My-work rows: unedited template
+  // wording renders in the viewer's language, marker-free, with the
+  // note one tap away on the linked task page (this shelf missed the
+  // phase-2a pass — task, project and upstream titles all showed the
+  // creation language).
+  const provText = useProvenanceText();
   return (
     <li className={`py-2 ${blocked ? "opacity-70" : ""}`}>
       <Link
@@ -358,17 +369,23 @@ function TaskRow({ entry }: { entry: ShelfTask }) {
         <span className="flex flex-wrap items-center gap-2">
           <CategoryBadge category={task.category} size="sm" />
           <span className="min-w-0 flex-1 truncate text-sm font-medium">
-            {task.title}
+            {provText.taskTitle(project.templateId, task.title)}
           </span>
         </span>
         <span className="mt-1 block text-xs text-moss-600 dark:text-moss-300">
-          {project.title}
+          {provText.projectTitle(project.templateId, project.title)}
         </span>
         {/* Soft block, the task-ordering discipline verbatim:
             de-emphasized and last, never hidden. */}
         {blocked && (
           <span className="mt-1 block text-xs text-moss-600 dark:text-moss-300">
-            {t("plugIn.follows", { titles: blockedByTitles.join(", ") })}
+            {t("plugIn.follows", {
+              titles: blockedByTitles
+                .map((title) =>
+                  provText.taskTitle(project.templateId, title),
+                )
+                .join(", "),
+            })}
           </span>
         )}
         <MatchedOn tokens={matchedOn} />
