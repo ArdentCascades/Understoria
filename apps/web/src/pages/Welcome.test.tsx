@@ -770,7 +770,11 @@ describe("WelcomePage — the protect step (V5 #475)", () => {
     clickNextNTimes(6);
     setInput(nameInput(), "Mara");
     await clickFinish();
-    expect(container.textContent).toContain("Protect your key");
+    // Finish runs real async identity creation that act() doesn't
+    // await; a single flush is enough on a fast machine and not on a
+    // slow CI runner (observed flaking there at "Working…"). Poll
+    // like the protect doors below do.
+    await waitForText("Protect your key");
   }
 
   beforeEach(() => {
