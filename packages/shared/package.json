@@ -24,6 +24,10 @@
       "types": "./dist/crypto.d.ts",
       "default": "./dist/crypto.js"
     },
+    "./notifications": {
+      "types": "./dist/notifications.d.ts",
+      "default": "./dist/notifications.js"
+    },
     "./trust": {
       "types": "./dist/trust.d.ts",
       "default": "./dist/trust.js"

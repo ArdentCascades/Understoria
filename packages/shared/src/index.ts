@@ -30,3 +30,4 @@ export * from "./types.js";
 export * from "./bytes.js";
 export * from "./crypto.js";
 export * from "./trust.js";
+export * from "./notifications.js";

@@ -5,30 +5,35 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 //
-// The no-notifications guard.
+// The quiet-by-default guard (formerly the no-notifications guard).
 //
-// `no-notifications` is the design principle the product's whole shape
-// rests on, and the README now spends a section on it. Before this file,
-// it was the one large claim in the project with no test behind it: the
-// repository pins its own README's numbers in readme.guard.test.ts on the
-// stated grounds that prose has no compiler — and then left the loudest
-// prose unguarded.
+// `no-notifications` was the absolute this file originally enforced:
+// no notification call site anywhere, no push dependency, full stop.
+// docs/notifications.md AMENDS that principle rather than repealing
+// it — "quiet by default: a notification exists only when you asked
+// for it, only for things with a person or a clock on the other end"
+// — and this guard evolves with it. The claim it now pins is scoped,
+// not gone:
 //
-// That gap mattered because the distance from here to push is short. The
-// app is an installable PWA with a generated service worker; adding
-// `web-push` and one `showNotification` call would ship green. A promise
-// that depends on nobody forgetting is not a promise, it is a habit.
+//   - OS-surface call sites (notifications, push, badges, vibration)
+//     may exist ONLY in the files named in the allowlist below, each
+//     with the specific capability it is allowed — panic.ts may drop
+//     a push subscription, never create one. Anything anywhere else
+//     still fails this test, exactly as before.
+//   - The only push-delivery dependency allowed is `web-push` in the
+//     server (standard Web Push from the community's own node).
+//     Vendor push SDKs (Firebase, OneSignal…) stay forbidden
+//     everywhere — the doc's decision 8.
+//   - The generated service worker stays generateSW; the push
+//     display handler is the one audited static script
+//     (public/push-sw.js), pinned here and cross-checked against the
+//     shared category enum in notifications.guard.test.ts.
 //
-// So this asserts the claim mechanically: no notification, badge,
-// vibration or push-subscription call site, and no push dependency.
-//
-// WHAT THIS DELIBERATELY DOES NOT FORBID: the nudge stream. The app holds
-// a Server-Sent-Events connection that carries a content-free "something
-// changed" frame and triggers the same sync a window-focus already runs
-// (docs/sync-liveness.md). That is server push and it is fine — it raises
-// nothing, addresses no one, and dies with a hidden tab. The claim is "no
-// push NOTIFICATIONS", not "no push", and the README says so in those
-// words.
+// WHAT THIS DELIBERATELY DOES NOT FORBID: the nudge stream. The app
+// holds a Server-Sent-Events connection carrying a content-free
+// "something changed" frame (docs/sync-liveness.md). That is server
+// push and it is fine — it raises nothing, addresses no one, and
+// dies with a hidden tab.
 //
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join } from "node:path";
@@ -59,6 +64,26 @@ const FORBIDDEN: ReadonlyArray<{ pattern: RegExp; what: string }> = [
   { pattern: /document\s*\.\s*title\s*=/, what: "document.title mutation (title flashing)" },
 ];
 
+/**
+ * The amendment, file by file (docs/notifications.md). Each entry
+ * names the ONLY capabilities that file may use; a new capability in
+ * an allowed file, or any capability in a new file, fails the scan
+ * and must argue its case here and in the doc in the same PR.
+ */
+const ALLOWED: Readonly<Record<string, readonly string[]>> = {
+  // Panic teardown: DROPPING the push subscription during a purge.
+  // Reading and unsubscribing only — a subscribe call here would be
+  // "pushManager" too, which is why the entry exists per-file, not
+  // per-pattern-everywhere.
+  "apps/web/src/lib/panic.ts": ["registration.pushManager"],
+};
+
+/** Guard tests that name the forbidden patterns as literals. */
+const SELF_REFERENTIAL = [
+  "apps/web/src/lib/noNotifications.guard.test.ts",
+  "apps/web/src/lib/notifications.guard.test.ts",
+];
+
 /** Packages whose only purpose is delivering notifications. */
 const FORBIDDEN_DEPS = [
   "web-push",
@@ -67,6 +92,13 @@ const FORBIDDEN_DEPS = [
   "onesignal",
   "react-onesignal",
   "node-pushnotifications",
+];
+
+/** The one sanctioned delivery dependency: standard Web Push, sent
+ *  by the community's own node — no vendor SDK (doc decision 8). */
+const ALLOWED_DEPS: ReadonlyArray<{ manifest: string; dep: string }> = [
+  { manifest: "apps/server/package.json", dep: "web-push" },
+  { manifest: "apps/server/package.json", dep: "@types/web-push" },
 ];
 
 function sources(dir: string, out: string[] = []): string[] {
@@ -93,19 +125,21 @@ function manifests(): string[] {
   return found;
 }
 
-describe("no-notifications: the principle, enforced", () => {
-  it("has no notification, badge or vibration call site in any shipped tree", () => {
+describe("quiet by default: the amended principle, enforced", () => {
+  it("has no OS-surface call site outside the allowlisted files", () => {
     const offenders: string[] = [];
     for (const tree of TREES) {
       for (const abs of sources(tree)) {
         const rel = abs.slice(ROOT.length + 1);
-        // This file names the patterns as literals.
-        if (rel.endsWith("lib/noNotifications.guard.test.ts")) continue;
+        if (SELF_REFERENTIAL.includes(rel)) continue;
+        const allowed = ALLOWED[rel] ?? [];
         readFileSync(abs, "utf8")
           .split("\n")
           .forEach((line, i) => {
             for (const { pattern, what } of FORBIDDEN) {
-              if (pattern.test(line)) offenders.push(`${rel}:${i + 1}  ${what}`);
+              if (pattern.test(line) && !allowed.includes(what)) {
+                offenders.push(`${rel}:${i + 1}  ${what}`);
+              }
             }
           });
       }
@@ -113,16 +147,20 @@ describe("no-notifications: the principle, enforced", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("depends on no push-delivery package", () => {
+  it("depends on web-push in the server alone — no vendor push SDK anywhere", () => {
     const offenders: string[] = [];
     for (const m of manifests()) {
+      const rel = m.slice(ROOT.length + 1);
       const pkg = JSON.parse(readFileSync(m, "utf8")) as Record<string, unknown>;
       for (const field of ["dependencies", "devDependencies", "peerDependencies"]) {
         const deps = pkg[field];
         if (!deps || typeof deps !== "object") continue;
         for (const name of Object.keys(deps as object)) {
-          if (FORBIDDEN_DEPS.some((f) => name === f || name.startsWith(`${f}/`))) {
-            offenders.push(`${m.slice(ROOT.length + 1)} → ${name}`);
+          if (
+            FORBIDDEN_DEPS.some((f) => name === f || name.startsWith(`${f}/`)) &&
+            !ALLOWED_DEPS.some((a) => a.manifest === rel && a.dep === name)
+          ) {
+            offenders.push(`${rel} → ${name}`);
           }
         }
       }
@@ -130,19 +168,26 @@ describe("no-notifications: the principle, enforced", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("ships no hand-written service worker that could carry a push handler", () => {
-    // vite-plugin-pwa runs in generateSW mode, so the emitted worker is
-    // precache + runtime caching only. A hand-written sw source is the
-    // route by which a `push` / `notificationclick` listener would arrive.
+  it("keeps generateSW: the push handler is the one audited static script", () => {
+    // vite-plugin-pwa stays in generateSW mode — the emitted worker is
+    // precache + runtime caching, with the display handler riding in
+    // as ONE named importScripts file. A hand-written sw source (the
+    // injectManifest route) would put arbitrary code in the worker;
+    // these stay absent.
     const web = join(ROOT, "apps", "web");
     const suspects = ["src/sw.ts", "src/sw.js", "src/service-worker.ts", "public/sw.js"];
     expect(suspects.filter((f) => existsSync(join(web, f)))).toEqual([]);
+    const viteConfig = readFileSync(join(web, "vite.config.ts"), "utf8");
+    expect(viteConfig).toContain('importScripts: ["push-sw.js"]');
+    expect(viteConfig).not.toContain("injectManifest");
+    expect(existsSync(join(web, "public", "push-sw.js"))).toBe(true);
   });
 
   it("keeps the desktop shell's notification permission denied", () => {
-    // The Electron shell allowlists permissions; notifications must not
-    // appear in it. This is the strongest artifact behind the claim and
-    // the easiest to lose in a refactor.
+    // The Electron shell allowlists permissions; notifications must
+    // not appear in it. Web push does not reach the desktop shell,
+    // and until a desktop story is designed and documented, the
+    // denial stands — opt-in on the web changes nothing here.
     const policy = readFileSync(
       join(ROOT, "apps", "desktop", "src", "policy.ts"),
       "utf8",
@@ -151,11 +196,12 @@ describe("no-notifications: the principle, enforced", () => {
     expect(allow.slice(0, allow.indexOf("]"))).not.toContain("notifications");
   });
 
-  it("the README claims no push NOTIFICATIONS, not no push", () => {
+  it("the README claims no push NOTIFICATIONS by default, not no push", () => {
     // The nudge stream is real server push. A README that denied push
-    // outright would be false against docs/sync-liveness.md, which titles
-    // its own section "Server push — the nudge stream". This assertion
-    // exists so the softer, true wording cannot quietly harden.
+    // outright would be false against docs/sync-liveness.md, which
+    // titles its own section "Server push — the nudge stream". This
+    // assertion exists so the softer, true wording cannot quietly
+    // harden.
     const readme = readFileSync(join(ROOT, "README.md"), "utf8");
     const overclaims = [
       "nothing is pushed",

@@ -2020,3 +2020,23 @@ export function parseFounderAccession(
     },
   };
 }
+
+/**
+ * Canonical bytes a member signs to manage a push subscription
+ * (docs/notifications.md — quiet by default). Binds the action, the
+ * member, the device, the push endpoint, and the payload the action
+ * carries (the sorted category list for subscribe; empty otherwise),
+ * plus a timestamp so a captured body goes stale like a read
+ * signature does. Shared so the PWA signer and the node verifier can
+ * never drift.
+ */
+export function canonicalPushAuthMessage(
+  action: "push-subscribe" | "push-renew" | "push-delete",
+  memberKey: string,
+  deviceId: string,
+  endpoint: string,
+  categories: readonly string[],
+  timestampMs: number,
+): string {
+  return `${action}|${memberKey}|${deviceId}|${endpoint}|${[...categories].sort().join(",")}|${timestampMs}`;
+}

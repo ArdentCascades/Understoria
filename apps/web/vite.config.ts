@@ -116,6 +116,11 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        // The opt-in push display handler (docs/notifications.md)
+        // rides into the generated SW as a plain static script —
+        // generateSW stays; nothing about precaching changes. It is
+        // dark until a member opts in: no subscription, no events.
+        importScripts: ["push-sw.js"],
         // Lazy locale chunks stay OUT of the install-time precache —
         // that is the point of lazy loading (docs/i18n-expansion.md
         // Phase 0): a member downloads only the language they use.

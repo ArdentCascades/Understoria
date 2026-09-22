@@ -30,6 +30,7 @@ import {
   createAwaitingTransitionStore,
   createCofounderStore,
   createDeviceLinkStore,
+  createPushSubscriptionStore,
   createEventRsvpStateStore,
   createEventShiftStateStore,
   createLinkRequestStore,
@@ -73,6 +74,8 @@ import { registerRedemptionRoutes } from "./routes/redemptions.js";
 import { registerInviteRevocationRoutes } from "./routes/inviteRevocations.js";
 import { registerInviteAnnouncementRoutes } from "./routes/inviteAnnouncements.js";
 import { registerNudgeRoutes } from "./routes/nudges.js";
+import { registerPushRoutes } from "./routes/push.js";
+import { ensureVapidKeys } from "./push.js";
 import { createNudgeBus } from "./nudgeBus.js";
 import { registerAwaitingTransitionRoutes } from "./routes/awaitingTransitions.js";
 import { registerTaskCommentRoutes } from "./routes/taskComments.js";
@@ -284,6 +287,11 @@ export async function buildServer({
   const pullStore = createPeerPullStore(db);
   const awaitingTransitionStore = createAwaitingTransitionStore(db);
   const deviceLinkStore = createDeviceLinkStore(db);
+  // Opt-in push (docs/notifications.md): the subscription store and
+  // this node's VAPID pair. The lifecycle ships DARK — no trigger
+  // sends anything yet; the routes below only manage rows.
+  const pushSubscriptionStore = createPushSubscriptionStore(db);
+  const vapidKeys = ensureVapidKeys(db);
   const linkRequestStore = createLinkRequestStore(db);
   const projectStateStore = createProjectStateStore(db);
   const taskStateStore = createTaskStateStore(db);
@@ -567,6 +575,11 @@ export async function buildServer({
   // future route is covered the day it lands in SURFACES.
   const nudgeBus = createNudgeBus();
   await registerNudgeRoutes(app, { bus: nudgeBus });
+  await registerPushRoutes(app, {
+    store: pushSubscriptionStore,
+    resolver: membershipResolver,
+    vapidPublicKey: vapidKeys.publicKey,
+  });
   app.addHook("onResponse", async (req, reply) => {
     if (req.method !== "POST") return;
     if (reply.statusCode >= 300) return;
