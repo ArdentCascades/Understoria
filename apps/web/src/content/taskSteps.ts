@@ -60,6 +60,54 @@ export function templateTaskIndex(
   return -1;
 }
 
+/**
+ * Viewer-language rendering of SEEDED plan steps
+ * (docs/provenance-translation.md, extended by field report: a
+ * member seeded their private plan while the app showed English —
+ * or before their language's content bundle had loaded — and the
+ * stored rows stayed English after switching to Russian).
+ *
+ * The plan is the member's own, so the byte-exact rule applies PER
+ * STEP: a stored step translates only when it is, byte for byte, one
+ * of the authored starter steps for this template task in SOME
+ * locale — the aligned per-locale lists make the position the
+ * bridge. A step the member wrote or reworded matches nothing and
+ * stays verbatim: the app translates its own words, never theirs.
+ * Display-only — the stored rows never change.
+ */
+export function translateSeededSteps(
+  templateId: string | null | undefined,
+  taskTitle: string,
+  steps: readonly string[],
+  locale: string,
+): readonly string[] {
+  if (!templateId || steps.length === 0) return steps;
+  const idx = templateTaskIndex(templateId, taskTitle);
+  if (idx < 0) return steps;
+  const ours = getContentBundle(locale).TASK_STEPS[templateId]?.[idx];
+  if (!ours || ours.length === 0) return steps;
+  // Every locale the corpus knows for this template; an unloaded
+  // lazy bundle aliases en, so it can only ever match en's own text.
+  const codes = Object.keys(TEMPLATE_TASK_NAMES[templateId] ?? {});
+  let any = false;
+  const out = steps.map((step) => {
+    if (ours.includes(step)) return step; // already the viewer's words
+    for (const code of codes) {
+      const theirs = getContentBundle(code).TASK_STEPS[templateId]?.[idx];
+      const at = theirs?.indexOf(step) ?? -1;
+      if (at < 0) continue;
+      const translated = ours[at];
+      if (translated && translated !== step) {
+        any = true;
+        return translated;
+      }
+      return step;
+    }
+    return step;
+  });
+  return any ? out : steps;
+}
+
 export function getTaskSteps(
   templateId: string | null | undefined,
   taskTitle: string,

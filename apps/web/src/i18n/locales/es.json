@@ -3889,6 +3889,7 @@
     "note": "Se muestra en tu idioma: el proyecto partió de una guía y este texto quedó tal cual.",
     "viewOriginal": "Ver original",
     "showTranslated": "Ver en tu idioma",
-    "mixedNote": "Lo que quien organiza escribió aparece exactamente como lo escribió — Understoria nunca traduce automáticamente lo que escriben los miembros."
+    "mixedNote": "Lo que quien organiza escribió aparece exactamente como lo escribió — Understoria nunca traduce automáticamente lo que escriben los miembros.",
+    "editingOriginal": "Aquí editas la redacción original. La traducción solo se muestra mientras el texto del manual sigue sin cambios — lo que guardes se mostrará a todo el mundo exactamente como lo escribas."
   }
 }

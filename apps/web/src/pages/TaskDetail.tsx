@@ -201,6 +201,7 @@ export default function TaskDetailPage() {
         viewerSkills={currentMember?.skills ?? []}
         templateId={project.templateId}
         organizerKey={project.organizerKey}
+        titleView={prov.taskTitle(task.id)}
         descriptionView={prov.taskDescription(task.id)}
         skillsView={prov.taskSkills(task.id)}
       />

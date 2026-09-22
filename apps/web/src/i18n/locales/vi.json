@@ -3889,6 +3889,7 @@
     "note": "Hiển thị bằng ngôn ngữ của bạn: dự án bắt đầu từ cẩm nang và đoạn này được giữ nguyên.",
     "viewOriginal": "Xem bản gốc",
     "showTranslated": "Hiện theo ngôn ngữ của bạn",
-    "mixedNote": "Những gì người tổ chức tự viết sẽ hiện đúng như đã viết — Understoria không bao giờ dịch máy chữ của thành viên."
+    "mixedNote": "Những gì người tổ chức tự viết sẽ hiện đúng như đã viết — Understoria không bao giờ dịch máy chữ của thành viên.",
+    "editingOriginal": "Ở đây bạn đang sửa nguyên văn gốc. Bản dịch chỉ hiển thị khi chữ của cẩm nang còn nguyên — những gì bạn lưu sẽ hiện ra với mọi người đúng như bạn viết."
   }
 }

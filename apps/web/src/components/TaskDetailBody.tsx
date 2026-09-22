@@ -76,6 +76,7 @@ export function TaskDetailBody({
   viewerSkills,
   templateId,
   organizerKey,
+  titleView,
   descriptionView,
   skillsView,
 }: {
@@ -121,6 +122,9 @@ export function TaskDetailBody({
    *  page's useTemplateProvenance (docs/provenance-translation.md).
    *  Display only — the stored description keeps driving edits,
    *  wire payloads, and everything that must stay signed-bytes. */
+  /** The task title's provenance view — here only to decide whether
+   *  the edit form owes the editing-the-original note. */
+  titleView?: ProvenanceView;
   descriptionView?: ProvenanceView;
   /** Display strings for the skill chips, aligned with
    *  task.requiredSkills by index — the skill-fit check keeps using
@@ -305,6 +309,16 @@ export function TaskDetailBody({
   if (editing) {
     return (
       <div className="card flex flex-col gap-2">
+        {/* The page marker above says "shown in your language" while
+            these fields hold the stored ORIGINAL (editing edits the
+            signed text — pre-filling a translation would overwrite
+            the organizer's words on save). Without this line the two
+            read as a contradiction; field reports flagged it twice. */}
+        {(titleView?.translated || descriptionView?.translated) && (
+          <p className="rounded-lg bg-moss-100 p-2 text-xs text-moss-700 dark:bg-moss-800 dark:text-moss-200">
+            {t("provenance.editingOriginal")}
+          </p>
+        )}
         <label className="flex flex-col gap-1 text-sm">
           <span className="font-medium">
             {t("projects.task.addTask.fieldTitle")}
@@ -378,38 +392,47 @@ export function TaskDetailBody({
             excluding this one. Saved via editProjectTask (which
             calls detectCycle + in-project-membership checks). The
             soft cap of 10 keeps the "Follows:" badge legible. */}
-        <label className="flex flex-col gap-1 text-sm">
+        <div className="flex flex-col gap-1 text-sm">
           <span className="font-medium">{t("projects.task.dependsOn")}</span>
-          <select
-            multiple
+          {/* A plain checkbox list, deliberately NOT a native
+              <select multiple>: on iOS the closed control renders
+              OS-chrome text ("0 Items") in the PHONE's language, not
+              the member's app language — the one string on the form
+              no locale file could reach. Checkboxes are ours end to
+              end, and kinder on touch anyway. Titles render through
+              the same provenance path as the Follows lines. */}
+          <ul
             data-testid={`deps-${task.id}`}
-            className="input min-h-[6rem]"
-            value={editDeps}
-            onChange={(e) => {
-              const picked = Array.from(
-                e.target.selectedOptions,
-                (o) => o.value,
-              );
-              setEditDeps(picked);
-            }}
+            className="input flex max-h-48 flex-col gap-1 overflow-y-auto py-2"
           >
             {allTasks
               .filter((other) => other.id !== task.id)
               .map((other) => (
-                <option key={other.id} value={other.id}>
-                  {/* Same provenance rendering as the Follows lines —
-                      the picker names tasks the way the list shows
-                      them (field report: an English-created project
-                      offered its Chinese viewer an English-only
-                      dependency list). */}
-                  {provText.taskTitle(templateId, other.title)}
-                </option>
+                <li key={other.id}>
+                  <label className="flex cursor-pointer items-start gap-2">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-canopy-600"
+                      checked={editDeps.includes(other.id)}
+                      onChange={(e) =>
+                        setEditDeps((prev) =>
+                          e.target.checked
+                            ? [...prev, other.id]
+                            : prev.filter((id) => id !== other.id),
+                        )
+                      }
+                    />
+                    <span className="min-w-0 break-words">
+                      {provText.taskTitle(templateId, other.title)}
+                    </span>
+                  </label>
+                </li>
               ))}
-          </select>
+          </ul>
           <span className="text-xs text-moss-600 dark:text-moss-300">
             {t("projects.task.dependsOnHint")}
           </span>
-        </label>
+        </div>
         <div className="flex flex-wrap gap-2 self-end">
           <button
             type="button"

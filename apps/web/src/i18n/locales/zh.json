@@ -3889,6 +3889,7 @@
     "note": "以你的语言显示：这个项目由手册创建，这段文字未经改动。",
     "viewOriginal": "查看原文",
     "showTranslated": "显示为你的语言",
-    "mixedNote": "组织者自己写的内容会原样显示——Understoria 绝不会机器翻译成员写的文字。"
+    "mixedNote": "组织者自己写的内容会原样显示——Understoria 绝不会机器翻译成员写的文字。",
+    "editingOriginal": "这里编辑的是原文。译文只在手册文字未经改动时显示——你保存的内容会原样展示给所有人。"
   }
 }
