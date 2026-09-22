@@ -207,7 +207,7 @@ interface TemplateLike {
   purpose: string;
   whoItServes: string;
   whatYoullNeed: string;
-  tasks: readonly { description: string }[];
+  tasks: readonly { description: string; skills?: readonly string[] }[];
 }
 
 function findTemplate(
@@ -305,6 +305,48 @@ export function provenanceTaskDescription(
     };
   }
   return live;
+}
+
+/**
+ * Viewer-language rendering of a task's suggested-skill chips, for a
+ * task whose row is already fixed by its title match. The byte-exact
+ * rule applies PER SKILL: a stored skill translates only when it is,
+ * byte for byte, one of a source bundle's skills for this same task
+ * row — the aligned per-locale lists make the position the bridge.
+ * A skill the organizer added or reworded matches nothing and stays
+ * verbatim, exactly like every other member-authored string
+ * (field report: an English-created template task showed
+ * "outreach"/"paperwork" to a Chinese viewer whose bundle carries
+ * 外联/办手续 for that very row).
+ */
+export function provenanceTaskSkills(
+  templateId: string | null,
+  row: number,
+  skills: readonly string[],
+  candidateLocales: readonly string[],
+  viewerLocale: string | undefined,
+): readonly string[] {
+  if (!templateId || row < 0 || skills.length === 0) return skills;
+  const viewer = contentLocale(viewerLocale);
+  const ours = findTemplate(viewer, templateId)?.tasks[row]?.skills;
+  if (!ours || ours.length === 0) return skills;
+  let any = false;
+  const out = skills.map((skill) => {
+    for (const code of candidateLocales) {
+      if (code === viewer) continue;
+      const theirs = findTemplate(code, templateId)?.tasks[row]?.skills;
+      const idx = theirs?.indexOf(skill) ?? -1;
+      if (idx < 0) continue;
+      const translated = ours[idx];
+      if (translated && translated !== skill) {
+        any = true;
+        return translated;
+      }
+      return skill;
+    }
+    return skill;
+  });
+  return any ? out : skills;
 }
 
 // ---- Event templates (docs/provenance-translation.md, phase 2c) ----

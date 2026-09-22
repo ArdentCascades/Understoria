@@ -21,6 +21,7 @@ import {
   provenanceEventDescription,
   provenanceEventTitle,
   provenanceTaskDescription,
+  provenanceTaskSkills,
   provenanceTaskTitle,
   provenanceTitle,
   wordingHash,
@@ -145,6 +146,35 @@ describe("description provenance (bundle-verified)", () => {
     expect(
       provenanceTaskDescription(TID, 1, esDesc, ["es"], "en").translated,
     ).toBe(false);
+  });
+});
+
+describe("task-skill provenance (per-skill byte-exact)", () => {
+  it("translates template skills by aligned position, and only those", async () => {
+    await ensureContent("es");
+    // en task 1 of community-fridge suggests ["carpentry","driving"];
+    // the es bundle's same row carries ["carpintería","conducir"].
+    // An organizer-added skill matches nothing and stays verbatim.
+    const view = provenanceTaskSkills(
+      TID,
+      1,
+      ["carpentry", "welding", "driving"],
+      ["en"],
+      "es",
+    );
+    expect(view).toEqual(["carpintería", "welding", "conducir"]);
+  });
+
+  it("substitutes nothing without a matched row or for the source's own locale", async () => {
+    await ensureContent("es");
+    const skills = ["carpentry", "driving"];
+    expect(provenanceTaskSkills(TID, -1, skills, ["en"], "es")).toBe(skills);
+    // Viewer IS the source: their words already.
+    expect(provenanceTaskSkills(TID, 1, skills, ["en"], "en")).toBe(skills);
+    // Wrong row: same bytes, different address — no substitution.
+    expect(
+      provenanceTaskSkills(TID, 0, ["carpentry"], ["en"], "es"),
+    ).toEqual(["carpentry"]);
   });
 });
 

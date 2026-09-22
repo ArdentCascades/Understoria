@@ -77,6 +77,7 @@ export function TaskDetailBody({
   templateId,
   organizerKey,
   descriptionView,
+  skillsView,
 }: {
   task: ProjectTask;
   isOrganizer: boolean;
@@ -121,6 +122,10 @@ export function TaskDetailBody({
    *  Display only — the stored description keeps driving edits,
    *  wire payloads, and everything that must stay signed-bytes. */
   descriptionView?: ProvenanceView;
+  /** Display strings for the skill chips, aligned with
+   *  task.requiredSkills by index — the skill-fit check keeps using
+   *  the stored strings; only the rendered text swaps. */
+  skillsView?: readonly string[];
 }) {
   const { t, i18n } = useTranslation();
   const { showToast } = useToast();
@@ -392,7 +397,12 @@ export function TaskDetailBody({
               .filter((other) => other.id !== task.id)
               .map((other) => (
                 <option key={other.id} value={other.id}>
-                  {other.title}
+                  {/* Same provenance rendering as the Follows lines —
+                      the picker names tasks the way the list shows
+                      them (field report: an English-created project
+                      offered its Chinese viewer an English-only
+                      dependency list). */}
+                  {provText.taskTitle(templateId, other.title)}
                 </option>
               ))}
           </select>
@@ -516,7 +526,10 @@ export function TaskDetailBody({
             <span className="text-sm font-medium text-moss-700 dark:text-moss-200">
               {t("projects.task.detail.skillsLabel")}
             </span>
-            {task.requiredSkills.map((s) => {
+            {task.requiredSkills.map((s, i) => {
+              // Fit is judged on the STORED string (what members
+              // wrote in their profiles matches against); the chip
+              // shows the provenance view when one exists.
               const fits = skillMatch.matched.includes(s);
               return (
                 <span
@@ -532,7 +545,7 @@ export function TaskDetailBody({
                       {"✓"}
                     </span>
                   )}
-                  {s}
+                  {skillsView?.[i] ?? s}
                 </span>
               );
             })}
