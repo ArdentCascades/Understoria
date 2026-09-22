@@ -46,6 +46,7 @@
  */
 import type { FastifyBaseLogger } from "fastify";
 import type { Database as DatabaseType } from "better-sqlite3-multiple-ciphers";
+import { PUSH_SUBSCRIPTION_TTL_MS } from "./db.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -67,6 +68,7 @@ export interface RetentionSweepResult {
   announcements: number;
   transitions: number;
   counters: number;
+  pushSubscriptions: number;
 }
 
 export interface RetentionSweep {
@@ -98,6 +100,13 @@ export function startRetentionSweep(
   const deleteCounters = opts.db.prepare(
     "DELETE FROM newcomer_daily_writes WHERE window_start < ?",
   );
+  // Push-subscription TTL dead-man (docs/notifications.md): rows not
+  // renewed by an app open expire here, which is what makes an
+  // OFFLINE hard purge safe — the wiped device cannot unsubscribe,
+  // but its pings stop when the TTL lapses.
+  const deletePushSubscriptions = opts.db.prepare(
+    "DELETE FROM push_subscriptions WHERE renewed_at < ?",
+  );
 
   function sweepOnce(): RetentionSweepResult {
     const t = now();
@@ -106,6 +115,7 @@ export function startRetentionSweep(
       announcements: 0,
       transitions: 0,
       counters: 0,
+      pushSubscriptions: 0,
     };
     if (opts.claimRetentionDays > 0) {
       result.claims = deleteClaims.run(
@@ -127,11 +137,15 @@ export function startRetentionSweep(
         t - opts.newcomerCounterRetentionDays * DAY_MS,
       ).changes;
     }
+    result.pushSubscriptions = deletePushSubscriptions.run(
+      t - PUSH_SUBSCRIPTION_TTL_MS,
+    ).changes;
     const total =
       result.claims +
       result.announcements +
       result.transitions +
-      result.counters;
+      result.counters +
+      result.pushSubscriptions;
     if (total > 0) {
       opts.log.info(result, "retention sweep pruned rows");
     }

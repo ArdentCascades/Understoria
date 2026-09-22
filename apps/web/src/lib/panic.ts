@@ -18,9 +18,35 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { db, SETTING_KEYS, setSetting } from "@/db/database";
+import { db, getSetting, SETTING_KEYS, setSetting } from "@/db/database";
 import { revokeAllAudioUrls } from "./audioUrls";
+import { beginPushTeardown } from "./pushNotifications";
 import { generateKeyPair } from "./crypto";
+
+/**
+ * Push teardown, purge edition (docs/notifications.md): drop the
+ * browser's PushSubscription so this device stops being a deliverable
+ * address, run the LOCAL half of the lifecycle teardown (sign the
+ * node delete while the secret key is still readable, clear the
+ * device-only prefs — tier, title, saved display strings), then fire
+ * the signed node delete WITHOUT awaiting it — a dead network must
+ * never hold up a wipe. nodeCall's keepalive lets the delete outlive
+ * the post-purge reload, and the node-side TTL dead-man retires the
+ * row even if it never lands. Never throws.
+ */
+async function teardownPushForPurge(): Promise<void> {
+  try {
+    const reg = await navigator.serviceWorker?.getRegistration?.();
+    const sub = await reg?.pushManager?.getSubscription();
+    await sub?.unsubscribe();
+  } catch {
+    // Best-effort — no SW / no subscription / a vendor error must
+    // not stall the purge.
+  }
+  const memberKey = (await getSetting(SETTING_KEYS.currentMember)) ?? null;
+  const sendDelete = await beginPushTeardown(memberKey);
+  void sendDelete();
+}
 
 /**
  * Panic button implementations — Agent 4 task 3.
@@ -141,6 +167,11 @@ export async function softPurge(): Promise<PurgeResult> {
   // reachable through a live object URL (#476). Table scrubs can
   // take a moment; the in-memory audio must not outlive the tap.
   const audioUrlsRevoked = revokeAllAudioUrls();
+
+  // A device "briefly handled by a hostile party" must not keep
+  // lighting up its lock screen: drop the push subscription and the
+  // device-only display prefs before the scrubs.
+  await teardownPushForPurge();
 
   await db.transaction("rw", db.members, async () => {
     const members = await db.members.toArray();
@@ -437,6 +468,11 @@ export async function hardPurge(): Promise<PurgeResult> {
   // clear them too, but the contract must not lean on a reload that
   // an error path might never reach.
   const audioUrlsRevoked = revokeAllAudioUrls();
+
+  // Push teardown BEFORE the wipe: the signed node delete needs the
+  // secret key this purge is about to destroy. Local-only and
+  // bounded; the network half is fired, never awaited.
+  await teardownPushForPurge();
 
   // Enumerate the LIVE schema rather than hand-maintaining a table
   // list. The hand-maintained list drifted: ten tables added after it

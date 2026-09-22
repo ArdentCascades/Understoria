@@ -1602,6 +1602,43 @@ function applyMigrations(db: DatabaseType): void {
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '34')",
     ).run();
   }
+
+  if (current < 35) {
+    // Schema v35 — opt-in push subscriptions (docs/notifications.md,
+    // "quiet by default"). One row per DEVICE (endpoint is the
+    // primary key — browsers mint one endpoint per SW registration),
+    // so unlinking a lost phone prunes exactly that phone's pings.
+    // `categories` is the JSON array of NOTIFICATION_CATEGORIES the
+    // device opted into — the node sends ONLY these (send-time
+    // filtering; browsers punish pushes that display nothing). The
+    // member's lock-screen tier and custom notification title are
+    // deliberately NOT here: they never leave the device (the
+    // service worker applies them at display time). `renewed_at`
+    // drives the TTL dead-man (retentionSweep): an offline-purged
+    // device cannot unsubscribe, so its row — and its pings — expire
+    // instead. This table is a named seizure surface
+    // (docs/threat-model.md §7); it lives in the encrypted ledger
+    // and rows die by TTL.
+    db.exec(`
+      CREATE TABLE push_subscriptions (
+        endpoint   TEXT PRIMARY KEY,
+        member_key TEXT NOT NULL,
+        device_id  TEXT NOT NULL,
+        p256dh     TEXT NOT NULL,
+        auth       TEXT NOT NULL,
+        categories TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        renewed_at INTEGER NOT NULL
+      );
+      CREATE INDEX push_subscriptions_member_idx
+        ON push_subscriptions (member_key);
+      CREATE INDEX push_subscriptions_renewed_idx
+        ON push_subscriptions (renewed_at);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '35')",
+    ).run();
+  }
 }
 
 /**
@@ -4433,6 +4470,149 @@ export function createMirrorPullStore(db: DatabaseType): MirrorPullStore {
     },
     set(mirrorUrl, kind, lastTs, lastId) {
       setStmt.run(mirrorUrl, kind, lastTs, lastId);
+    },
+  };
+}
+
+/**
+ * Push-subscription store (schema v35, docs/notifications.md). One
+ * row per device endpoint; tier and custom title never reach this
+ * table — see the migration comment.
+ */
+export interface PushSubscriptionRow {
+  endpoint: string;
+  memberKey: string;
+  deviceId: string;
+  p256dh: string;
+  auth: string;
+  categories: string[];
+  createdAt: number;
+  renewedAt: number;
+}
+
+export interface PushSubscriptionStore {
+  /** Idempotent per-endpoint upsert; re-subscribing a device with a
+   *  fresh endpoint replaces its old row via deleteByDevice below. */
+  upsert(row: PushSubscriptionRow): void;
+  /** Renew the TTL clock for one endpoint (app open, resubscribe). */
+  renew(endpoint: string, memberKey: string, now: number): boolean;
+  /** Remove one endpoint — the owning member only. */
+  deleteByEndpoint(endpoint: string, memberKey: string): boolean;
+  /** Remove every subscription a member's DEVICE holds — the lost
+   *  phone path, callable from any of the member's devices. */
+  deleteByDevice(memberKey: string, deviceId: string): number;
+  /** Node-side prune when the push service reports the endpoint
+   *  gone (404/410). No auth: the push service already ruled. */
+  pruneDeadEndpoint(endpoint: string): void;
+  listForMember(memberKey: string): PushSubscriptionRow[];
+  /** Every live subscription opted into `category` — the send set. */
+  listForCategory(category: string, now: number): PushSubscriptionRow[];
+  /** TTL dead-man (retentionSweep): drop rows not renewed since
+   *  `cutoff`. Returns the number expired. */
+  expireStale(cutoff: number): number;
+}
+
+const PUSH_SUBSCRIPTION_TTL_MS = 21 * 24 * 60 * 60 * 1000;
+export { PUSH_SUBSCRIPTION_TTL_MS };
+
+export function createPushSubscriptionStore(
+  db: DatabaseType,
+): PushSubscriptionStore {
+  const upsertStmt = db.prepare(`
+    INSERT INTO push_subscriptions
+      (endpoint, member_key, device_id, p256dh, auth, categories,
+       created_at, renewed_at)
+    VALUES
+      (@endpoint, @memberKey, @deviceId, @p256dh, @auth, @categories,
+       @createdAt, @renewedAt)
+    ON CONFLICT(endpoint) DO UPDATE SET
+      member_key = excluded.member_key,
+      device_id  = excluded.device_id,
+      p256dh     = excluded.p256dh,
+      auth       = excluded.auth,
+      categories = excluded.categories,
+      renewed_at = excluded.renewed_at
+  `);
+  const renewStmt = db.prepare(
+    "UPDATE push_subscriptions SET renewed_at = ? WHERE endpoint = ? AND member_key = ?",
+  );
+  const deleteEndpointStmt = db.prepare(
+    "DELETE FROM push_subscriptions WHERE endpoint = ? AND member_key = ?",
+  );
+  const deleteDeviceStmt = db.prepare(
+    "DELETE FROM push_subscriptions WHERE member_key = ? AND device_id = ?",
+  );
+  const pruneStmt = db.prepare(
+    "DELETE FROM push_subscriptions WHERE endpoint = ?",
+  );
+  const listMemberStmt = db.prepare(
+    "SELECT * FROM push_subscriptions WHERE member_key = ? ORDER BY created_at",
+  );
+  const listAllLiveStmt = db.prepare(
+    "SELECT * FROM push_subscriptions WHERE renewed_at >= ? ORDER BY created_at",
+  );
+  const expireStmt = db.prepare(
+    "DELETE FROM push_subscriptions WHERE renewed_at < ?",
+  );
+
+  interface Raw {
+    endpoint: string;
+    member_key: string;
+    device_id: string;
+    p256dh: string;
+    auth: string;
+    categories: string;
+    created_at: number;
+    renewed_at: number;
+  }
+  const fromRaw = (r: Raw): PushSubscriptionRow => ({
+    endpoint: r.endpoint,
+    memberKey: r.member_key,
+    deviceId: r.device_id,
+    p256dh: r.p256dh,
+    auth: r.auth,
+    categories: JSON.parse(r.categories) as string[],
+    createdAt: r.created_at,
+    renewedAt: r.renewed_at,
+  });
+
+  return {
+    upsert(row) {
+      upsertStmt.run({
+        endpoint: row.endpoint,
+        memberKey: row.memberKey,
+        deviceId: row.deviceId,
+        p256dh: row.p256dh,
+        auth: row.auth,
+        categories: JSON.stringify(row.categories),
+        createdAt: row.createdAt,
+        renewedAt: row.renewedAt,
+      });
+    },
+    renew(endpoint, memberKey, now) {
+      return renewStmt.run(now, endpoint, memberKey).changes > 0;
+    },
+    deleteByEndpoint(endpoint, memberKey) {
+      return deleteEndpointStmt.run(endpoint, memberKey).changes > 0;
+    },
+    deleteByDevice(memberKey, deviceId) {
+      return deleteDeviceStmt.run(memberKey, deviceId).changes;
+    },
+    pruneDeadEndpoint(endpoint) {
+      pruneStmt.run(endpoint);
+    },
+    listForMember(memberKey) {
+      return (listMemberStmt.all(memberKey) as Raw[]).map(fromRaw);
+    },
+    listForCategory(category, now) {
+      // Category sets are tiny JSON arrays; filtering in JS keeps the
+      // schema simple and the send set exact.
+      return (listAllLiveStmt.all(now - PUSH_SUBSCRIPTION_TTL_MS) as Raw[])
+        .map(fromRaw)
+        .filter((r) => r.categories.includes(category));
+    },
+    expireStale(cutoff) {
+      return expireStmt.run(cutoff).changes;
     },
   };
 }
