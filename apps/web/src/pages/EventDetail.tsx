@@ -42,6 +42,8 @@ import { OverflowMenu, type OverflowMenuItem } from "@/components/OverflowMenu";
 import { shareUrl } from "@/lib/share";
 import { buildEventIcs, icsFilename } from "@/lib/eventIcs";
 import { intlLocale } from "@/i18n";
+import { ProvenanceNote } from "@/components/ProvenanceNote";
+import { useEventProvenance } from "@/lib/useTemplateProvenance";
 
 // Render an epoch-ms timestamp as "<date> <time>" in the active
 // locale. The native date+time pickers collected local-time values
@@ -93,6 +95,10 @@ export default function EventDetailPage() {
     if (!rawEvent) return null;
     return blockedKeys.has(rawEvent.createdBy) ? null : rawEvent;
   }, [rawEvent, blockedKeys]);
+  // Provenance-verified display translation for template-derived
+  // event text (docs/provenance-translation.md, phase 2c) — this
+  // page owns the event's View-original toggle.
+  const prov = useEventProvenance(event ?? null);
   const cancellation = useLiveQuery(
     () =>
       eventId
@@ -325,9 +331,14 @@ export default function EventDetailPage() {
 
       <header className="mb-4 landscape-short:mb-2">
         <div className="flex items-start justify-between gap-2">
-          <h1 className="page-title">{event.title}</h1>
+          <h1 className="page-title">
+            <span lang={prov.title.lang} dir={prov.title.dir}>
+              {prov.title.text}
+            </span>
+          </h1>
           <OverflowMenu label={t("events.detail.menuLabel")} items={menuItems} />
         </div>
+        <ProvenanceNote prov={prov} />
         <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
           {linkedProject && (
             <Field label={t("events.detail.projectLinkLabel")}>
@@ -406,11 +417,13 @@ export default function EventDetailPage() {
 
       {event.description && (
         <section className="card mb-4">
-          <Markdown
-            text={event.description}
-            authorKey={event.createdBy}
-            className="text-sm"
-          />
+          <div lang={prov.description.lang} dir={prov.description.dir}>
+            <Markdown
+              text={prov.description.text}
+              authorKey={event.createdBy}
+              className="text-sm"
+            />
+          </div>
         </section>
       )}
 

@@ -30,9 +30,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { contentLocale, ensureContent } from "@/content/registry";
 import {
+  matchedEventScaffold,
   matchedNameLocales,
   matchedTaskRow,
   provenanceDescription,
+  provenanceEventDescription,
+  provenanceEventTitle,
   provenanceTaskDescription,
   provenanceTaskTitle,
   provenanceTitle,
@@ -93,6 +96,7 @@ function toView(pt: ProvenanceText, showOriginal: boolean): ProvenanceView {
 export function useProvenanceText(): {
   projectTitle: (templateId: string | null, title: string) => string;
   taskTitle: (templateId: string | null, title: string) => string;
+  eventTitle: (templateId: string | null, title: string) => string;
 } {
   const { i18n } = useTranslation();
   const lang = i18n.resolvedLanguage;
@@ -102,6 +106,8 @@ export function useProvenanceText(): {
         provenanceTitle(templateId, title, lang).text,
       taskTitle: (templateId: string | null, title: string) =>
         provenanceTaskTitle(templateId, title, lang).text,
+      eventTitle: (templateId: string | null, title: string) =>
+        provenanceEventTitle(templateId, title, lang).text,
     }),
     [lang],
   );
@@ -304,4 +310,80 @@ export function useTemplateProvenance(
     showOriginal,
     bundlesReady,
   ]);
+}
+
+export interface EventProvenance {
+  any: boolean;
+  mixed: boolean;
+  showOriginal: boolean;
+  toggleOriginal: () => void;
+  title: ProvenanceView;
+  description: ProvenanceView;
+}
+
+/** Event-page provenance (docs/provenance-translation.md, phase 2c):
+ *  the scaffold segment of the title and an unedited description
+ *  render in the viewer's language, with the page's single
+ *  View-original toggle. The title mixes an app-authored scaffold
+ *  with the member's own suffix, so its view is never lang-tagged —
+ *  the toggled ORIGINAL is, as one whole signed string. */
+export function useEventProvenance(
+  event:
+    | { templateId: string | null; title: string; description: string }
+    | null
+    | undefined,
+): EventProvenance {
+  const { i18n } = useTranslation();
+  const viewer = contentLocale(i18n.resolvedLanguage);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const [bundlesReady, setBundlesReady] = useState(0);
+
+  const templateId = event?.templateId ?? null;
+  const title = event?.title ?? "";
+  const description = event?.description ?? "";
+
+  const candidates = useMemo(() => {
+    if (!templateId) return [] as string[];
+    const set = new Set<string>(
+      matchedEventScaffold(templateId, title)?.locales ?? [],
+    );
+    set.delete(viewer);
+    return [...set].sort();
+  }, [templateId, title, viewer]);
+
+  const candidatesKey = candidates.join(",");
+  useEffect(() => {
+    if (!candidatesKey) return;
+    let cancelled = false;
+    void Promise.all(
+      candidatesKey.split(",").map((c) => ensureContent(c)),
+    ).then(() => {
+      if (!cancelled) setBundlesReady((n) => n + 1);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [candidatesKey]);
+
+  return useMemo(() => {
+    void bundlesReady;
+    const titlePt = provenanceEventTitle(templateId, title, viewer);
+    const descPt = provenanceEventDescription(
+      templateId,
+      description,
+      candidates,
+      viewer,
+    );
+    const translated =
+      (titlePt.translated ? 1 : 0) + (descPt.translated ? 1 : 0);
+    const fields = (title ? 1 : 0) + (description ? 1 : 0);
+    return {
+      any: translated > 0,
+      mixed: translated > 0 && translated < fields,
+      showOriginal,
+      toggleOriginal: () => setShowOriginal((v) => !v),
+      title: toView(titlePt, showOriginal),
+      description: toView(descPt, showOriginal),
+    };
+  }, [templateId, title, description, viewer, candidates, showOriginal, bundlesReady]);
 }

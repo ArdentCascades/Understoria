@@ -30,6 +30,8 @@ export interface TemplateWordingHistory {
   taskNames?: Record<string, readonly (readonly string[])[]>;
   descHashes?: Record<string, readonly string[]>;
   taskDescHashes?: Record<string, readonly (readonly string[])[]>;
+  eventScaffolds?: Record<string, readonly string[]>;
+  eventDescHashes?: Record<string, readonly string[]>;
 }
 
 export const TEMPLATE_WORDING_HISTORY: Record<

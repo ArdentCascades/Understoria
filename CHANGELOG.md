@@ -34,6 +34,17 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **Provenance translation for events (phase 2c).** Events created
+  from the fourteen gathering templates now translate too: an
+  unedited description renders in the viewer's language under the
+  same byte-exact rule as projects, and titles get the scaffold
+  composition rule — the template's title scaffold (which ends
+  "— ", with the organizer's own words following) substitutes as
+  the app text it provably is, while the member's suffix stays
+  verbatim, always. Historical scaffolds and description wordings
+  ride the phase-2b history. Surfaces: the event page (with the
+  note and View-original toggle), calendar entries, gathering-
+  screen event slides, and my-work event and shift rows.
 - **Historical wording sets for provenance translation (phase
   2b).** Native review is expected to reword template text, and a
   reword would silently orphan every project created under the old

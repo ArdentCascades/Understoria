@@ -33,6 +33,7 @@ const ALLOWED = new Set([
   // detail surfaces (each renders ProvenanceNote — asserted below)
   "pages/ProjectDetail.tsx",
   "pages/TaskDetail.tsx",
+  "pages/EventDetail.tsx",
   // compact LIST surfaces (phase 2a): substitute without an inline
   // marker BY DESIGN — every row/card/slide links to the project or
   // task page, where the note and the View-original toggle live one
@@ -47,6 +48,8 @@ const ALLOWED = new Set([
   "pages/Present.tsx",
   "lib/gatheringSlides.ts",
   "lib/gatheringSlides.test.ts",
+  "lib/calendar.ts",
+  "lib/calendar.test.ts",
   "components/ProjectCard.tsx",
   // display-view plumbing (type-only imports)
   "components/TaskCard.tsx",
@@ -86,7 +89,11 @@ describe("provenance display translation stays on allowlisted surfaces", () => {
     // A surface may substitute only while it carries the note + the
     // View-original toggle. Plumbing components render views handed
     // down BY a surface, so the surfaces are where the marker lives.
-    for (const surface of ["pages/ProjectDetail.tsx", "pages/TaskDetail.tsx"]) {
+    for (const surface of [
+      "pages/ProjectDetail.tsx",
+      "pages/TaskDetail.tsx",
+      "pages/EventDetail.tsx",
+    ]) {
       const text = readFileSync(join(SRC, surface), "utf8");
       expect(text.includes("ProvenanceNote"), surface).toBe(true);
     }

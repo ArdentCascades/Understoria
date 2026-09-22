@@ -1,10 +1,10 @@
 # Provenance-verified display translation
 
 Status: PHASE 1 SHIPPED (project page + task page). PHASE 2a
-SHIPPED (list surfaces: board project cards, my-work rows, the
-calendar's project filter, gathering-screen task slides — plus the
-board search rule below). PHASE 2b SHIPPED (historical wording
-sets). Remaining phases at the end.
+SHIPPED (list surfaces + the board search rule below). PHASE 2b
+SHIPPED (historical wording sets). PHASE 2c SHIPPED (event
+templates — the scaffold composition rule below). Remaining at the
+end.
 
 ## The problem
 
@@ -161,10 +161,35 @@ search matches signed + substituted text per the rule above. All
 compact surfaces are marker-free by the one-tap-away contract; the
 guard test's allowlist names each one.
 
+## Phase 2c (shipped): event templates
+
+An event stages title = the template's `titleScaffold` (which ends
+"— "; the member's own words follow) and description = the
+`descriptionScaffold` verbatim until edited. Descriptions get the
+same byte-exact rule as projects (bundle-verified, or
+history-hash-verified bundle-free). Titles get the **scaffold
+composition rule** — the one sanctioned extension of byte-exact
+matching: when a stored title starts with a locale's scaffold
+(current or historical; longest match wins), the scaffold segment
+is provably app text and renders as the viewer's scaffold, while
+the member's suffix stays verbatim, always. This is not
+near-matching: the scaffold segment must be byte-exact, and the
+boundary is the scaffold's own trailing "— " — a defined
+composition, like the staged project description. Because the
+result mixes app text and member text in one string, the title
+view is never lang-tagged; the toggled ORIGINAL is, as one whole
+signed string, and the event page's marker owns the disclosure.
+Surfaces: EventDetail (marker + toggle), calendar entries and the
+calendar's event rows (via `buildCalendar`'s optional `locale`),
+gathering-screen event slides, my-work event and shift rows (the
+`.ics` filename follows the exporting member's rendering). The
+two template-id namespaces overlap (skill-share, repair-cafe exist
+as both project and event templates); safety comes from
+field-level namespacing in the shared history/manifest maps, never
+from id disjointness.
+
 ## Remaining phases (not yet shipped)
 
 - FAQ + member-guide entries stating the rule ("the app translates
   its own words, never yours") — content-tier, so it rides the
   full 18-language content pipeline as its own change.
-- Event templates: `Event.templateId` exists; the same mechanism
-  applies to event titles/descriptions.

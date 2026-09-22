@@ -26,9 +26,17 @@
 // translated playbook text with organizer-authored text, the note
 // adds the second sentence: member text is never machine-translated.
 import { useTranslation } from "react-i18next";
-import type { TemplateProvenance } from "@/lib/useTemplateProvenance";
 
-export function ProvenanceNote({ prov }: { prov: TemplateProvenance }) {
+/** The note only needs the toggle-and-state slice, so any provenance
+ *  hook (project surface, event surface) can drive it. */
+interface ProvenanceNoteState {
+  any: boolean;
+  mixed: boolean;
+  showOriginal: boolean;
+  toggleOriginal: () => void;
+}
+
+export function ProvenanceNote({ prov }: { prov: ProvenanceNoteState }) {
   const { t } = useTranslation();
   if (!prov.any) return null;
   return (
