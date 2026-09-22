@@ -37,6 +37,7 @@ import {
   provenanceEventDescription,
   provenanceEventTitle,
   provenanceTaskDescription,
+  provenanceTaskSkills,
   provenanceTaskTitle,
   provenanceTitle,
   type ProvenanceText,
@@ -46,6 +47,10 @@ export interface ProvenanceTaskInput {
   id: string;
   title: string;
   description: string;
+  /** Suggested skills, when the surface renders them — translated
+   *  per skill under the same byte-exact rule (a skill the
+   *  organizer added or reworded stays verbatim). */
+  requiredSkills?: readonly string[];
 }
 
 /** What a surface actually renders for one field under the current
@@ -72,6 +77,10 @@ export interface TemplateProvenance {
   title: ProvenanceView;
   description: ProvenanceView;
   taskTitle: (taskId: string) => ProvenanceView | undefined;
+  /** Display strings for a task's skill chips, aligned with the
+   *  STORED requiredSkills by index (match logic keeps using the
+   *  stored strings). Follows the View-original toggle. */
+  taskSkills: (taskId: string) => readonly string[] | undefined;
   taskDescription: (taskId: string) => ProvenanceView | undefined;
 }
 
@@ -264,7 +273,11 @@ export function useTemplateProvenance(
     );
     const taskViews = new Map<
       string,
-      { title: ProvenanceView; description: ProvenanceView }
+      {
+        title: ProvenanceView;
+        description: ProvenanceView;
+        skills: readonly string[] | undefined;
+      }
     >();
     let translatedCount = titlePt.translated ? 1 : 0;
     let fieldCount = title ? 1 : 0;
@@ -288,6 +301,16 @@ export function useTemplateProvenance(
       taskViews.set(task.id, {
         title: toView(tPt, showOriginal),
         description: toView(dPt, showOriginal),
+        skills:
+          task.requiredSkills && !showOriginal
+            ? provenanceTaskSkills(
+                templateId,
+                row,
+                task.requiredSkills,
+                candidates,
+                viewer,
+              )
+            : task.requiredSkills,
       });
     }
     return {
@@ -299,6 +322,7 @@ export function useTemplateProvenance(
       description: toView(descPt, showOriginal),
       taskTitle: (id: string) => taskViews.get(id)?.title,
       taskDescription: (id: string) => taskViews.get(id)?.description,
+      taskSkills: (id: string) => taskViews.get(id)?.skills,
     };
   }, [
     templateId,

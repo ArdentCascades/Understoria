@@ -116,7 +116,7 @@ export default function TaskDetailPage() {
         <BackLink
           to={`/project/${id}`}
           label={t("projects.task.detail.backToProject", {
-            title: project.title,
+            title: prov.title.text,
           })}
           className="btn-ghost -ms-2 mt-4 inline-block text-sm"
         />
@@ -131,7 +131,7 @@ export default function TaskDetailPage() {
       <BackLink
         to={`/project/${id}#task-${taskId}`}
         label={t("projects.task.detail.backToProject", {
-          title: project.title,
+          title: prov.title.text,
         })}
       />
       {error && (
@@ -202,6 +202,7 @@ export default function TaskDetailPage() {
         templateId={project.templateId}
         organizerKey={project.organizerKey}
         descriptionView={prov.taskDescription(task.id)}
+        skillsView={prov.taskSkills(task.id)}
       />
       {/* Completed/archived projects keep their history reachable from
           the task page too. */}
