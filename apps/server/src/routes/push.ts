@@ -21,10 +21,11 @@
 import type { FastifyInstance } from "fastify";
 import {
   canonicalPushAuthMessage,
-  isNotificationCategory,
+  SUBSCRIBABLE_CATEGORIES,
   verify,
 } from "@understoria/shared";
 import type { PushSubscriptionStore } from "../db.js";
+import type { PushSender } from "../push.js";
 import type { MembershipResolver } from "../readAuth.js";
 import { READ_AUTH_MAX_SKEW_MS } from "../readAuth.js";
 
@@ -55,6 +56,9 @@ export interface PushRouteDeps {
   store: PushSubscriptionStore;
   resolver: MembershipResolver;
   vapidPublicKey: string;
+  /** For the self-requested test ping only — every real trigger
+   *  lives in pushTriggers.ts, not behind a route. */
+  sender: PushSender;
   now?: () => number;
 }
 
@@ -68,7 +72,7 @@ interface AuthedBody {
 function checkAuth(
   deps: PushRouteDeps,
   body: AuthedBody,
-  action: "push-subscribe" | "push-renew" | "push-delete",
+  action: "push-subscribe" | "push-renew" | "push-delete" | "push-test",
   endpoint: string,
   categories: readonly string[],
 ): string | null {
@@ -139,7 +143,14 @@ export async function registerPushRoutes(
       typeof sub.keys?.auth !== "string" ||
       !Array.isArray(body.categories) ||
       body.categories.length === 0 ||
-      !body.categories.every(isNotificationCategory)
+      // Subset of SUBSCRIBABLE, not just the enum: `test_ping` is a
+      // valid category (the send gate and the SW know it) but not a
+      // subscribable preference — a subscription claiming it is a
+      // client bug, refused loudly rather than stored quietly.
+      !body.categories.every(
+        (c): c is (typeof SUBSCRIBABLE_CATEGORIES)[number] =>
+          (SUBSCRIBABLE_CATEGORIES as readonly unknown[]).includes(c),
+      )
     ) {
       reply.code(400);
       return { error: "bad_shape" };
@@ -205,6 +216,36 @@ export async function registerPushRoutes(
       reply.code(404);
       return { error: "unknown_subscription" };
     }
+    return { ok: true };
+  });
+
+  app.post("/push/test", async (req, reply) => {
+    // The self-requested test ping (docs/notifications.md v2): a
+    // member checks their own plumbing end to end — node, push
+    // service, service worker, their chosen tier and title — without
+    // waiting for a real shift. Signed like every other push write,
+    // and deliverable ONLY to a subscription row the signer already
+    // owns: there is no way to aim it at anyone else, which is what
+    // keeps a test ping out of the harassment analysis entirely.
+    const body = req.body as (AuthedBody & { endpoint?: string }) | null;
+    if (!body || typeof body.endpoint !== "string" || body.endpoint === "") {
+      reply.code(400);
+      return { error: "bad_shape" };
+    }
+    const authErr = checkAuth(deps, body, "push-test", body.endpoint, []);
+    if (authErr) {
+      reply.code(authErr === "not_a_member" ? 403 : 401);
+      return { error: authErr };
+    }
+    const row = deps.store.getByEndpoint(body.endpoint, body.memberKey);
+    if (!row) {
+      reply.code(404);
+      return { error: "unknown_subscription" };
+    }
+    await deps.sender.sendToDevice(row, {
+      category: "test_ping",
+      path: "/settings",
+    });
     return { ok: true };
   });
 

@@ -34,7 +34,7 @@ import { createPushSender, ensureVapidKeys } from "./push.js";
 import {
   awaitingConfirmationPath,
   awaitingConfirmationTarget,
-  startShiftReminderSweep,
+  startReminderSweep,
 } from "./pushTriggers.js";
 
 type Sent = { endpoint: string; payload: Record<string, unknown> };
@@ -214,7 +214,7 @@ describe("shift-reminder sweep (injected transport, fake clock)", () => {
       ensureVapidKeys(db),
       captureTransport(sent),
     );
-    return startShiftReminderSweep({
+    return startReminderSweep({
       db,
       sender,
       intervalMs: 0,
@@ -305,5 +305,134 @@ describe("shift-reminder sweep (injected transport, fake clock)", () => {
     expect(await sweep.sweepOnce()).toBe(0);
     expect(sent).toHaveLength(0);
     sweep.stop();
+  });
+});
+
+describe("event-reminder sweep (v2 — same clock, one level up)", () => {
+  let db: DatabaseType;
+
+  afterEach(() => {
+    db.close();
+  });
+
+  function seedEvent(id: string, startsAt: number) {
+    db.prepare(
+      `INSERT INTO events
+        (id, node_id, created_by, starts_at, ends_at, created_at,
+         payload, signature)
+       VALUES (?, 'node_test', 'organizer', ?, NULL, 0, '{}', 'sig')`,
+    ).run(id, startsAt);
+  }
+
+  function seedRsvp(
+    eventId: string,
+    memberKey: string,
+    status: "going" | "maybe" | "not_going",
+  ) {
+    const payload = {
+      id: `rsvp-${eventId}-${memberKey}`,
+      eventId,
+      memberKey,
+      status,
+      respondedAt: 0,
+      updatedAt: 1,
+      signerKey: memberKey,
+      signature: "sig",
+    };
+    db.prepare(
+      `INSERT OR REPLACE INTO event_rsvps
+        (event_id, member_key, id, signer_key, updated_at, payload,
+         signature)
+       VALUES (?, ?, ?, ?, 1, ?, 'sig')`,
+    ).run(eventId, memberKey, payload.id, memberKey, JSON.stringify(payload));
+  }
+
+  function makeSweep(sent: Sent[], at: number) {
+    const sender = createPushSender(
+      createPushSubscriptionStore(db),
+      ensureVapidKeys(db),
+      captureTransport(sent),
+    );
+    return startReminderSweep({
+      db,
+      sender,
+      intervalMs: 0,
+      now: () => at,
+    });
+  }
+
+  it("reminds each going-RSVP subscriber once, inside the window, and never for maybe/not_going", async () => {
+    db = openDatabase(":memory:");
+    const T = 1_700_000_000_000;
+    const sent: Sent[] = [];
+    seedEvent("event-soon", T + 30 * 60_000);
+    seedEvent("event-far", T + 3 * 60 * 60_000);
+    seedRsvp("event-soon", "member-going", "going");
+    seedRsvp("event-soon", "member-maybe", "maybe");
+    seedRsvp("event-soon", "member-no", "not_going");
+    seedRsvp("event-far", "member-going", "going");
+    for (const m of ["member-going", "member-maybe", "member-no"]) {
+      subscribeRow(db, m, `https://push.example/${m}`, ["event_reminder"]);
+    }
+
+    const sweep = makeSweep(sent, T);
+    expect(await sweep.sweepOnce()).toBe(1);
+    expect(sent).toHaveLength(1);
+    expect(sent[0].endpoint).toBe("https://push.example/member-going");
+    expect(sent[0].payload).toEqual({
+      category: "event_reminder",
+      path: "/events/event-soon",
+    });
+    // Once means once.
+    expect(await sweep.sweepOnce()).toBe(0);
+    expect(sent).toHaveLength(1);
+    sweep.stop();
+  });
+
+  it("stays silent for cancelled events, catches a late opt-in, and an RSVP flipped away never pings", async () => {
+    db = openDatabase(":memory:");
+    const T = 1_700_000_000_000;
+    const sent: Sent[] = [];
+    seedEvent("event-1", T + 30 * 60_000);
+    seedRsvp("event-1", "member-late", "going");
+    seedRsvp("event-1", "member-flipped", "going");
+    subscribeRow(db, "member-flipped", "https://push.example/flipped", [
+      "event_reminder",
+    ]);
+
+    const sweep = makeSweep(sent, T);
+    // member-flipped changes their answer BEFORE the first pass —
+    // the LWW row now says maybe, so send-time checking is the
+    // cancellation.
+    seedRsvp("event-1", "member-flipped", "maybe");
+    expect(await sweep.sweepOnce()).toBe(0);
+    expect(sent).toHaveLength(0);
+
+    // The zero-device claim was released: opting in while the
+    // window is still open gets the reminder on the next pass.
+    subscribeRow(db, "member-late", "https://push.example/late", [
+      "event_reminder",
+    ]);
+    expect(await sweep.sweepOnce()).toBe(1);
+    expect(sent.map((s) => s.endpoint)).toEqual([
+      "https://push.example/late",
+    ]);
+    sweep.stop();
+
+    // A cancelled event pings no one, whatever the RSVPs say.
+    db.prepare(
+      `INSERT INTO event_cancellations
+        (id, node_id, event_id, created_by, cancelled_at, payload, signature)
+       VALUES ('c1', 'node_test', 'event-1', 'organizer', ?, '{}', 'sig')`,
+    ).run(T);
+    const sent2: Sent[] = [];
+    seedRsvp("event-1", "member-another", "going");
+    subscribeRow(db, "member-another", "https://push.example/another", [
+      "event_reminder",
+    ]);
+    const sweep2 = makeSweep(sent2, T);
+    expect(await sweep2.sweepOnce()).toBe(0);
+    expect(sent2).toHaveLength(0);
+    sweep2.stop();
   });
 });

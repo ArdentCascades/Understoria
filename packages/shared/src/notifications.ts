@@ -20,22 +20,42 @@
  */
 // Opt-in notifications (docs/notifications.md — quiet by default).
 //
-// THE CATEGORY LIST IS THE CONTRACT. These three exist because they
-// are node-initiated from signed records that no chosen individual
-// can weaponize against a chosen target, and because each has a
-// person or a clock on the other end. There is deliberately NO
-// messages category (blocks never leave the device — see the doc's
-// harassment analysis), and never an engagement category of any
-// kind. Growing this list is a reviewed act that must amend
-// docs/notifications.md first; a guard test pins it.
+// THE CATEGORY LIST IS THE CONTRACT. Each entry exists because it is
+// node-initiated from signed records that no chosen individual can
+// weaponize against a chosen target, and because each has a person
+// or a clock on the other end. Growing this list is a reviewed act
+// that must amend docs/notifications.md first; guard tests pin it.
+//
+// The v2 amendment (2026-09-23) added:
+//  - event_reminder: an event the member RSVP'd "going" to starts
+//    soon — the same clock shift reminders answer.
+//  - test_ping: SELF-REQUESTED ONLY (a member-signed /push/test,
+//    delivered straight to the requesting device). It is in the
+//    enum so the send gate and the SW know it; it is NOT a
+//    subscribable preference and the Settings switchboard never
+//    lists it. One arriving unrequested is a bug with the severity
+//    of an engagement ping.
+// message_waiting (coalesced, named by mutual consent) is designed
+// in the doc and lands with its own rung.
 
 export const NOTIFICATION_CATEGORIES = [
   "shift_reminder",
   "guardian_request",
   "awaiting_confirmation",
+  "event_reminder",
+  "test_ping",
 ] as const;
 
 export type NotificationCategory = (typeof NOTIFICATION_CATEGORIES)[number];
+
+/** Everything except the self-requested test ping. */
+export type SubscribableCategory = Exclude<NotificationCategory, "test_ping">;
+
+/** The categories a member can actually subscribe to in Settings —
+ *  the node refuses a subscription claiming anything else. */
+export const SUBSCRIBABLE_CATEGORIES = NOTIFICATION_CATEGORIES.filter(
+  (c): c is SubscribableCategory => c !== "test_ping",
+);
 
 export function isNotificationCategory(
   v: unknown,

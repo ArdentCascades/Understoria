@@ -34,12 +34,14 @@
  * on a lock screen the member didn't opt into seeing.
  */
 
-/* The doc's three categories. Kept in sync with the shared enum by
- * the notifications guard test — this file cannot import it. */
+/* The doc's five categories (v2). Kept in sync with the shared enum
+ * by the notifications guard test — this file cannot import it. */
 const PUSH_CATEGORIES = [
   "shift_reminder",
   "guardian_request",
   "awaiting_confirmation",
+  "event_reminder",
+  "test_ping",
 ];
 
 const PUSH_PREFS_DB = "understoria-push";
@@ -105,6 +107,29 @@ function interpolate(template, detail) {
   );
 }
 
+/* Is `now` inside the member's quiet window? Times are "HH:MM" on
+ * THIS device's clock — quiet hours are a display choice, so the
+ * comparison happens where the member sleeps, not on any server. A
+ * window that crosses midnight (22:00–07:00) means "after start OR
+ * before end". start === end would be a 24-hour window, which the
+ * Settings surface never saves; treated as no window here so a
+ * corrupt pref can't silence everything forever. */
+function inQuietHours(quiet, now) {
+  if (!quiet || typeof quiet.start !== "string" || typeof quiet.end !== "string")
+    return false;
+  const parse = (s) => {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(s);
+    if (!m) return null;
+    const mins = Number(m[1]) * 60 + Number(m[2]);
+    return mins >= 0 && mins < 24 * 60 ? mins : null;
+  };
+  const start = parse(quiet.start);
+  const end = parse(quiet.end);
+  if (start === null || end === null || start === end) return false;
+  const at = now.getHours() * 60 + now.getMinutes();
+  return start < end ? at >= start && at < end : at >= start || at < end;
+}
+
 async function displayPush(event) {
   let payload = null;
   try {
@@ -117,7 +142,16 @@ async function displayPush(event) {
       ? payload.category
       : null;
   const prefs = await readPushPrefs();
-  const tier = prefs && prefs.tier ? prefs.tier : "generic";
+  /* Per-category tier (v2) over the legacy single tier — prefs saved
+   * before v2 keep behaving exactly as chosen. Quiet hours downgrade
+   * whatever won to silent: the notification still exists (browsers
+   * revoke subscriptions that push without showing), it just neither
+   * lights the screen nor says anything. */
+  let tier =
+    (prefs && prefs.tiers && category && prefs.tiers[category]) ||
+    (prefs && prefs.tier) ||
+    "generic";
+  if (prefs && inQuietHours(prefs.quiet, new Date())) tier = "silent";
   const title = prefs && prefs.title ? prefs.title : FALLBACK_TITLE;
   const strings = prefs && prefs.strings ? prefs.strings : null;
   const generic = strings && strings.generic ? strings.generic : FALLBACK_BODY;
