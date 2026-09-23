@@ -9,6 +9,17 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+- **Every settings section heading now carries its emoji.** Read
+  aloud 🔊, Transcription 📝 and Notifications 🔔 already had one;
+  the other twelve sections joined them (Language 🌐, Appearance
+  🎨, Blocked contacts 🚫, Security 🔒, Add another device 📱,
+  Recovery kit 🗝️, Guardians 🛡️, Data & privacy 💾, What we run
+  on now 🗳️, Community settings 🛠️, Community node 📡, Restore
+  onto a node 🌱). Purely decorative and `aria-hidden` like the
+  originals: screen readers hear the same titles, and no
+  translated string changed in any language.
+
 ### Added
 - **Notifications v2, second rung: messages, named by mutual
   consent.** The `message_waiting` category lands end to end. The

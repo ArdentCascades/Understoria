@@ -126,6 +126,9 @@ export function ReseedSection() {
         id="reseed-title"
         className="mb-3 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
       >
+        <span aria-hidden="true" className="me-1">
+          🌱
+        </span>
         {t("reseed.title")}
       </h2>
       <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">

@@ -162,7 +162,9 @@ describe("Settings authority zones", () => {
     // device zone; its "Start pairing" CTA is present here now.
     const heading = Array.from(
       deviceSection.querySelectorAll("h1,h2,h3,h4"),
-    ).some((h) => (h.textContent ?? "").trim() === "Add another device");
+      // includes(), not equality: settings headings carry a
+      // decorative aria-hidden emoji before the title.
+    ).some((h) => (h.textContent ?? "").includes("Add another device"));
     expect(heading).toBe(true);
     const cta = Array.from(deviceSection.querySelectorAll("button")).some(
       (b) => (b.textContent ?? "").trim() === "Start pairing",

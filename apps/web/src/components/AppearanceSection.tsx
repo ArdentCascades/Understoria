@@ -76,6 +76,9 @@ export function AppearanceSection() {
         id="appearance-section-title"
         className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
       >
+        <span aria-hidden="true" className="me-1">
+          🎨
+        </span>
         {t("profile.appearance.title")}
       </h2>
       <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">

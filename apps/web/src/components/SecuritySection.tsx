@@ -161,6 +161,9 @@ export function SecuritySection() {
   return (
     <section className="card mb-4">
       <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+        <span aria-hidden="true" className="me-1">
+          🔒
+        </span>
         {t("profile.security.title")}
       </h2>
       <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">
