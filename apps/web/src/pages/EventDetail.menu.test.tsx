@@ -71,6 +71,18 @@ vi.mock("@/db/events", () => ({
   listRsvpsForEvent: vi.fn(),
 }));
 vi.mock("@/db/eventProjectLinks", () => ({ getLinkForEvent: vi.fn() }));
+// Named reminders (docs/notifications.md v2): the organizer toggle's
+// write path is a signed outbox record — stubbed so this suite stays
+// off the real DB; the lib has its own unit suite.
+const { setDisclosureMock } = vi.hoisted(() => ({
+  setDisclosureMock: vi.fn(async (_id: string, allow: boolean) => ({
+    ok: true as const,
+    disclosure: { allow },
+  })),
+}));
+vi.mock("@/lib/eventReminderDisclosure", () => ({
+  setEventReminderDisclosure: setDisclosureMock,
+}));
 vi.mock("@/db/secrets", () => ({ getSecretKey: vi.fn(async () => "secret") }));
 // EventRsvpControl reads from its own dexie queries; stub it to a marker
 // so the page renders without touching the DB. (Its presence/absence is
@@ -160,6 +172,7 @@ function setLiveQueries(evt: Event | null | undefined) {
   liveSequence = [
     evt, // getEvent
     null, // getEventCancellation
+    undefined, // eventReminderDisclosures (named reminders — none)
     null, // getMemberRsvp
     [], // listRsvpsForEvent
     [], // listShiftsForEvent (print roster menu gate)
@@ -283,5 +296,58 @@ describe("EventDetailPage — header overflow menu", () => {
       `${window.location.origin}/events/evt-1`,
     );
     expect(showToastMock).toHaveBeenCalledWith("Link copied to your clipboard.");
+  });
+});
+
+describe("EventDetailPage — named-reminders toggle (organizer controls)", () => {
+  function namedRemindersBox(): HTMLInputElement | undefined {
+    return Array.from(
+      container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+    ).find((i) =>
+      (i.closest("label")?.textContent ?? "").includes(
+        "Reminders may name this event",
+      ),
+    );
+  }
+
+  it("is absent for a non-organizer viewer", () => {
+    render();
+    expect(namedRemindersBox()).toBeUndefined();
+  });
+
+  it("shows unchecked by default for the organizer, and a tick signs allow:true", async () => {
+    mockState.currentMember = member(organizerKey, "Olive Organizer");
+    render();
+    const box = namedRemindersBox();
+    expect(box).toBeDefined();
+    expect(box!.checked).toBe(false);
+    act(() => {
+      box!.click();
+    });
+    await flush();
+    expect(setDisclosureMock).toHaveBeenCalledWith("evt-1", true);
+  });
+
+  it("shows checked when a disclosure allows, and a tick retracts it", async () => {
+    mockState.currentMember = member(organizerKey, "Olive Organizer");
+    liveSequence = [
+      event(), // getEvent
+      null, // getEventCancellation
+      { eventId: "evt-1", allow: true }, // disclosure — organizer said yes
+      null, // getMemberRsvp
+      [], // listRsvpsForEvent
+      [], // listShiftsForEvent
+      null, // getLinkForEvent
+    ];
+    liveCursor = 0;
+    render();
+    const box = namedRemindersBox();
+    expect(box).toBeDefined();
+    expect(box!.checked).toBe(true);
+    act(() => {
+      box!.click();
+    });
+    await flush();
+    expect(setDisclosureMock).toHaveBeenCalledWith("evt-1", false);
   });
 });

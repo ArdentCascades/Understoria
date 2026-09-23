@@ -9,6 +9,28 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Named event reminders, by organizer consent.** A reminder used
+  to say only that *an* event was coming up; now an organizer can
+  flip a per-event "reminders may name this event" flag (default
+  OFF, absence = no) and reminder payloads carry the event's title
+  — shown only on lock screens whose owners themselves chose the
+  named level, so it is a two-consent AND. The flag is its own
+  organizer-signed LWW record (the event wire format is closed —
+  and usefully so: the flag can be flipped or retracted any time
+  after the immutable event is created, and the sweeps read it at
+  send time, so a retraction bites on the next pass). One flag
+  covers both clocks: shift reminders name their event too — the
+  v1 contract's own "Your shift at {event}" example, finally
+  real. Nothing new becomes node-visible (titles are already
+  public signed records; the title rides only inside the encrypted
+  payload). The record federates end to end — node table v38,
+  routes with the shift-style organizer-referent check, mirror
+  replication, device pull, outbox, re-seed and pairing-snapshot
+  registries. Toggle on the event creation form and in the event
+  page's organizer controls; four new strings in all eighteen
+  languages.
+
 ### Changed
 - **Every settings section heading now carries its emoji.** Read
   aloud 🔊, Transcription 📝 and Notifications 🔔 already had one;

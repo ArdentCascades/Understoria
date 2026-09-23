@@ -1599,6 +1599,32 @@ export interface PushNameConsent {
   signature: string;
 }
 
+/** An organizer's per-event "reminders may name this event" flag
+ *  (docs/notifications.md v2 — named event reminders). Default OFF
+ *  for every event: absence of a record means reminders say only
+ *  that AN event is coming up; with `allow: true`, the named
+ *  lock-screen level may carry the event's title (inside the
+ *  encrypted payload — the title is already a public signed record,
+ *  so nothing new becomes node-visible). Its own record because the
+ *  event wire format is closed (canonicalEventPayload's field order
+ *  is the contract) — and deliberately so: an LWW record can be
+ *  flipped or retracted AFTER creation, which an immutable event
+ *  cannot. Keyed by `eventId`; the single legitimate signer is the
+ *  stored event's `createdBy`, checked as a referent rule by the
+ *  route and every puller (like event shifts), not here. Retraction
+ *  is `allow: false` (no tombstone — it must keep winning LWW over
+ *  stale allowing copies). */
+export interface EventReminderDisclosure {
+  /** UUID of the row version — identity is `eventId`. */
+  id: string;
+  eventId: string;
+  allow: boolean;
+  /** LWW clock. */
+  updatedAt: number;
+  signerKey: string;
+  signature: string;
+}
+
 /**
  * Founder nomination — the founder's half of the co-founder ceremony
  * (docs/cofounder-ceremony-plan.md). Signed by the community's SOLE

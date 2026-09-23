@@ -22,6 +22,8 @@ import {
   getMemberRsvp,
   listRsvpsForEvent,
 } from "@/db/events";
+import { db } from "@/db/database";
+import { setEventReminderDisclosure } from "@/lib/eventReminderDisclosure";
 import { getLinkForEvent } from "@/db/eventProjectLinks";
 import { listShiftsForEvent } from "@/db/eventShifts";
 import { getSecretKey } from "@/db/secrets";
@@ -108,6 +110,15 @@ export default function EventDetailPage() {
     undefined,
   );
   const memberKey = currentMember?.publicKey ?? null;
+  // Named reminders (docs/notifications.md v2): the organizer's
+  // per-event disclosure flag — live so a flip from another of
+  // their devices shows here too.
+  const reminderDisclosure = useLiveQuery(
+    async () =>
+      eventId ? db.eventReminderDisclosures.get(eventId) : undefined,
+    [eventId],
+    undefined,
+  );
   const myRsvp = useLiveQuery(
     () =>
       eventId && memberKey
@@ -513,6 +524,36 @@ export default function EventDetailPage() {
           <h2 className="text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
             {t("events.detail.organizerControlsHeading")}
           </h2>
+          {/* Named reminders (docs/notifications.md v2): the
+              organizer's half of the two-consent AND, flippable any
+              time — the sweep reads it at send time, so a retraction
+              takes effect on the next pass. */}
+          <label className="flex items-start gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={reminderDisclosure?.allow === true}
+              onChange={() => {
+                void setEventReminderDisclosure(
+                  event.id,
+                  reminderDisclosure?.allow !== true,
+                ).then((res) => {
+                  if (!res.ok) {
+                    showToast(
+                      res.error === "locked"
+                        ? t("events.detail.cancelLocked")
+                        : t("events.new.errorGeneric"),
+                      "error",
+                    );
+                  }
+                });
+              }}
+            />
+            <span>{t("events.new.namedRemindersLabel")}</span>
+          </label>
+          <p className="ms-6 -mt-1 text-xs text-moss-600 dark:text-moss-300">
+            {t("events.new.namedRemindersHint")}
+          </p>
           <p className="text-xs text-moss-600 dark:text-moss-300">
             {t("events.detail.cancelHint")}
           </p>

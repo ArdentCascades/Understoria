@@ -48,6 +48,7 @@ import type {
   RedemptionReceipt,
   SeedVaultPledge,
   PushNameConsent,
+  EventReminderDisclosure,
   CapacityPosture,
   ShiftSignupRow,
   TaskComment,
@@ -170,6 +171,9 @@ export interface OutboxRow {
     // Push name consent (docs/notifications.md v2): the member's
     // "my name may appear in notifications" boolean, same machinery.
     | "push_name_consent"
+    // Event reminder disclosure (docs/notifications.md v2): the
+    // organizer's per-event "reminders may name this event" boolean.
+    | "event_reminder_disclosure"
     // Assembled quorum governance records (docs/member-removal.md
     // M2) — queued by the proposer's device after the ceremony.
     | "member_removal"
@@ -593,6 +597,12 @@ export class UnderstoriaDB extends Dexie {
    *  Absence means OFF. The boolean only — a lock-screen name always
    *  comes from this device's own member rows. */
   pushNameConsents!: Table<PushNameConsent, string>;
+  /** Event reminder disclosures (docs/notifications.md v2): each
+   *  organizer's per-event "reminders may name this event" boolean,
+   *  single-owner LWW keyed by eventId (authority = the local
+   *  event's createdBy, checked at pull). Absence means OFF. The
+   *  boolean only — the title stays on the event. */
+  eventReminderDisclosures!: Table<EventReminderDisclosure, string>;
   /** Coarse node-capacity attestations (docs/capacity-forecast.md §6):
    *  node-system-key-signed LWW records keyed by nodeId, carrying only
    *  a band/horizon/trigger — never a byte count. Read-only on this
@@ -1298,6 +1308,15 @@ export class UnderstoriaDB extends Dexie {
     // rows, never from this table's records.
     this.version(41).stores({
       pushNameConsents: "memberKey, updatedAt",
+    });
+
+    // v42 — event reminder disclosures (docs/notifications.md v2,
+    // named event reminders): each event organizer's "reminders may
+    // name this event" boolean, keyed by eventId, pulled from the
+    // node feed with the shift-style authority check (signer must
+    // be the local event's createdBy). Absence means OFF.
+    this.version(42).stores({
+      eventReminderDisclosures: "eventId, updatedAt",
     });
   }
 }

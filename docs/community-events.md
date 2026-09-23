@@ -295,6 +295,16 @@ There is no `proposed`, no `pending`, no `passed`. An event exists
 or it's been cancelled. See §11 for why a "proposed → confirmed"
 status was rejected.
 
+One organizer-signed satellite record exists beside the immutable
+event: the **event reminder disclosure**
+(docs/notifications.md v2, "named event reminders") — a
+single-owner LWW boolean keyed by `eventId`, letting opt-in push
+reminders carry the event's title on lock screens whose owners
+chose the named level. It is a separate record precisely because
+`canonicalEventPayload` is a closed wire contract; authority is
+the shift rule (signer must be the stored event's `createdBy`).
+Default absent = reminders stay generic.
+
 ## §5 Lifecycle
 
 ```

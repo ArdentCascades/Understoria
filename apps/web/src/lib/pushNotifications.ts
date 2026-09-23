@@ -51,6 +51,15 @@ export interface PushDisplayStrings {
   /** Named-tier templates per category; `{detail-key}` tokens are
    *  replaced from the payload's detail map. */
   named: Record<NotificationCategory, string>;
+  /** With-title named templates for event/shift reminders (v2 —
+   *  their `{event}` token takes the payload's organizer-disclosed
+   *  title). Used only when a payload actually carries
+   *  `detail.title`; the static `named` lines cover every other
+   *  reminder. */
+  titled?: {
+    event_reminder: string;
+    shift_reminder: string;
+  };
 }
 
 /** A local-time quiet window, "HH:MM" on this device's clock. The

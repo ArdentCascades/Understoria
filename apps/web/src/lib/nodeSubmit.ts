@@ -46,6 +46,7 @@ import type {
   ProposalClosure,
   SeedVaultPledge,
   PushNameConsent,
+  EventReminderDisclosure,
   ShiftSignupState,
   TaskState,
 } from "@understoria/shared/types";
@@ -432,6 +433,17 @@ export async function submitPushNameConsentToNode(
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
   return postSignedRecord("/push-name-consents", record, config, deps);
+}
+
+/** Event reminder disclosure (docs/notifications.md v2) — has an
+ *  event referent, so a 409 (event not on the node yet) is the
+ *  retryable case the outbox flush special-cases, like shifts. */
+export async function submitEventReminderDisclosureToNode(
+  record: EventReminderDisclosure,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/event-reminder-disclosures", record, config, deps);
 }
 
 /** Member removal / reinstatement (docs/member-removal.md M2): the

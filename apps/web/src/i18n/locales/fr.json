@@ -647,7 +647,9 @@
       "endsOtherDay": "Se termine un autre jour",
       "errorEndBeforeStartMidnightHint": "Ça continue après minuit ? Coche « Se termine un autre jour ».",
       "errorCapacityInvalid": "Le nombre de places doit être un nombre entier positif — ou laisse vide pour ne pas limiter.",
-      "errorLocked": "Déverrouille cet appareil avec ta phrase secrète avant de signer l'événement."
+      "errorLocked": "Déverrouille cet appareil avec ta phrase secrète avant de signer l'événement.",
+      "namedRemindersLabel": "Les rappels peuvent nommer cet événement",
+      "namedRemindersHint": "D'habitude un rappel dit seulement qu'un événement approche. Autorise-le si le nom de l'événement peut s'afficher sans risque sur des écrans de verrouillage — seules les personnes qui ont choisi les notifications nommées le voient, et tu peux changer d'avis ici à tout moment."
     },
     "detail": {
       "projectLinkLabel": "Projet",
@@ -2643,6 +2645,8 @@
     "bodyGuardian": "Une demande de gardien t'attend",
     "bodyConfirm": "Un échange attend ta confirmation",
     "bodyEvent": "Un événement où tu as dit que tu viens approche",
+    "bodyEventTitled": "« {event} » approche",
+    "bodyShiftTitled": "Ton créneau à « {event} » commence bientôt",
     "bodyMessage": "{sender} a des mots pour toi",
     "bodyTest": "Un essai que tu as demandé — les vraies auront exactement cette allure",
     "levelTitle": "Régler chaque genre",

@@ -647,7 +647,9 @@
       "endsOtherDay": "Kết thúc vào ngày khác",
       "errorEndBeforeStartMidnightHint": "Kéo dài qua nửa đêm? Đánh dấu “Kết thúc vào ngày khác”.",
       "errorCapacityInvalid": "Số chỗ phải là số nguyên dương, hoặc để trống nếu không giới hạn.",
-      "errorLocked": "Mở khóa thiết bị này bằng cụm mật khẩu của bạn trước khi ký sự kiện."
+      "errorLocked": "Mở khóa thiết bị này bằng cụm mật khẩu của bạn trước khi ký sự kiện.",
+      "namedRemindersLabel": "Lời nhắc có thể nêu tên sự kiện này",
+      "namedRemindersHint": "Bình thường lời nhắc chỉ nói có một sự kiện sắp diễn ra. Hãy cho phép nếu tên sự kiện xuất hiện trên màn hình khóa cũng không sao — chỉ những người chọn thông báo nói rõ loại mới thấy, và bạn có thể đổi ý ở đây bất cứ lúc nào."
     },
     "detail": {
       "projectLinkLabel": "Dự án",
@@ -2643,6 +2645,8 @@
     "bodyGuardian": "Một lời nhờ gìn giữ đang chờ bạn",
     "bodyConfirm": "Một lần giúp nhau đang chờ bạn xác nhận",
     "bodyEvent": "Một sự kiện bạn nói sẽ đến sắp bắt đầu",
+    "bodyEventTitled": "“{event}” sắp diễn ra",
+    "bodyShiftTitled": "Ca của bạn ở “{event}” sắp bắt đầu",
     "bodyMessage": "{sender} có lời cho bạn",
     "bodyTest": "Một lần thử bạn vừa yêu cầu — thông báo thật sẽ trông y như vậy",
     "levelTitle": "Chỉnh riêng từng loại",

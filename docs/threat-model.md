@@ -170,7 +170,13 @@ We are not trying to protect against:
   name-consent flag itself is a per-member public boolean on the
   node (`push_name_consents`) — it says a member allows their
   name in others' notifications, nothing more, and absence is the
-  default no.
+  default no. Named EVENT reminders follow the same shape: an
+  organizer's per-event public boolean
+  (`event_reminder_disclosures`, default absent = no) lets
+  reminder payloads carry the event's title — which is already a
+  public signed record, so the node learns nothing and the title
+  travels only inside the encrypted body, rendered only at the
+  recipient's own named level.
 
 - **Onion-service front door: OPT-IN, SHIPPED.** A node can publish
   a Tor onion service as a second front door (`docs/tor-onion.md`).

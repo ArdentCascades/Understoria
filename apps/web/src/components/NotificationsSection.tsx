@@ -247,6 +247,12 @@ export function NotificationsSection() {
         ) as Record<SubscribableCategory, string>),
         test_ping: t("push.bodyTest"),
       },
+      // With-title reminder templates (v2): used by the SW only for
+      // payloads whose event's organizer disclosed the title.
+      titled: {
+        event_reminder: t("push.bodyEventTitled"),
+        shift_reminder: t("push.bodyShiftTitled"),
+      },
     };
   }
 

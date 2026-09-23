@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
 import { createEvent, EVENT_START_GRACE_MS } from "@/db/events";
+import { setEventReminderDisclosure } from "@/lib/eventReminderDisclosure";
 import { scheduleProjectWorkDay } from "@/db/eventProjectLinks";
 import { isOrganizer } from "@/db/projects";
 import { getSecretKey } from "@/db/secrets";
@@ -178,6 +179,11 @@ export default function EventNewPage() {
   const [endsOtherDay, setEndsOtherDay] = useState(false);
   const [location, setLocation] = useState("");
   const [capacity, setCapacity] = useState("");
+  // Named reminders (docs/notifications.md v2): the organizer's
+  // "reminders may name this event" flag. Deliberately NOT part of
+  // the saved draft — a privacy-relevant flag silently restored
+  // from a stale draft would be worse than re-ticking it.
+  const [namedReminders, setNamedReminders] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pendingDraft, setPendingDraft] =
@@ -502,6 +508,14 @@ export default function EventNewPage() {
             projectId: workDayProject.id,
           })
         : await createEvent(eventInput);
+      // The disclosure is its own signed LWW record riding the
+      // outbox behind the event (a 409 before the event lands is
+      // the retryable ordering case). Best-effort: a failure here
+      // must not undo a created event — the toggle on the event
+      // page is the retry path.
+      if (namedReminders) {
+        await setEventReminderDisclosure(event.id, true).catch(() => {});
+      }
       // A deep-link visit never touches the stored plain-visit draft —
       // clearing here would delete work that belongs to a different
       // composition (see the precedence comment near the top).
@@ -884,6 +898,27 @@ export default function EventNewPage() {
             </span>
           )}
         </label>
+      </div>
+
+      {/* Named reminders (docs/notifications.md v2): organizer-side
+          half of a two-consent AND — the title still only ever shows
+          on lock screens whose owners chose the named level. Above
+          the §3 signing card, whose immediately-above-the-buttons
+          placement is a layout guardrail. */}
+      <div>
+        <label className="flex items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={namedReminders}
+            disabled={submitting}
+            onChange={(e) => setNamedReminders(e.target.checked)}
+          />
+          <span>{t("events.new.namedRemindersLabel")}</span>
+        </label>
+        <p className="ms-6 mt-1 text-xs text-moss-600 dark:text-moss-300">
+          {t("events.new.namedRemindersHint")}
+        </p>
       </div>
 
       {/* "What you're signing" comparison card — mirrors the

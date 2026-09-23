@@ -44,6 +44,7 @@ import type {
   Vote,
   SeedVaultPledge,
   PushNameConsent,
+  EventReminderDisclosure,
   CapacityPosture,
   EventShiftState,
   Post,
@@ -1693,6 +1694,34 @@ function applyMigrations(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '37')",
+    ).run();
+  }
+
+  // v38 — event reminder disclosures (docs/notifications.md v2,
+  // named event reminders). An organizer's per-event "reminders may
+  // name this event" flag: single-owner LWW keyed by event_id on the
+  // pledge shape, its own record because the event wire format is
+  // closed and an LWW record can be flipped after creation. Absence
+  // means OFF, so the table holds only events whose organizers
+  // opted the title in (or explicitly retracted).
+  if (current < 38) {
+    db.exec(`
+      CREATE TABLE event_reminder_disclosures (
+        event_id TEXT NOT NULL,
+        id TEXT NOT NULL,
+        signer_key TEXT NOT NULL,
+        updated_at INTEGER NOT NULL,
+        payload TEXT NOT NULL,
+        signature TEXT NOT NULL,
+        PRIMARY KEY (event_id)
+      );
+      CREATE INDEX event_reminder_disclosures_updated_idx
+        ON event_reminder_disclosures (updated_at);
+      CREATE INDEX event_reminder_disclosures_signer_idx
+        ON event_reminder_disclosures (signer_key);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '38')",
     ).run();
   }
 }
@@ -4215,6 +4244,74 @@ export function createPushNameConsentStore(
         "id",
         opts,
       ).map((r) => JSON.parse(r.payload) as PushNameConsent);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+/** Event reminder disclosures (docs/notifications.md v2) — the
+ *  pledge machinery keyed by eventId. Authority (signer must be the
+ *  stored event's createdBy) is the route's referent check, like
+ *  event shifts — the store never judges. */
+export interface EventReminderDisclosureStore {
+  get(eventId: string): EventReminderDisclosure | null;
+  /** INSERT OR REPLACE by eventId. The route decides whether to
+   *  call this — the store never compares versions. */
+  upsert(record: EventReminderDisclosure): void;
+  list(opts?: {
+    since?: number;
+    sinceId?: string;
+    limit?: number;
+  }): EventReminderDisclosure[];
+  count(): number;
+}
+
+export function createEventReminderDisclosureStore(
+  db: DatabaseType,
+): EventReminderDisclosureStore {
+  const upsertStmt = db.prepare(`
+    INSERT OR REPLACE INTO event_reminder_disclosures (
+      event_id, id, signer_key, updated_at, payload, signature
+    ) VALUES (
+      @eventId, @id, @signerKey, @updatedAt, @payload, @signature
+    )
+  `);
+  const getStmt = db.prepare(
+    "SELECT * FROM event_reminder_disclosures WHERE event_id = ?",
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM event_reminder_disclosures",
+  );
+
+  return {
+    get(eventId) {
+      const r = getStmt.get(eventId) as StateRowSqlite | undefined;
+      return r ? (JSON.parse(r.payload) as EventReminderDisclosure) : null;
+    },
+    upsert(record) {
+      upsertStmt.run({
+        eventId: record.eventId,
+        id: record.id,
+        signerKey: record.signerKey,
+        updatedAt: record.updatedAt,
+        payload: JSON.stringify(record),
+        signature: record.signature,
+      });
+    },
+    list(opts = {}) {
+      // Retractions (allow:false) stay in the feed so they keep
+      // winning LWW on every puller — an organizer pulling a title
+      // back OFF the lock screens is exactly the record that must
+      // travel.
+      return pagedRows<StateRowSqlite>(
+        db,
+        "event_reminder_disclosures",
+        "updated_at",
+        "id",
+        opts,
+      ).map((r) => JSON.parse(r.payload) as EventReminderDisclosure);
     },
     count() {
       return (countStmt.get() as { n: number }).n;

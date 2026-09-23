@@ -250,6 +250,18 @@ export function startReminderSweep({
   const listRsvps = db.prepare(
     "SELECT payload FROM event_rsvps WHERE event_id = ?",
   );
+  // Named event reminders (docs/notifications.md v2): the
+  // organizer's per-event disclosure flag and the event's own
+  // (public, signed) title, both read at SEND time — flipping the
+  // flag or retracting it takes effect on the very next pass, the
+  // same "checking at send time IS the cancellation" discipline
+  // the rest of the sweep lives by.
+  const getDisclosure = db.prepare(
+    "SELECT payload FROM event_reminder_disclosures WHERE event_id = ?",
+  );
+  const getEventPayload = db.prepare(
+    "SELECT payload FROM events WHERE id = ?",
+  );
   // INSERT OR IGNORE is the atomic claim on "this reminder": whoever
   // inserts the row sends; a second pass (or a restart mid-pass)
   // changes nothing.
@@ -263,6 +275,41 @@ export function startReminderSweep({
     "DELETE FROM push_reminders_sent WHERE sent_at < ?",
   );
 
+  /** The named-tier detail for one event's reminders: the event's
+   *  title, ONLY when its organizer's disclosure flag is on.
+   *  Absence of a record — every event's default — returns
+   *  undefined and the payload stays category-data-only, exactly
+   *  as before. The title is capped as belt-and-braces (push
+   *  payload budgets are small; app-side validation already bounds
+   *  event titles). */
+  function titledDetail(
+    eventId: string,
+  ): Record<string, string> | undefined {
+    const row = getDisclosure.get(eventId) as
+      | { payload: string }
+      | undefined;
+    if (!row) return undefined;
+    try {
+      const disclosure = JSON.parse(row.payload) as { allow?: unknown };
+      if (disclosure.allow !== true) return undefined;
+    } catch {
+      return undefined;
+    }
+    const eventRow = getEventPayload.get(eventId) as
+      | { payload: string }
+      | undefined;
+    if (!eventRow) return undefined;
+    try {
+      const event = JSON.parse(eventRow.payload) as { title?: unknown };
+      if (typeof event.title !== "string" || event.title === "") {
+        return undefined;
+      }
+      return { title: event.title.slice(0, 120) };
+    } catch {
+      return undefined;
+    }
+  }
+
   /** The shared send-once step: claim, send, release on zero
    *  devices so a member who flips the category on while the window
    *  is still open gets their reminder on a later pass. */
@@ -272,6 +319,7 @@ export function startReminderSweep({
     memberKey: string,
     path: string,
     at: number,
+    detail?: Record<string, string>,
   ): Promise<number> {
     const claimed = claimSend.run(kind, dedupeKey, at);
     if (claimed.changes === 0) return 0;
@@ -279,6 +327,7 @@ export function startReminderSweep({
       const devices = await sender.sendToMember(memberKey, {
         category: kind,
         path,
+        ...(detail ? { detail } : {}),
       });
       if (devices > 0) return 1;
       releaseClaim.run(kind, dedupeKey);
@@ -309,6 +358,10 @@ export function startReminderSweep({
       if (shift.deletedAt !== null) continue;
       if (shift.startsAt <= at || shift.startsAt > at + leadMs) continue;
       if (eventCancelled.get(shift.eventId)) continue;
+      // Shifts belong to events, so the EVENT's disclosure flag
+      // governs both clocks — the contract's own "Your shift at
+      // {event}" example.
+      const shiftDetail = titledDetail(shift.eventId);
       for (const signupRow of listSignups.all(shift.id) as {
         payload: string;
       }[]) {
@@ -325,6 +378,7 @@ export function startReminderSweep({
           signup.memberKey,
           `/events/${shift.eventId}`,
           at,
+          shiftDetail,
         );
       }
     }
@@ -336,6 +390,7 @@ export function startReminderSweep({
       id: string;
     }[]) {
       if (eventCancelled.get(eventRow.id)) continue;
+      const eventDetail = titledDetail(eventRow.id);
       for (const rsvpRow of listRsvps.all(eventRow.id) as {
         payload: string;
       }[]) {
@@ -352,6 +407,7 @@ export function startReminderSweep({
           rsvp.memberKey,
           `/events/${eventRow.id}`,
           at,
+          eventDetail,
         );
       }
     }

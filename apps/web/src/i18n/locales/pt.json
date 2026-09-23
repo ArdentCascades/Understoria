@@ -647,7 +647,9 @@
       "endsOtherDay": "Termina em outro dia",
       "errorEndBeforeStartMidnightHint": "Vai passar da meia-noite? Marque “Termina em outro dia”.",
       "errorCapacityInvalid": "A capacidade precisa ser um número inteiro positivo — ou deixe vazio para não ter limite.",
-      "errorLocked": "Desbloqueie este dispositivo com a sua frase de acesso antes de assinar o evento."
+      "errorLocked": "Desbloqueie este dispositivo com a sua frase de acesso antes de assinar o evento.",
+      "namedRemindersLabel": "Os lembretes podem nomear este evento",
+      "namedRemindersHint": "Normalmente um lembrete só diz que um evento está chegando. Permita se o nome do evento puder aparecer sem risco em telas de bloqueio — só vê quem escolheu notificações com detalhe, e você pode mudar de ideia aqui a qualquer momento."
     },
     "detail": {
       "projectLinkLabel": "Projeto",
@@ -2643,6 +2645,8 @@
     "bodyGuardian": "Um pedido de guardião espera por você",
     "bodyConfirm": "Uma troca espera a sua confirmação",
     "bodyEvent": "Um evento em que você disse que vai está chegando",
+    "bodyEventTitled": "“{event}” está chegando",
+    "bodyShiftTitled": "Seu turno em “{event}” começa em breve",
     "bodyMessage": "{sender} tem palavras para você",
     "bodyTest": "Um teste que você pediu — as de verdade vão aparecer exatamente assim",
     "levelTitle": "Ajustar cada tipo",
