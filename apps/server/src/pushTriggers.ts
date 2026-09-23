@@ -44,6 +44,11 @@
 //    pings ("maybe" chose ambivalence, and an RSVP flipped away
 //    before the window simply never matches at send time).
 //
+//  - message_waiting (v2): event-driven off the relay's
+//    onNewMessage hook, coalesced per recipient through the same
+//    ledger — one ping per 4-hour quiet period, whatever any
+//    sender does. See createMessageWaitingNotifier.
+//
 //  - test_ping (v2) is not a trigger at all: it is self-requested
 //    through POST /push/test and delivered straight to the signing
 //    member's own subscription row. Nothing here can emit one.
@@ -62,6 +67,7 @@ import type {
   AwaitingTransition,
   EventRsvpState,
   EventShiftState,
+  RelayedMessage,
   ShiftSignupState,
 } from "@understoria/shared";
 import type { PushSender } from "./push.js";
@@ -126,6 +132,83 @@ export function notifyAwaitingConfirmation(
       path: awaitingConfirmationPath(record.postId),
     })
     .catch(() => log("awaiting-confirmation push failed"));
+}
+
+/** The message_waiting quiet period (docs/notifications.md v2):
+ *  one ping per recipient per this window, fired by the first
+ *  message after the window lapses. THE CAP IS THE SAFETY
+ *  MECHANISM — whatever a sender does, they cannot make a phone
+ *  buzz more than once per period, which is what neuters the
+ *  blocked-abuser doorbell; naming rules ride on top and never
+ *  replace it. */
+export const MESSAGE_QUIET_PERIOD_MS = 4 * 60 * 60 * 1000;
+
+export interface MessageWaitingNotifierOptions {
+  db: DatabaseType;
+  sender: PushSender;
+  quietPeriodMs?: number;
+  now?: () => number;
+  log?: (msg: string) => void;
+}
+
+/**
+ * The message_waiting trigger — event-driven off the relay's
+ * onNewMessage hook (201 inserts only), coalesced per RECIPIENT
+ * through the same durable ledger the sweeps use. The claim is a
+ * single atomic upsert: insert the (kind, recipient) row, or renew
+ * it only when the last ping is older than the quiet period —
+ * whoever wins the write sends, and every message inside a live
+ * period changes nothing.
+ *
+ * The payload carries the triggering sender's PUBLIC KEY as
+ * `detail.senderKey` — never a display name, never a body, never a
+ * count. The recipient's device decides (or refuses) to resolve
+ * the key against its own local name map; a blocked or
+ * unconsented sender's key finds no entry there.
+ *
+ * Zero-device sends release the claim (like the sweeps' late
+ * opt-in rule): a recipient who enables the category mid-period
+ * still hears about the NEXT message, rather than inheriting a
+ * spent period from before they opted in. The release matches on
+ * the claim's own timestamp so it can never erase a newer claim.
+ */
+export function createMessageWaitingNotifier({
+  db,
+  sender,
+  quietPeriodMs = MESSAGE_QUIET_PERIOD_MS,
+  now = Date.now,
+  log = () => {},
+}: MessageWaitingNotifierOptions): (
+  message: Pick<RelayedMessage, "senderKey" | "recipientKey">,
+) => void {
+  const claim = db.prepare(`
+    INSERT INTO push_reminders_sent (kind, dedupe_key, sent_at)
+    VALUES ('message_waiting', @recipient, @at)
+    ON CONFLICT(kind, dedupe_key) DO UPDATE SET sent_at = @at
+      WHERE push_reminders_sent.sent_at <= @lapsed
+  `);
+  const release = db.prepare(`
+    DELETE FROM push_reminders_sent
+    WHERE kind = 'message_waiting' AND dedupe_key = ? AND sent_at = ?
+  `);
+
+  return (message) => {
+    void (async () => {
+      const at = now();
+      const claimed = claim.run({
+        recipient: message.recipientKey,
+        at,
+        lapsed: at - quietPeriodMs,
+      });
+      if (claimed.changes === 0) return; // inside a live quiet period
+      const devices = await sender.sendToMember(message.recipientKey, {
+        category: "message_waiting",
+        path: "/messages",
+        detail: { senderKey: message.senderKey },
+      });
+      if (devices === 0) release.run(message.recipientKey, at);
+    })().catch(() => log("message-waiting push failed"));
+  };
 }
 
 export interface ReminderSweepOptions {

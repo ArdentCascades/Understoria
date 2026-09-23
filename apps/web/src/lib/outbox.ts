@@ -35,6 +35,7 @@ import {
   submitExchangeToNode,
   submitMessageToNode,
   submitSeedVaultPledgeToNode,
+  submitPushNameConsentToNode,
   submitMemberRemovalToNode,
   submitMemberReinstatementToNode,
   submitProposalToNode,
@@ -72,6 +73,7 @@ import type {
   MemberReinstatement,
   ProposalClosure,
   SeedVaultPledge,
+  PushNameConsent,
   ShiftSignupState,
   TaskState,
 } from "@understoria/shared/types";
@@ -339,6 +341,13 @@ export async function enqueueSeedVaultPledgeOutbox(
   // Natural key IS the member — one live pledge version per member in
   // the queue; a newer version replaces a still-pending one in place.
   return enqueueOutbox("seed_vault_pledge", `svp_${record.memberKey}`, record);
+}
+
+export async function enqueuePushNameConsentOutbox(
+  record: PushNameConsent,
+): Promise<OutboxRow | null> {
+  // Same natural key as pledges: one live consent version per member.
+  return enqueueOutbox("push_name_consent", `pnc_${record.memberKey}`, record);
 }
 
 export async function enqueueEventShiftOutbox(
@@ -753,6 +762,12 @@ export async function flushOutboxOnce(
     } else if (row.kind === "seed_vault_pledge") {
       result = await submitSeedVaultPledgeToNode(
         payload as unknown as SeedVaultPledge,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
+    } else if (row.kind === "push_name_consent") {
+      result = await submitPushNameConsentToNode(
+        payload as unknown as PushNameConsent,
         cfg,
         { fetchImpl: options.fetchImpl },
       );

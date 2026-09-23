@@ -37,6 +37,7 @@ import {
   type RelayedMessage,
   type ShiftSignupState,
   type SeedVaultPledge,
+  type PushNameConsent,
   type CapacityPosture,
   type SignedVouch,
   type TaskComment,
@@ -1206,6 +1207,10 @@ export type ParseSeedVaultPledgeResult =
   | { ok: true; value: SeedVaultPledge }
   | { ok: false; error: string };
 
+export type ParsePushNameConsentResult =
+  | { ok: true; value: PushNameConsent }
+  | { ok: false; error: string };
+
 export type ParseCapacityPostureResult =
   | { ok: true; value: CapacityPosture }
   | { ok: false; error: string };
@@ -1283,6 +1288,26 @@ export function parseSeedVaultPledge(
   const clock = checkLwwClock(r);
   if (clock) return { ok: false, error: clock };
   return { ok: true, value: r as unknown as SeedVaultPledge };
+}
+
+export function parsePushNameConsent(
+  input: unknown,
+): ParsePushNameConsentResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of ["id", "memberKey", "signerKey", "signature"]) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (typeof r.allow !== "boolean") {
+    return { ok: false, error: "allow must be a boolean" };
+  }
+  const clock = checkLwwClock(r);
+  if (clock) return { ok: false, error: clock };
+  return { ok: true, value: r as unknown as PushNameConsent };
 }
 
 export function parseCapacityPosture(

@@ -2622,6 +2622,8 @@
     "catConfirmDesc": "Cuando un intercambio está terminado y solo falta tu palabra.",
     "catEvent": "Recordatorios de evento",
     "catEventDesc": "Antes de que empiece un evento al que dijiste que vienes.",
+    "catMessage": "Mensajes esperando",
+    "catMessageDesc": "Cuando lleguen palabras para ti — como mucho un toque cada cuatro horas, escriba quien escriba y cuanto escriba.",
     "disclosureTitle": "Antes de encender esto",
     "disclosure": "Los avisos push viajan por el relé del fabricante de tu navegador — Google, Mozilla o Apple, según cuál uses. El relé no puede leerlos (cada uno va sellado para este dispositivo), pero sí ve que llegó algo pequeño, y cuándo. El servidor de tu comunidad solo sabe qué tipos elegiste — nunca el texto de tu pantalla de bloqueo, nunca un mensaje. Si ese rastro no es un coste que quieras pagar, sáltatelo: la app está completa sin esto.",
     "disclosureContinue": "Entendido — pregunta al navegador",
@@ -2641,6 +2643,7 @@
     "bodyGuardian": "Una petición de guardián te espera",
     "bodyConfirm": "Un intercambio espera tu confirmación",
     "bodyEvent": "Se acerca un evento al que dijiste que vienes",
+    "bodyMessage": "{sender} tiene palabras para ti",
     "bodyTest": "Una prueba que pediste — las de verdad se verán exactamente así",
     "levelTitle": "Afinar cada tipo",
     "levelDefault": "Igual que arriba",
@@ -2654,7 +2657,10 @@
     "quietHint": "Entre esas horas, según el reloj de este dispositivo, lo que llegue se queda callado — sin sonido, sin palabras, solo la señal — y ahí espera hasta que mires. Esto vive solo en este dispositivo; el servidor de tu comunidad nunca sabe cuándo duermes.",
     "testButton": "Enviarme una prueba",
     "testSent": "Enviada. Debería llegar a este dispositivo en un momento, viéndose exactamente como una de verdad.",
-    "testFailed": "No se pudo enviar la prueba. Revisa que tengas conexión e inténtalo otra vez — y si sigue fallando, apagarlo todo y volver a encenderlo renueva el registro de este dispositivo."
+    "testFailed": "No se pudo enviar la prueba. Revisa que tengas conexión e inténtalo otra vez — y si sigue fallando, apagarlo todo y volver a encenderlo renueva el registro de este dispositivo.",
+    "nameConsentTitle": "Tu nombre en otras pantallas",
+    "nameConsentLabel": "Quienes reciben mis mensajes pueden ver mi nombre en sus notificaciones",
+    "nameConsentHint": "Apagado por defecto, como todo aquí. Si alguien a quien escribes eligió notificaciones con detalle, su pantalla de bloqueo puede decir que las palabras son tuyas — solo si tú lo permites aquí, y siempre con el nombre con el que su dispositivo ya te conoce. Quien te haya bloqueado nunca lo ve, tu nombre nunca viaja dentro de una notificación, y puedes retirarlo cuando quieras."
   },
   "betaNotice": {
     "dismiss": "Entendido",

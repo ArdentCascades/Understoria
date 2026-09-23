@@ -2622,6 +2622,8 @@
     "catConfirmDesc": "Kapag tapos na ang isang palitan at ang salita mo na lang ang kulang.",
     "catEvent": "Paalala sa event",
     "catEventDesc": "Bago magsimula ang event na sinabi mong pupuntahan mo.",
+    "catMessage": "May naghihintay na mensahe",
+    "catMessageDesc": "Kapag may dumating na mga salita para sa iyo — sinuman ang sumulat, gaano man karami, isang kalabit lang kada apat na oras.",
     "disclosureTitle": "Bago ito buksan",
     "disclosure": "Dumadaan ang push sa relay ng gumawa ng browser mo — Google, Mozilla, o Apple, depende sa browser. Hindi ito mababasa ng relay (selyado ang bawat isa para sa device na ito), pero nakikita nitong may maliit na dumating, at kung kailan. Ang alam lang ng server ng inyong komunidad ay kung aling mga uri ang pinili mo — hindi kailanman ang mga salita sa lock screen mo, hindi kailanman ang mensahe. Kung ang bakas na iyon ay halagang ayaw mong bayaran, laktawan mo: buo ang app kahit wala ito.",
     "disclosureContinue": "Nauunawaan ko — itanong sa browser",
@@ -2641,6 +2643,7 @@
     "bodyGuardian": "May hiling ng tagapag-ingat na naghihintay sa iyo",
     "bodyConfirm": "May palitang naghihintay ng kumpirmasyon mo",
     "bodyEvent": "Paparating na ang event na sinabi mong pupuntahan mo",
+    "bodyMessage": "May mga salita si {sender} para sa iyo",
     "bodyTest": "Pagsubok na hiniling mo — ganito mismo magmumukha ang totoo",
     "levelTitle": "Ayusin ang bawat uri",
     "levelDefault": "Katulad ng nasa itaas",
@@ -2654,7 +2657,10 @@
     "quietHint": "Sa pagitan ng mga oras na iyon, ayon sa orasan ng device na ito, nananatiling tahimik ang anumang dumating — walang tunog, walang salita, tanda lang — at naghihintay ito hanggang tumingin ka. Nabubuhay lang ang piniling ito sa device na ito; hindi kailanman nalalaman ng server ng komunidad mo kung kailan ka natutulog.",
     "testButton": "Padalhan ang sarili ng pagsubok",
     "testSent": "Naipadala. Darating ito sa device na ito sandali na lang, mukhang eksaktong katulad ng totoo.",
-    "testFailed": "Hindi naipadala ang pagsubok. Tingnan kung nakakonekta ka at subukan ulit — kung paulit-ulit itong pumapalya, ang pagpatay sa lahat at muling pagbukas ay nagpapanibago sa rehistro ng device na ito."
+    "testFailed": "Hindi naipadala ang pagsubok. Tingnan kung nakakonekta ka at subukan ulit — kung paulit-ulit itong pumapalya, ang pagpatay sa lahat at muling pagbukas ay nagpapanibago sa rehistro ng device na ito.",
+    "nameConsentTitle": "Ang pangalan mo sa ibang screen",
+    "nameConsentLabel": "Maaaring makita ng mga sinusulatan ko ang pangalan ko sa kanilang notipikasyon",
+    "nameConsentHint": "Nakapatay bilang default, tulad ng lahat dito. Kung pinili ng sinusulatan mo ang notipikasyong nagsasabi ng uri, maaaring sabihin ng lock screen niya na galing sa iyo ang mga salita — kung papayagan mo lang dito, at lagi sa pangalang kilala na ng device niya. Hindi ito kailanman makikita ng nag-block sa iyo; hindi kailanman sumasama ang pangalan mo sa loob ng notipikasyon; at maaari mo itong bawiin anumang oras."
   },
   "betaNotice": {
     "dismiss": "Nakuha ko",

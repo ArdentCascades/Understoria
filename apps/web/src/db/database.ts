@@ -47,6 +47,7 @@ import type {
   ProposalClosure,
   RedemptionReceipt,
   SeedVaultPledge,
+  PushNameConsent,
   CapacityPosture,
   ShiftSignupRow,
   TaskComment,
@@ -166,6 +167,9 @@ export interface OutboxRow {
     // Seed-vault pledge (docs/storage-budget.md Phase 2): a member's
     // public archive-role claim, single-owner LWW like an RSVP.
     | "seed_vault_pledge"
+    // Push name consent (docs/notifications.md v2): the member's
+    // "my name may appear in notifications" boolean, same machinery.
+    | "push_name_consent"
     // Assembled quorum governance records (docs/member-removal.md
     // M2) — queued by the proposer's device after the ceremony.
     | "member_removal"
@@ -583,6 +587,12 @@ export class UnderstoriaDB extends Dexie {
    *  federates, re-seeds, rides the pairing snapshot, exports; never
    *  windowed (it is itself the coverage signal). */
   seedVaultPledges!: Table<SeedVaultPledge, string>;
+  /** Push name consents (docs/notifications.md v2): each member's
+   *  federated "my name may appear in notifications" boolean,
+   *  single-owner LWW keyed by memberKey, pulled from the node feed.
+   *  Absence means OFF. The boolean only — a lock-screen name always
+   *  comes from this device's own member rows. */
+  pushNameConsents!: Table<PushNameConsent, string>;
   /** Coarse node-capacity attestations (docs/capacity-forecast.md §6):
    *  node-system-key-signed LWW records keyed by nodeId, carrying only
    *  a band/horizon/trigger — never a byte count. Read-only on this
@@ -1277,6 +1287,17 @@ export class UnderstoriaDB extends Dexie {
     // posture is on the field declaration above.
     this.version(40).stores({
       transcripts: "id, ownerKey, createdAt",
+    });
+
+    // v41 — push name consents (docs/notifications.md v2, messages
+    // named by mutual consent): each member's federated "my name may
+    // appear in notifications" boolean, pulled from the node feed
+    // like seed-vault pledges. Keyed by memberKey (single-owner
+    // LWW); absence means OFF. Carries a boolean only — the name a
+    // lock screen shows always comes from this device's own member
+    // rows, never from this table's records.
+    this.version(41).stores({
+      pushNameConsents: "memberKey, updatedAt",
     });
   }
 }

@@ -338,12 +338,13 @@ describe("the send helper (injected transport — nothing real is sent)", () => 
         path: "/",
       }),
     ).rejects.toThrow(/documented list/);
-    // And the documented list is exactly the doc's five (v2).
+    // And the documented list is exactly the doc's six (v2).
     expect([...NOTIFICATION_CATEGORIES]).toEqual([
       "shift_reminder",
       "guardian_request",
       "awaiting_confirmation",
       "event_reminder",
+      "message_waiting",
       "test_ping",
     ]);
   });

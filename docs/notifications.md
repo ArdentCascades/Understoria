@@ -351,12 +351,17 @@ stand. The design that respects them:
 
 ### Ladder v2
 
-- **F (this amendment) — the contract.**
-- **G:** event_reminder + test_ping + per-category levels + quiet
-  hours; strings in all eighteen languages; every enum pin moved.
-- **H:** message_waiting end to end — consent record (node table,
-  routes, feed, web pull), the coalescer on the message route, the
-  Settings toggle + name-map snapshot, SW named rendering;
-  strings ×18.
+- **F (this amendment) — the contract. SHIPPED, #644.**
+- **G — SHIPPED, #645:** event_reminder + test_ping + per-category
+  levels + quiet hours; strings in all eighteen languages; every
+  enum pin moved.
+- **H — SHIPPED:** message_waiting end to end — the consent record
+  (node table v37, `/push-name-consents` routes + feed, mirror
+  kind, web pull + outbox + reseed/snapshot registries), the
+  per-recipient coalescer on the message route's onNewMessage hook,
+  the Settings toggle + consented∩unblocked name-map snapshot into
+  the SW prefs, SW named rendering with generic on any map miss;
+  strings ×18; the threat-model §7 rewrite (shipped status + the
+  consent-flag disclosure).
 - **I (later):** lead-time choice; then governance, guardian, per
   the section above.

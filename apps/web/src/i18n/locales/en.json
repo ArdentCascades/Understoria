@@ -2622,6 +2622,8 @@
     "catConfirmDesc": "When an exchange is finished except for your word.",
     "catEvent": "Event reminders",
     "catEventDesc": "Before an event you said you're going to begins.",
+    "catMessage": "Messages waiting",
+    "catMessageDesc": "When someone's words arrive for you — at most one nudge every four hours, no matter who writes or how often.",
     "disclosureTitle": "Before this turns on",
     "disclosure": "Pushes travel through your browser maker's relay — Google, Mozilla, or Apple, depending on this browser. The relay can't read them (each one is sealed to this device), but it can see that something small arrived, and when. Your community's server learns only which kinds you chose — never your lock-screen wording, never a message. If that trace isn't a cost you want, skip this: the app is complete without it.",
     "disclosureContinue": "I understand — ask this browser",
@@ -2641,6 +2643,7 @@
     "bodyGuardian": "A guardian request is waiting for you",
     "bodyConfirm": "An exchange is waiting for your confirmation",
     "bodyEvent": "An event you're going to is coming up",
+    "bodyMessage": "{sender} has words for you",
     "bodyTest": "A test you asked for — real ones will look just like this",
     "levelTitle": "Fine-tune each kind",
     "levelDefault": "Same as above",
@@ -2654,7 +2657,10 @@
     "quietHint": "Between these times, by this device's clock, anything that arrives keeps quiet — no sound, no words, just the badge — and it's waiting when you look. This lives only on this device; your community's server never learns when you sleep.",
     "testButton": "Send myself a test",
     "testSent": "Sent. It should reach this device in a moment, looking exactly the way a real one would.",
-    "testFailed": "The test couldn't be sent. Check that you're connected and try again — and if it keeps failing, turning everything off and back on refreshes this device's registration."
+    "testFailed": "The test couldn't be sent. Check that you're connected and try again — and if it keeps failing, turning everything off and back on refreshes this device's registration.",
+    "nameConsentTitle": "Your name on other screens",
+    "nameConsentLabel": "People I write to may see my name in their notifications",
+    "nameConsentHint": "Off by default, like everything here. When someone you write to chose named notifications, their lock screen can say the words are from you — only if you allow it here, and only ever the name their device already calls you. Anyone who blocked you never sees it, your name never travels inside a notification, and you can take this back any time."
   },
   "betaNotice": {
     "dismiss": "Got it",

@@ -17,9 +17,12 @@ import type { Database as DatabaseType } from "better-sqlite3-multiple-ciphers";
 import type { FastifyInstance } from "fastify";
 import {
   canonicalAwaitingTransitionPayload,
+  canonicalRelayedMessagePayload,
   generateKeyPair,
   sign,
   type EventShiftState,
+  type KeyPair,
+  type RelayedMessage,
   type ShiftSignupState,
 } from "@understoria/shared";
 import { buildServer } from "./server.js";
@@ -34,6 +37,8 @@ import { createPushSender, ensureVapidKeys } from "./push.js";
 import {
   awaitingConfirmationPath,
   awaitingConfirmationTarget,
+  createMessageWaitingNotifier,
+  MESSAGE_QUIET_PERIOD_MS,
   startReminderSweep,
 } from "./pushTriggers.js";
 
@@ -434,5 +439,182 @@ describe("event-reminder sweep (v2 — same clock, one level up)", () => {
     expect(await sweep2.sweepOnce()).toBe(0);
     expect(sent2).toHaveLength(0);
     sweep2.stop();
+  });
+});
+
+describe("message-waiting coalescer (v2 — the cap is the safety mechanism)", () => {
+  let db: DatabaseType;
+
+  afterEach(() => {
+    db.close();
+  });
+
+  function makeNotifier(sent: Sent[], clock: { at: number }) {
+    const sender = createPushSender(
+      createPushSubscriptionStore(db),
+      ensureVapidKeys(db),
+      captureTransport(sent),
+    );
+    return createMessageWaitingNotifier({
+      db,
+      sender,
+      now: () => clock.at,
+    });
+  }
+
+  async function settle() {
+    await new Promise((r) => setImmediate(r));
+  }
+
+  it("pings once per quiet period whatever any sender does, then again after the lapse", async () => {
+    db = openDatabase(":memory:");
+    const T = 1_700_000_000_000;
+    const clock = { at: T };
+    const sent: Sent[] = [];
+    subscribeRow(db, "recipient", "https://push.example/r", [
+      "message_waiting",
+    ]);
+    const notify = makeNotifier(sent, clock);
+
+    notify({ senderKey: "sender-a", recipientKey: "recipient" });
+    await settle();
+    expect(sent).toHaveLength(1);
+    // The payload names no one: category, path, and the triggering
+    // sender's KEY — never a display name, never a body, never a
+    // count.
+    expect(sent[0].payload).toEqual({
+      category: "message_waiting",
+      path: "/messages",
+      detail: { senderKey: "sender-a" },
+    });
+
+    // A storm inside the period — same sender, different senders —
+    // changes nothing. The blocked-abuser doorbell has no clapper.
+    clock.at = T + 5 * 60_000;
+    notify({ senderKey: "sender-a", recipientKey: "recipient" });
+    notify({ senderKey: "sender-b", recipientKey: "recipient" });
+    await settle();
+    expect(sent).toHaveLength(1);
+
+    // ANOTHER recipient's first message still pings them — the cap
+    // is per recipient, not global.
+    subscribeRow(db, "recipient-2", "https://push.example/r2", [
+      "message_waiting",
+    ]);
+    notify({ senderKey: "sender-a", recipientKey: "recipient-2" });
+    await settle();
+    expect(sent).toHaveLength(2);
+    expect(sent[1].endpoint).toBe("https://push.example/r2");
+
+    // After the period lapses, the first message pings again.
+    clock.at = T + MESSAGE_QUIET_PERIOD_MS + 1;
+    notify({ senderKey: "sender-c", recipientKey: "recipient" });
+    await settle();
+    expect(sent).toHaveLength(3);
+    expect(sent[2].payload).toMatchObject({
+      detail: { senderKey: "sender-c" },
+    });
+  });
+
+  it("releases a zero-device claim so a mid-period opt-in hears about the NEXT message", async () => {
+    db = openDatabase(":memory:");
+    const T = 1_700_000_000_000;
+    const clock = { at: T };
+    const sent: Sent[] = [];
+    const notify = makeNotifier(sent, clock);
+
+    // Not subscribed: nothing sent, and the period is NOT spent.
+    notify({ senderKey: "sender-a", recipientKey: "late-joiner" });
+    await settle();
+    expect(sent).toHaveLength(0);
+
+    subscribeRow(db, "late-joiner", "https://push.example/late", [
+      "message_waiting",
+    ]);
+    clock.at = T + 60_000; // well inside what would have been the period
+    notify({ senderKey: "sender-a", recipientKey: "late-joiner" });
+    await settle();
+    expect(sent).toHaveLength(1);
+    expect(sent[0].endpoint).toBe("https://push.example/late");
+  });
+});
+
+describe("message-waiting end to end (the relay hook)", () => {
+  let app: FastifyInstance;
+  let db: DatabaseType;
+
+  afterEach(async () => {
+    await app.close();
+    db.close();
+  });
+
+  let seq = 0;
+  function envelope(from: KeyPair, toPublicKey: string): RelayedMessage {
+    seq += 1;
+    const base = {
+      id: `msg_hook_${seq}`,
+      senderKey: from.publicKey,
+      recipientKey: toPublicKey,
+      nonce: "bm9uY2Vub25jZW5vbmNlbm9uY2U=",
+      ciphertext: "Y2lwaGVydGV4dA==",
+      createdAt: Date.now(),
+    };
+    return {
+      ...base,
+      signature: sign(canonicalRelayedMessagePayload(base), from.secretKey),
+    };
+  }
+
+  it("fires on the 201 insert only — an idempotent re-post pings no one", async () => {
+    db = openDatabase(":memory:");
+    const sent: Sent[] = [];
+    const config = readConfigFromEnv({
+      LOG_LEVEL: "fatal",
+      READ_AUTH: "off",
+      NODE_ID: "node_test",
+      RATE_LIMIT_MAX: "10000",
+    } as unknown as NodeJS.ProcessEnv);
+    const built = await buildServer({
+      config,
+      database: db,
+      pushTransport: captureTransport(sent),
+    });
+    app = built.app;
+    await app.ready();
+
+    const sender = generateKeyPair();
+    const recipient = generateKeyPair();
+    subscribeRow(db, recipient.publicKey, "https://push.example/dm", [
+      "message_waiting",
+    ]);
+
+    const msg = envelope(sender, recipient.publicKey);
+    const post = () =>
+      app.inject({ method: "POST", url: "/messages", payload: msg });
+
+    expect((await post()).statusCode).toBe(201);
+    await new Promise((r) => setImmediate(r));
+    expect(sent).toHaveLength(1);
+    expect(sent[0].payload).toEqual({
+      category: "message_waiting",
+      path: "/messages",
+      detail: { senderKey: sender.publicKey },
+    });
+
+    // Re-post of the same envelope: 200, no new ping (and even a
+    // NEW envelope stays quiet inside the period).
+    expect((await post()).statusCode).toBe(200);
+    const second = envelope(sender, recipient.publicKey);
+    expect(
+      (
+        await app.inject({
+          method: "POST",
+          url: "/messages",
+          payload: second,
+        })
+      ).statusCode,
+    ).toBe(201);
+    await new Promise((r) => setImmediate(r));
+    expect(sent).toHaveLength(1);
   });
 });

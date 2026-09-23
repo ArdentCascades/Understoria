@@ -15,6 +15,7 @@ import {
   verify,
   verifyRelayedMessage,
 } from "@understoria/shared/crypto";
+import type { RelayedMessage } from "@understoria/shared/types";
 import type { MessageStore } from "../db.js";
 import { parseRelayedMessage } from "../validate.js";
 import { READ_AUTH_MAX_SKEW_MS, type MembershipResolver } from "../readAuth.js";
@@ -33,6 +34,11 @@ interface Deps {
   retentionDays: number;
   /** Injectable clock for tests. */
   now?: () => number;
+  /** Fired only when a message is NEWLY stored (the 201 path) —
+   *  the message_waiting push trigger's hook, mirroring
+   *  awaitingTransitions' onNewTransition. Never blocks or fails
+   *  the relay write. */
+  onNewMessage?: (message: RelayedMessage) => void;
 }
 
 /**
@@ -100,6 +106,7 @@ export async function registerMessageRoutes(
     }
 
     deps.store.insert(message);
+    deps.onNewMessage?.(message);
     reply.code(201);
     return { stored: true, id: message.id };
   });

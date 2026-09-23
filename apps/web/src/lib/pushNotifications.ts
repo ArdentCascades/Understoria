@@ -85,6 +85,13 @@ export interface PushPrefs {
   /** Last successful node renew (ms) — throttles renew-on-open. */
   renewedAt: number;
   strings: PushDisplayStrings | null;
+  /** senderKey→displayName map for message pings (v2) — the
+   *  recipient-side gate of the naming AND, built ONLY from this
+   *  device's own member rows filtered to consented ∩ unblocked
+   *  (lib/pushNameConsent.ts `buildPushNameMap`). A key with no
+   *  entry renders the generic wording. Snapshotted at save time
+   *  like `strings`; never sent anywhere. */
+  names?: Record<string, string>;
 }
 
 export const PUSH_PREFS_DB = "understoria-push";

@@ -102,6 +102,9 @@ export const WINDOW_PINNED_TABLES = [
   // The archive-role claims themselves (docs/storage-budget.md Phase
   // 2) — tiny, and the coverage signal windowing is honest about.
   "seedVaultPledges",
+  // Name-consent booleans (docs/notifications.md v2) — tiny, and the
+  // naming AND needs them current on every device.
+  "pushNameConsents",
   // Coarse node-capacity attestations (docs/capacity-forecast.md §6):
   // one node-signed row per node, trivially small; the community's
   // capacity signal, always freshly pulled — pin it, never window.

@@ -30,6 +30,7 @@ import type {
   EventShiftState,
   ProjectState,
   SeedVaultPledge,
+  PushNameConsent,
   CapacityPosture,
   ShiftSignupState,
   TaskState,
@@ -2788,6 +2789,66 @@ export async function pullFederatedSeedVaultPledges(): Promise<FederationSyncRes
       continue;
     }
     await db.seedVaultPledges.put(record);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxUpdatedAt !== null) {
+    await setSetting(feed.cursorKey, formatCursor(maxUpdatedAt));
+  }
+  return { inserted, skipped };
+}
+
+const PUSH_NAME_CONSENT_CURSOR_KEY = "federationLastPushNameConsentPull";
+
+/**
+ * Pull push name consents (docs/notifications.md v2) — each member's
+ * federated "my name may appear in notifications" boolean, on the
+ * pledge machinery: single-owner LWW, natural key = memberKey, no
+ * parent record, no windowing guard (the table is a handful of
+ * booleans and the naming AND needs it current on every device).
+ */
+export async function pullFederatedPushNameConsents(): Promise<FederationSyncResult | null> {
+  const feed = await fetchStateFeed<Record<string, unknown>>(
+    "/push-name-consents",
+    "pushNameConsents",
+    PUSH_NAME_CONSENT_CURSOR_KEY,
+  );
+  if (!feed) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxUpdatedAt: CursorPos | null = feed.cursor;
+
+  for (const r of feed.rows) {
+    if (
+      typeof r.id !== "string" ||
+      typeof r.memberKey !== "string" ||
+      typeof r.signerKey !== "string" ||
+      typeof r.signature !== "string" ||
+      typeof r.allow !== "boolean" ||
+      !plausibleCursorStamp(r.updatedAt)
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const record = r as unknown as PushNameConsent;
+    if (!verifyStateRecord(record) || record.signerKey !== record.memberKey) {
+      skipped += 1; // refused — never advance past a hostile row
+      continue;
+    }
+
+    const advanceCursor = () => {
+      maxUpdatedAt = advancePair(maxUpdatedAt, record.updatedAt, record.id);
+    };
+
+    const local = await db.pushNameConsents.get(record.memberKey);
+    if (local && record.updatedAt <= local.updatedAt) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+    await db.pushNameConsents.put(record);
     inserted += 1;
     advanceCursor();
   }

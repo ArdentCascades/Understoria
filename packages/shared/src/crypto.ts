@@ -59,6 +59,7 @@ import type {
   ProjectState,
   TaskState,
   SeedVaultPledge,
+  PushNameConsent,
   CapacityPosture,
   MemberRemoval,
   MemberRemovalPayload,
@@ -1357,6 +1358,10 @@ export function verifyTaskState(rec: TaskState): boolean {
 }
 
 export function verifySeedVaultPledge(rec: SeedVaultPledge): boolean {
+  return verifyStateRecord(rec);
+}
+
+export function verifyPushNameConsent(rec: PushNameConsent): boolean {
   return verifyStateRecord(rec);
 }
 

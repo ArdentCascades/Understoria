@@ -138,6 +138,8 @@ const RESEED_KINDS: readonly ReseedKindSpec[] = [
   { path: "/event-rsvps", table: "eventRsvps", toWire: signedOrNull },
   // docs/storage-budget.md Phase 2: archive-role pledges (no parent).
   { path: "/seed-vault-pledges", table: "seedVaultPledges", toWire: signedOrNull },
+  // docs/notifications.md v2: name-consent booleans (no parent).
+  { path: "/push-name-consents", table: "pushNameConsents", toWire: signedOrNull },
   // docs/member-removal.md M1: governance records — after receipts
   // (their validity reads the closure the receipts rebuild). These
   // rows carry a signatures[] array rather than a single signature;
