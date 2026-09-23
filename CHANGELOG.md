@@ -34,6 +34,22 @@ include breaking changes.
   learned to skip.
 
 ### Added
+- **Notifications v2: the contract** (docs/notifications.md
+  amendment). Three additions to opt into, settled before any code:
+  event reminders for RSVP'd-"going" events (same sweep discipline
+  as shifts); a self-requested test ping so a member can see their
+  chosen lock-screen presentation before a real shift depends on
+  it; and the messages design — coalesced (one ping per four-hour
+  quiet period, the cap that defuses the blocked-abuser doorbell,
+  whatever the naming rules say) and NAMED BY MUTUAL CONSENT: the
+  sender's own federated "my name may appear in notifications"
+  flag (default off — each member's control over their own name),
+  the recipient's named level for messages, and the recipient's
+  device resolving the sender key against a local consented-and-
+  unblocked name map the service worker reads. Names never ride a
+  payload; block lists never leave the device; the node gains one
+  public per-member bit. Plus device-only per-category lock-screen
+  levels and quiet hours the node never learns about.
 - **Opt-in notifications, shipped end to end** — the design
   contract's whole PR ladder is built (docs/notifications.md now
   reads SHIPPED). The node sends standard Web Push itself

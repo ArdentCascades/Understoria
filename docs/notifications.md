@@ -1,12 +1,15 @@
 # Quiet by default — opt-in notifications
 
-Status: SHIPPED (this document remains the contract). Every rung of
-the PR ladder at the end has landed — #633 (this doc), #634 (dark
+Status: v1 SHIPPED, v2 IN FLIGHT (this document remains the
+contract). Every v1 rung landed — #633 (this doc), #634 (dark
 plumbing), #635 (the Settings switchboard), #636 (the content
-pass). Every decision below was settled with the project owner on
-2026-09-22, and changing any of them starts with amending this
-file: the guard tests pin the enum, the defaults, and the
-allowlisted API surfaces to what is written here.
+pass) — and the send triggers followed (#641). The v2 amendment at
+the end (2026-09-23) extends the ladder: more categories, deeper
+member control, and messages named by mutual consent. Every
+decision here was settled with the project owner, and changing any
+of them starts with amending this file: the guard tests pin the
+enum, the defaults, and the allowlisted API surfaces to what is
+written here.
 
 ## Why this exists, and why it is not a betrayal
 
@@ -245,3 +248,115 @@ records each choice as a glossary erratum.
   `npm run build:server`, and a process restart. The operator
   guide (§6, "Opt-in push notifications") carries the steps and
   the ten-second check.
+
+## v2 — more to opt into (2026-09-23 amendment)
+
+Settled with the project owner after a day of live use. The
+principle is unchanged — a notification exists only when you asked
+for it, only for things with a person or a clock on the other end —
+and every addition below is one of those two things. The category
+enum grows from three to six; every guard that pins it (the web
+guard, the server suite, push-sw.js's hand copy, this file) moves
+in the same change, as the contract requires.
+
+### New categories
+
+- **event_reminder** — an hour before an event the member RSVP'd
+  **"going"** to. Same sweep, same send-once ledger, same
+  cancelled-things-cancel-their-pings rule as shift reminders. A
+  "maybe" never pings: the member kept their options open, and the
+  app keeps their quiet.
+- **message_waiting** — coalesced, named by mutual consent. The
+  full design below.
+- **test_ping** — self-requested only. A member-signed
+  `POST /push/test` delivers one ping straight to the requesting
+  device's own subscription (no category opt-in involved, no other
+  member reachable), so a member can see exactly what their chosen
+  levels put on their lock screen before a real shift depends on
+  it. Never node-initiated; a test that arrives unrequested is a
+  bug with the same severity as an engagement ping.
+
+### Messages: coalesced, named by mutual consent
+
+The v1 doc excluded messages because blocks never leave the device
+and per-message pings hand a blocked person a doorbell. Both facts
+stand. The design that respects them:
+
+- **The cap is the safety mechanism.** One ping per recipient per
+  QUIET PERIOD (4 hours), fired by the first message to arrive
+  after the period lapses, silent for every further message and
+  sender inside the period. Whatever a sender does, they cannot
+  make a phone buzz more than once per period — naming rules ride
+  ON TOP of this and never replace it.
+- **The payload names no one.** `category`, `path: /messages`, and
+  `detail.senderKey` — the public key of the triggering sender.
+  Never a display name, never a body, never a count.
+- **Naming is an AND of three consents.** A ping renders as
+  "«Name» has words for you" only when: (1) the SENDER's federated
+  "my name may appear in notifications" flag is on — default OFF,
+  each member's control over their own name, the pseudonym moral
+  geometry pointed at notifications; (2) the RECIPIENT chose the
+  named level for messages — the recipient always owns their lock
+  screen and can always say less; (3) the recipient's DEVICE
+  resolves the key: the app snapshots a senderKey→name map into
+  the service worker's prefs — consented AND unblocked members
+  only — and the SW renders named only on a map hit, generic
+  otherwise. A blocked sender's key finds no entry and can never
+  put their name on their target's screen; the block list never
+  left the device to make that true.
+- **The consent flag is a record, not a profile hope.** Display
+  names materialize from redemption receipts and live on devices;
+  there is no live profile-field channel to ride. The flag is its
+  own single-owner signed LWW record — the seed-vault-pledge
+  pattern — `{memberKey, allow, updatedAt, signature}`: a node
+  table, a signed POST, a pull feed. The record carries the
+  boolean ONLY; the name a recipient's lock screen shows is the
+  one their own device already holds for that member.
+- **Nevers, extended:** the name map is written only by the app
+  from its own member rows — never from payload content; an
+  unknown, unconsented or blocked senderKey MUST render the
+  generic wording; message bodies still exist in no payload, at
+  no tier, ever.
+- **Threat-model note (for §7):** the node gains one public
+  per-member bit (the name-consent flag) and message pings reveal
+  to the push vendor the same thing every other category does —
+  that something small arrived, and when. The triggering sender's
+  key rides inside the encrypted payload, visible only to the
+  recipient's device, which knew it anyway.
+
+### Deeper member control (device-only)
+
+- **Per-category lock-screen levels.** The single tier becomes a
+  per-category choice (the stored single tier remains the
+  fallback for categories without one). Applied by the SW at
+  display time, from prefs, per payload category — the node still
+  never learns any of it.
+- **Quiet hours.** A local window ("nothing buzzes 21:00–08:00")
+  stored in the device prefs; inside it the SW downgrades every
+  ping to the silent presentation. Delivery still happens —
+  the member reads it when they wake — but nothing sounds, and
+  the node never learns anyone's sleep schedule.
+
+### Designed, scheduled behind v2
+
+- **Lead-time choice** for shift/event reminders (15 min / 1 h /
+  morning-of / day-before): one small integer per subscription —
+  the single new node-visible number — honored by the sweeps.
+- **Governance deadlines** (a proposal you haven't voted on closes
+  soon): a real, community-owned clock; argued fully in this file
+  when scheduled.
+- **The guardian recovery-request record**, which makes the
+  long-quiet guardian_request category fire at last; designed with
+  the recovery flow it touches.
+
+### Ladder v2
+
+- **F (this amendment) — the contract.**
+- **G:** event_reminder + test_ping + per-category levels + quiet
+  hours; strings in all eighteen languages; every enum pin moved.
+- **H:** message_waiting end to end — consent record (node table,
+  routes, feed, web pull), the coalescer on the message route, the
+  Settings toggle + name-map snapshot, SW named rendering;
+  strings ×18.
+- **I (later):** lead-time choice; then governance, guardian, per
+  the section above.
