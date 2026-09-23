@@ -38,6 +38,13 @@ vi.mock("@/lib/pushNotifications", () => {
   const defaults = () => ({
     categories: [] as import("@understoria/shared").NotificationCategory[],
     tier: "generic" as const,
+    tiers: {} as Partial<
+      Record<
+        import("@understoria/shared").NotificationCategory,
+        "silent" | "generic" | "named"
+      >
+    >,
+    quiet: null as { start: string; end: string } | null,
     title: null as string | null,
     deviceId: "device-test",
     endpoint: null as string | null,
@@ -64,6 +71,7 @@ vi.mock("@/lib/pushNotifications", () => {
     teardownPushSubscription: vi.fn(async () => {
       mockPrefs = defaults();
     }),
+    requestTestPing: vi.fn(async () => mockTestResult),
   };
 });
 
@@ -76,6 +84,7 @@ import {
 } from "@/lib/pushBrowser";
 import {
   registerPushSubscription,
+  requestTestPing,
   teardownPushSubscription,
   defaultPushPrefs,
 } from "@/lib/pushNotifications";
@@ -84,6 +93,7 @@ import type { Member } from "@/types";
 let mockPermission: NotificationPermission;
 let mockPermissionAnswer: NotificationPermission;
 let mockPrefs: ReturnType<typeof defaultPushPrefs>;
+let mockTestResult: { ok: boolean; status: number };
 let mockVapid: import("@/lib/pushNotifications").VapidKeyResult;
 let mockState: {
   currentMember: Member | null;
@@ -101,6 +111,7 @@ beforeEach(() => {
   mockPermission = "default";
   mockPermissionAnswer = "granted";
   mockPrefs = defaultPushPrefs();
+  mockTestResult = { ok: true, status: 200 };
   mockVapid = { kind: "ok", publicKey: "test-vapid-key" };
   mockState = {
     currentMember: {
@@ -181,7 +192,7 @@ describe("NotificationsSection", () => {
     await act(async () => {
       buttonByText("Try again").click();
     });
-    expect(checkboxes()).toHaveLength(3);
+    expect(checkboxes()).toHaveLength(4);
   });
 
   it("keeps the switchboard for an already-subscribed member even when the probe fails", async () => {
@@ -193,13 +204,15 @@ describe("NotificationsSection", () => {
       endpoint: "https://push.example/sub/1",
     };
     await render();
-    expect(checkboxes()).toHaveLength(3);
+    // Four switchboard rows plus the quiet-hours checkbox (the
+    // switchboard is open for a subscribed member).
+    expect(checkboxes()).toHaveLength(5);
     expect(container.textContent).not.toContain("couldn't be reached");
   });
 
   it("renders everything off by default and asks the browser nothing", async () => {
     await render();
-    expect(checkboxes()).toHaveLength(3);
+    expect(checkboxes()).toHaveLength(4);
     expect(checkboxes().every((c) => !c.checked)).toBe(true);
     expect(container.textContent).toContain("Everything is off");
     expect(requestNotificationPermission).not.toHaveBeenCalled();
@@ -283,5 +296,102 @@ describe("NotificationsSection", () => {
     expect(mockPrefs.tier).toBe("named");
     expect(mockPrefs.title).toBe("Weather");
     expect(container.textContent).toContain("Everything is off");
+  });
+
+  it("never lists test_ping as a switch, and the switchboard shows event reminders (v2)", async () => {
+    await render();
+    expect(container.textContent).toContain("Event reminders");
+    // Four rows, none of them a test-ping preference — the test is a
+    // button, not a subscription.
+    expect(checkboxes()).toHaveLength(4);
+    expect(container.textContent).not.toContain("Send myself a test");
+  });
+
+  it("sends a self-test on request and reports the outcome honestly", async () => {
+    mockPermission = "granted";
+    mockPrefs = {
+      ...defaultPushPrefs(),
+      categories: ["shift_reminder"],
+      endpoint: "https://push.example/sub/1",
+    };
+    await render();
+    await act(async () => {
+      buttonByText("Send myself a test").click();
+    });
+    expect(requestTestPing).toHaveBeenCalledWith("me-key");
+    expect(container.textContent).toContain("Sent.");
+
+    mockTestResult = { ok: false, status: 0 };
+    await act(async () => {
+      buttonByText("Send myself a test").click();
+    });
+    expect(container.textContent).toContain("couldn't be sent");
+  });
+
+  it("per-kind overrides appear only with two kinds on, and save device-only tiers", async () => {
+    mockPermission = "granted";
+    mockPrefs = {
+      ...defaultPushPrefs(),
+      categories: ["shift_reminder"],
+      endpoint: "https://push.example/sub/1",
+    };
+    await render();
+    expect(container.textContent).not.toContain("Fine-tune each kind");
+    act(() => root.unmount());
+
+    mockPrefs = {
+      ...defaultPushPrefs(),
+      categories: ["shift_reminder", "event_reminder"],
+      endpoint: "https://push.example/sub/1",
+    };
+    await render();
+    expect(container.textContent).toContain("Fine-tune each kind");
+    const select = container.querySelector<HTMLSelectElement>("select");
+    expect(select).not.toBeNull();
+    await act(async () => {
+      const setter = Object.getOwnPropertyDescriptor(
+        HTMLSelectElement.prototype,
+        "value",
+      )!.set!;
+      setter.call(select, "silent");
+      select!.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    expect(mockPrefs.tiers).toEqual({ shift_reminder: "silent" });
+    // Categories at the node were untouched — this is display-only.
+    expect(registerPushSubscription).not.toHaveBeenCalled();
+  });
+
+  it("quiet hours toggle stores a local window and clears it, never touching the node", async () => {
+    mockPermission = "granted";
+    mockPrefs = {
+      ...defaultPushPrefs(),
+      categories: ["shift_reminder"],
+      endpoint: "https://push.example/sub/1",
+    };
+    await render();
+    const quietBox = checkboxes()[4];
+    expect(quietBox.checked).toBe(false);
+    await act(async () => {
+      quietBox.click();
+    });
+    expect(mockPrefs.quiet).toEqual({ start: "22:00", end: "07:00" });
+    const timeInputs = [
+      ...container.querySelectorAll<HTMLInputElement>('input[type="time"]'),
+    ];
+    expect(timeInputs).toHaveLength(2);
+    await act(async () => {
+      const setter = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      )!.set!;
+      setter.call(timeInputs[0], "21:30");
+      timeInputs[0].dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(mockPrefs.quiet).toEqual({ start: "21:30", end: "07:00" });
+    await act(async () => {
+      checkboxes()[4].click();
+    });
+    expect(mockPrefs.quiet).toBeNull();
+    expect(registerPushSubscription).not.toHaveBeenCalled();
   });
 });

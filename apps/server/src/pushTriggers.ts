@@ -38,6 +38,16 @@
 //    their pings" — with a sweep, checking at send time IS the
 //    cancellation).
 //
+//  - event_reminder (v2): the same clock, one level up — an event
+//    the member RSVP'd "going" to starts soon. Rides the same sweep,
+//    ledger and cancellation discipline; only a live "going" answer
+//    pings ("maybe" chose ambivalence, and an RSVP flipped away
+//    before the window simply never matches at send time).
+//
+//  - test_ping (v2) is not a trigger at all: it is self-requested
+//    through POST /push/test and delivered straight to the signing
+//    member's own subscription row. Nothing here can emit one.
+//
 //  - guardian_request has NO node-visible signal yet: guardian
 //    recovery runs device-to-device and through end-to-end messages
 //    the node cannot (and must not) classify. The category exists
@@ -50,21 +60,24 @@
 import type { Database as DatabaseType } from "better-sqlite3-multiple-ciphers";
 import type {
   AwaitingTransition,
+  EventRsvpState,
   EventShiftState,
   ShiftSignupState,
 } from "@understoria/shared";
 import type { PushSender } from "./push.js";
 
-/** How far ahead of a shift's start the reminder fires. One hour:
- *  early enough to travel, late enough to matter — and comfortably
- *  inside the 4-hour delivery TTL, so a phone that comes online
- *  before the shift still hears about it, and one that doesn't never
- *  gets a stale buzz after the fact. */
-export const SHIFT_REMINDER_LEAD_MS = 60 * 60 * 1000;
+/** How far ahead of a start time the reminder fires — shifts and
+ *  events share the clock. One hour: early enough to travel, late
+ *  enough to matter — and comfortably inside the 4-hour delivery
+ *  TTL, so a phone that comes online before the start still hears
+ *  about it, and one that doesn't never gets a stale buzz after the
+ *  fact. (A member-chosen lead is the designed follow-up — rung I —
+ *  and will be a DEVICE preference, not a node column.) */
+export const REMINDER_LEAD_MS = 60 * 60 * 1000;
 
 /** Sweep cadence. Five minutes of jitter on a one-hour lead is
  *  invisible to a member and cheap for the node. */
-export const SHIFT_REMINDER_SWEEP_INTERVAL_MS = 5 * 60 * 1000;
+export const REMINDER_SWEEP_INTERVAL_MS = 5 * 60 * 1000;
 
 /** Send-once rows older than this can never match a live window
  *  again (shifts don't time-travel); the sweep prunes them. */
@@ -115,7 +128,7 @@ export function notifyAwaitingConfirmation(
     .catch(() => log("awaiting-confirmation push failed"));
 }
 
-export interface ShiftReminderSweepOptions {
+export interface ReminderSweepOptions {
   db: DatabaseType;
   sender: PushSender;
   intervalMs?: number;
@@ -124,21 +137,21 @@ export interface ShiftReminderSweepOptions {
   log?: (msg: string) => void;
 }
 
-export interface ShiftReminderSweep {
+export interface ReminderSweep {
   /** One pass — exported for tests and for the interval to drive.
    *  Returns how many member-reminders were sent this pass. */
   sweepOnce(): Promise<number>;
   stop(): void;
 }
 
-export function startShiftReminderSweep({
+export function startReminderSweep({
   db,
   sender,
-  intervalMs = SHIFT_REMINDER_SWEEP_INTERVAL_MS,
-  leadMs = SHIFT_REMINDER_LEAD_MS,
+  intervalMs = REMINDER_SWEEP_INTERVAL_MS,
+  leadMs = REMINDER_LEAD_MS,
   now = Date.now,
   log = () => {},
-}: ShiftReminderSweepOptions): ShiftReminderSweep {
+}: ReminderSweepOptions): ReminderSweep {
   const listShifts = db.prepare("SELECT payload FROM event_shifts");
   const eventCancelled = db.prepare(
     "SELECT 1 FROM event_cancellations WHERE event_id = ?",
@@ -146,24 +159,63 @@ export function startShiftReminderSweep({
   const listSignups = db.prepare(
     "SELECT payload FROM shift_signups WHERE shift_id = ?",
   );
+  // Events starting inside the window — `starts_at` is a real
+  // column with an index, so the window IS the query.
+  const listStartingEvents = db.prepare(
+    "SELECT id FROM events WHERE starts_at > ? AND starts_at <= ?",
+  );
+  const listRsvps = db.prepare(
+    "SELECT payload FROM event_rsvps WHERE event_id = ?",
+  );
   // INSERT OR IGNORE is the atomic claim on "this reminder": whoever
   // inserts the row sends; a second pass (or a restart mid-pass)
   // changes nothing.
   const claimSend = db.prepare(
-    "INSERT OR IGNORE INTO push_reminders_sent (kind, dedupe_key, sent_at) VALUES ('shift_reminder', ?, ?)",
+    "INSERT OR IGNORE INTO push_reminders_sent (kind, dedupe_key, sent_at) VALUES (?, ?, ?)",
   );
   const releaseClaim = db.prepare(
-    "DELETE FROM push_reminders_sent WHERE kind = 'shift_reminder' AND dedupe_key = ?",
+    "DELETE FROM push_reminders_sent WHERE kind = ? AND dedupe_key = ?",
   );
   const pruneLedger = db.prepare(
     "DELETE FROM push_reminders_sent WHERE sent_at < ?",
   );
 
+  /** The shared send-once step: claim, send, release on zero
+   *  devices so a member who flips the category on while the window
+   *  is still open gets their reminder on a later pass. */
+  async function remindOnce(
+    kind: "shift_reminder" | "event_reminder",
+    dedupeKey: string,
+    memberKey: string,
+    path: string,
+    at: number,
+  ): Promise<number> {
+    const claimed = claimSend.run(kind, dedupeKey, at);
+    if (claimed.changes === 0) return 0;
+    try {
+      const devices = await sender.sendToMember(memberKey, {
+        category: kind,
+        path,
+      });
+      if (devices > 0) return 1;
+      releaseClaim.run(kind, dedupeKey);
+      return 0;
+    } catch {
+      // The enum gate can't throw here (the category is ours);
+      // transport failures are already logged-and-skipped inside
+      // the sender. Keep the claim: a broken send this close to
+      // the start is better silent than double.
+      log(`${kind} push failed`);
+      return 0;
+    }
+  }
+
   async function sweepOnce(): Promise<number> {
     const at = now();
     let sent = 0;
-    // Community-scale table (a node hosts one community's events);
-    // a full scan every few minutes is cheaper than being clever.
+    // Shifts: community-scale table (a node hosts one community's
+    // events); a full scan every few minutes is cheaper than being
+    // clever.
     for (const row of listShifts.all() as { payload: string }[]) {
       let shift: EventShiftState;
       try {
@@ -184,29 +236,40 @@ export function startShiftReminderSweep({
           continue;
         }
         if (signup.deletedAt !== null) continue;
-        const dedupeKey = `${shift.id}|${signup.memberKey}`;
-        const claimed = claimSend.run(dedupeKey, at);
-        if (claimed.changes === 0) continue;
+        sent += await remindOnce(
+          "shift_reminder",
+          `${shift.id}|${signup.memberKey}`,
+          signup.memberKey,
+          `/events/${shift.eventId}`,
+          at,
+        );
+      }
+    }
+    // Events: same clock, one level up. Only a live "going" RSVP
+    // pings; a flip to "maybe"/"not_going" before the window means
+    // the row simply never matches at send time — with a sweep,
+    // checking at send time IS the cancellation.
+    for (const eventRow of listStartingEvents.all(at, at + leadMs) as {
+      id: string;
+    }[]) {
+      if (eventCancelled.get(eventRow.id)) continue;
+      for (const rsvpRow of listRsvps.all(eventRow.id) as {
+        payload: string;
+      }[]) {
+        let rsvp: EventRsvpState;
         try {
-          const devices = await sender.sendToMember(signup.memberKey, {
-            category: "shift_reminder",
-            path: `/events/${shift.eventId}`,
-          });
-          if (devices > 0) {
-            sent += 1;
-          } else {
-            // Nothing subscribed (the default). Release the claim so
-            // a member who flips the category on while the window is
-            // still open gets their reminder on a later pass.
-            releaseClaim.run(dedupeKey);
-          }
+          rsvp = JSON.parse(rsvpRow.payload) as EventRsvpState;
         } catch {
-          // The enum gate can't throw here (the category is ours);
-          // transport failures are already logged-and-skipped inside
-          // the sender. Keep the claim: a broken send this close to
-          // the shift is better silent than double.
-          log("shift-reminder push failed");
+          continue;
         }
+        if (rsvp.status !== "going") continue;
+        sent += await remindOnce(
+          "event_reminder",
+          `${eventRow.id}|${rsvp.memberKey}`,
+          rsvp.memberKey,
+          `/events/${eventRow.id}`,
+          at,
+        );
       }
     }
     pruneLedger.run(at - SENT_LEDGER_RETENTION_MS);
@@ -216,7 +279,7 @@ export function startShiftReminderSweep({
   const timer =
     intervalMs > 0
       ? setInterval(() => {
-          void sweepOnce().catch(() => log("shift-reminder sweep failed"));
+          void sweepOnce().catch(() => log("reminder sweep failed"));
         }, intervalMs)
       : null;
   timer?.unref?.();

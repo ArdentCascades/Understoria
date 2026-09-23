@@ -36,7 +36,7 @@
 // category data, and the SW applies these preferences locally.
 import {
   canonicalPushAuthMessage,
-  NOTIFICATION_CATEGORIES,
+  SUBSCRIBABLE_CATEGORIES,
   sign,
   type NotificationCategory,
 } from "@understoria/shared";
@@ -53,11 +53,27 @@ export interface PushDisplayStrings {
   named: Record<NotificationCategory, string>;
 }
 
+/** A local-time quiet window, "HH:MM" on this device's clock. The
+ *  service worker downgrades any banner inside it to the silent
+ *  tier at display time — device-only, like every display choice
+ *  (the node never learns when a member sleeps). */
+export interface QuietHours {
+  start: string;
+  end: string;
+}
+
 export interface PushPrefs {
   /** Categories the member opted into. EMPTY BY DEFAULT — quiet by
    *  default is the contract, and the guard test pins it. */
   categories: NotificationCategory[];
   tier: LockScreenTier;
+  /** Per-category lock-screen overrides (v2): a member can keep
+   *  shift reminders named while guardian requests stay generic on
+   *  the lock screen. Missing entries fall back to `tier`, so
+   *  prefs saved before v2 keep behaving exactly as chosen. */
+  tiers?: Partial<Record<NotificationCategory, LockScreenTier>>;
+  /** Quiet hours (v2); null/absent = none. */
+  quiet?: QuietHours | null;
   /** The member-chosen notification title; null = the honest
    *  default ("Understoria"). Device-only, never sent anywhere. */
   title: string | null;
@@ -83,6 +99,8 @@ export function defaultPushPrefs(): PushPrefs {
   return {
     categories: [],
     tier: "generic",
+    tiers: {},
+    quiet: null,
     title: null,
     deviceId: crypto.randomUUID(),
     endpoint: null,
@@ -242,8 +260,11 @@ export async function registerPushSubscription(
   categories: readonly NotificationCategory[],
   deps: NodeCallDeps = {},
 ): Promise<boolean> {
+  // Subscribable only: `test_ping` is in the enum for the send gate
+  // and the SW, but it is never a stored preference — the node
+  // refuses a subscription claiming it, and so do we.
   const cats = [...new Set(categories)].filter((c) =>
-    (NOTIFICATION_CATEGORIES as readonly string[]).includes(c),
+    (SUBSCRIBABLE_CATEGORIES as readonly string[]).includes(c),
   );
   if (cats.length === 0) return false;
   const prefs = await getPushPrefs();
@@ -319,6 +340,47 @@ export async function renewPushSubscriptionOnOpen(
   if (res.ok) {
     await savePushPrefs({ ...prefs, renewedAt: now });
   }
+}
+
+/**
+ * Ask the node to send THIS device one test ping (v2) — the member
+ * checking their own plumbing end to end: node, push service,
+ * service worker, and exactly the tier, title and quiet hours a
+ * real ping would get. Signed like every push write; the node can
+ * only deliver it to a subscription row the signer already owns.
+ * `status` lets Settings tell an expired row (404 — re-subscribe)
+ * from a node that predates v2 (also often 404 on the route) versus
+ * a network miss (0).
+ */
+export async function requestTestPing(
+  memberKey: string,
+  deps: NodeCallDeps = {},
+): Promise<{ ok: boolean; status: number }> {
+  const prefs = await getPushPrefs();
+  if (!prefs.endpoint) return { ok: false, status: 0 };
+  const timestamp = (deps.now ?? Date.now)();
+  const secretKey = await getSecretKey(memberKey);
+  return nodeCall(
+    "/push/test",
+    {
+      memberKey,
+      deviceId: prefs.deviceId,
+      endpoint: prefs.endpoint,
+      timestamp,
+      signature: sign(
+        canonicalPushAuthMessage(
+          "push-test",
+          memberKey,
+          prefs.deviceId,
+          prefs.endpoint,
+          [],
+          timestamp,
+        ),
+        secretKey,
+      ),
+    },
+    deps,
+  );
 }
 
 /**

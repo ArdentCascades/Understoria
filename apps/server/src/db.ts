@@ -4531,6 +4531,13 @@ export interface PushSubscriptionStore {
    *  gone (404/410). No auth: the push service already ruled. */
   pruneDeadEndpoint(endpoint: string): void;
   listForMember(memberKey: string): PushSubscriptionRow[];
+  /** One member's row for one endpoint — the self-requested test
+   *  ping's lookup (the member proves the endpoint is theirs by
+   *  owning the row, not by claiming it). */
+  getByEndpoint(
+    endpoint: string,
+    memberKey: string,
+  ): PushSubscriptionRow | null;
   /** Every live subscription opted into `category` — the send set. */
   listForCategory(category: string, now: number): PushSubscriptionRow[];
   /** TTL dead-man (retentionSweep): drop rows not renewed since
@@ -4573,6 +4580,9 @@ export function createPushSubscriptionStore(
   );
   const listMemberStmt = db.prepare(
     "SELECT * FROM push_subscriptions WHERE member_key = ? ORDER BY created_at",
+  );
+  const getEndpointStmt = db.prepare(
+    "SELECT * FROM push_subscriptions WHERE endpoint = ? AND member_key = ?",
   );
   const listAllLiveStmt = db.prepare(
     "SELECT * FROM push_subscriptions WHERE renewed_at >= ? ORDER BY created_at",
@@ -4629,6 +4639,10 @@ export function createPushSubscriptionStore(
     },
     listForMember(memberKey) {
       return (listMemberStmt.all(memberKey) as Raw[]).map(fromRaw);
+    },
+    getByEndpoint(endpoint, memberKey) {
+      const r = getEndpointStmt.get(endpoint, memberKey) as Raw | undefined;
+      return r ? fromRaw(r) : null;
     },
     listForCategory(category, now) {
       // Category sets are tiny JSON arrays; filtering in JS keeps the

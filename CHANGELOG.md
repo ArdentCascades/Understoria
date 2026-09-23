@@ -9,6 +9,25 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Notifications v2, first rung: event reminders, a self-test, and
+  finer device-side control.** The category enum grows to five:
+  `event_reminder` (an event you RSVP'd "going" to starts soon —
+  rides the same sweep, send-once ledger and cancellation discipline
+  as shift reminders) and `test_ping` (SELF-REQUESTED ONLY: a signed
+  `POST /push/test` delivered straight to the requesting device's
+  own subscription row — never subscribable, never listed in
+  Settings, and the subscribe route now validates against the
+  SUBSCRIBABLE list so a subscription claiming it is refused).
+  Device-only display control deepens without the node learning
+  anything new: per-category lock-screen levels (each enabled kind
+  can override the main tier) and quiet hours (a local-clock window
+  in which the service worker downgrades every banner to silent —
+  the badge stays, the sound and words don't, and the server never
+  learns when you sleep). Seventeen new strings in all eighteen
+  languages; the zh glossary note: quiet hours are 安静时间, never
+  时段, which belongs to shifts.
+
 ### Security
 - **Desktop shell on Electron 44** (Chromium 152, Node 24 runtime) —
   Chromium security content lands in the newest Electron major

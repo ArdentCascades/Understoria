@@ -11,7 +11,10 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { NOTIFICATION_CATEGORIES } from "@understoria/shared";
+import {
+  NOTIFICATION_CATEGORIES,
+  SUBSCRIBABLE_CATEGORIES,
+} from "@understoria/shared";
 import { defaultPushPrefs, getPushPrefs, PUSH_PREFS_DB } from "./pushNotifications";
 
 const WEB_ROOT = join(__dirname, "..", "..");
@@ -32,6 +35,8 @@ describe("notifications guard — quiet by default", () => {
     const defaults = defaultPushPrefs();
     expect(defaults.categories).toEqual([]);
     expect(defaults.tier).toBe("generic");
+    expect(defaults.tiers).toEqual({});
+    expect(defaults.quiet).toBeNull();
     expect(defaults.title).toBeNull();
 
     // A device that has never touched Settings reads the same
@@ -67,11 +72,22 @@ describe("notifications guard — quiet by default", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("pins the category list to the doc's three — and the SW handler agrees", () => {
+  it("pins the category list to the doc's five (v2) — and the SW handler agrees", () => {
     expect([...NOTIFICATION_CATEGORIES]).toEqual([
       "shift_reminder",
       "guardian_request",
       "awaiting_confirmation",
+      "event_reminder",
+      "test_ping",
+    ]);
+    // test_ping is in the enum (send gate + SW) but is NEVER a
+    // subscribable preference — the Settings switchboard never lists
+    // it and the node refuses a subscription claiming it.
+    expect([...SUBSCRIBABLE_CATEGORIES]).toEqual([
+      "shift_reminder",
+      "guardian_request",
+      "awaiting_confirmation",
+      "event_reminder",
     ]);
     // public/push-sw.js is plain SW-side JS and cannot import the
     // shared enum; this keeps its hand-copied list honest.

@@ -109,6 +109,14 @@ export interface PushSender {
     payload: PushPayload,
     now?: number,
   ): Promise<number>;
+  /** Send `payload` to ONE known subscription row, bypassing the
+   *  category filter — the self-requested test ping's delivery path
+   *  (nobody subscribes to `test_ping`; the member just asked for
+   *  one, signed, from this exact device). The enum gate still
+   *  applies: nothing outside the documented list can ever be sent,
+   *  and nothing here lets a caller reach someone ELSE's device —
+   *  the row comes from an owner-checked store lookup. */
+  sendToDevice(row: PushSubscriptionRow, payload: PushPayload): Promise<void>;
 }
 
 export function createPushSender(
@@ -180,6 +188,10 @@ export function createPushSender(
           .filter((row) => row.memberKey === memberKey),
         payload,
       );
+    },
+    async sendToDevice(row, payload) {
+      gate(payload);
+      await sendOne(row, JSON.stringify(payload));
     },
   };
 }

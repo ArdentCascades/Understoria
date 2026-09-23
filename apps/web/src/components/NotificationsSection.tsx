@@ -21,14 +21,16 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  NOTIFICATION_CATEGORIES,
+  SUBSCRIBABLE_CATEGORIES,
   type NotificationCategory,
+  type SubscribableCategory,
 } from "@understoria/shared";
 import { useApp } from "@/state/AppContext";
 import {
   fetchVapidKey,
   getPushPrefs,
   registerPushSubscription,
+  requestTestPing,
   savePushPrefs,
   teardownPushSubscription,
   defaultPushPrefs,
@@ -61,8 +63,12 @@ import {
  * push-sw.js at display time.
  */
 
+/** Switchboard rows exist only for SUBSCRIBABLE categories —
+ *  `test_ping` is never listed (it is self-requested via the test
+ *  button below, not a preference); its named-tier body is added
+ *  separately in `displayStrings`. */
 const CATEGORY_KEYS: Record<
-  NotificationCategory,
+  SubscribableCategory,
   { label: string; desc: string; body: string }
 > = {
   shift_reminder: {
@@ -80,7 +86,16 @@ const CATEGORY_KEYS: Record<
     desc: "push.catConfirmDesc",
     body: "push.bodyConfirm",
   },
+  event_reminder: {
+    label: "push.catEvent",
+    desc: "push.catEventDesc",
+    body: "push.bodyEvent",
+  },
 };
+
+/** The default quiet window offered when the member first enables
+ *  quiet hours — overnight, editable immediately. */
+const DEFAULT_QUIET = { start: "22:00", end: "07:00" };
 
 type Flow =
   | { kind: "idle" }
@@ -98,6 +113,9 @@ export function NotificationsSection() {
   /** null = still checking. */
   const [vapid, setVapid] = useState<VapidKeyResult | null>(null);
   const [flow, setFlow] = useState<Flow>({ kind: "idle" });
+  const [testState, setTestState] = useState<
+    "idle" | "sending" | "sent" | "failed"
+  >("idle");
 
   useEffect(() => {
     if (!supported) return;
@@ -165,9 +183,12 @@ export function NotificationsSection() {
   function displayStrings(): PushDisplayStrings {
     return {
       generic: t("push.bodyGeneric"),
-      named: Object.fromEntries(
-        NOTIFICATION_CATEGORIES.map((c) => [c, t(CATEGORY_KEYS[c].body)]),
-      ) as Record<NotificationCategory, string>,
+      named: {
+        ...(Object.fromEntries(
+          SUBSCRIBABLE_CATEGORIES.map((c) => [c, t(CATEGORY_KEYS[c].body)]),
+        ) as Record<SubscribableCategory, string>),
+        test_ping: t("push.bodyTest"),
+      },
     };
   }
 
@@ -244,12 +265,39 @@ export function NotificationsSection() {
     await applyCategories([category]);
   }
 
-  /** Tier and title are device-only: saved locally, never sent. */
+  /** Tier, per-kind tiers, quiet hours and title are device-only:
+   *  saved locally, never sent. */
   async function saveDisplayPrefs(patch: Partial<PushPrefs>) {
     if (!prefs) return;
     const updated = { ...prefs, ...patch, strings: displayStrings() };
     await savePushPrefs(updated);
     setPrefs(updated);
+  }
+
+  /** Per-kind lock-screen override; "default" clears the entry so
+   *  the kind follows the main choice again. */
+  async function setCategoryTier(
+    category: NotificationCategory,
+    value: string,
+  ) {
+    if (!prefs) return;
+    const tiers = { ...(prefs.tiers ?? {}) };
+    if (value === "default") delete tiers[category];
+    else tiers[category] = value as LockScreenTier;
+    await saveDisplayPrefs({ tiers });
+  }
+
+  /** Ask the node to ping THIS device once — the member checking
+   *  their own plumbing, delivered exactly as a real ping would be
+   *  (tier, title, quiet hours and all). */
+  async function sendTest() {
+    if (!memberKey) return;
+    setTestState("sending");
+    const res = await requestTestPing(memberKey).catch(() => ({
+      ok: false,
+      status: 0,
+    }));
+    setTestState(res.ok ? "sent" : "failed");
   }
 
   const busy = flow.kind === "busy";
@@ -273,7 +321,7 @@ export function NotificationsSection() {
             {t("push.whatTitle")}
           </h3>
           <ul className="mb-3 space-y-2">
-            {NOTIFICATION_CATEGORIES.map((category) => {
+            {SUBSCRIBABLE_CATEGORIES.map((category) => {
               const on = prefs.categories.includes(category);
               return (
                 <li key={category}>
@@ -364,6 +412,105 @@ export function NotificationsSection() {
                   ),
                 )}
               </ul>
+              {prefs.categories.length > 1 && (
+                <>
+                  {/* Per-kind overrides only make sense once two
+                      kinds could differ — one kind on, one control. */}
+                  <h3 className="mb-2 text-sm font-semibold text-moss-700 dark:text-moss-200">
+                    {t("push.levelTitle")}
+                  </h3>
+                  <ul className="mb-3 space-y-2">
+                    {SUBSCRIBABLE_CATEGORIES.filter((c) =>
+                      prefs.categories.includes(c),
+                    ).map((category) => (
+                      <li key={category}>
+                        <label className="flex items-center justify-between gap-2 text-sm">
+                          <span>{t(CATEGORY_KEYS[category].label)}</span>
+                          <select
+                            className="input w-auto font-normal"
+                            value={prefs.tiers?.[category] ?? "default"}
+                            disabled={busy}
+                            onChange={(e) =>
+                              void setCategoryTier(category, e.target.value)
+                            }
+                          >
+                            <option value="default">
+                              {t("push.levelDefault")}
+                            </option>
+                            <option value="silent">
+                              {t("push.levelSilent")}
+                            </option>
+                            <option value="generic">
+                              {t("push.levelGeneric")}
+                            </option>
+                            <option value="named">
+                              {t("push.levelNamed")}
+                            </option>
+                          </select>
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              <h3 className="mb-2 text-sm font-semibold text-moss-700 dark:text-moss-200">
+                {t("push.quietTitle")}
+              </h3>
+              <label className="flex items-start gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={!!prefs.quiet}
+                  disabled={busy}
+                  onChange={() =>
+                    void saveDisplayPrefs({
+                      quiet: prefs.quiet ? null : DEFAULT_QUIET,
+                    })
+                  }
+                />
+                <span>{t("push.quietEnable")}</span>
+              </label>
+              {prefs.quiet && (
+                <div className="ms-6 mt-2 flex flex-wrap items-center gap-3 text-sm">
+                  <label className="flex items-center gap-2">
+                    {t("push.quietFrom")}
+                    <input
+                      type="time"
+                      className="input w-auto font-normal"
+                      value={prefs.quiet.start}
+                      disabled={busy}
+                      onChange={(e) =>
+                        void saveDisplayPrefs({
+                          quiet: {
+                            start: e.target.value,
+                            end: prefs.quiet?.end ?? DEFAULT_QUIET.end,
+                          },
+                        })
+                      }
+                    />
+                  </label>
+                  <label className="flex items-center gap-2">
+                    {t("push.quietTo")}
+                    <input
+                      type="time"
+                      className="input w-auto font-normal"
+                      value={prefs.quiet.end}
+                      disabled={busy}
+                      onChange={(e) =>
+                        void saveDisplayPrefs({
+                          quiet: {
+                            start: prefs.quiet?.start ?? DEFAULT_QUIET.start,
+                            end: e.target.value,
+                          },
+                        })
+                      }
+                    />
+                  </label>
+                </div>
+              )}
+              <p className="mb-3 ms-6 mt-1 text-xs text-moss-600 dark:text-moss-300">
+                {t("push.quietHint")}
+              </p>
               <label className="mb-1 block text-sm font-semibold text-moss-700 dark:text-moss-200">
                 {t("push.titleLabel")}
                 <input
@@ -383,14 +530,37 @@ export function NotificationsSection() {
               <p className="mb-3 text-xs text-moss-600 dark:text-moss-300">
                 {t("push.titleHint")}
               </p>
-              <button
-                type="button"
-                className="btn-secondary"
-                disabled={busy}
-                onClick={() => void applyCategories([])}
-              >
-                {t("push.turnAllOff")}
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  disabled={busy || testState === "sending"}
+                  onClick={() => void sendTest()}
+                >
+                  {t("push.testButton")}
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  disabled={busy}
+                  onClick={() => void applyCategories([])}
+                >
+                  {t("push.turnAllOff")}
+                </button>
+              </div>
+              {testState === "sent" && (
+                <p className="mt-2 text-sm text-moss-600 dark:text-moss-300">
+                  {t("push.testSent")}
+                </p>
+              )}
+              {testState === "failed" && (
+                <p
+                  role="alert"
+                  className="mt-2 text-sm text-moss-600 dark:text-moss-300"
+                >
+                  {t("push.testFailed")}
+                </p>
+              )}
             </>
           ) : (
             flow.kind === "idle" && (

@@ -2031,7 +2031,7 @@ export function parseFounderAccession(
  * never drift.
  */
 export function canonicalPushAuthMessage(
-  action: "push-subscribe" | "push-renew" | "push-delete",
+  action: "push-subscribe" | "push-renew" | "push-delete" | "push-test",
   memberKey: string,
   deviceId: string,
   endpoint: string,

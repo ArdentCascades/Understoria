@@ -39,7 +39,7 @@ import { startPeerPullWorker } from "./peerPull.js";
 import { startMirrorPullWorker } from "./mirrorPull.js";
 import { startCapacitySampler } from "./capacitySampler.js";
 import { startRetentionSweep } from "./retentionSweep.js";
-import { startShiftReminderSweep } from "./pushTriggers.js";
+import { startReminderSweep } from "./pushTriggers.js";
 import { createCapacityEmitter } from "./capacityEmitter.js";
 import { createSystemSignerFromSecret } from "./systemSigner.js";
 
@@ -186,11 +186,12 @@ async function main(): Promise<void> {
     log: app.log,
   });
 
-  // Opt-in push, the clock-driven trigger (docs/notifications.md):
-  // pings each signed-up member once, shortly before a shift starts.
-  // A member with the category off — the default — is filtered at
-  // send time inside the sender and never contacted.
-  const shiftReminders = startShiftReminderSweep({
+  // Opt-in push, the clock-driven triggers (docs/notifications.md):
+  // pings each member once, shortly before a shift they signed up
+  // for — or an event they RSVP'd "going" to — starts. A member with
+  // the category off (the default) is filtered at send time inside
+  // the sender and never contacted.
+  const reminderSweep = startReminderSweep({
     db: database,
     sender: pushSender,
     log: (msg) => app.log.warn(msg),
@@ -203,7 +204,7 @@ async function main(): Promise<void> {
       mirrorWorker.stop();
       capacitySampler.stop();
       retentionSweep.stop();
-      shiftReminders.stop();
+      reminderSweep.stop();
       await app.close();
     } catch (err) {
       app.log.error({ err }, "error during close");

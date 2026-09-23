@@ -338,11 +338,150 @@ describe("the send helper (injected transport — nothing real is sent)", () => 
         path: "/",
       }),
     ).rejects.toThrow(/documented list/);
-    // And the documented list is exactly the doc's three.
+    // And the documented list is exactly the doc's five (v2).
     expect([...NOTIFICATION_CATEGORIES]).toEqual([
       "shift_reminder",
       "guardian_request",
       "awaiting_confirmation",
+      "event_reminder",
+      "test_ping",
     ]);
+  });
+});
+
+describe("the self-requested test ping (v2)", () => {
+  function testBody(over: Record<string, unknown> = {}) {
+    const timestamp = Date.now();
+    const endpoint = (over.endpoint as string | undefined) ?? ENDPOINT;
+    const memberKey =
+      (over.memberKey as string | undefined) ?? member.publicKey;
+    return {
+      memberKey,
+      deviceId: "device-1",
+      endpoint,
+      timestamp,
+      signature: sign(
+        canonicalPushAuthMessage(
+          "push-test",
+          memberKey,
+          "device-1",
+          endpoint,
+          [],
+          timestamp,
+        ),
+        (over.secretKey as string | undefined) ?? member.secretKey,
+      ),
+    };
+  }
+
+  it("cannot be SUBSCRIBED to — test_ping in a category set is a 400", async () => {
+    // In the enum (the send gate and the SW know it), but never a
+    // preference: a subscription claiming it is a client bug.
+    expect(
+      (await subscribe({ categories: ["shift_reminder", "test_ping"] }))
+        .statusCode,
+    ).toBe(400);
+  });
+
+  it("delivers one ping to the signer's own subscription row, and only there", async () => {
+    const sent: { endpoint: string; payload: string }[] = [];
+    await app.close();
+    db.close();
+    db = openDatabase(":memory:");
+    member = generateKeyPair();
+    const config = readConfigFromEnv({
+      LOG_LEVEL: "fatal",
+      READ_AUTH: "off",
+      NODE_ID: "node_test",
+      NODE_FOUNDER_KEYS: member.publicKey,
+      RATE_LIMIT_MAX: "10000",
+    } as unknown as NodeJS.ProcessEnv);
+    const built = await buildServer({
+      config,
+      database: db,
+      pushTransport: async (sub, payload) => {
+        sent.push({ endpoint: sub.endpoint, payload });
+      },
+    });
+    app = built.app;
+    await app.ready();
+
+    // No subscription yet: 404, nothing sent.
+    const cold = await app.inject({
+      method: "POST",
+      url: "/push/test",
+      payload: testBody(),
+    });
+    expect(cold.statusCode).toBe(404);
+    expect(sent).toHaveLength(0);
+
+    await subscribe(); // device-1 @ ENDPOINT — note: NOT subscribed to test_ping
+    const res = await app.inject({
+      method: "POST",
+      url: "/push/test",
+      payload: testBody(),
+    });
+    expect(res.statusCode).toBe(200);
+    expect(sent).toHaveLength(1);
+    expect(sent[0].endpoint).toBe(ENDPOINT);
+    expect(JSON.parse(sent[0].payload)).toEqual({
+      category: "test_ping",
+      path: "/settings",
+    });
+
+    // Someone else's endpoint: their signature doesn't own that row.
+    const stranger = generateKeyPair();
+    const aimed = await app.inject({
+      method: "POST",
+      url: "/push/test",
+      payload: testBody({
+        memberKey: stranger.publicKey,
+        secretKey: stranger.secretKey,
+      }),
+    });
+    // Not a member here → 403; a member without that row would 404.
+    expect(aimed.statusCode).toBe(403);
+    expect(sent).toHaveLength(1);
+  });
+
+  it("rejects a bad signature and a stale timestamp like every push write", async () => {
+    await subscribe();
+    expect(
+      (
+        await app.inject({
+          method: "POST",
+          url: "/push/test",
+          payload: testBody({ secretKey: generateKeyPair().secretKey }),
+        })
+      ).statusCode,
+    ).toBe(401);
+    // Correctly signed, but over a timestamp outside the skew window.
+    const staleTs = Date.now() - 11 * 60_000;
+    const stale = {
+      memberKey: member.publicKey,
+      deviceId: "device-1",
+      endpoint: ENDPOINT,
+      timestamp: staleTs,
+      signature: sign(
+        canonicalPushAuthMessage(
+          "push-test",
+          member.publicKey,
+          "device-1",
+          ENDPOINT,
+          [],
+          staleTs,
+        ),
+        member.secretKey,
+      ),
+    };
+    expect(
+      (
+        await app.inject({
+          method: "POST",
+          url: "/push/test",
+          payload: stale,
+        })
+      ).statusCode,
+    ).toBe(401);
   });
 });

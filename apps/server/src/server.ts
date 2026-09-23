@@ -606,6 +606,7 @@ export async function buildServer({
     store: pushSubscriptionStore,
     resolver: membershipResolver,
     vapidPublicKey: vapidKeys.publicKey,
+    sender: pushSender,
   });
   app.addHook("onResponse", async (req, reply) => {
     if (req.method !== "POST") return;
