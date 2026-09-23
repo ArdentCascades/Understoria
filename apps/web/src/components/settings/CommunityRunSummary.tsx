@@ -62,6 +62,9 @@ export function CommunityRunSummary() {
   return (
     <section className="card mb-4">
       <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300">
+        <span aria-hidden="true" className="me-1">
+          🗳️
+        </span>
         {t("settings.community.summary.title")}
       </h3>
       <p className="mb-3 text-sm text-moss-600 dark:text-moss-300">

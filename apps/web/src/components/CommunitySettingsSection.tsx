@@ -111,6 +111,9 @@ export function CommunitySettingsSection() {
             id="community-settings-title"
             className="text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
           >
+            <span aria-hidden="true" className="me-1">
+              🛠️
+            </span>
             {t("profile.communitySettings.title")}
           </h2>
           <p className="mt-1 text-sm text-moss-600 dark:text-moss-300">

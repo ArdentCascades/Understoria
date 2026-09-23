@@ -172,6 +172,9 @@ export function BlockedContactsPanel() {
           id="blocked-contacts-section-title"
           className="text-sm font-semibold uppercase tracking-wide text-moss-600 dark:text-moss-300"
         >
+          <span aria-hidden="true" className="me-1">
+            🚫
+          </span>
           {t("block.settings.sectionTitle")}
         </h2>
         <WhyTooltip principleId="privacy-precondition" />
