@@ -37,6 +37,7 @@ function makeMockPulls(): MockPulls {
     "pullFederatedInviteRevocations",
     "pullFederatedVouches",
     "pullFederatedSeedVaultPledges",
+    "pullFederatedPushNameConsents",
     "pullCapacityPostures",
     "pullFederatedMemberRemovals",
     "pullFederatedMemberReinstatements",

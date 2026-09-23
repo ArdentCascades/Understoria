@@ -2622,6 +2622,8 @@
     "catConfirmDesc": "Saat sebuah pertukaran sudah selesai dan tinggal menunggu katamu.",
     "catEvent": "Pengingat acara",
     "catEventDesc": "Sebelum acara yang kamu bilang akan kamu datangi dimulai.",
+    "catMessage": "Pesan menunggu",
+    "catMessageDesc": "Saat ada kata-kata datang untukmu — siapa pun yang menulis, seberapa pun banyaknya, paling banyak satu sentilan tiap empat jam.",
     "disclosureTitle": "Sebelum menyalakan ini",
     "disclosure": "Notifikasi push lewat relai pembuat browser-mu — Google, Mozilla, atau Apple, tergantung browser-nya. Relai itu tidak bisa membacanya (masing-masing tersegel untuk perangkat ini), tapi bisa melihat bahwa ada sesuatu yang kecil datang, dan kapan. Server komunitasmu hanya tahu jenis mana yang kamu pilih — tidak pernah kata-kata di layar kuncimu, tidak pernah isi pesan. Kalau jejak itu harga yang tidak mau kamu bayar, lewati saja: aplikasi ini utuh tanpanya.",
     "disclosureContinue": "Mengerti — tanya browser",
@@ -2641,6 +2643,7 @@
     "bodyGuardian": "Ada permintaan pemegang amanah menunggumu",
     "bodyConfirm": "Ada pertukaran menunggu konfirmasimu",
     "bodyEvent": "Acara yang kamu bilang akan kamu datangi sebentar lagi mulai",
+    "bodyMessage": "{sender} punya kata-kata untukmu",
     "bodyTest": "Uji coba yang kamu minta — notifikasi sungguhan akan tampak persis seperti ini",
     "levelTitle": "Atur tiap jenis",
     "levelDefault": "Sama seperti di atas",
@@ -2654,7 +2657,10 @@
     "quietHint": "Di antara jam itu, menurut jam perangkat ini, apa pun yang datang tetap diam — tanpa suara, tanpa kata, hanya tanda — dan menunggu sampai kamu melihat. Pilihan ini hanya hidup di perangkat ini; server komunitasmu tak pernah tahu kapan kamu tidur.",
     "testButton": "Kirimi diriku uji coba",
     "testSent": "Terkirim. Sebentar lagi sampai di perangkat ini, tampak persis seperti yang asli.",
-    "testFailed": "Uji coba gagal terkirim. Pastikan tersambung lalu coba lagi — kalau terus gagal, mematikan semua lalu menyalakan lagi memperbarui pendaftaran perangkat ini."
+    "testFailed": "Uji coba gagal terkirim. Pastikan tersambung lalu coba lagi — kalau terus gagal, mematikan semua lalu menyalakan lagi memperbarui pendaftaran perangkat ini.",
+    "nameConsentTitle": "Namamu di layar orang lain",
+    "nameConsentLabel": "Orang yang kukirimi pesan boleh melihat namaku di notifikasi mereka",
+    "nameConsentHint": "Mati secara bawaan, seperti semua di sini. Kalau orang yang kamu kirimi pesan memilih notifikasi yang menyebut jenis, layar kuncinya bisa bilang kata-kata itu darimu — hanya kalau kamu izinkan di sini, dan selalu dengan nama yang memang sudah dikenal perangkatnya. Yang memblokirmu tak pernah melihatnya; namamu tak pernah ikut di dalam notifikasi; dan kamu bisa menariknya kapan saja."
   },
   "betaNotice": {
     "dismiss": "Mengerti",

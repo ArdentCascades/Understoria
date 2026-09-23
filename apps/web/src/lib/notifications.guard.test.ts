@@ -72,12 +72,13 @@ describe("notifications guard — quiet by default", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("pins the category list to the doc's five (v2) — and the SW handler agrees", () => {
+  it("pins the category list to the doc's six (v2) — and the SW handler agrees", () => {
     expect([...NOTIFICATION_CATEGORIES]).toEqual([
       "shift_reminder",
       "guardian_request",
       "awaiting_confirmation",
       "event_reminder",
+      "message_waiting",
       "test_ping",
     ]);
     // test_ping is in the enum (send gate + SW) but is NEVER a
@@ -88,6 +89,7 @@ describe("notifications guard — quiet by default", () => {
       "guardian_request",
       "awaiting_confirmation",
       "event_reminder",
+      "message_waiting",
     ]);
     // public/push-sw.js is plain SW-side JS and cannot import the
     // shared enum; this keeps its hand-copied list honest.
@@ -119,5 +121,23 @@ describe("notifications guard — quiet by default", () => {
     expect(subscribeCall).not.toContain("tier");
     expect(subscribeCall).not.toContain("title");
     expect(subscribeCall).not.toContain("strings");
+    // v2: the senderKey→name map is device-only too — the node
+    // must never learn whose names a member's lock screen resolves.
+    expect(subscribeCall).not.toContain("names");
+  });
+
+  it("keeps the lock-screen name map sourced from the app's own rows, never payload content", () => {
+    // The SW may READ prefs.names to resolve a message ping's
+    // senderKey, but nothing in the SW may ever WRITE prefs — the
+    // map is written only by the app from its member rows
+    // (lib/pushNameConsent.ts), which is what makes a blocked or
+    // unconsented sender unable to name themselves onto a lock
+    // screen.
+    const sw = readFileSync(join(WEB_ROOT, "public", "push-sw.js"), "utf8");
+    expect(sw).not.toMatch(/objectStore\([^)]*\)\s*\.\s*(put|add|delete)/);
+    // And the named path for messages interpolates from the map hit
+    // only — the raw senderKey must never be a display fallback.
+    expect(sw).toContain("prefs.names");
+    expect(sw).not.toMatch(/body\s*=\s*[^;]*senderKey\b[^;]*;/);
   });
 });

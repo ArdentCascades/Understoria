@@ -357,6 +357,7 @@ export async function restoreIdentityCore(identity: {
     void sync.pullFederatedEventRsvps();
     void sync.pullFederatedShiftSignups();
     void sync.pullFederatedSeedVaultPledges();
+    void sync.pullFederatedPushNameConsents();
     void sync.pullFederatedMemberRemovals();
     void sync.pullFederatedMemberReinstatements();
     void sync.pullFederatedProposals();

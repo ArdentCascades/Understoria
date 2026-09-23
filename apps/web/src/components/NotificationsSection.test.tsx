@@ -19,6 +19,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/state/AppContext", () => ({ useApp: () => mockState }));
 
+vi.mock("@/lib/pushNameConsent", () => ({
+  getMyPushNameConsent: vi.fn(async () =>
+    mockMyConsent === null ? null : { allow: mockMyConsent },
+  ),
+  setPushNameConsent: vi.fn(async (allow: boolean) => {
+    mockMyConsent = allow;
+    return { ok: true, consent: { allow } };
+  }),
+  buildPushNameMap: vi.fn(async () => mockNameMap),
+}));
+
 vi.mock("@/lib/pushBrowser", () => ({
   pushSupported: () => true,
   currentPermission: () => mockPermission,
@@ -88,12 +99,15 @@ import {
   teardownPushSubscription,
   defaultPushPrefs,
 } from "@/lib/pushNotifications";
+import { setPushNameConsent } from "@/lib/pushNameConsent";
 import type { Member } from "@/types";
 
 let mockPermission: NotificationPermission;
 let mockPermissionAnswer: NotificationPermission;
 let mockPrefs: ReturnType<typeof defaultPushPrefs>;
 let mockTestResult: { ok: boolean; status: number };
+let mockMyConsent: boolean | null;
+let mockNameMap: Record<string, string>;
 let mockVapid: import("@/lib/pushNotifications").VapidKeyResult;
 let mockState: {
   currentMember: Member | null;
@@ -112,6 +126,8 @@ beforeEach(() => {
   mockPermissionAnswer = "granted";
   mockPrefs = defaultPushPrefs();
   mockTestResult = { ok: true, status: 200 };
+  mockMyConsent = null;
+  mockNameMap = {};
   mockVapid = { kind: "ok", publicKey: "test-vapid-key" };
   mockState = {
     currentMember: {
@@ -192,7 +208,8 @@ describe("NotificationsSection", () => {
     await act(async () => {
       buttonByText("Try again").click();
     });
-    expect(checkboxes()).toHaveLength(4);
+    // Five switchboard rows plus the name-consent checkbox.
+    expect(checkboxes()).toHaveLength(6);
   });
 
   it("keeps the switchboard for an already-subscribed member even when the probe fails", async () => {
@@ -204,15 +221,16 @@ describe("NotificationsSection", () => {
       endpoint: "https://push.example/sub/1",
     };
     await render();
-    // Four switchboard rows plus the quiet-hours checkbox (the
-    // switchboard is open for a subscribed member).
-    expect(checkboxes()).toHaveLength(5);
+    // Five switchboard rows plus the quiet-hours checkbox (the
+    // switchboard is open for a subscribed member) plus the
+    // name-consent checkbox.
+    expect(checkboxes()).toHaveLength(7);
     expect(container.textContent).not.toContain("couldn't be reached");
   });
 
   it("renders everything off by default and asks the browser nothing", async () => {
     await render();
-    expect(checkboxes()).toHaveLength(4);
+    expect(checkboxes()).toHaveLength(6);
     expect(checkboxes().every((c) => !c.checked)).toBe(true);
     expect(container.textContent).toContain("Everything is off");
     expect(requestNotificationPermission).not.toHaveBeenCalled();
@@ -298,12 +316,14 @@ describe("NotificationsSection", () => {
     expect(container.textContent).toContain("Everything is off");
   });
 
-  it("never lists test_ping as a switch, and the switchboard shows event reminders (v2)", async () => {
+  it("never lists test_ping as a switch, and the switchboard shows event reminders and messages (v2)", async () => {
     await render();
     expect(container.textContent).toContain("Event reminders");
-    // Four rows, none of them a test-ping preference — the test is a
-    // button, not a subscription.
-    expect(checkboxes()).toHaveLength(4);
+    expect(container.textContent).toContain("Messages waiting");
+    // Five subscribable rows + name consent, none of them a
+    // test-ping preference — the test is a button, not a
+    // subscription.
+    expect(checkboxes()).toHaveLength(6);
     expect(container.textContent).not.toContain("Send myself a test");
   });
 
@@ -369,7 +389,7 @@ describe("NotificationsSection", () => {
       endpoint: "https://push.example/sub/1",
     };
     await render();
-    const quietBox = checkboxes()[4];
+    const quietBox = checkboxes()[5];
     expect(quietBox.checked).toBe(false);
     await act(async () => {
       quietBox.click();
@@ -389,9 +409,45 @@ describe("NotificationsSection", () => {
     });
     expect(mockPrefs.quiet).toEqual({ start: "21:30", end: "07:00" });
     await act(async () => {
-      checkboxes()[4].click();
+      checkboxes()[5].click();
     });
     expect(mockPrefs.quiet).toBeNull();
     expect(registerPushSubscription).not.toHaveBeenCalled();
+  });
+
+  it("the sender-side name consent is its own signed record: off by default, flips, never touches prefs", async () => {
+    await render();
+    expect(container.textContent).toContain("Your name on other screens");
+    const consentBox = checkboxes()[5]; // last: after the 5 switches
+    expect(consentBox.checked).toBe(false);
+    await act(async () => {
+      consentBox.click();
+    });
+    expect(setPushNameConsent).toHaveBeenCalledWith(true);
+    expect(checkboxes()[5].checked).toBe(true);
+    // Flipping the federated flag registers nothing with the node's
+    // PUSH tables and saves no device prefs — it is a state record.
+    expect(registerPushSubscription).not.toHaveBeenCalled();
+  });
+
+  it("snapshots the consented∩unblocked name map into the device prefs at save time", async () => {
+    mockPermission = "granted";
+    mockNameMap = { "key-ana": "Ana" };
+    mockPrefs = {
+      ...defaultPushPrefs(),
+      categories: ["message_waiting"],
+      endpoint: "https://push.example/sub/1",
+    };
+    await render();
+    // Any display-pref save re-snapshots strings AND names.
+    const radios = [
+      ...container.querySelectorAll<HTMLInputElement>('input[type="radio"]'),
+    ];
+    await act(async () => {
+      radios[2].click(); // named tier
+    });
+    expect(mockPrefs.names).toEqual({ "key-ana": "Ana" });
+    expect(mockPrefs.strings?.named.message_waiting).toContain("{sender}");
+    expect(mockPrefs.strings?.named.test_ping).toBeTruthy();
   });
 });

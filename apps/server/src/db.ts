@@ -43,6 +43,7 @@ import type {
   ProposalClosure,
   Vote,
   SeedVaultPledge,
+  PushNameConsent,
   CapacityPosture,
   EventShiftState,
   Post,
@@ -1663,6 +1664,35 @@ function applyMigrations(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '36')",
+    ).run();
+  }
+
+  // v37 — push name consents (docs/notifications.md v2, messages
+  // named by mutual consent). A member's federated "my name may
+  // appear in notifications" flag: single-owner LWW keyed by
+  // member_key on the seed-vault-pledge shape. Carries the boolean
+  // only — never a display name (the name a recipient sees is the
+  // one their own device already holds). Absence means OFF, so the
+  // table stays tiny: only members who opted their name IN (or
+  // explicitly retracted) have a row.
+  if (current < 37) {
+    db.exec(`
+      CREATE TABLE push_name_consents (
+        member_key TEXT NOT NULL,
+        id TEXT NOT NULL,
+        signer_key TEXT NOT NULL,
+        updated_at INTEGER NOT NULL,
+        payload TEXT NOT NULL,
+        signature TEXT NOT NULL,
+        PRIMARY KEY (member_key)
+      );
+      CREATE INDEX push_name_consents_updated_idx
+        ON push_name_consents (updated_at);
+      CREATE INDEX push_name_consents_signer_idx
+        ON push_name_consents (signer_key);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '37')",
     ).run();
   }
 }
@@ -4120,6 +4150,71 @@ export function createSeedVaultPledgeStore(
         "id",
         opts,
       ).map((r) => JSON.parse(r.payload) as SeedVaultPledge);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+/** Push name consents (docs/notifications.md v2) — the pledge
+ *  machinery pointed at one boolean. */
+export interface PushNameConsentStore {
+  get(memberKey: string): PushNameConsent | null;
+  /** INSERT OR REPLACE by memberKey. The route decides whether to
+   *  call this — the store never compares versions. */
+  upsert(record: PushNameConsent): void;
+  list(opts?: {
+    since?: number;
+    sinceId?: string;
+    limit?: number;
+  }): PushNameConsent[];
+  count(): number;
+}
+
+export function createPushNameConsentStore(
+  db: DatabaseType,
+): PushNameConsentStore {
+  const upsertStmt = db.prepare(`
+    INSERT OR REPLACE INTO push_name_consents (
+      member_key, id, signer_key, updated_at, payload, signature
+    ) VALUES (
+      @memberKey, @id, @signerKey, @updatedAt, @payload, @signature
+    )
+  `);
+  const getStmt = db.prepare(
+    "SELECT * FROM push_name_consents WHERE member_key = ?",
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM push_name_consents",
+  );
+
+  return {
+    get(memberKey) {
+      const r = getStmt.get(memberKey) as StateRowSqlite | undefined;
+      return r ? (JSON.parse(r.payload) as PushNameConsent) : null;
+    },
+    upsert(record) {
+      upsertStmt.run({
+        memberKey: record.memberKey,
+        id: record.id,
+        signerKey: record.signerKey,
+        updatedAt: record.updatedAt,
+        payload: JSON.stringify(record),
+        signature: record.signature,
+      });
+    },
+    list(opts = {}) {
+      // Retractions (allow:false) stay in the feed so they keep
+      // winning LWW on every puller — a member pulling their name
+      // back OUT is exactly the record that must travel.
+      return pagedRows<StateRowSqlite>(
+        db,
+        "push_name_consents",
+        "updated_at",
+        "id",
+        opts,
+      ).map((r) => JSON.parse(r.payload) as PushNameConsent);
     },
     count() {
       return (countStmt.get() as { n: number }).n;

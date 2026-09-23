@@ -74,6 +74,9 @@ export const SNAPSHOT_TABLES = [
   // docs/storage-budget.md Phase 2: public archive-role claims — the
   // linked device should see the community's coverage immediately.
   "seedVaultPledges",
+  // docs/notifications.md v2: name-consent booleans — the linked
+  // device's name map needs them from its first snapshot.
+  "pushNameConsents",
   // docs/member-removal.md M1: quorum governance records — a linked
   // device must know who stands removed from its first render.
   "memberRemovals",

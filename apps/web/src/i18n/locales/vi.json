@@ -2622,6 +2622,8 @@
     "catConfirmDesc": "Khi một lần giúp nhau đã xong, chỉ còn thiếu lời bạn.",
     "catEvent": "Nhắc sự kiện",
     "catEventDesc": "Trước khi một sự kiện bạn nói sẽ đến bắt đầu.",
+    "catMessage": "Tin nhắn đang chờ",
+    "catMessageDesc": "Khi có lời nhắn đến cho bạn — ai viết, viết bao nhiêu cũng vậy, nhiều nhất một lần chạm mỗi bốn giờ.",
     "disclosureTitle": "Trước khi bật",
     "disclosure": "Thông báo đẩy đi qua trạm trung chuyển của hãng làm trình duyệt — Google, Mozilla hay Apple, tùy trình duyệt này. Trạm đó không đọc được nội dung (mỗi gói đều niêm phong riêng cho thiết bị này), nhưng thấy được là có một gói nhỏ vừa đến, và đến lúc nào. Máy chủ của cộng đồng bạn chỉ biết bạn chọn những loại nào — không bao giờ biết chữ trên màn hình khóa của bạn, không bao giờ biết tin nhắn. Nếu dấu vết đó là cái giá bạn không muốn trả, cứ bỏ qua: không có thông báo, ứng dụng vẫn đủ đầy.",
     "disclosureContinue": "Tôi hiểu rồi — hỏi trình duyệt đi",
@@ -2641,6 +2643,7 @@
     "bodyGuardian": "Một lời nhờ gìn giữ đang chờ bạn",
     "bodyConfirm": "Một lần giúp nhau đang chờ bạn xác nhận",
     "bodyEvent": "Một sự kiện bạn nói sẽ đến sắp bắt đầu",
+    "bodyMessage": "{sender} có lời cho bạn",
     "bodyTest": "Một lần thử bạn vừa yêu cầu — thông báo thật sẽ trông y như vậy",
     "levelTitle": "Chỉnh riêng từng loại",
     "levelDefault": "Như bên trên",
@@ -2654,7 +2657,10 @@
     "quietHint": "Trong khoảng đó, theo đồng hồ của thiết bị này, thứ gì đến cũng giữ im — không tiếng, không chữ, chỉ còn dấu — và vẫn chờ khi bạn mở xem. Lựa chọn này chỉ nằm trên thiết bị này; máy chủ của cộng đồng bạn không bao giờ biết bạn ngủ lúc nào.",
     "testButton": "Gửi cho mình một lần thử",
     "testSent": "Đã gửi. Lát nữa nó sẽ đến thiết bị này, trông y hệt một thông báo thật.",
-    "testFailed": "Chưa gửi được lần thử. Kiểm tra mạng rồi thử lại — nếu vẫn hỏng, tắt hết rồi bật lại sẽ làm mới đăng ký của thiết bị này."
+    "testFailed": "Chưa gửi được lần thử. Kiểm tra mạng rồi thử lại — nếu vẫn hỏng, tắt hết rồi bật lại sẽ làm mới đăng ký của thiết bị này.",
+    "nameConsentTitle": "Tên bạn trên màn hình người khác",
+    "nameConsentLabel": "Người nhận tin của tôi có thể thấy tên tôi trong thông báo của họ",
+    "nameConsentHint": "Mặc định tắt, như mọi thứ ở đây. Nếu người bạn nhắn đã chọn thông báo nói rõ loại, màn hình khóa của họ có thể nói lời nhắn là từ bạn — chỉ khi bạn cho phép ở đây, và luôn bằng cái tên mà máy của họ vốn đã biết về bạn. Ai đã chặn bạn thì không bao giờ thấy; tên bạn không bao giờ nằm trong thông báo nào; và bạn có thể rút lại bất cứ lúc nào."
   },
   "betaNotice": {
     "dismiss": "Đã hiểu",

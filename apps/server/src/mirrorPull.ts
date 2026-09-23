@@ -197,6 +197,13 @@ export const MIRROR_KINDS: readonly MirrorKindSpec[] = [
     conflict409: "halt",
   },
   {
+    path: "/push-name-consents",
+    bodyKey: "pushNameConsents",
+    ts: (r) => num(r.updatedAt),
+    id: (r) => str(r.id),
+    conflict409: "halt",
+  },
+  {
     path: "/shift-signups",
     bodyKey: "shiftSignups",
     ts: (r) => num(r.updatedAt),

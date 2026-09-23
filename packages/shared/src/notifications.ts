@@ -29,20 +29,29 @@
 // The v2 amendment (2026-09-23) added:
 //  - event_reminder: an event the member RSVP'd "going" to starts
 //    soon — the same clock shift reminders answer.
+//  - message_waiting: coalesced, named by mutual consent. One ping
+//    per recipient per 4-hour quiet period, fired by the first
+//    message after the period lapses — the CAP is the safety
+//    mechanism (a blocked person cannot ring a doorbell). The
+//    payload carries the triggering sender's KEY only; a name
+//    appears on a lock screen only when the sender's federated
+//    consent flag is on AND the recipient chose the named level
+//    AND the recipient's own device resolves the key in its local
+//    name map (consented ∩ unblocked). Never a display name in a
+//    payload, never a body, never a count.
 //  - test_ping: SELF-REQUESTED ONLY (a member-signed /push/test,
 //    delivered straight to the requesting device). It is in the
 //    enum so the send gate and the SW know it; it is NOT a
 //    subscribable preference and the Settings switchboard never
 //    lists it. One arriving unrequested is a bug with the severity
 //    of an engagement ping.
-// message_waiting (coalesced, named by mutual consent) is designed
-// in the doc and lands with its own rung.
 
 export const NOTIFICATION_CATEGORIES = [
   "shift_reminder",
   "guardian_request",
   "awaiting_confirmation",
   "event_reminder",
+  "message_waiting",
   "test_ping",
 ] as const;
 
@@ -71,9 +80,11 @@ export function isNotificationCategory(
  * worker applies the member's lock-screen tier and their chosen
  * notification title at display time, so neither preference ever
  * reaches the node. `detail` carries the named-tier line's
- * interpolations (an event title, an exchange partner's name — never
- * a message body; no messages category exists) and the generic tier
- * ignores it entirely.
+ * interpolations — for message_waiting that is `senderKey`, the
+ * triggering sender's PUBLIC KEY, which the recipient's device
+ * resolves (or refuses to) against its own local name map. Never a
+ * display name, never a message body, never a count; the generic
+ * tier ignores `detail` entirely.
  */
 export interface PushPayload {
   category: NotificationCategory;

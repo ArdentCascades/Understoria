@@ -34,13 +34,14 @@
  * on a lock screen the member didn't opt into seeing.
  */
 
-/* The doc's five categories (v2). Kept in sync with the shared enum
+/* The doc's six categories (v2). Kept in sync with the shared enum
  * by the notifications guard test — this file cannot import it. */
 const PUSH_CATEGORIES = [
   "shift_reminder",
   "guardian_request",
   "awaiting_confirmation",
   "event_reminder",
+  "message_waiting",
   "test_ping",
 ];
 
@@ -164,10 +165,31 @@ async function displayPush(event) {
     strings.named &&
     typeof strings.named[category] === "string"
   ) {
-    body = interpolate(
-      strings.named[category],
-      payload && payload.detail ? payload.detail : null,
-    );
+    if (category === "message_waiting") {
+      /* Named by MUTUAL consent (docs/notifications.md v2): the
+       * payload carries only the triggering sender's KEY, and a
+       * name renders only when this device's own map — consented ∩
+       * unblocked, written by the app from its member rows, never
+       * from payload content — resolves it. Any miss (unknown key,
+       * unconsented, blocked, no map) falls back to the generic
+       * wording, never to a raw key on a lock screen. */
+      const senderKey =
+        payload && payload.detail && typeof payload.detail.senderKey === "string"
+          ? payload.detail.senderKey
+          : null;
+      const name =
+        senderKey && prefs && prefs.names && typeof prefs.names[senderKey] === "string"
+          ? prefs.names[senderKey]
+          : null;
+      body = name
+        ? interpolate(strings.named[category], { sender: name })
+        : generic;
+    } else {
+      body = interpolate(
+        strings.named[category],
+        payload && payload.detail ? payload.detail : null,
+      );
+    }
   }
 
   const options = {

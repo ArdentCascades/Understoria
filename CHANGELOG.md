@@ -10,6 +10,26 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Notifications v2, second rung: messages, named by mutual
+  consent.** The `message_waiting` category lands end to end. The
+  cap is the safety mechanism: one ping per recipient per four-hour
+  quiet period, fired by the first message after the period lapses
+  and silent for everything inside it — whatever any sender does,
+  a blocked person cannot ring a doorbell. The payload names no
+  one: category, path, and the triggering sender's public key,
+  inside the encrypted body. A name appears on a lock screen only
+  under an AND of three consents: the sender's own federated "my
+  name may appear in notifications" flag (default OFF — a
+  single-owner signed LWW record with node table, routes, feed,
+  mirror replication and device pull, carrying the boolean only),
+  the recipient's named level, and the recipient's device resolving
+  the key against its local name map — snapshotted from its own
+  member rows, consented ∩ unblocked, never from payload content —
+  with the generic wording on any miss. Block lists still never
+  leave the device; message bodies still exist in no payload. Six
+  new strings in all eighteen languages, and the threat model's §7
+  push entry rewritten for the shipped state plus the one new
+  public datum (the consent boolean).
 - **Notifications v2, first rung: event reminders, a self-test, and
   finer device-side control.** The category enum grows to five:
   `event_reminder` (an event you RSVP'd "going" to starts soon —

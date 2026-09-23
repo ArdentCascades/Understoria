@@ -715,29 +715,39 @@ forwards them to the node.
 
 Since the quiet-by-default release (docs/notifications.md), the
 node sends opt-in web push to members who turned it on in Settings:
-a reminder an hour before a shift they signed up for, and a ping
-when an exchange or task is waiting on their confirmation. (The
-third category members can enable, guardian requests, has no
-node-visible signal yet — guardian recovery runs device-to-device —
-so enabling it currently receives nothing.) Everything is off by default and stays
+a reminder an hour before a shift they signed up for — or an event
+they RSVP'd "going" to — a ping when an exchange or task is waiting
+on their confirmation, and (v2) a capped once-per-four-hours "words
+are waiting" ping for messages. (One category members can enable,
+guardian requests, has no node-visible signal yet — guardian
+recovery runs device-to-device — so enabling it currently receives
+nothing.) Everything is off by default and stays
 off until a member opts in; nothing about running the node changes
 until then. What the node holds and sends:
 
 - **Routes:** `GET /push/vapid-key` (public — the key devices
-  subscribe against) and member-signed
-  `POST /push/subscriptions[/renew|/delete]`.
+  subscribe against), member-signed
+  `POST /push/subscriptions[/renew|/delete]` and `POST /push/test`
+  (a member pinging their own device to check the plumbing), and
+  `/push-name-consents` (v2 — each member's public "my name may
+  appear in notifications" boolean; a state feed like seed-vault
+  pledges, replicated by mirrors).
 - **VAPID keys** are minted automatically on first boot after the
   update and stored in the encrypted ledger's `meta` table. Do not
   rotate them casually: a new key silently invalidates every
   member's subscription, and each member must re-enable from
   Settings. Treat rotation as deliberate surgery, announced.
-- **One table** (`push_subscriptions`, migration v35, runs itself
-  on start): one row per member device — endpoint, encryption
-  keys, chosen categories, a renewal clock. Members' lock-screen
-  wording, custom titles, and message contents are never in it and
-  never pass through the node. Rows a device stops renewing expire
-  after 21 days via the retention sweep — that's the designed
-  cleanup for devices that were wiped while offline.
+- **Tables** (migrations run themselves on start):
+  `push_subscriptions` (v35) — one row per member device:
+  endpoint, encryption keys, chosen categories, a renewal clock.
+  Members' lock-screen wording, custom titles, and message
+  contents are never in it and never pass through the node. Rows a
+  device stops renewing expire after 21 days via the retention
+  sweep — that's the designed cleanup for devices that were wiped
+  while offline. `push_reminders_sent` (v36) — the tiny send-once
+  ledger that makes reminders fire exactly once across restarts.
+  `push_name_consents` (v37) — the per-member name-consent
+  booleans; public by design, boolean only, absence means no.
 - **Payloads are sent by your node directly** (standard Web Push,
   no Firebase/OneSignal/etc.). The browser vendor's relay sees
   that something small arrived and when, never what — the cost the

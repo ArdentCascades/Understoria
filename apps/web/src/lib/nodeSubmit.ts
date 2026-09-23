@@ -45,6 +45,7 @@ import type {
   MemberReinstatement,
   ProposalClosure,
   SeedVaultPledge,
+  PushNameConsent,
   ShiftSignupState,
   TaskState,
 } from "@understoria/shared/types";
@@ -421,6 +422,16 @@ export async function submitSeedVaultPledgeToNode(
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
   return postSignedRecord("/seed-vault-pledges", record, config, deps);
+}
+
+/** Push name consent (docs/notifications.md v2) — same no-referent
+ *  shape as the pledge: the node stores or LWW-noops. */
+export async function submitPushNameConsentToNode(
+  record: PushNameConsent,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/push-name-consents", record, config, deps);
 }
 
 /** Member removal / reinstatement (docs/member-removal.md M2): the

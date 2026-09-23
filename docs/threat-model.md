@@ -132,7 +132,7 @@ We are not trying to protect against:
 
 ## 7. Known gaps (tracked work)
 
-- **Opt-in push notifications: DESIGNED, not yet shipped**
+- **Opt-in push notifications: SHIPPED (v1 + v2)**
   (`docs/notifications.md` — quiet by default; every category off
   until a member turns it on in Settings). What enabling costs, so
   members can weigh it honestly: (a) *push-service metadata* — a
@@ -148,16 +148,29 @@ We are not trying to protect against:
   toward a device); the table lives in the encrypted ledger and
   rows expire by TTL, but the surface exists and this line is its
   disclosure; (c) *lock-screen exposure* — mitigated by content
-  tiers (silent/generic/named), the rule that message bodies never
-  appear in any notification, and a member-chosen neutral title so
-  the lock screen need not name the app (mitigation, not
-  invisibility — an unlocked phone's notification settings still
-  name it); (d) *the offline-purge residual* — a device hard-purged
-  while offline cannot unsubscribe, so its pings continue until the
-  node-side subscription TTL lapses (days, not minutes); the
-  dead-man TTL bounds the window and this line states it. Blocks
-  never leave the device, which is why no message-notification
-  category ships until the sender-blind coalesced design lands.
+  tiers (silent/generic/named — v2 makes the tier per-category and
+  adds device-local quiet hours the node never learns), the rule
+  that message bodies never appear in any notification, and a
+  member-chosen neutral title so the lock screen need not name the
+  app (mitigation, not invisibility — an unlocked phone's
+  notification settings still name it); (d) *the offline-purge
+  residual* — a device hard-purged while offline cannot
+  unsubscribe, so its pings continue until the node-side
+  subscription TTL lapses (days, not minutes); the dead-man TTL
+  bounds the window and this line states it. Blocks never leave
+  the device — the v2 message category respects that: pings are
+  CAPPED (one per recipient per four-hour quiet period, whatever
+  any sender does — the blocked-abuser doorbell has no clapper),
+  the payload carries the triggering sender's key inside the
+  encrypted body (visible only to the recipient's device, which
+  knew it anyway), and a name renders only when the sender's own
+  federated consent flag is on AND the recipient chose the named
+  level AND the recipient's device resolves the key in its local
+  consented∩unblocked map. The one NEW public datum v2 adds: the
+  name-consent flag itself is a per-member public boolean on the
+  node (`push_name_consents`) — it says a member allows their
+  name in others' notifications, nothing more, and absence is the
+  default no.
 
 - **Onion-service front door: OPT-IN, SHIPPED.** A node can publish
   a Tor onion service as a second front door (`docs/tor-onion.md`).

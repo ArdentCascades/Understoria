@@ -1576,6 +1576,29 @@ export interface SeedVaultPledge {
   signature: string;
 }
 
+/** A member's federated "my name may appear in notifications" flag
+ *  (docs/notifications.md v2 — messages named by mutual consent).
+ *  Default OFF for everyone: absence of a record means `allow:
+ *  false`. Carries the boolean ONLY — never a display name; the
+ *  name a recipient's lock screen shows is the one their own device
+ *  already holds for this member, and only when their device's map
+ *  resolves the key (consented AND unblocked). Single-owner LWW on
+ *  the seed-vault-pledge machinery: `signerKey === memberKey`,
+ *  keyed by `memberKey`, strictly-newer `updatedAt` replaces;
+ *  retraction is `allow: false` (no tombstone — the retraction must
+ *  keep winning LWW over stale allowing copies). */
+export interface PushNameConsent {
+  /** UUID of the row version — identity is `memberKey`. */
+  id: string;
+  /** The consenting member. The single legitimate signer. */
+  memberKey: string;
+  allow: boolean;
+  /** LWW clock. */
+  updatedAt: number;
+  signerKey: string;
+  signature: string;
+}
+
 /**
  * Founder nomination — the founder's half of the co-founder ceremony
  * (docs/cofounder-ceremony-plan.md). Signed by the community's SOLE

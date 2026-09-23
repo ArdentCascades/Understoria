@@ -27,6 +27,11 @@ import {
 } from "@understoria/shared";
 import { useApp } from "@/state/AppContext";
 import {
+  buildPushNameMap,
+  getMyPushNameConsent,
+  setPushNameConsent,
+} from "@/lib/pushNameConsent";
+import {
   fetchVapidKey,
   getPushPrefs,
   registerPushSubscription,
@@ -91,6 +96,14 @@ const CATEGORY_KEYS: Record<
     desc: "push.catEventDesc",
     body: "push.bodyEvent",
   },
+  message_waiting: {
+    label: "push.catMessage",
+    desc: "push.catMessageDesc",
+    // The named-tier template — its {sender} token resolves ONLY
+    // through the device's consented∩unblocked name map; the SW
+    // falls back to the generic wording on any miss.
+    body: "push.bodyMessage",
+  },
 };
 
 /** The default quiet window offered when the member first enables
@@ -116,10 +129,19 @@ export function NotificationsSection() {
   const [testState, setTestState] = useState<
     "idle" | "sending" | "sent" | "failed"
   >("idle");
+  /** The member's own federated name-consent flag (absence = OFF).
+   *  Member-level, not device-level — it renders even where push
+   *  itself is unsupported, because it governs OTHER people's lock
+   *  screens, not this device's. */
+  const [nameConsent, setNameConsent] = useState<boolean>(false);
+  const [consentBusy, setConsentBusy] = useState(false);
 
   useEffect(() => {
-    if (!supported) return;
     let alive = true;
+    void getMyPushNameConsent().then((c) => {
+      if (alive) setNameConsent(c?.allow === true);
+    });
+    if (!supported) return;
     void getPushPrefs().then((p) => {
       if (alive) setPrefs(p);
     });
@@ -132,12 +154,47 @@ export function NotificationsSection() {
     };
   }, [supported]);
 
+  /** The sender-side half of "named by mutual consent": the
+   *  member's federated flag over their OWN name on other people's
+   *  lock screens. Member-level, not device-level, so it renders in
+   *  every branch — including a browser that cannot receive push at
+   *  all (consenting is about what others see, not this device). */
+  async function toggleNameConsent() {
+    setConsentBusy(true);
+    const res = await setPushNameConsent(!nameConsent).catch(
+      () => ({ ok: false }) as const,
+    );
+    if (res.ok) setNameConsent(res.consent.allow);
+    setConsentBusy(false);
+  }
+  const nameConsentBlock = currentMember ? (
+    <div className="mt-4 border-t border-moss-200 pt-3 dark:border-moss-800">
+      <h3 className="mb-1 text-sm font-semibold text-moss-700 dark:text-moss-200">
+        {t("push.nameConsentTitle")}
+      </h3>
+      <label className="flex items-start gap-2 text-sm">
+        <input
+          type="checkbox"
+          className="mt-1"
+          checked={nameConsent}
+          disabled={consentBusy || lockState === "locked"}
+          onChange={() => void toggleNameConsent()}
+        />
+        <span>{t("push.nameConsentLabel")}</span>
+      </label>
+      <p className="ms-6 mt-1 text-xs text-moss-600 dark:text-moss-300">
+        {t("push.nameConsentHint")}
+      </p>
+    </div>
+  ) : null;
+
   if (!supported) {
     return (
       <Shell>
         <p className="text-sm text-moss-600 dark:text-moss-300">
           {t("push.unsupported")}
         </p>
+        {nameConsentBlock}
       </Shell>
     );
   }
@@ -170,6 +227,7 @@ export function NotificationsSection() {
             {t("common.tryAgain")}
           </button>
         )}
+        {nameConsentBlock}
       </Shell>
     );
   }
@@ -228,7 +286,11 @@ export function NotificationsSection() {
     // registerPushSubscription persisted categories/endpoint; layer
     // the device-only display prefs on top of what it stored.
     const stored = await getPushPrefs();
-    const updated = { ...stored, strings: displayStrings() };
+    const updated = {
+      ...stored,
+      strings: displayStrings(),
+      names: await buildPushNameMap(),
+    };
     await savePushPrefs(updated);
     setPrefs(updated);
     setFlow({ kind: "idle" });
@@ -266,10 +328,17 @@ export function NotificationsSection() {
   }
 
   /** Tier, per-kind tiers, quiet hours and title are device-only:
-   *  saved locally, never sent. */
+   *  saved locally, never sent. Every save also re-snapshots the
+   *  strings and the consented∩unblocked name map, so both track
+   *  the app language and the latest consents/blocks. */
   async function saveDisplayPrefs(patch: Partial<PushPrefs>) {
     if (!prefs) return;
-    const updated = { ...prefs, ...patch, strings: displayStrings() };
+    const updated = {
+      ...prefs,
+      ...patch,
+      strings: displayStrings(),
+      names: await buildPushNameMap(),
+    };
     await savePushPrefs(updated);
     setPrefs(updated);
   }
@@ -571,6 +640,7 @@ export function NotificationsSection() {
           )}
         </>
       )}
+      {nameConsentBlock}
     </Shell>
   );
 }

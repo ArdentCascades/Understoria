@@ -189,6 +189,11 @@ export const SURFACES: Record<string, Surface> = {
     keyField: "signerKey",
     keyColumn: "signer_key",
   },
+  "/push-name-consents": {
+    table: "push_name_consents",
+    keyField: "signerKey",
+    keyColumn: "signer_key",
+  },
   // Member removal / reinstatement (docs/member-removal.md): multi-
   // signed records — no single attributable body key, so only the
   // table ceiling applies (the route's quorum-of-members check is

@@ -2622,6 +2622,8 @@
     "catConfirmDesc": "Lè yon echanj fini e se sèl pawòl ou ki manke.",
     "catEvent": "Rapèl pou evènman",
     "catEventDesc": "Anvan yon evènman ou te di w ap vini an kòmanse.",
+    "catMessage": "Mesaj k ap tann",
+    "catMessageDesc": "Lè pawòl rive pou ou — kèlkeswa moun ki ekri, kèlkeswa kantite a, yon sèl ti frape chak kat èdtan pou pi plis.",
     "disclosureTitle": "Anvan ou limen sa",
     "disclosure": "Notifikasyon push yo pase nan relè konpayi ki fè navigatè w la — Google, Mozilla oswa Apple, selon navigatè a. Relè a pa ka li yo (chak youn sele pou aparèy sa a sèlman), men li wè yon ti bagay rive, ak ki lè. Sèvè kominote a konnen sèlman ki kalite ou chwazi — li pa janm konnen mo ki sou ekran bloke w la, li pa janm konnen okenn mesaj. Si tras sa a se yon pri ou pa vle peye, kite sa: app la konplè san li.",
     "disclosureContinue": "Mwen konprann — mande navigatè a",
@@ -2641,6 +2643,7 @@
     "bodyGuardian": "Yon demann pou sere kle ap tann ou",
     "bodyConfirm": "Yon echanj ap tann konfimasyon w",
     "bodyEvent": "Yon evènman ou te di w ap vini an ap pwoche",
+    "bodyMessage": "{sender} gen pawòl pou ou",
     "bodyTest": "Yon tès ou te mande — vrè yo ap parèt menm jan an nèt",
     "levelTitle": "Regle chak kalite apa",
     "levelDefault": "Menm jan ak anwo a",
@@ -2654,7 +2657,10 @@
     "quietHint": "Ant lè sa yo, dapre revèy aparèy sa a, sa ki rive rete an silans — san son, san mo, sèlman mak la — epi l ap tann jiskaske ou gade. Chwa sa a viv sèlman sou aparèy sa a; sèvè kominote w la pa janm konnen ki lè w ap dòmi.",
     "testButton": "Voye yon tès bay tèt mwen",
     "testSent": "Li pati. Li ta dwe rive sou aparèy sa a talè konsa, l ap parèt menm jan ak yon vrè.",
-    "testFailed": "Tès la pa t ka pati. Verifye koneksyon ou epi eseye ankò — si sa kontinye echwe, fèmen tout epi relimen yo mete enskripsyon aparèy sa a ajou."
+    "testFailed": "Tès la pa t ka pati. Verifye koneksyon ou epi eseye ankò — si sa kontinye echwe, fèmen tout epi relimen yo mete enskripsyon aparèy sa a ajou.",
+    "nameConsentTitle": "Non ou sou ekran lòt moun",
+    "nameConsentLabel": "Moun mwen ekri yo ka wè non mwen nan notifikasyon yo",
+    "nameConsentHint": "Li fèmen depi nan kòmansman, menm jan ak tout bagay isit la. Si moun ou ekri a te chwazi notifikasyon ki di ki kalite, ekran vewouyaj li ka di pawòl yo soti nan men ou — sèlman si ou pèmèt sa isit la, epi toujou ak non aparèy li deja konnen ou. Moun ki bloke ou pa janm wè l; non ou pa janm vwayaje anndan yon notifikasyon; epi ou ka retire sa nenpòt lè."
   },
   "betaNotice": {
     "dismiss": "Mwen konprann",

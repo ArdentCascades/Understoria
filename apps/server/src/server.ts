@@ -37,6 +37,7 @@ import {
   createClaimStore,
   createShiftSignupStateStore,
   createSeedVaultPledgeStore,
+  createPushNameConsentStore,
   createCapacityPostureStore,
   createMemberRemovalStore,
   createMemberReinstatementStore,
@@ -81,7 +82,10 @@ import {
   type PushSender,
   type PushTransport,
 } from "./push.js";
-import { notifyAwaitingConfirmation } from "./pushTriggers.js";
+import {
+  createMessageWaitingNotifier,
+  notifyAwaitingConfirmation,
+} from "./pushTriggers.js";
 import { createNudgeBus } from "./nudgeBus.js";
 import { registerAwaitingTransitionRoutes } from "./routes/awaitingTransitions.js";
 import { registerTaskCommentRoutes } from "./routes/taskComments.js";
@@ -98,6 +102,7 @@ import { registerLinkRequestRoutes } from "./routes/linkRequests.js";
 import { registerProjectStateRoutes } from "./routes/projectStates.js";
 import { registerParticipationStateRoutes } from "./routes/participationStates.js";
 import { registerSeedVaultPledgeRoutes } from "./routes/seedVaultPledges.js";
+import { registerPushNameConsentRoutes } from "./routes/pushNameConsents.js";
 import { registerCapacityPostureRoutes } from "./routes/capacityPostures.js";
 import { registerMemberRemovalRoutes } from "./routes/memberRemovals.js";
 import { registerGovernanceRoutes } from "./routes/proposals.governance.js";
@@ -326,6 +331,7 @@ export async function buildServer({
   const eventShiftStateStore = createEventShiftStateStore(db);
   const shiftSignupStateStore = createShiftSignupStateStore(db);
   const seedVaultPledgeStore = createSeedVaultPledgeStore(db);
+  const pushNameConsentStore = createPushNameConsentStore(db);
   const capacityPostureStore = createCapacityPostureStore(db);
   const memberRemovalStore = createMemberRemovalStore(db);
   const memberReinstatementStore = createMemberReinstatementStore(db);
@@ -564,6 +570,13 @@ export async function buildServer({
     resolver: membershipResolver,
     requireSenderMembership: config.readAuth === "on",
     retentionDays: config.messageRetentionDays,
+    // message_waiting (docs/notifications.md v2): fire-and-forget,
+    // coalesced per recipient — a push outage never fails the relay.
+    onNewMessage: createMessageWaitingNotifier({
+      db,
+      sender: pushSender,
+      log: (msg) => app.log.warn(msg),
+    }),
   });
   await registerPostRoutes(app, { store: postStore });
   // Voice-board audio blobs (#474): the content-addressed store the
@@ -659,6 +672,10 @@ export async function buildServer({
   // Seed-vault pledges (docs/storage-budget.md Phase 2) — a member's
   // public archive-role claim, single-owner LWW like an RSVP.
   await registerSeedVaultPledgeRoutes(app, { store: seedVaultPledgeStore });
+  // Push name consents (docs/notifications.md v2) — a member's
+  // federated "my name may appear in notifications" boolean, on the
+  // same single-owner LWW machinery. Absence means OFF.
+  await registerPushNameConsentRoutes(app, { store: pushNameConsentStore });
   // Capacity postures (docs/capacity-forecast.md §6) — the coarse,
   // node-system-key-signed community capacity attestation. READ-ONLY:
   // the node emits its own posture; there is no member POST path.
