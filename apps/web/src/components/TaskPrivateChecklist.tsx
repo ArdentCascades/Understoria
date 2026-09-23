@@ -18,7 +18,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { intlLocale } from "@/i18n";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -35,7 +35,8 @@ import {
   setPlanNote,
   togglePlanStep,
 } from "@/db/taskPlans";
-import { getTaskSteps } from "@/content/taskSteps";
+import { getTaskSteps, translateSeededSteps } from "@/content/taskSteps";
+import { ensureContent } from "@/content/registry";
 import { downloadIcs, plannedDayIcs } from "@/lib/ics";
 import { shareOrigin } from "@/lib/appOrigin";
 import { useToast } from "@/state/ToastContext";
@@ -83,10 +84,27 @@ export function TaskPrivateChecklist({
   // auto-inserted) only while the plan has no steps: everything in
   // the plan should have arrived by the member's choice, and starting
   // blank stays one decision, not an undo.
-  const suggestions = getTaskSteps(
-    templateId,
-    taskTitle,
-    i18n.resolvedLanguage ?? "en",
+  // The viewer's content bundle loads lazily; without this the
+  // suggestions (and the seeded-step display below) fall back to
+  // English on the first paint after a language switch — which is
+  // exactly how members ended up seeding English rows.
+  const [contentReady, setContentReady] = useState(0);
+  const lang = i18n.resolvedLanguage ?? "en";
+  useEffect(() => {
+    let alive = true;
+    void ensureContent(lang).then(() => {
+      if (alive) setContentReady((n) => n + 1);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [lang]);
+  const suggestions = useMemo(
+    () => {
+      void contentReady;
+      return getTaskSteps(templateId, taskTitle, lang);
+    },
+    [templateId, taskTitle, lang, contentReady],
   );
   // null = not editing (textarea mirrors the stored note); a string =
   // unsaved edit in progress. Keeps a background live-query refresh
@@ -102,6 +120,18 @@ export function TaskPrivateChecklist({
   // notes are theirs, even on a shared device. First write replaces.
   const plan = row && row.memberKey === memberKey ? row : null;
   const steps = plan?.steps ?? [];
+  // Display-only rendering of SEEDED steps in the viewer's language
+  // (byte-exact per step; anything the member wrote stays verbatim).
+  // Toggling/removing keeps working on the stored rows by id.
+  const stepViews = useMemo(() => {
+    void contentReady;
+    return translateSeededSteps(
+      templateId,
+      taskTitle,
+      steps.map((st) => st.text),
+      lang,
+    );
+  }, [templateId, taskTitle, steps, lang, contentReady]);
   const doneCount = steps.filter((s) => s.done).length;
   const storedNote = plan?.note ?? "";
   const noteValue = noteDraft ?? storedNote;
@@ -186,14 +216,14 @@ export function TaskPrivateChecklist({
                       : "min-w-0 break-words text-moss-800 dark:text-moss-100"
                   }
                 >
-                  {step.text}
+                  {stepViews[steps.indexOf(step)] ?? step.text}
                 </span>
               </label>
               <button
                 type="button"
                 onClick={() => void removePlanStep(taskId, memberKey, step.id)}
                 aria-label={t("projects.task.plan.removeStep", {
-                  step: step.text,
+                  step: stepViews[steps.indexOf(step)] ?? step.text,
                 })}
                 className="shrink-0 rounded px-1 text-moss-600 hover:bg-moss-100 hover:text-moss-800 dark:text-moss-300 dark:hover:bg-moss-800 dark:hover:text-moss-100"
               >

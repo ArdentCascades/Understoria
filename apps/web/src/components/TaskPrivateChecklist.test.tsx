@@ -18,6 +18,14 @@ vi.mock("@/content/taskSteps", () => ({
     templateId === "tmpl-with-steps"
       ? ["Send one text", "Find the tape measure", "Walk the site"]
       : null,
+  // Pass-through: the per-step display translation has its own unit
+  // suite in content/taskSteps.test.ts; here it must only not get in
+  // the way of the stored rows.
+  translateSeededSteps: (
+    _tid: string | null,
+    _title: string,
+    steps: readonly string[],
+  ) => steps,
 }));
 
 import "@/i18n";

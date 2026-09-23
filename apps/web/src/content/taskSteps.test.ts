@@ -25,7 +25,8 @@ import { PROJECT_TEMPLATES_BN } from "@/content/projectTemplates.bn";
 import { PROJECT_TEMPLATES_HT } from "@/content/projectTemplates.ht";
 import { PROJECT_TEMPLATES_FA } from "@/content/projectTemplates.fa";
 import { PROJECT_TEMPLATES_MY } from "@/content/projectTemplates.my";
-import { getTaskSteps } from "@/content/taskSteps";
+import { getTaskSteps, translateSeededSteps } from "@/content/taskSteps";
+import { ensureContent } from "@/content/registry";
 import { TASK_STEPS_EN } from "@/content/taskSteps.en";
 import { TASK_STEPS_ES } from "@/content/taskSteps.es";
 import { TASK_STEPS_FR } from "@/content/taskSteps.fr";
@@ -303,6 +304,40 @@ describe("TASK_STEPS coverage", () => {
         });
       });
     }
+  });
+});
+
+describe("translateSeededSteps (display-only, per-step byte-exact)", () => {
+  it("renders seeded steps in the viewer's language; member-written steps stay verbatim", async () => {
+    await ensureContent("es");
+    const tpl = PROJECT_TEMPLATES_EN[0];
+    const enSteps = TASK_STEPS_EN[tpl.id][0];
+    const esSteps = TASK_STEPS_ES[tpl.id][0];
+    // A plan seeded while the app showed English, plus one step the
+    // member typed themselves — viewed later in Spanish.
+    const stored = [enSteps[0], "call my cousin about the van", enSteps[2]];
+    const view = translateSeededSteps(tpl.id, tpl.tasks[0].name, stored, "es");
+    expect(view).toEqual([
+      esSteps[0],
+      "call my cousin about the van",
+      esSteps[2],
+    ]);
+    // The stored rows are untouched by contract — new array only.
+    expect(stored[0]).toBe(enSteps[0]);
+  });
+
+  it("substitutes nothing for a renamed task or the viewer's own words", async () => {
+    await ensureContent("es");
+    const tpl = PROJECT_TEMPLATES_EN[0];
+    const enSteps = TASK_STEPS_EN[tpl.id][0];
+    const stored = [enSteps[0]];
+    expect(
+      translateSeededSteps(tpl.id, "a renamed task", stored, "es"),
+    ).toBe(stored);
+    // Viewer already speaks the seeded language: unchanged.
+    expect(
+      translateSeededSteps(tpl.id, tpl.tasks[0].name, stored, "en"),
+    ).toBe(stored);
   });
 });
 

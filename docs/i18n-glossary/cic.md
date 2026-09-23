@@ -64,3 +64,25 @@ column open, conventions per the partners' decision.
 Nothing, until partners say so. Wiring is one small PR on the
 no-ICU rails plus the convention's glyph check. No deadline; the
 infrastructure waits for the language.
+
+
+## New since this draft (2026-09-22) — read before the strings pass
+
+Two things changed after this glossary was drafted; both are work
+for the human review this document waits on, recorded here so the
+launch cannot miss them:
+
+1. **The app gained opt-in notifications** (docs/notifications.md):
+   ~40 new strings (`push.*`, `provenance.editingOriginal`) since
+   this draft's inventory. The register rule that matters: the
+   feature needs a word for *push notification* that is DISTINCT
+   from whatever this glossary chose for a board *post* — Persian
+   and Burmese had both spent their everyday "notification" word on
+   the post and needed a second term (fa آگاه‌سازی, my သတိပေးချက်).
+   Check this glossary's post/announce decisions for the same
+   collision before translating the notifications strings.
+2. **The field-test ledger** in docs/provenance-translation.md
+   ("Field-test ledger (2026-09-22)") lists every class of
+   untranslated surface live testing found. A launch in this
+   language walks that ledger by hand, in this language, over an
+   instance created in a different language.

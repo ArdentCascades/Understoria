@@ -193,3 +193,75 @@ from id disjointness.
 - FAQ + member-guide entries stating the rule ("the app translates
   its own words, never yours") — content-tier, so it rides the
   full 18-language content pipeline as its own change.
+
+## Field-test ledger (2026-09-22) — the launch checklist
+
+One day of live testing by the project owner (Filipino-, Chinese-,
+Hindi- and Russian-language passes over an English-created instance)
+surfaced eleven classes of untranslated surface. Each is fixed and,
+where a guard can hold it, guarded — but the LIST is the durable
+asset: **every future language launch, and every review of a new
+surface, walks this ledger.** A class that recurs goes back on this
+list with its new example.
+
+1. **Hardcoded English beside existing i18n keys** (board project
+   filter's three extension categories; Board's active-chip label
+   map). Cause: a stale comment claiming the keys didn't exist.
+   Rule: no inline label literals — render through `t()` and the
+   meta tables; if a comment says a key is missing, verify it
+   against the locale files before believing it (PR #638).
+2. **Raw stored ids rendered as text** (`project.category` on the
+   project page → "childcare"). Rule: stored enum/id values never
+   render directly; use the house badge/meta + `t()` (PR #638).
+3. **Derived text bypassing provenance** ("Follows:" upstream titles
+   on the task card, the task page, and the plug-in shelf, while the
+   cards those titles name translated). Rule: any text DERIVED from
+   a template-originated field goes through the same provenance
+   path as the field itself (PR #639).
+4. **A whole surface missed by the list pass** (the plug-in shelf:
+   task, project and event titles). Rule: the provenance guard's
+   allowlist is also the review list — a new list surface joins it
+   the day it renders template-originated text (PR #639).
+5. **Interpolated stored titles** (the task page's back link:
+   "Back to <stored project title>"). Rule: interpolations carrying
+   member/template text take the provenance view, not the stored
+   string (PR #642).
+6. **Native form-control chrome** (`<select multiple>` rendering
+   "0 Items" in the PHONE's OS language). Rule: never a native
+   multi-select — its closed-state text belongs to the OS, and no
+   locale file can reach it. Use owned checkbox lists (PR #643).
+7. **Template content with no translation path** (suggested-skill
+   chips). Rule: every authored, per-locale-aligned template field
+   is translatable per item under byte-exact-or-nothing — position
+   in the aligned lists is the bridge (PR #642).
+8. **Member-owned copies of authored content** (personal-plan steps
+   seeded from starter steps, stored at seeding-time language).
+   Rule: seeded rows display-translate per item, byte-exact against
+   the authored corpus; anything the member wrote stays verbatim.
+   And `ensureContent(viewer)` BEFORE offering/seeding, so the
+   en-fallback of an unloaded bundle never gets stored (PR #643).
+9. **The marker contradicting the edit form** ("shown in your
+   language" directly above fields holding the original). Editing
+   the ORIGINAL is correct — pre-filling a translation would
+   overwrite the organizer's words on save — but it must say so:
+   `provenance.editingOriginal`, shown whenever the marker is
+   active (PR #643).
+10. **Server-state message conflation** (Settings' notifications
+    probe calling an outdated server "not connected"). Rule: a
+    probe distinguishes every failure mode it can name — see
+    docs/notifications.md field notes (PR #637, #640).
+11. **Glossary collisions with app vocabulary** (fa اعلان and my
+    အသိပေးချက် already meant "board post" when "notification"
+    needed a word). Rule: a new feature term is checked against
+    every glossary's existing decisions BEFORE the strings pass;
+    the distinct term lands in the glossary first
+    (docs/i18n-glossary/fa.md, my.md — PR #635).
+
+**For a NEW language launch**, the parity gates force key/structure
+coverage automatically; what they cannot force is walked by hand:
+the surfaces above, in the new language, over an instance created
+in a DIFFERENT language. And two inventory notes for plans drafted
+before 2026-09-22 (the Korean plan included): the string surface
+has since grown by `push.*` (37 keys) and
+`provenance.editingOriginal`, and Stage 0 gains the
+glossary-collision check for "push notification".
