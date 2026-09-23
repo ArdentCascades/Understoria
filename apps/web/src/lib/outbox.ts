@@ -36,6 +36,7 @@ import {
   submitMessageToNode,
   submitSeedVaultPledgeToNode,
   submitPushNameConsentToNode,
+  submitEventReminderDisclosureToNode,
   submitMemberRemovalToNode,
   submitMemberReinstatementToNode,
   submitProposalToNode,
@@ -74,6 +75,7 @@ import type {
   ProposalClosure,
   SeedVaultPledge,
   PushNameConsent,
+  EventReminderDisclosure,
   ShiftSignupState,
   TaskState,
 } from "@understoria/shared/types";
@@ -348,6 +350,18 @@ export async function enqueuePushNameConsentOutbox(
 ): Promise<OutboxRow | null> {
   // Same natural key as pledges: one live consent version per member.
   return enqueueOutbox("push_name_consent", `pnc_${record.memberKey}`, record);
+}
+
+export async function enqueueEventReminderDisclosureOutbox(
+  record: EventReminderDisclosure,
+): Promise<OutboxRow | null> {
+  // Natural key IS the event — one live disclosure version per event
+  // in the queue; a retraction replaces a still-pending allow.
+  return enqueueOutbox(
+    "event_reminder_disclosure",
+    `erd_${record.eventId}`,
+    record,
+  );
 }
 
 export async function enqueueEventShiftOutbox(
@@ -771,6 +785,12 @@ export async function flushOutboxOnce(
         cfg,
         { fetchImpl: options.fetchImpl },
       );
+    } else if (row.kind === "event_reminder_disclosure") {
+      result = await submitEventReminderDisclosureToNode(
+        payload as unknown as EventReminderDisclosure,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
     } else if (row.kind === "member_removal") {
       result = await submitMemberRemovalToNode(
         payload as unknown as MemberRemoval,
@@ -852,6 +872,9 @@ export async function flushOutboxOnce(
       "event_rsvp",
       "event_shift",
       "shift_signup",
+      // 409 unknown_event: the disclosure's event may still be in
+      // flight ahead of this row — same ordering as shifts.
+      "event_reminder_disclosure",
       // 409 quorum_not_met: the node hasn't seen a signer's receipt
       // yet — retryable by design (docs/member-removal.md M1).
       "member_removal",

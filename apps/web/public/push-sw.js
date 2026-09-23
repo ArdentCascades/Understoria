@@ -165,7 +165,24 @@ async function displayPush(event) {
     strings.named &&
     typeof strings.named[category] === "string"
   ) {
-    if (category === "message_waiting") {
+    if (
+      (category === "event_reminder" || category === "shift_reminder") &&
+      payload &&
+      payload.detail &&
+      typeof payload.detail.title === "string" &&
+      strings.titled &&
+      typeof strings.titled[category] === "string"
+    ) {
+      /* Named EVENT reminders (docs/notifications.md v2): the
+       * payload carries the event's title only when its organizer's
+       * disclosure flag is on — the organizer's half of a
+       * two-consent AND whose other half is this member's named
+       * level. No detail (every event's default) falls through to
+       * the static named line below. */
+      body = interpolate(strings.titled[category], {
+        event: payload.detail.title,
+      });
+    } else if (category === "message_waiting") {
       /* Named by MUTUAL consent (docs/notifications.md v2): the
        * payload carries only the triggering sender's KEY, and a
        * name renders only when this device's own map — consented ∩

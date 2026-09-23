@@ -647,7 +647,9 @@
       "endsOtherDay": "Linaisha siku nyingine",
       "errorEndBeforeStartMidnightHint": "Linavuka usiku wa manane? Weka alama kwenye “Linaisha siku nyingine.”",
       "errorCapacityInvalid": "Idadi ya nafasi iwe namba kamili chanya, au acha wazi kama hakuna kikomo.",
-      "errorLocked": "Fungua kifaa hiki kwa maneno yako ya siri kabla ya kutia sahihi tukio."
+      "errorLocked": "Fungua kifaa hiki kwa maneno yako ya siri kabla ya kutia sahihi tukio.",
+      "namedRemindersLabel": "Vikumbusho vinaweza kutaja tukio hili",
+      "namedRemindersHint": "Kwa kawaida kikumbusho husema tu kwamba tukio linakaribia. Ruhusu kama jina la tukio hili ni salama kuonekana kwenye skrini za kufunga — linaonekana tu kwa waliochagua arifa zinazotaja aina, na unaweza kubadili uamuzi hapa wakati wowote."
     },
     "detail": {
       "projectLinkLabel": "Mradi",
@@ -2643,6 +2645,8 @@
     "bodyGuardian": "Ombi la ushika amana linakusubiri",
     "bodyConfirm": "Mbadilishano unasubiri uthibitisho wako",
     "bodyEvent": "Tukio ulilosema utakuja linakaribia",
+    "bodyEventTitled": "“{event}” linakaribia",
+    "bodyShiftTitled": "Zamu yako kwenye “{event}” inaanza hivi karibuni",
     "bodyMessage": "{sender} ana maneno kwa ajili yako",
     "bodyTest": "Jaribio uliloomba — arifa halisi zitaonekana hivi hivi",
     "levelTitle": "Rekebisha kila aina",

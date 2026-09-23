@@ -647,7 +647,9 @@
       "endsOtherDay": "Ends on a different day",
       "errorEndBeforeStartMidnightHint": "Runs past midnight? Tick “Ends on a different day.”",
       "errorCapacityInvalid": "Capacity must be a positive whole number, or leave it empty for uncapped.",
-      "errorLocked": "Unlock this device with your passphrase before signing the event."
+      "errorLocked": "Unlock this device with your passphrase before signing the event.",
+      "namedRemindersLabel": "Reminders may name this event",
+      "namedRemindersHint": "Usually a reminder says only that an event is coming up. Allow this if the event's name is safe to appear on lock screens — it shows only to people who chose detailed notifications, and you can change your mind here any time."
     },
     "detail": {
       "projectLinkLabel": "Project",
@@ -2643,6 +2645,8 @@
     "bodyGuardian": "A guardian request is waiting for you",
     "bodyConfirm": "An exchange is waiting for your confirmation",
     "bodyEvent": "An event you're going to is coming up",
+    "bodyEventTitled": "“{event}” is coming up",
+    "bodyShiftTitled": "Your shift at “{event}” starts soon",
     "bodyMessage": "{sender} has words for you",
     "bodyTest": "A test you asked for — real ones will look just like this",
     "levelTitle": "Fine-tune each kind",

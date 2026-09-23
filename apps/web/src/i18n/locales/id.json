@@ -647,7 +647,9 @@
       "endsOtherDay": "Berakhir di hari yang berbeda",
       "errorEndBeforeStartMidnightHint": "Lewat tengah malam? Centang “Berakhir di hari yang berbeda”.",
       "errorCapacityInvalid": "Kapasitas harus bilangan bulat positif, atau kosongkan kalau tanpa batas.",
-      "errorLocked": "Buka kunci perangkat ini dengan frasa sandimu sebelum menandatangani acara."
+      "errorLocked": "Buka kunci perangkat ini dengan frasa sandimu sebelum menandatangani acara.",
+      "namedRemindersLabel": "Pengingat boleh menyebut nama acara ini",
+      "namedRemindersHint": "Biasanya pengingat hanya bilang ada acara yang segera mulai. Izinkan kalau nama acara ini aman muncul di layar kunci — hanya terlihat oleh yang memilih notifikasi yang menyebut jenis, dan kamu bisa berubah pikiran di sini kapan saja."
     },
     "detail": {
       "projectLinkLabel": "Proyek",
@@ -2643,6 +2645,8 @@
     "bodyGuardian": "Ada permintaan pemegang amanah menunggumu",
     "bodyConfirm": "Ada pertukaran menunggu konfirmasimu",
     "bodyEvent": "Acara yang kamu bilang akan kamu datangi sebentar lagi mulai",
+    "bodyEventTitled": "“{event}” sebentar lagi mulai",
+    "bodyShiftTitled": "Sesimu di “{event}” segera mulai",
     "bodyMessage": "{sender} punya kata-kata untukmu",
     "bodyTest": "Uji coba yang kamu minta — notifikasi sungguhan akan tampak persis seperti ini",
     "levelTitle": "Atur tiap jenis",

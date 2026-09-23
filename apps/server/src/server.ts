@@ -38,6 +38,7 @@ import {
   createShiftSignupStateStore,
   createSeedVaultPledgeStore,
   createPushNameConsentStore,
+  createEventReminderDisclosureStore,
   createCapacityPostureStore,
   createMemberRemovalStore,
   createMemberReinstatementStore,
@@ -103,6 +104,7 @@ import { registerProjectStateRoutes } from "./routes/projectStates.js";
 import { registerParticipationStateRoutes } from "./routes/participationStates.js";
 import { registerSeedVaultPledgeRoutes } from "./routes/seedVaultPledges.js";
 import { registerPushNameConsentRoutes } from "./routes/pushNameConsents.js";
+import { registerEventReminderDisclosureRoutes } from "./routes/eventReminderDisclosures.js";
 import { registerCapacityPostureRoutes } from "./routes/capacityPostures.js";
 import { registerMemberRemovalRoutes } from "./routes/memberRemovals.js";
 import { registerGovernanceRoutes } from "./routes/proposals.governance.js";
@@ -332,6 +334,7 @@ export async function buildServer({
   const shiftSignupStateStore = createShiftSignupStateStore(db);
   const seedVaultPledgeStore = createSeedVaultPledgeStore(db);
   const pushNameConsentStore = createPushNameConsentStore(db);
+  const eventReminderDisclosureStore = createEventReminderDisclosureStore(db);
   const capacityPostureStore = createCapacityPostureStore(db);
   const memberRemovalStore = createMemberRemovalStore(db);
   const memberReinstatementStore = createMemberReinstatementStore(db);
@@ -676,6 +679,13 @@ export async function buildServer({
   // federated "my name may appear in notifications" boolean, on the
   // same single-owner LWW machinery. Absence means OFF.
   await registerPushNameConsentRoutes(app, { store: pushNameConsentStore });
+  // Event reminder disclosures (docs/notifications.md v2) — an
+  // organizer's per-event "reminders may name this event" flag,
+  // authority derived from the stored event like shifts.
+  await registerEventReminderDisclosureRoutes(app, {
+    store: eventReminderDisclosureStore,
+    eventStore,
+  });
   // Capacity postures (docs/capacity-forecast.md §6) — the coarse,
   // node-system-key-signed community capacity attestation. READ-ONLY:
   // the node emits its own posture; there is no member POST path.

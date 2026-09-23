@@ -60,6 +60,7 @@ import type {
   TaskState,
   SeedVaultPledge,
   PushNameConsent,
+  EventReminderDisclosure,
   CapacityPosture,
   MemberRemoval,
   MemberRemovalPayload,
@@ -1362,6 +1363,15 @@ export function verifySeedVaultPledge(rec: SeedVaultPledge): boolean {
 }
 
 export function verifyPushNameConsent(rec: PushNameConsent): boolean {
+  return verifyStateRecord(rec);
+}
+
+/** Cryptographic check only — the AUTHORITY rule (`signerKey` must
+ *  equal the stored event's `createdBy`) is a referent check
+ *  enforced by the callers, exactly as event shifts do. */
+export function verifyEventReminderDisclosure(
+  rec: EventReminderDisclosure,
+): boolean {
   return verifyStateRecord(rec);
 }
 

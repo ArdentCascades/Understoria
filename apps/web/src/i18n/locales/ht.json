@@ -647,7 +647,9 @@
       "endsOtherDay": "Li fini yon lòt jou",
       "errorEndBeforeStartMidnightHint": "L ap pase minwi? Make “Li fini yon lòt jou”.",
       "errorCapacityInvalid": "Kantite plas la se yon chif antye ki pi gran pase 0 — oswa kite l vid si pa gen limit.",
-      "errorLocked": "Ouvri aparèy sa a ak passphrase ou anvan ou siyen evènman an."
+      "errorLocked": "Ouvri aparèy sa a ak passphrase ou anvan ou siyen evènman an.",
+      "namedRemindersLabel": "Rapèl yo ka di non evènman sa a",
+      "namedRemindersHint": "Anjeneral yon rapèl di sèlman gen yon evènman k ap pwoche. Pèmèt sa si non evènman an ka parèt san danje sou ekran vewouyaj — se sèlman moun ki chwazi notifikasyon ki di ki kalite k ap wè l, epi ou ka chanje lide isit la nenpòt lè."
     },
     "detail": {
       "projectLinkLabel": "Pwojè",
@@ -2643,6 +2645,8 @@
     "bodyGuardian": "Yon demann pou sere kle ap tann ou",
     "bodyConfirm": "Yon echanj ap tann konfimasyon w",
     "bodyEvent": "Yon evènman ou te di w ap vini an ap pwoche",
+    "bodyEventTitled": "«{event}» ap pwoche",
+    "bodyShiftTitled": "Tou ou nan «{event}» ap kòmanse talè",
     "bodyMessage": "{sender} gen pawòl pou ou",
     "bodyTest": "Yon tès ou te mande — vrè yo ap parèt menm jan an nèt",
     "levelTitle": "Regle chak kalite apa",

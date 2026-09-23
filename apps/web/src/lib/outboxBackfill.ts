@@ -38,6 +38,7 @@ import {
   enqueueProposalOutbox,
   enqueueSeedVaultPledgeOutbox,
   enqueuePushNameConsentOutbox,
+  enqueueEventReminderDisclosureOutbox,
   enqueueTaskCommentOutbox,
   enqueueVouchOutbox,
   enqueueVoteOutbox,
@@ -233,6 +234,10 @@ export async function backfillOutboxFromLocalData(): Promise<number> {
   for (const c of await db.pushNameConsents.toArray()) {
     if (!held.has(c.memberKey)) continue;
     count(await enqueuePushNameConsentOutbox(c));
+  }
+  for (const d of await db.eventReminderDisclosures.toArray()) {
+    if (!held.has(d.signerKey)) continue;
+    count(await enqueueEventReminderDisclosureOutbox(d));
   }
 
   // Co-organizer records — stored rows ARE the full signed records.

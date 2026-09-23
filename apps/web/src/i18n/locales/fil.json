@@ -647,7 +647,9 @@
       "endsOtherDay": "Matatapos sa ibang araw",
       "errorEndBeforeStartMidnightHint": "Lalampas ng hatinggabi? Lagyan ng check ang “Matatapos sa ibang araw.”",
       "errorCapacityInvalid": "Dapat buo at positibong numero ang dami ng kasya, o iwanang blangko kung walang takda.",
-      "errorLocked": "I-unlock ang device na ito gamit ang passphrase mo bago pirmahan ang event."
+      "errorLocked": "I-unlock ang device na ito gamit ang passphrase mo bago pirmahan ang event.",
+      "namedRemindersLabel": "Maaaring banggitin ng mga paalala ang event na ito",
+      "namedRemindersHint": "Karaniwan, sinasabi lang ng paalala na may paparating na event. Payagan ito kung ligtas lumabas ang pangalan ng event sa mga lock screen — makikita lang ito ng mga pumili ng notipikasyong nagsasabi ng uri, at maaari kang magbago ng isip dito anumang oras."
     },
     "detail": {
       "projectLinkLabel": "Proyekto",
@@ -2643,6 +2645,8 @@
     "bodyGuardian": "May hiling ng tagapag-ingat na naghihintay sa iyo",
     "bodyConfirm": "May palitang naghihintay ng kumpirmasyon mo",
     "bodyEvent": "Paparating na ang event na sinabi mong pupuntahan mo",
+    "bodyEventTitled": "Paparating na ang “{event}”",
+    "bodyShiftTitled": "Malapit nang magsimula ang turno mo sa “{event}”",
     "bodyMessage": "May mga salita si {sender} para sa iyo",
     "bodyTest": "Pagsubok na hiniling mo — ganito mismo magmumukha ang totoo",
     "levelTitle": "Ayusin ang bawat uri",

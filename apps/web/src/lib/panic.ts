@@ -146,6 +146,7 @@ export const SOFT_PURGE_CLASSIFICATION: Readonly<
   capacityPostures: "preserved", // node-signed coarse bands, no text
   seedVaultPledges: "preserved", // public archive-role claims, key + flag
   pushNameConsents: "preserved", // public name-consent booleans, key + flag
+  eventReminderDisclosures: "preserved", // public per-event flags, id + bool
   memberRemovals: "preserved", // quorum governance records, signed
   memberReinstatements: "preserved", // same class as removals
   proposalClosures: "preserved", // signed governance outcomes

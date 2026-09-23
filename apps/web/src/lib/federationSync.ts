@@ -31,6 +31,7 @@ import type {
   ProjectState,
   SeedVaultPledge,
   PushNameConsent,
+  EventReminderDisclosure,
   CapacityPosture,
   ShiftSignupState,
   TaskState,
@@ -2849,6 +2850,93 @@ export async function pullFederatedPushNameConsents(): Promise<FederationSyncRes
       continue;
     }
     await db.pushNameConsents.put(record);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxUpdatedAt !== null) {
+    await setSetting(feed.cursorKey, formatCursor(maxUpdatedAt));
+  }
+  return { inserted, skipped };
+}
+
+const EVENT_REMINDER_DISCLOSURE_CURSOR_KEY =
+  "federationLastEventReminderDisclosurePull";
+
+/**
+ * Pull event reminder disclosures (docs/notifications.md v2) — each
+ * organizer's per-event "reminders may name this event" boolean.
+ * Single-owner LWW keyed by eventId; authority derives from the
+ * LOCAL event row exactly like shifts (the signer must be the
+ * event's createdBy), so a hostile row never advances the cursor
+ * and a disclosure whose event hasn't arrived yet retries next
+ * cycle.
+ */
+export async function pullFederatedEventReminderDisclosures(): Promise<FederationSyncResult | null> {
+  const feed = await fetchStateFeed<Record<string, unknown>>(
+    "/event-reminder-disclosures",
+    "eventReminderDisclosures",
+    EVENT_REMINDER_DISCLOSURE_CURSOR_KEY,
+  );
+  if (!feed) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxUpdatedAt: CursorPos | null = feed.cursor;
+
+  for (const r of feed.rows) {
+    if (
+      typeof r.id !== "string" ||
+      typeof r.eventId !== "string" ||
+      typeof r.signerKey !== "string" ||
+      typeof r.signature !== "string" ||
+      typeof r.allow !== "boolean" ||
+      !plausibleCursorStamp(r.updatedAt)
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const record = r as unknown as EventReminderDisclosure;
+    if (!verifyStateRecord(record)) {
+      skipped += 1;
+      continue;
+    }
+
+    const advanceCursor = () => {
+      maxUpdatedAt = advancePair(maxUpdatedAt, record.updatedAt, record.id);
+    };
+
+    // Authority derives from the LOCAL event row — the one signed
+    // artifact we already verified when it arrived.
+    const event = await db.events.get(record.eventId);
+    if (!event) {
+      // Windowing: disclosures of a windowed-out event never
+      // resolve — advance past them instead of retrying forever.
+      if (
+        !(await windowAdmits("event_child", {
+          ageAt: record.updatedAt,
+          parentPresent: false,
+        }))
+      ) {
+        skipped += 1;
+        advanceCursor();
+        continue;
+      }
+      skipped += 1; // event not here yet — retry next cycle
+      continue;
+    }
+    if (record.signerKey !== event.createdBy) {
+      skipped += 1; // refused — never advance past a hostile row
+      continue;
+    }
+
+    const local = await db.eventReminderDisclosures.get(record.eventId);
+    if (local && record.updatedAt <= local.updatedAt) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+    await db.eventReminderDisclosures.put(record);
     inserted += 1;
     advanceCursor();
   }

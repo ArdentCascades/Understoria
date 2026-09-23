@@ -647,7 +647,9 @@
       "endsOtherDay": "Termina otro día",
       "errorEndBeforeStartMidnightHint": "¿Termina pasada la medianoche? Marca “Termina otro día”.",
       "errorCapacityInvalid": "El cupo debe ser un número entero positivo, o déjalo vacío para cupo abierto.",
-      "errorLocked": "Desbloquea este dispositivo con tu frase de acceso antes de firmar el evento."
+      "errorLocked": "Desbloquea este dispositivo con tu frase de acceso antes de firmar el evento.",
+      "namedRemindersLabel": "Los recordatorios pueden nombrar este evento",
+      "namedRemindersHint": "Normalmente un recordatorio solo dice que se acerca un evento. Permítelo si el nombre del evento puede aparecer sin riesgo en pantallas de bloqueo — solo lo ven quienes eligieron notificaciones con detalle, y puedes cambiar de idea aquí cuando quieras."
     },
     "detail": {
       "projectLinkLabel": "Proyecto",
@@ -2643,6 +2645,8 @@
     "bodyGuardian": "Una petición de guardián te espera",
     "bodyConfirm": "Un intercambio espera tu confirmación",
     "bodyEvent": "Se acerca un evento al que dijiste que vienes",
+    "bodyEventTitled": "Se acerca “{event}”",
+    "bodyShiftTitled": "Tu turno en “{event}” empieza pronto",
     "bodyMessage": "{sender} tiene palabras para ti",
     "bodyTest": "Una prueba que pediste — las de verdad se verán exactamente así",
     "levelTitle": "Afinar cada tipo",

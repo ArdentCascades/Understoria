@@ -105,6 +105,9 @@ export const WINDOW_PINNED_TABLES = [
   // Name-consent booleans (docs/notifications.md v2) — tiny, and the
   // naming AND needs them current on every device.
   "pushNameConsents",
+  // Per-event reminder disclosures (docs/notifications.md v2) —
+  // tiny booleans; organizers' own flags must survive to re-seed.
+  "eventReminderDisclosures",
   // Coarse node-capacity attestations (docs/capacity-forecast.md §6):
   // one node-signed row per node, trivially small; the community's
   // capacity signal, always freshly pulled — pin it, never window.

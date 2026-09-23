@@ -647,7 +647,9 @@
       "endsOtherDay": "跨天结束",
       "errorEndBeforeStartMidnightHint": "会过午夜吗？勾上“跨天结束”。",
       "errorCapacityInvalid": "人数上限要是正整数，留空则表示不限人数。",
-      "errorLocked": "先用口令解锁这台设备，再签署活动。"
+      "errorLocked": "先用口令解锁这台设备，再签署活动。",
+      "namedRemindersLabel": "提醒可以写出这个活动的名字",
+      "namedRemindersHint": "平时提醒只说有个活动快到了。如果这个活动的名字出现在锁屏上也没关系，就打开它——只有选了写明类别通知的人才会看到，你随时可以在这里改主意。"
     },
     "detail": {
       "projectLinkLabel": "项目",
@@ -2643,6 +2645,8 @@
     "bodyGuardian": "有一个守护请求在等你",
     "bodyConfirm": "有一次互助在等你确认",
     "bodyEvent": "你说要参加的活动快到了",
+    "bodyEventTitled": "“{event}”快到了",
+    "bodyShiftTitled": "你在“{event}”的时段快开始了",
     "bodyMessage": "{sender}有话给你",
     "bodyTest": "这是你要的测试——真的通知就长这样",
     "levelTitle": "每一类单独调",

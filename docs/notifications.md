@@ -324,6 +324,41 @@ stand. The design that respects them:
   key rides inside the encrypted payload, visible only to the
   recipient's device, which knew it anyway.
 
+### Named event reminders (organizer-consented)
+
+The named tier's original example — "Your shift at {event} starts
+in an hour" — becomes real, behind a TWO-CONSENT AND:
+
+- **The ORGANIZER's per-event flag** — "reminders may name this
+  event", default OFF for every event (absence of a record is a
+  no). Their call because it is their event's name; the pseudonym
+  moral geometry again, pointed at a gathering. Less sensitive
+  events can opt their name in for clearer reminders; a support
+  circle stays generic forever.
+- **The RECIPIENT's named level**, chosen with the
+  shoulder-surfing warning — they always own their lock screen,
+  per category since v2's rung G.
+
+The flag is its own single-owner signed LWW record
+(`{id, eventId, allow, updatedAt, signerKey, signature}`) rather
+than an event field, because `canonicalEventPayload`'s field order
+is the wire contract — and deliberately so: the immutable event
+can't change its mind, but the record can be flipped or retracted
+at ANY time, and the sweep reads it at SEND time, so a retraction
+takes effect on the very next pass. Authority is the event-shift
+rule: the only legitimate signer is the stored event's
+`createdBy`, checked by the node route and every puller.
+
+With the flag on, reminder payloads carry `detail.title` — the
+event's title, which is already a public signed record, so nothing
+new becomes node-visible and the title travels only inside the
+RFC 8291-encrypted body. One flag covers BOTH clocks (shift
+reminders name the shift's event). The known vector — an organizer
+renaming an event to something hostile before reminders fire — is
+accepted as weak: it reaches only members who RSVP'd "going" to
+that organizer's own event, it is a public signed record, and any
+recipient can drop to generic.
+
 ### Deeper member control (device-only)
 
 - **Per-category lock-screen levels.** The single tier becomes a
@@ -363,5 +398,12 @@ stand. The design that respects them:
   the SW prefs, SW named rendering with generic on any map miss;
   strings ×18; the threat-model §7 rewrite (shipped status + the
   consent-flag disclosure).
+- **Named event reminders — SHIPPED** (with the section above):
+  the disclosure record end to end (node table v38,
+  `/event-reminder-disclosures` routes + feed with the
+  organizer-referent check, mirror kind, web pull + outbox +
+  registries), `detail.title` from both sweeps behind the flag,
+  the SW's with-title templates, the create-form checkbox and the
+  event page's organizer toggle; strings ×18.
 - **I (later):** lead-time choice; then governance, guardian, per
   the section above.

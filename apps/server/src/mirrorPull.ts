@@ -203,6 +203,16 @@ export const MIRROR_KINDS: readonly MirrorKindSpec[] = [
     id: (r) => str(r.id),
     conflict409: "halt",
   },
+  // Ordered after /events in this list: a disclosure references its
+  // event, and the local POST 409s (halt-and-retry) until the event
+  // has landed.
+  {
+    path: "/event-reminder-disclosures",
+    bodyKey: "eventReminderDisclosures",
+    ts: (r) => num(r.updatedAt),
+    id: (r) => str(r.id),
+    conflict409: "halt",
+  },
   {
     path: "/shift-signups",
     bodyKey: "shiftSignups",

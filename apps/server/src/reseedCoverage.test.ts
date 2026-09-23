@@ -49,6 +49,7 @@ const RESEED_PATHS = [
   "/event-rsvps",
   "/seed-vault-pledges",
   "/push-name-consents",
+  "/event-reminder-disclosures",
   "/member-removals",
   "/member-reinstatements",
   "/proposals",

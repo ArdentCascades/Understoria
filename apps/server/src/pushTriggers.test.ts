@@ -320,13 +320,31 @@ describe("event-reminder sweep (v2 — same clock, one level up)", () => {
     db.close();
   });
 
-  function seedEvent(id: string, startsAt: number) {
+  function seedEvent(id: string, startsAt: number, title = "") {
     db.prepare(
       `INSERT INTO events
         (id, node_id, created_by, starts_at, ends_at, created_at,
          payload, signature)
-       VALUES (?, 'node_test', 'organizer', ?, NULL, 0, '{}', 'sig')`,
-    ).run(id, startsAt);
+       VALUES (?, 'node_test', 'organizer', ?, NULL, 0, ?, 'sig')`,
+    ).run(id, startsAt, JSON.stringify(title ? { title } : {}));
+  }
+
+  /** The organizer's per-event disclosure flag, as the route would
+   *  store it (authority already checked at write time). */
+  function seedDisclosure(eventId: string, allow: boolean) {
+    const payload = {
+      id: `erd-${eventId}-${allow}`,
+      eventId,
+      allow,
+      updatedAt: Date.now(),
+      signerKey: "organizer",
+      signature: "sig",
+    };
+    db.prepare(
+      `INSERT OR REPLACE INTO event_reminder_disclosures
+        (event_id, id, signer_key, updated_at, payload, signature)
+       VALUES (?, ?, 'organizer', 1, ?, 'sig')`,
+    ).run(eventId, payload.id, JSON.stringify(payload));
   }
 
   function seedRsvp(
@@ -616,5 +634,169 @@ describe("message-waiting end to end (the relay hook)", () => {
     ).toBe(201);
     await new Promise((r) => setImmediate(r));
     expect(sent).toHaveLength(1);
+  });
+});
+
+describe("named event reminders (organizer-consented detail.title)", () => {
+  let db: DatabaseType;
+
+  afterEach(() => {
+    db.close();
+  });
+
+  function seedEvent(id: string, startsAt: number, title: string) {
+    db.prepare(
+      `INSERT INTO events
+        (id, node_id, created_by, starts_at, ends_at, created_at,
+         payload, signature)
+       VALUES (?, 'node_test', 'organizer', ?, NULL, 0, ?, 'sig')`,
+    ).run(id, startsAt, JSON.stringify({ title }));
+  }
+
+  function seedDisclosure(eventId: string, allow: boolean, at = 1) {
+    const payload = {
+      id: `erd-${eventId}-${at}`,
+      eventId,
+      allow,
+      updatedAt: at,
+      signerKey: "organizer",
+      signature: "sig",
+    };
+    db.prepare(
+      `INSERT OR REPLACE INTO event_reminder_disclosures
+        (event_id, id, signer_key, updated_at, payload, signature)
+       VALUES (?, ?, 'organizer', ?, ?, 'sig')`,
+    ).run(eventId, payload.id, at, JSON.stringify(payload));
+  }
+
+  function seedRsvp(eventId: string, memberKey: string) {
+    const payload = {
+      id: `rsvp-${eventId}-${memberKey}`,
+      eventId,
+      memberKey,
+      status: "going",
+      respondedAt: 0,
+      updatedAt: 1,
+      signerKey: memberKey,
+      signature: "sig",
+    };
+    db.prepare(
+      `INSERT OR REPLACE INTO event_rsvps
+        (event_id, member_key, id, signer_key, updated_at, payload,
+         signature)
+       VALUES (?, ?, ?, ?, 1, ?, 'sig')`,
+    ).run(eventId, memberKey, payload.id, memberKey, JSON.stringify(payload));
+  }
+
+  function makeSweep(sent: Sent[], at: number) {
+    const sender = createPushSender(
+      createPushSubscriptionStore(db),
+      ensureVapidKeys(db),
+      captureTransport(sent),
+    );
+    return startReminderSweep({
+      db,
+      sender,
+      intervalMs: 0,
+      now: () => at,
+    });
+  }
+
+  it("carries the title ONLY where the organizer's flag allows it — absence stays generic", async () => {
+    db = openDatabase(":memory:");
+    const T = 1_700_000_000_000;
+    const sent: Sent[] = [];
+    seedEvent("ev-named", T + 30 * 60_000, "Seed swap at the pavilion");
+    seedEvent("ev-quiet", T + 30 * 60_000, "Support circle");
+    seedDisclosure("ev-named", true);
+    // ev-quiet has NO disclosure record — every event's default.
+    seedRsvp("ev-named", "member-a");
+    seedRsvp("ev-quiet", "member-a");
+    subscribeRow(db, "member-a", "https://push.example/a", [
+      "event_reminder",
+    ]);
+
+    const sweep = makeSweep(sent, T);
+    expect(await sweep.sweepOnce()).toBe(2);
+    const named = sent.find((s) =>
+      JSON.stringify(s.payload).includes("ev-named"),
+    );
+    const quiet = sent.find((s) =>
+      JSON.stringify(s.payload).includes("ev-quiet"),
+    );
+    expect(named?.payload).toEqual({
+      category: "event_reminder",
+      path: "/events/ev-named",
+      detail: { title: "Seed swap at the pavilion" },
+    });
+    // No disclosure → category data only, exactly as before v2.
+    expect(quiet?.payload).toEqual({
+      category: "event_reminder",
+      path: "/events/ev-quiet",
+    });
+    sweep.stop();
+  });
+
+  it("a retraction strips the title at send time, and the shift clock honors the event's flag", async () => {
+    db = openDatabase(":memory:");
+    const T = 1_700_000_000_000;
+    const sent: Sent[] = [];
+    seedEvent("ev-1", T + 30 * 60_000, "Tool library open house");
+    seedDisclosure("ev-1", true, 1);
+    seedDisclosure("ev-1", false, 2); // organizer changed their mind
+    seedRsvp("ev-1", "member-a");
+    // A shift on a DISCLOSED event carries the title too.
+    seedEvent("ev-2", T + 6 * 60 * 60_000, "River cleanup");
+    seedDisclosure("ev-2", true);
+    createEventShiftStateStore(db).upsert({
+      id: "shift-1",
+      eventId: "ev-2",
+      label: "Morning crew",
+      startsAt: T + 30 * 60_000,
+      endsAt: T + 2 * 60 * 60_000,
+      capacity: null,
+      createdBy: "organizer",
+      createdAt: 0,
+      deletedAt: null,
+      updatedAt: 1,
+      signerKey: "organizer",
+      signature: "sig",
+    });
+    createShiftSignupStateStore(db).upsert({
+      id: "signup-1",
+      shiftId: "shift-1",
+      eventId: "ev-2",
+      memberKey: "member-a",
+      signedUpAt: 0,
+      deletedAt: null,
+      updatedAt: 1,
+      signerKey: "member-a",
+      signature: "sig",
+    });
+    subscribeRow(db, "member-a", "https://push.example/a", [
+      "event_reminder",
+      "shift_reminder",
+    ]);
+
+    const sweep = makeSweep(sent, T);
+    expect(await sweep.sweepOnce()).toBe(2);
+    const eventPing = sent.find(
+      (s) => s.payload.category === "event_reminder",
+    );
+    const shiftPing = sent.find(
+      (s) => s.payload.category === "shift_reminder",
+    );
+    // Retracted: back to category data only.
+    expect(eventPing?.payload).toEqual({
+      category: "event_reminder",
+      path: "/events/ev-1",
+    });
+    // The shift ping names its (still-disclosed) event.
+    expect(shiftPing?.payload).toEqual({
+      category: "shift_reminder",
+      path: "/events/ev-2",
+      detail: { title: "River cleanup" },
+    });
+    sweep.stop();
   });
 });

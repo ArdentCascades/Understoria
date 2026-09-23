@@ -449,5 +449,9 @@ describe("NotificationsSection", () => {
     expect(mockPrefs.names).toEqual({ "key-ana": "Ana" });
     expect(mockPrefs.strings?.named.message_waiting).toContain("{sender}");
     expect(mockPrefs.strings?.named.test_ping).toBeTruthy();
+    // The with-title reminder templates (organizer-disclosed
+    // events) ride the same snapshot, pre-localized for the SW.
+    expect(mockPrefs.strings?.titled?.event_reminder).toContain("{event}");
+    expect(mockPrefs.strings?.titled?.shift_reminder).toContain("{event}");
   });
 });
