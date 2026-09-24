@@ -205,51 +205,24 @@ describe("EventNew layout", () => {
     }
   });
 
-  it("date/time rows use minmax(0,…) tracks, never bare fr (iOS overflow contract)", () => {
-    // iOS Safari sizes bare-fr grid tracks from a date/time input's
-    // UA-intrinsic width and ignores min-width:0 on form controls, so
-    // a `grid-cols-[1.4fr_1fr]` row overflows the phone screen (the
-    // IMG_8249 report: the Starts time field ran off the right edge).
-    // The zero minimum must live on the TRACK. This pins the contract
-    // for every grid row that contains a native date/time input.
-    render();
-
-    const dateTimeInputs = Array.from(
-      container.querySelectorAll('input[type="date"], input[type="time"]'),
-    );
-    expect(dateTimeInputs.length).toBeGreaterThan(0);
-    for (const input of dateTimeInputs) {
-      // A time input sits inside its placeholder-overlay wrapper, so
-      // the grid row is the nearest ancestor declaring an
-      // arbitrary-value track list — and it must be INSIDE the
-      // input's fieldset (the page-level lg wrapper also carries a
-      // bracketed track list; matching that would mean the row lost
-      // its contract without failing here).
-      const row = input.closest('[class*="grid-cols-["]');
-      expect(row).not.toBeNull();
-      expect(input.closest("fieldset")!.contains(row!)).toBe(true);
-      const gridClasses = (row!.getAttribute("class") ?? "")
-        .split(/\s+/)
-        .filter((c) => c.includes("grid-cols-["));
-      for (const cls of gridClasses) {
-        // Every fr inside an arbitrary-value track list is wrapped:
-        // no `[`- or `_`-adjacent bare `Nfr` allowed.
-        expect(cls).not.toMatch(/[[_](?:\d+(?:\.\d+)?)fr/);
-        expect(cls).toContain("minmax(0,");
-      }
-    }
-  });
-
-  it("keeps native pickers un-rowed on portrait phones and fieldsets shrinkable (mobile overflow contract)", () => {
-    // The Sep 24 portrait report: the Starts time input ran off the
-    // right screen edge and the different-day toggle painted over the
-    // end time field. Two invariants prevent a regression:
-    //   1. Every grid row holding a native date/time picker is
-    //      single-column at base width — columns only appear at sm+ /
-    //      short landscape, where width is abundant.
-    //   2. Every fieldset holding such a row carries min-w-0: the UA
-    //      default min-inline-size:min-content otherwise lets iOS
-    //      picker intrinsic widths push the whole row past the screen.
+  it("date/time pickers are fixed-width pills in wrap rows, fieldsets shrinkable (mobile overflow contract)", () => {
+    // Two field reports shaped this contract:
+    //   Sep 24 #1: fr-track grids sized from iOS picker UA-intrinsic
+    //     widths (which form controls refuse to shrink below) pushed
+    //     the row past the screen edge — the fieldset's UA default
+    //     min-inline-size:min-content compounding it — and the
+    //     different-day toggle painted over the end time field.
+    //   Sep 24 #2: the full-width stacked replacement stretched a
+    //     ~120px value across the whole phone width.
+    // A native picker only ever needs its value's width, so:
+    //   1. Every date input is a fixed w-44 pill, every time input
+    //      sits in a fixed w-36 overlay wrapper — full-width ONLY
+    //      under the largest-text preference, where the fixed pills
+    //      would clip at 125% font.
+    //   2. The row is flex-wrap (very narrow screens wrap, never
+    //      overflow) with no arbitrary-value grid tracks anywhere in
+    //      the fieldset for iOS to mis-size.
+    //   3. Every fieldset holding pickers carries min-w-0.
     render();
 
     // Reveal the end fieldset and its different-day date input so the
@@ -270,17 +243,25 @@ describe("EventNew layout", () => {
     ).toBe(4);
 
     for (const input of Array.from(
-      container.querySelectorAll('input[type="date"], input[type="time"]'),
+      container.querySelectorAll<HTMLInputElement>(
+        'input[type="date"], input[type="time"]',
+      ),
     )) {
-      const row = input.closest('[class*="grid-cols-["]')!;
-      const classes = (row.getAttribute("class") ?? "").split(/\s+/);
-      expect(classes).toContain("grid-cols-1");
-      // No unprefixed multi-column utility may sneak in beside it.
-      expect(
-        classes.some((c) => /^grid-cols-\[/.test(c)),
-        `unprefixed track list on: ${row.getAttribute("class")}`,
-      ).toBe(false);
-      expect(input.closest("fieldset")!.className).toContain("min-w-0");
+      const sized =
+        input.type === "date"
+          ? input // the date input is its own pill
+          : input.parentElement!; // the time input's overlay wrapper
+      const sizedClasses = (sized.getAttribute("class") ?? "").split(/\s+/);
+      expect(sizedClasses).toContain(input.type === "date" ? "w-44" : "w-36");
+      expect(sizedClasses).toContain("[.text-largest_&]:w-full");
+
+      const row = sized.parentElement!;
+      const rowClasses = (row.getAttribute("class") ?? "").split(/\s+/);
+      expect(rowClasses).toContain("flex-wrap");
+
+      const fieldset = input.closest("fieldset")!;
+      expect(fieldset.className).toContain("min-w-0");
+      expect(fieldset.querySelector('[class*="grid-cols-["]')).toBeNull();
     }
   });
 

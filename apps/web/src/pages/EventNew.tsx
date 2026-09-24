@@ -616,23 +616,23 @@ export default function EventNewPage() {
         <legend className="text-sm font-medium">
           {t("events.new.startsAt")}
         </legend>
-        {/* Portrait phones stack the fields full-width — two native
-            pickers side by side lose to iOS intrinsic widths on a
-            narrow screen. Two columns only where width is abundant
-            (sm+ / short landscape), EXCEPT under the largest-text
-            preference, where the fields stay stacked: at 125% font the
-            pickers cannot render un-clipped side by side, and
-            largest-text members have already chosen legibility over
-            density.
-            minmax(0, Nfr) — not bare Nfr — because iOS Safari sizes fr
-            tracks from a date/time input's UA-intrinsic width and does
-            not honor min-width:0 on form controls, so a bare-fr row
-            blows out past the right edge of the phone screen. Putting
-            the zero minimum on the TRACK is the fix Safari respects. */}
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] landscape-short:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] [.text-largest_&]:grid-cols-1">
+        {/* Fixed-width pills in a wrap row. Two field reports shaped
+            this: fr-track grids let iOS size the tracks from a
+            picker's UA-intrinsic width (which form controls won't
+            shrink below) and blew the row past the screen edge; the
+            full-width stacked replacement then stretched a ~120px
+            value across the whole phone. A native picker only ever
+            needs its value's width, so the date (w-44) and time
+            (w-36) sit side by side at their natural sizes and
+            flex-wrap onto their own lines on very narrow screens —
+            no fr negotiation, no stretch. Only the largest-text
+            preference goes full-width stacked: at 125% font the
+            fixed pills would clip, and largest-text members have
+            already chosen legibility over density. */}
+        <div className="flex flex-wrap items-center gap-2">
           <input
             type="date"
-            className="input min-w-0"
+            className="input w-44 min-w-0 [.text-largest_&]:w-full"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             onBlur={() => validation.onBlur("startDate")}
@@ -651,8 +651,9 @@ export default function EventNewPage() {
               through to the input, focusing it (peer-focus) reveals
               the native control, and picking a value removes the span
               entirely. aria-hidden — the input's aria-label already
-              names it. */}
-          <div className="relative min-w-0">
+              names it. text-sm so the longest locale renderings
+              ("Выберите время") fit the w-36 pill. */}
+          <div className="relative w-36 min-w-0 [.text-largest_&]:w-full">
             <input
               type="time"
               className="input peer min-w-0"
@@ -669,7 +670,7 @@ export default function EventNewPage() {
             {startTime === "" && (
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-px flex items-center rounded-[11px] bg-white px-3 text-moss-400 peer-focus:hidden dark:bg-moss-900 dark:text-moss-500"
+                className="pointer-events-none absolute inset-px flex items-center rounded-[11px] bg-white px-3 text-sm text-moss-400 peer-focus:hidden dark:bg-moss-900 dark:text-moss-500"
               >
                 {t("events.new.timePlaceholder")}
               </span>
@@ -782,27 +783,18 @@ export default function EventNewPage() {
           <fieldset className="min-w-0 flex flex-col gap-2">
             <legend className="sr-only">{t("events.new.endsAt")}</legend>
             {/* Same-day is the default: just the end time. Opting into
-                a different day adds the date input beside it (stacked
-                on portrait phones, same rules as the Starts row). The
-                different-day toggle lives on its OWN line below the
-                fields — it used to share a grid cell with the time
-                input, and on a portrait phone the picker's intrinsic
-                width painted the checkbox on top of the field. */}
-            {/* minmax(0,…) tracks for the same iOS-Safari reason as the
-                Starts row above; the 1fr second track in same-day mode
-                keeps the lone time input at the Starts row's time
-                width once columns appear. */}
-            <div
-              className={
-                endsOtherDay
-                  ? "grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] landscape-short:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] [.text-largest_&]:grid-cols-1"
-                  : "grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] landscape-short:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] [.text-largest_&]:grid-cols-1"
-              }
-            >
+                a different day adds the date input beside it — fixed-
+                width pills in a wrap row, same contract as the Starts
+                row above. The different-day toggle lives on its OWN
+                line below the fields — it used to share a grid cell
+                with the time input, and on a portrait phone the
+                picker's intrinsic width painted the checkbox on top
+                of the field. */}
+            <div className="flex flex-wrap items-center gap-2">
               {endsOtherDay && (
                 <input
                   type="date"
-                  className="input min-w-0"
+                  className="input w-44 min-w-0 [.text-largest_&]:w-full"
                   value={endDate}
                   onChange={(e) => {
                     setEndDate(e.target.value);
@@ -816,7 +808,7 @@ export default function EventNewPage() {
                 />
               )}
               {/* Same empty-state overlay as the start time. */}
-              <div className="relative min-w-0">
+              <div className="relative w-36 min-w-0 [.text-largest_&]:w-full">
                 <input
                   type="time"
                   className="input peer min-w-0"
@@ -834,7 +826,7 @@ export default function EventNewPage() {
                 {endTime === "" && (
                   <span
                     aria-hidden="true"
-                    className="pointer-events-none absolute inset-px flex items-center rounded-[11px] bg-white px-3 text-moss-400 peer-focus:hidden dark:bg-moss-900 dark:text-moss-500"
+                    className="pointer-events-none absolute inset-px flex items-center rounded-[11px] bg-white px-3 text-sm text-moss-400 peer-focus:hidden dark:bg-moss-900 dark:text-moss-500"
                   >
                     {t("events.new.timePlaceholder")}
                   </span>
