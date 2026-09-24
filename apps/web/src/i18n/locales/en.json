@@ -2625,7 +2625,7 @@
     "catEvent": "Event reminders",
     "catEventDesc": "Before an event you said you're going to begins.",
     "catMessage": "Messages waiting",
-    "catMessageDesc": "When someone's words arrive for you — at most one nudge every four hours, no matter who writes or how often.",
+    "catMessageDesc": "When someone's words arrive for you. While you're away: at most one nudge every four hours, whoever writes and however much. And once you've been in to collect your messages, the next words can nudge you right away.",
     "disclosureTitle": "Before this turns on",
     "disclosure": "Pushes travel through your browser maker's relay — Google, Mozilla, or Apple, depending on this browser. The relay can't read them (each one is sealed to this device), but it can see that something small arrived, and when. Your community's server learns only which kinds you chose — never your lock-screen wording, never a message. If that trace isn't a cost you want, skip this: the app is complete without it.",
     "disclosureContinue": "I understand — ask this browser",

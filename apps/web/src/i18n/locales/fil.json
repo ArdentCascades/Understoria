@@ -2625,7 +2625,7 @@
     "catEvent": "Paalala sa event",
     "catEventDesc": "Bago magsimula ang event na sinabi mong pupuntahan mo.",
     "catMessage": "May naghihintay na mensahe",
-    "catMessageDesc": "Kapag may dumating na mga salita para sa iyo — sinuman ang sumulat, gaano man karami, isang kalabit lang kada apat na oras.",
+    "catMessageDesc": "Kapag may dumating na mga salita para sa iyo. Habang wala ka: sinuman ang sumulat, gaano man karami, isang kalabit lang kada apat na oras. At sa sandaling pumasok ka at makuha ang mga mensahe mo, maaari ka nang kalabitin agad ng susunod na mga salita.",
     "disclosureTitle": "Bago ito buksan",
     "disclosure": "Dumadaan ang push sa relay ng gumawa ng browser mo — Google, Mozilla, o Apple, depende sa browser. Hindi ito mababasa ng relay (selyado ang bawat isa para sa device na ito), pero nakikita nitong may maliit na dumating, at kung kailan. Ang alam lang ng server ng inyong komunidad ay kung aling mga uri ang pinili mo — hindi kailanman ang mga salita sa lock screen mo, hindi kailanman ang mensahe. Kung ang bakas na iyon ay halagang ayaw mong bayaran, laktawan mo: buo ang app kahit wala ito.",
     "disclosureContinue": "Nauunawaan ko — itanong sa browser",

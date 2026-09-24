@@ -2625,7 +2625,7 @@
     "catEvent": "Recordatorios de evento",
     "catEventDesc": "Antes de que empiece un evento al que dijiste que vienes.",
     "catMessage": "Mensajes esperando",
-    "catMessageDesc": "Cuando lleguen palabras para ti — como mucho un toque cada cuatro horas, escriba quien escriba y cuanto escriba.",
+    "catMessageDesc": "Cuando lleguen palabras para ti. Mientras no estás: como mucho un toque cada cuatro horas, escriba quien escriba y cuanto escriba. Y en cuanto entras y recoges tus mensajes, las siguientes palabras pueden avisarte al momento.",
     "disclosureTitle": "Antes de encender esto",
     "disclosure": "Los avisos push viajan por el relé del fabricante de tu navegador — Google, Mozilla o Apple, según cuál uses. El relé no puede leerlos (cada uno va sellado para este dispositivo), pero sí ve que llegó algo pequeño, y cuándo. El servidor de tu comunidad solo sabe qué tipos elegiste — nunca el texto de tu pantalla de bloqueo, nunca un mensaje. Si ese rastro no es un coste que quieras pagar, sáltatelo: la app está completa sin esto.",
     "disclosureContinue": "Entendido — pregunta al navegador",

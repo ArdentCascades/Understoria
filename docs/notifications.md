@@ -288,6 +288,26 @@ stand. The design that respects them:
   sender inside the period. Whatever a sender does, they cannot
   make a phone buzz more than once per period — naming rules ride
   ON TOP of this and never replace it.
+- **Reading your messages resets the period** (2026-09-24
+  amendment). Every recipient-PROVED `GET /messages` — the signed
+  read proof only the recipient's own devices can produce — clears
+  their coalescer window, so the NEXT message pings immediately
+  instead of waiting out a window the member has already answered.
+  The experience falls out of the sync loop with no client change:
+  an app open on screen fetches mail every few seconds, so an
+  active conversation pings reply by reply; a pocketed phone
+  fetches nothing and keeps the full quiet period. The cap's
+  guarantee, restated precisely: **a sender cannot buzz a
+  recipient more than once per period WITHOUT the recipient's own
+  participation** — the cadence follows the recipient's activity,
+  never the sender's. Two accepted edges, stated honestly: the
+  reset trusts the same bounded-timestamp read proof the messages
+  GET already trusts (its replay window is the proof's, and the
+  consequence is bounded to extra pings while the member was
+  provably just active); and while the app is visibly open, a ping
+  may arrive for words the member is watching land in-app —
+  redundant, but never suppressed in the SW, because browsers
+  revoke subscriptions that receive pushes without displaying.
 - **The payload names no one.** `category`, `path: /messages`, and
   `detail.senderKey` — the public key of the triggering sender.
   Never a display name, never a body, never a count.
@@ -405,5 +425,10 @@ recipient can drop to generic.
   registries), `detail.title` from both sweeps behind the flag,
   the SW's with-title templates, the create-form checkbox and the
   event page's organizer toggle; strings ×18.
-- **I (later):** lead-time choice; then governance, guardian, per
-  the section above.
+- **Read-resets — SHIPPED** (with the amendment above): the
+  recipient-proved GET /messages clears the coalescer window
+  server-side; strings' cap description reworded ×18; no client
+  change, no schema, no new setting.
+- **I (later):** lead-time choice (and, argued alongside it, a
+  bounded member-chosen quiet period — 1h floor); then governance,
+  guardian, per the section above.

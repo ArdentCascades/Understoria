@@ -717,8 +717,10 @@ Since the quiet-by-default release (docs/notifications.md), the
 node sends opt-in web push to members who turned it on in Settings:
 a reminder an hour before a shift they signed up for — or an event
 they RSVP'd "going" to — a ping when an exchange or task is waiting
-on their confirmation, and (v2) a capped once-per-four-hours "words
-are waiting" ping for messages. (One category members can enable,
+on their confirmation, and (v2) a capped "words are waiting" ping
+for messages — at most one per four hours while the member is away,
+resetting whenever their device collects their mail, so active
+conversations ping reply by reply. (One category members can enable,
 guardian requests, has no node-visible signal yet — guardian
 recovery runs device-to-device — so enabling it currently receives
 nothing.) Everything is off by default and stays

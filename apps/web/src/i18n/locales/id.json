@@ -2625,7 +2625,7 @@
     "catEvent": "Pengingat acara",
     "catEventDesc": "Sebelum acara yang kamu bilang akan kamu datangi dimulai.",
     "catMessage": "Pesan menunggu",
-    "catMessageDesc": "Saat ada kata-kata datang untukmu — siapa pun yang menulis, seberapa pun banyaknya, paling banyak satu sentilan tiap empat jam.",
+    "catMessageDesc": "Saat ada kata-kata datang untukmu. Selagi kamu pergi: siapa pun yang menulis, seberapa pun banyaknya, paling banyak satu sentilan tiap empat jam. Begitu kamu masuk dan mengambil pesanmu, kata-kata berikutnya bisa langsung menyapamu.",
     "disclosureTitle": "Sebelum menyalakan ini",
     "disclosure": "Notifikasi push lewat relai pembuat browser-mu — Google, Mozilla, atau Apple, tergantung browser-nya. Relai itu tidak bisa membacanya (masing-masing tersegel untuk perangkat ini), tapi bisa melihat bahwa ada sesuatu yang kecil datang, dan kapan. Server komunitasmu hanya tahu jenis mana yang kamu pilih — tidak pernah kata-kata di layar kuncimu, tidak pernah isi pesan. Kalau jejak itu harga yang tidak mau kamu bayar, lewati saja: aplikasi ini utuh tanpanya.",
     "disclosureContinue": "Mengerti — tanya browser",

@@ -17,6 +17,7 @@ import type { Database as DatabaseType } from "better-sqlite3-multiple-ciphers";
 import type { FastifyInstance } from "fastify";
 import {
   canonicalAwaitingTransitionPayload,
+  canonicalReadAuthMessage,
   canonicalRelayedMessagePayload,
   generateKeyPair,
   sign,
@@ -38,6 +39,7 @@ import {
   awaitingConfirmationPath,
   awaitingConfirmationTarget,
   createMessageWaitingNotifier,
+  createMessageWindowReset,
   MESSAGE_QUIET_PERIOD_MS,
   startReminderSweep,
 } from "./pushTriggers.js";
@@ -798,5 +800,144 @@ describe("named event reminders (organizer-consented detail.title)", () => {
       detail: { title: "River cleanup" },
     });
     sweep.stop();
+  });
+});
+
+describe("reading your messages resets the quiet period", () => {
+  let app: FastifyInstance;
+  let db: DatabaseType;
+
+  afterEach(async () => {
+    await app.close();
+    db.close();
+  });
+
+  let seq = 100;
+  function envelope(from: KeyPair, toPublicKey: string): RelayedMessage {
+    seq += 1;
+    const base = {
+      id: `msg_reset_${seq}`,
+      senderKey: from.publicKey,
+      recipientKey: toPublicKey,
+      nonce: "bm9uY2Vub25jZW5vbmNlbm9uY2U=",
+      ciphertext: "Y2lwaGVydGV4dA==",
+      createdAt: Date.now(),
+    };
+    return {
+      ...base,
+      signature: sign(canonicalRelayedMessagePayload(base), from.secretKey),
+    };
+  }
+
+  function readHeaders(kp: KeyPair, url: string, ts = Date.now()) {
+    return {
+      "x-understoria-key": kp.publicKey,
+      "x-understoria-ts": String(ts),
+      "x-understoria-sig": sign(
+        canonicalReadAuthMessage(url, ts),
+        kp.secretKey,
+      ),
+    };
+  }
+
+  it("a recipient-proved fetch lets the very next message ping inside the old window; a forged fetch resets nothing", async () => {
+    db = openDatabase(":memory:");
+    const sent: Sent[] = [];
+    const config = readConfigFromEnv({
+      LOG_LEVEL: "fatal",
+      READ_AUTH: "off",
+      NODE_ID: "node_test",
+      RATE_LIMIT_MAX: "10000",
+    } as unknown as NodeJS.ProcessEnv);
+    const built = await buildServer({
+      config,
+      database: db,
+      pushTransport: captureTransport(sent),
+    });
+    app = built.app;
+    await app.ready();
+
+    const sender = generateKeyPair();
+    const recipient = generateKeyPair();
+    subscribeRow(db, recipient.publicKey, "https://push.example/dm", [
+      "message_waiting",
+    ]);
+
+    const post = () =>
+      app.inject({
+        method: "POST",
+        url: "/messages",
+        payload: envelope(sender, recipient.publicKey),
+      });
+    const settle = () => new Promise((r) => setImmediate(r));
+
+    // First message pings; a second inside the window stays silent.
+    expect((await post()).statusCode).toBe(201);
+    await settle();
+    expect(sent).toHaveLength(1);
+    expect((await post()).statusCode).toBe(201);
+    await settle();
+    expect(sent).toHaveLength(1);
+
+    // A FORGED fetch (someone else signing the recipient's key) is
+    // refused and must not reset the window.
+    const attacker = generateKeyPair();
+    const forged = await app.inject({
+      method: "GET",
+      url: "/messages",
+      headers: {
+        "x-understoria-key": recipient.publicKey,
+        "x-understoria-ts": String(Date.now()),
+        "x-understoria-sig": sign(
+          canonicalReadAuthMessage("/messages", Date.now()),
+          attacker.secretKey,
+        ),
+      },
+    });
+    expect(forged.statusCode).toBe(401);
+    expect((await post()).statusCode).toBe(201);
+    await settle();
+    expect(sent).toHaveLength(1); // still coalesced
+
+    // The recipient's own proved fetch clears the window: the very
+    // next message pings immediately, well inside the old period.
+    const fetched = await app.inject({
+      method: "GET",
+      url: "/messages",
+      headers: readHeaders(recipient, "/messages"),
+    });
+    expect(fetched.statusCode).toBe(200);
+    expect((await post()).statusCode).toBe(201);
+    await settle();
+    expect(sent).toHaveLength(2);
+    expect(sent[1].payload).toMatchObject({ category: "message_waiting" });
+  });
+
+  it("the reset is kind-scoped: reminder send-once rows survive it", () => {
+    db = openDatabase(":memory:");
+    const recipientKey = "member-r";
+    db.prepare(
+      "INSERT INTO push_reminders_sent (kind, dedupe_key, sent_at) VALUES ('message_waiting', ?, 1)",
+    ).run(recipientKey);
+    // A shift ledger row whose dedupe key happens to contain the
+    // same member — "once means once" must survive mail fetches.
+    db.prepare(
+      "INSERT INTO push_reminders_sent (kind, dedupe_key, sent_at) VALUES ('shift_reminder', ?, 1)",
+    ).run(`shift-1|${recipientKey}`);
+    db.prepare(
+      "INSERT INTO push_reminders_sent (kind, dedupe_key, sent_at) VALUES ('event_reminder', ?, 1)",
+    ).run(`ev-1|${recipientKey}`);
+
+    createMessageWindowReset({ db })(recipientKey);
+
+    const kinds = (
+      db
+        .prepare("SELECT kind FROM push_reminders_sent ORDER BY kind")
+        .all() as { kind: string }[]
+    ).map((r) => r.kind);
+    expect(kinds).toEqual(["event_reminder", "shift_reminder"]);
+    // The app hasn't opened for THIS test's fastify teardown; give
+    // afterEach something to close.
+    app = { close: async () => {} } as unknown as FastifyInstance;
   });
 });
