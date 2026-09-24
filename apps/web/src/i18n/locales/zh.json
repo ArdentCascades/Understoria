@@ -610,6 +610,7 @@
       "endsAt": "结束",
       "endDateAria": "结束日期",
       "endTimeAria": "结束时间",
+      "timePlaceholder": "选个时间",
       "addEndTime": "添加结束时间",
       "quickPick": {
         "today": "今天",

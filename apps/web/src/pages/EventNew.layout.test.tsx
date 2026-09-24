@@ -219,8 +219,16 @@ describe("EventNew layout", () => {
     );
     expect(dateTimeInputs.length).toBeGreaterThan(0);
     for (const input of dateTimeInputs) {
-      const row = input.parentElement!;
-      const gridClasses = (row.getAttribute("class") ?? "")
+      // A time input sits inside its placeholder-overlay wrapper, so
+      // the grid row is the nearest ancestor declaring an
+      // arbitrary-value track list — and it must be INSIDE the
+      // input's fieldset (the page-level lg wrapper also carries a
+      // bracketed track list; matching that would mean the row lost
+      // its contract without failing here).
+      const row = input.closest('[class*="grid-cols-["]');
+      expect(row).not.toBeNull();
+      expect(input.closest("fieldset")!.contains(row!)).toBe(true);
+      const gridClasses = (row!.getAttribute("class") ?? "")
         .split(/\s+/)
         .filter((c) => c.includes("grid-cols-["));
       for (const cls of gridClasses) {
@@ -229,6 +237,50 @@ describe("EventNew layout", () => {
         expect(cls).not.toMatch(/[[_](?:\d+(?:\.\d+)?)fr/);
         expect(cls).toContain("minmax(0,");
       }
+    }
+  });
+
+  it("keeps native pickers un-rowed on portrait phones and fieldsets shrinkable (mobile overflow contract)", () => {
+    // The Sep 24 portrait report: the Starts time input ran off the
+    // right screen edge and the different-day toggle painted over the
+    // end time field. Two invariants prevent a regression:
+    //   1. Every grid row holding a native date/time picker is
+    //      single-column at base width — columns only appear at sm+ /
+    //      short landscape, where width is abundant.
+    //   2. Every fieldset holding such a row carries min-w-0: the UA
+    //      default min-inline-size:min-content otherwise lets iOS
+    //      picker intrinsic widths push the whole row past the screen.
+    render();
+
+    // Reveal the end fieldset and its different-day date input so the
+    // sweep below covers every picker row the form can render.
+    const checkboxes = () =>
+      Array.from(
+        container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+      );
+    act(() => {
+      checkboxes()[0].click(); // Add an end time
+    });
+    act(() => {
+      checkboxes()[1].click(); // Ends on a different day
+    });
+    expect(
+      container.querySelectorAll('input[type="date"], input[type="time"]')
+        .length,
+    ).toBe(4);
+
+    for (const input of Array.from(
+      container.querySelectorAll('input[type="date"], input[type="time"]'),
+    )) {
+      const row = input.closest('[class*="grid-cols-["]')!;
+      const classes = (row.getAttribute("class") ?? "").split(/\s+/);
+      expect(classes).toContain("grid-cols-1");
+      // No unprefixed multi-column utility may sneak in beside it.
+      expect(
+        classes.some((c) => /^grid-cols-\[/.test(c)),
+        `unprefixed track list on: ${row.getAttribute("class")}`,
+      ).toBe(false);
+      expect(input.closest("fieldset")!.className).toContain("min-w-0");
     }
   });
 

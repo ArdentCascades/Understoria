@@ -192,6 +192,27 @@ export const EVENT_CATEGORY_META: Record<string, EventCategoryMeta> = {
 };
 
 /**
+ * The category choices the EVENT form offers, in menu order: the three
+ * event-specific strings first (that's what gatherings skew toward),
+ * then the exchange taxonomy, then the project-only trio, with the
+ * `other` catch-all last. Every id here has an `EVENT_CATEGORY_META`
+ * entry and a `categories.*` locale key, so each option renders with
+ * its emoji and translated label — a template-minted category
+ * ("social", "organizing") is a first-class, always-present option
+ * rather than a value-injected fallback that vanishes on reselect.
+ */
+export const EVENT_FORM_CATEGORIES: readonly string[] = [
+  "social",
+  "celebration",
+  "learning",
+  ...ALL_CATEGORIES.filter((c) => c !== "other"),
+  "infrastructure",
+  "organizing",
+  "mutual_aid_drive",
+  "other",
+];
+
+/**
  * Neutral fallback for a category string this node doesn't recognize —
  * events federate with free-text categories, so a peer can send one we've
  * never seen. The calendar/detail surfaces show a calendar glyph + the

@@ -610,6 +610,7 @@
       "endsAt": "Fin",
       "endDateAria": "Date de fin",
       "endTimeAria": "Heure de fin",
+      "timePlaceholder": "Choisis une heure",
       "addEndTime": "Ajouter une heure de fin",
       "quickPick": {
         "today": "Aujourd'hui",

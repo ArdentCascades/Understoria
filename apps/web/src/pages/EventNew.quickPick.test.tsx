@@ -120,8 +120,12 @@ describe("EventNew quick picks", () => {
   it("keeps the start time empty until the member acts (no silent default)", () => {
     render();
     expect(startTimeInput().value).toBe("");
-    // The blank-pill hint shows exactly while the time is empty.
+    // The blank-pill hint shows exactly while the time is empty —
+    // and so does the in-field "Pick a time" overlay (native time
+    // inputs take no placeholder; empty ones render as an unlabeled
+    // blank pill on iOS).
     expect(container.textContent).toContain("No time yet");
+    expect(container.textContent).toContain("Pick a time");
   });
 
   it("a tapped time chip sets the input, aria-pressed, and clears the hint", () => {
@@ -134,6 +138,8 @@ describe("EventNew quick picks", () => {
     expect(startTimeInput().value).toBe("18:00");
     expect(evening.getAttribute("aria-pressed")).toBe("true");
     expect(container.textContent).not.toContain("No time yet");
+    // The in-field overlay leaves with the emptiness it labels.
+    expect(container.textContent).not.toContain("Pick a time");
   });
 
   it("day chips set the start date; Today reflects the seeded date as pressed", () => {

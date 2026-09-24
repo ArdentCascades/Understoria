@@ -610,6 +610,7 @@
       "endsAt": "اختتام",
       "endDateAria": "اختتام کی تاریخ",
       "endTimeAria": "اختتام کا وقت",
+      "timePlaceholder": "وقت چن لیں",
       "addEndTime": "اختتام کا وقت لکھیں",
       "quickPick": {
         "today": "آج",

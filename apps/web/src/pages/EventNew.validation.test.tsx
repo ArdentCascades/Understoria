@@ -256,12 +256,21 @@ describe("EventNew — inline validation", () => {
     });
     await flush();
 
-    // Enable end time; overnight event ends 02:00 — same-day mode
-    // correctly flags it...
+    // Enable end time. The 22:00 start's +2h prefill crosses midnight,
+    // so different-day mode is already surfaced; the member unticks it
+    // (same-day mode) and sets an overnight 02:00 — which same-day
+    // mode correctly flags...
     const [hasEndBox] = Array.from(
       container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
     );
     act(() => hasEndBox.click());
+    await flush();
+    const otherDayBox = () =>
+      Array.from(
+        container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+      )[1];
+    expect(otherDayBox().checked).toBe(true);
+    act(() => otherDayBox().click());
     await flush();
     const [, endTime] = Array.from(
       container.querySelectorAll<HTMLInputElement>('form input[type="time"]'),
@@ -270,12 +279,10 @@ describe("EventNew — inline validation", () => {
     await flush();
     expect(container.querySelector("#event-end-error")).not.toBeNull();
 
-    // ...ticking the different-day toggle reveals the date (seeded from
-    // the start date), and moving it one day forward clears the error.
-    const [, otherDayBox] = Array.from(
-      container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
-    );
-    act(() => otherDayBox.click());
+    // ...re-ticking the different-day toggle reveals the date (seeded
+    // from the START date, not the prefill's), and moving it one day
+    // forward clears the error.
+    act(() => otherDayBox().click());
     await flush();
     const dates = Array.from(
       container.querySelectorAll<HTMLInputElement>('form input[type="date"]'),
@@ -354,5 +361,94 @@ describe("EventNew — inline validation", () => {
 
     expect(createEventMock).not.toHaveBeenCalled();
     expect(container.textContent ?? "").toContain(PAST_COPY);
+  });
+});
+
+describe("EventNew — end-time prefill on enable", () => {
+  function endCheckbox(): HTMLInputElement {
+    return container.querySelector('input[type="checkbox"]') as HTMLInputElement;
+  }
+  function timeInputs(): HTMLInputElement[] {
+    return Array.from(
+      container.querySelectorAll<HTMLInputElement>('form input[type="time"]'),
+    );
+  }
+
+  it("ticking Add-an-end-time with a start time set prefills start + 2h, visible and editable", async () => {
+    render();
+    const tomorrow = dateString(Date.now() + 24 * 60 * 60 * 1000);
+    act(() => {
+      setInput(startDateInput(), tomorrow);
+      setInput(startTimeInput(), "10:00");
+    });
+    await flush();
+
+    act(() => endCheckbox().click());
+    await flush();
+
+    const [, endTime] = timeInputs();
+    expect(endTime.value).toBe("12:00");
+    // Same-day prefill: no end date input, no error.
+    expect(
+      container.querySelectorAll('form input[type="date"]').length,
+    ).toBe(1);
+    expect(container.querySelector("#event-end-error")).toBeNull();
+  });
+
+  it("a prefill that crosses midnight surfaces the different-day date, one day ahead", async () => {
+    render();
+    const tomorrow = dateString(Date.now() + 24 * 60 * 60 * 1000);
+    const dayAfter = dateString(Date.now() + 2 * 24 * 60 * 60 * 1000);
+    act(() => {
+      setInput(startDateInput(), tomorrow);
+      setInput(startTimeInput(), "23:00");
+    });
+    await flush();
+
+    act(() => endCheckbox().click());
+    await flush();
+
+    const [, endTime] = timeInputs();
+    expect(endTime.value).toBe("01:00");
+    const dates = Array.from(
+      container.querySelectorAll<HTMLInputElement>('form input[type="date"]'),
+    );
+    expect(dates.length).toBe(2);
+    expect(dates[1].value).toBe(dayAfter);
+    // The auto-surfaced toggle reads checked, and start+2h is valid.
+    const [, otherDayBox] = Array.from(
+      container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+    );
+    expect(otherDayBox.checked).toBe(true);
+    expect(container.querySelector("#event-end-error")).toBeNull();
+  });
+
+  it("no start time, no fabricated end: ticking leaves the end time empty", async () => {
+    render();
+    act(() => endCheckbox().click());
+    await flush();
+    const [, endTime] = timeInputs();
+    expect(endTime.value).toBe("");
+  });
+
+  it("re-enabling with an end time already in hand keeps it instead of re-prefilling", async () => {
+    render();
+    const tomorrow = dateString(Date.now() + 24 * 60 * 60 * 1000);
+    act(() => {
+      setInput(startDateInput(), tomorrow);
+      setInput(startTimeInput(), "10:00");
+    });
+    await flush();
+    act(() => endCheckbox().click());
+    await flush();
+    const [, endTime] = timeInputs();
+    act(() => setInput(endTime, "15:30"));
+    await flush();
+
+    act(() => endCheckbox().click()); // off
+    await flush();
+    act(() => endCheckbox().click()); // on again
+    await flush();
+    expect(timeInputs()[1].value).toBe("15:30");
   });
 });

@@ -610,6 +610,7 @@
       "endsAt": "Tapos",
       "endDateAria": "Petsa ng pagtatapos",
       "endTimeAria": "Oras ng pagtatapos",
+      "timePlaceholder": "Pumili ng oras",
       "addEndTime": "Magdagdag ng oras ng pagtatapos",
       "quickPick": {
         "today": "Ngayon",

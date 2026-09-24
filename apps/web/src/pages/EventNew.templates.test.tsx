@@ -264,3 +264,49 @@ describe("EventNew — template prefill", () => {
     expect(summaryButton()).toBeNull();
   });
 });
+
+describe("EventNew — category select", () => {
+  it("offers the event-specific categories as permanent options, every option with its emoji", () => {
+    render();
+    const select = container.querySelector("select") as HTMLSelectElement;
+    const options = Array.from(select.options);
+    const values = options.map((o) => o.value);
+    // The template-minted vocabulary is first-class — present without
+    // any template picked, alongside the exchange + project sets.
+    for (const v of ["social", "celebration", "learning", "organizing"]) {
+      expect(values).toContain(v);
+    }
+    // Exactly one option per value (no injected duplicate), and every
+    // option leads with a glyph (its label is not bare ASCII).
+    expect(new Set(values).size).toBe(values.length);
+    for (const o of options) {
+      expect(
+        /^[\u0000-\u007f]/.test(o.textContent ?? ""),
+        `option ${o.value} has no leading emoji: "${o.textContent}"`,
+      ).toBe(false);
+    }
+  });
+
+  it("a template-set category survives picking another and returning (the vanishing-Social bug)", async () => {
+    render();
+    clickCardContaining("Potluck");
+    await flush();
+    const select = container.querySelector("select") as HTMLSelectElement;
+    expect(select.value).toBe("social");
+
+    // Switch away — the social option must still be offered.
+    act(() => {
+      const setter = Object.getOwnPropertyDescriptor(
+        window.HTMLSelectElement.prototype,
+        "value",
+      )!.set!;
+      setter.call(select, "food");
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await flush();
+    const values = Array.from(
+      (container.querySelector("select") as HTMLSelectElement).options,
+    ).map((o) => o.value);
+    expect(values).toContain("social");
+  });
+});

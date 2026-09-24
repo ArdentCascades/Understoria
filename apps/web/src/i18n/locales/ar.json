@@ -622,6 +622,7 @@
       "endsAt": "ينتهي",
       "endDateAria": "تاريخ النهاية",
       "endTimeAria": "وقت النهاية",
+      "timePlaceholder": "اختر وقتاً",
       "addEndTime": "إضافة وقت نهاية",
       "quickPick": {
         "today": "اليوم",

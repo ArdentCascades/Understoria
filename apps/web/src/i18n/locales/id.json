@@ -610,6 +610,7 @@
       "endsAt": "Selesai",
       "endDateAria": "Tanggal selesai",
       "endTimeAria": "Waktu selesai",
+      "timePlaceholder": "Pilih waktu",
       "addEndTime": "Tambah waktu selesai",
       "quickPick": {
         "today": "Hari ini",

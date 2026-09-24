@@ -610,6 +610,7 @@
       "endsAt": "ख़त्म",
       "endDateAria": "ख़त्म होने की तारीख़",
       "endTimeAria": "ख़त्म होने का समय",
+      "timePlaceholder": "समय चुनें",
       "addEndTime": "ख़त्म होने का समय जोड़ें",
       "quickPick": {
         "today": "आज",

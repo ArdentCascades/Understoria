@@ -610,6 +610,7 @@
       "endsAt": "শেষ",
       "endDateAria": "শেষের তারিখ",
       "endTimeAria": "শেষের সময়",
+      "timePlaceholder": "সময় বেছে নিন",
       "addEndTime": "শেষের সময় যোগ করুন",
       "quickPick": {
         "today": "আজ",

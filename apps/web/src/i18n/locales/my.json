@@ -1340,6 +1340,7 @@
       "endsAt": "ပြီးချိန်",
       "endDateAria": "ပြီးမယ့်ရက်",
       "endTimeAria": "ပြီးမယ့်အချိန်",
+      "timePlaceholder": "အချိန် ရွေးပါ",
       "addEndTime": "ပြီးချိန် ထည့်ပါ",
       "quickPick": {
         "today": "ဒီနေ့",

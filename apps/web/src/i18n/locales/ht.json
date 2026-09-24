@@ -610,6 +610,7 @@
       "endsAt": "Fini",
       "endDateAria": "Dat fen",
       "endTimeAria": "Lè fen",
+      "timePlaceholder": "Chwazi yon lè",
       "addEndTime": "Mete lè l ap fini",
       "quickPick": {
         "today": "Jodi a",
