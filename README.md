@@ -228,18 +228,26 @@ can cite; the principle behind it is `no-notifications` — *quiet by
 default* — and you can read it in the app, on the surfaces where a
 notification would otherwise have been.
 
-**What you can ask for.** There are exactly three notifications a member
+**What you can ask for.** There are exactly five notifications a member
 may turn on, all off until they do: a reminder before a shift they
-signed up for, a guardian request from someone whose recovery they
-agreed to help, and work waiting on their confirmation. Each has a
-person or a clock on the other end; none is the app wanting you back.
-You choose what your lock screen may say (nothing, a bare "something
-needs you", or the kind), and message contents never appear in any
-notification, at any level — there is deliberately no message
-notification at all, because your block list never leaves your device
-and a notification your device filters is one an abuser can still make
-buzz. The permission prompt appears once, from Settings, after the costs
-are stated — never at onboarding, never again after a no.
+signed up for, a reminder before an event they said they're going to, a
+guardian request from someone whose recovery they agreed to help, work
+waiting on their confirmation, and — added by community request — a
+"words are waiting" nudge for messages. Each has a person or a clock on
+the other end; none is the app wanting you back. You choose what your
+lock screen may say (nothing, a bare "something needs you", or the
+kind — per kind, with quiet hours your server never learns), and
+message *contents* never appear in any notification, at any level. The
+message nudge deserves its own sentence, because your block list never
+leaves your device and a per-message ping is a doorbell an abuser could
+ring: it is capped at one per quiet stretch no matter who writes or how
+often — checking your messages starts the clock fresh, so a live
+conversation still reaches you reply by reply — and a name appears on
+your lock screen only when the *sender* allowed their name and *you*
+chose the named level. Event reminders may name the event only when its
+organizer said the name is safe on lock screens. The permission prompt
+appears once, from Settings, after the costs are stated — never at
+onboarding, never again after a no.
 
 **What it does not mean.** The app does hold an open connection to your
 community's node while you're using it. That connection carries no
@@ -256,8 +264,9 @@ this deserves them before they find out the hard way.
 **It is not a rapid-response tool.** For anyone who hasn't opted in —
 the default, and for many members the permanent state — how fast they
 learn about something is exactly how soon they next open the app, which
-for a quieter member can be days. Even with every notification on, no
-message ever buzzes and nothing outside the three named kinds exists to
+for a quieter member can be days. Even with every notification on,
+messages coalesce to at most one nudge per quiet stretch and nothing
+outside the named kinds exists to
 buzz. If your community needs to reach people within hours — an eviction
 defence, a raid response, a shift that just lost its only cover — keep
 the phone tree and the group thread. Understoria is the layer underneath
