@@ -9,6 +9,40 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **The event form fits a phone again.** On portrait mobile the
+  Starts time input could run off the right screen edge and the
+  "Ends on a different day" checkbox painted over the end time
+  field — native date/time pickers carry intrinsic widths iOS
+  refuses to shrink, and the fieldsets' browser-default
+  `min-inline-size: min-content` let those widths push whole rows
+  past the screen. Fieldsets are now shrinkable, date and time
+  stack full-width on narrow portrait screens (side by side only
+  where width is abundant), and the different-day toggle lives on
+  its own line, never sharing a row with a picker.
+- **Category choices no longer vanish.** The event form's category
+  menu offered only the nine exchange categories; a template-set
+  category like Social appeared as a temporary emoji-less entry
+  that disappeared the moment another option was picked. The menu
+  now offers the full event vocabulary — social 🎉, celebration 🎂,
+  and learning 📚 first, then the exchange and project categories —
+  every option always present, each with its emoji.
+
+### Changed
+- **Empty time fields say so.** A time input with no value renders
+  as a blank unlabeled pill on iOS; while empty, both time fields
+  now show a "Pick a time" label in-field (translated ×18), joining
+  the quick-pick chips as the affordance the native control fails
+  to be. The start time still begins empty — a signed, append-only
+  event record gets no silent default.
+- **Ticking "Add an end time" prefills a visible end.** With a
+  start time chosen, enabling the end fields seeds end = start +
+  2 h, editable in the field before anything is signed; a prefill
+  that crosses midnight surfaces the different-day date
+  automatically. No start time yet, no fabricated value.
+- **The capacity field is capacity-sized** on every screen width
+  instead of spanning the phone's full width for a 2-digit number.
+
 ### Documentation
 - **Docs caught up to the notifications-v2 week.** The README's
   "Why nothing buzzes" section now tells the v2 truth (five

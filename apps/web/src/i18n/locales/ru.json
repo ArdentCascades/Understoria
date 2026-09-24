@@ -616,6 +616,7 @@
       "endsAt": "Окончание",
       "endDateAria": "Дата окончания",
       "endTimeAria": "Время окончания",
+      "timePlaceholder": "Выберите время",
       "addEndTime": "Добавить время окончания",
       "quickPick": {
         "today": "Сегодня",

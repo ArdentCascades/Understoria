@@ -610,6 +610,7 @@
       "endsAt": "མཇུག་སྒྲིལ་དུས།",
       "endDateAria": "མཇུག་སྒྲིལ་ཚེས་གྲངས།",
       "endTimeAria": "མཇུག་སྒྲིལ་ཆུ་ཚོད།",
+      "timePlaceholder": "ཆུ་ཚོད་འདེམས།",
       "addEndTime": "མཇུག་སྒྲིལ་དུས་ཚོད་སྣོན།",
       "quickPick": {
         "today": "དེ་རིང་།",

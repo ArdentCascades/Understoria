@@ -610,6 +610,7 @@
       "endsAt": "Linaisha",
       "endDateAria": "Tarehe ya kumaliza",
       "endTimeAria": "Saa ya kumaliza",
+      "timePlaceholder": "Chagua saa",
       "addEndTime": "Ongeza saa ya kumaliza",
       "quickPick": {
         "today": "Leo",

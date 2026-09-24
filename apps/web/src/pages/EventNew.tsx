@@ -19,7 +19,7 @@ import { setEventReminderDisclosure } from "@/lib/eventReminderDisclosure";
 import { scheduleProjectWorkDay } from "@/db/eventProjectLinks";
 import { isOrganizer } from "@/db/projects";
 import { getSecretKey } from "@/db/secrets";
-import { ALL_CATEGORIES, CATEGORY_META } from "@/lib/categories";
+import { EVENT_FORM_CATEGORIES, eventCategoryMeta } from "@/lib/categories";
 import {
   formatQuickTime,
   formatQuickWeekday,
@@ -119,6 +119,14 @@ function splitDateAndTime(ms: number): { date: string; time: string } {
 function todayDateString(): string {
   return splitDateAndTime(Date.now()).date;
 }
+
+// Prefill applied when the member ticks "Add an end time" while a
+// start time exists: end = start + 2h. NOT a silent default in the
+// todayDateString sense — the tick is the conscious act, and the
+// value sits visibly editable in the field before anything is
+// signed. (Template durations still win; they set the end fields
+// directly and never pass through the checkbox handler.)
+const END_PREFILL_OFFSET_MS = 2 * 60 * 60_000;
 
 // Fallback label for an event-specific category string the i18n
 // `categories.*` block doesn't yet carry a key for ("social" → "Social").
@@ -226,9 +234,7 @@ export default function EventNewPage() {
       t("events.new.workDayDescriptionPrefill", { project: workDayProject.title }),
     );
     const cat = workDayProject.category;
-    setCategory(
-      (ALL_CATEGORIES as readonly string[]).includes(cat) ? cat : "other",
-    );
+    setCategory(EVENT_FORM_CATEGORIES.includes(cat) ? cat : "other");
   }, [workDayProject, t]);
 
   // Offer a stored draft back — but never on a deep-link visit (see
@@ -393,27 +399,6 @@ export default function EventNewPage() {
     ? combineDateAndTime(effectiveEndDate, endTime)
     : null;
 
-  // Rendered in two spots (beside the time input in same-day mode,
-  // below the date+time row in different-day mode) — a plain element,
-  // not a nested component, so the checkbox doesn't remount and drop
-  // focus when the mode flips.
-  const endsOtherDayToggle = (
-    <label className="inline-flex items-center gap-2 text-xs text-moss-600 dark:text-moss-300">
-      <input
-        type="checkbox"
-        checked={endsOtherDay}
-        onChange={(e) => {
-          setEndsOtherDay(e.target.checked);
-          // Opting in starts from the same day the member picked —
-          // an overnight event is usually start-date + 1 tweak away.
-          if (e.target.checked) setEndDate(startDate);
-          setPendingDurationMinutes(null);
-        }}
-        className="h-4 w-4 rounded border-moss-300"
-      />
-      {t("events.new.endsOtherDay")}
-    </label>
-  );
   const endBeforeStart =
     hasEnd && startMsNow !== null && endMsNow !== null && endMsNow <= startMsNow;
 
@@ -597,40 +582,54 @@ export default function EventNewPage() {
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
-          {/* When a template set an event-specific category (e.g.
-              "social"), surface it as an option so the value shows and
-              is preserved. Task 4 gives these first-class labels/emoji;
-              until then a humanized fallback. */}
-          {!(ALL_CATEGORIES as readonly string[]).includes(category) && (
+          {/* A value OUTSIDE the offered list (an old draft, or a
+              federated string this build doesn't know) is injected so
+              it still shows and is preserved — with the total-lookup
+              glyph, and a humanized label when no locale key exists.
+              Every list category below is always present, so picking
+              another option never makes one disappear. */}
+          {!EVENT_FORM_CATEGORIES.includes(category) && (
             <option value={category}>
+              {eventCategoryMeta(category).emoji}{" "}
               {t(`categories.${category}`, {
                 defaultValue: prettifyCategory(category),
               })}
             </option>
           )}
-          {ALL_CATEGORIES.map((c) => (
+          {EVENT_FORM_CATEGORIES.map((c) => (
             <option key={c} value={c}>
-              {CATEGORY_META[c].emoji} {t(`categories.${c}`)}
+              {eventCategoryMeta(c).emoji} {t(`categories.${c}`)}
             </option>
           ))}
         </select>
       </label>
 
-      <fieldset className="flex flex-col gap-2">
+      <fieldset className="min-w-0 flex flex-col gap-2">
+        {/* min-w-0 on the fieldset: a <fieldset> ships a UA default of
+            min-inline-size:min-content, so it refuses to shrink below
+            its content's natural width — and on iOS, where form
+            controls ignore min-width:0, that natural width includes a
+            native picker's UA-intrinsic size. The whole row then blows
+            past the phone's screen edge no matter what the grid inside
+            says (the Sep 24 portrait report). Same fix on the end
+            fieldset below. */}
         <legend className="text-sm font-medium">
           {t("events.new.startsAt")}
         </legend>
-        {/* Two columns at every width EXCEPT under the largest-text
-            preference, where the fields stack full-width: at 125% font
-            the native pickers cannot render their values un-clipped
-            side by side on narrow phones, and largest-text members
-            have already chosen legibility over density.
+        {/* Portrait phones stack the fields full-width — two native
+            pickers side by side lose to iOS intrinsic widths on a
+            narrow screen. Two columns only where width is abundant
+            (sm+ / short landscape), EXCEPT under the largest-text
+            preference, where the fields stay stacked: at 125% font the
+            pickers cannot render un-clipped side by side, and
+            largest-text members have already chosen legibility over
+            density.
             minmax(0, Nfr) — not bare Nfr — because iOS Safari sizes fr
             tracks from a date/time input's UA-intrinsic width and does
             not honor min-width:0 on form controls, so a bare-fr row
             blows out past the right edge of the phone screen. Putting
             the zero minimum on the TRACK is the fix Safari respects. */}
-        <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-2 [.text-largest_&]:grid-cols-1">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] landscape-short:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] [.text-largest_&]:grid-cols-1">
           <input
             type="date"
             className="input min-w-0"
@@ -644,19 +643,38 @@ export default function EventNewPage() {
             aria-describedby={startErrorKey ? "event-start-error" : undefined}
             required
           />
-          <input
-            type="time"
-            className="input min-w-0"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-            onBlur={() => validation.onBlur("startTime")}
-            aria-label={t("events.new.startTimeAria")}
-            aria-invalid={
-              validation.shouldShowError("startTime") || startInPast || undefined
-            }
-            aria-describedby={startErrorKey ? "event-start-error" : undefined}
-            required
-          />
+          {/* Native time inputs take no placeholder attribute, and an
+              EMPTY one renders as an unlabeled blank pill on iOS (a
+              bare --:-- skeleton on desktop). While no time is chosen
+              and the input isn't focused, this overlay paints a real
+              "Pick a time" label over the field: pointer events pass
+              through to the input, focusing it (peer-focus) reveals
+              the native control, and picking a value removes the span
+              entirely. aria-hidden — the input's aria-label already
+              names it. */}
+          <div className="relative min-w-0">
+            <input
+              type="time"
+              className="input peer min-w-0"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              onBlur={() => validation.onBlur("startTime")}
+              aria-label={t("events.new.startTimeAria")}
+              aria-invalid={
+                validation.shouldShowError("startTime") || startInPast || undefined
+              }
+              aria-describedby={startErrorKey ? "event-start-error" : undefined}
+              required
+            />
+            {startTime === "" && (
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-px flex items-center rounded-[11px] bg-white px-3 text-moss-400 peer-focus:hidden dark:bg-moss-900 dark:text-moss-500"
+              >
+                {t("events.new.timePlaceholder")}
+              </span>
+            )}
+          </div>
         </div>
         {/* Quick picks: one tap covers the common days and times. A
             tapped chip is a CONSCIOUS choice, so this respects the
@@ -737,33 +755,48 @@ export default function EventNewPage() {
             checked={hasEnd}
             onChange={(e) => {
               setHasEnd(e.target.checked);
-              // Manual enable starts from the common case: ends the
-              // same day. (Template suggestions set the flag
-              // themselves when their duration crosses midnight.)
-              if (e.target.checked) setEndsOtherDay(false);
               // The member is taking over the end fields — a parked
               // template duration must not clobber them later.
               setPendingDurationMinutes(null);
+              if (!e.target.checked) return;
+              const startMs = combineDateAndTime(startDate, startTime);
+              if (endTime === "" && startMs !== null) {
+                // Visible prefill (see END_PREFILL_OFFSET_MS). A +2h
+                // that crosses midnight surfaces the date field, the
+                // same rule as the template-duration effect.
+                const end = splitDateAndTime(startMs + END_PREFILL_OFFSET_MS);
+                setEndTime(end.time);
+                setEndDate(end.date);
+                setEndsOtherDay(end.date !== startDate);
+              } else {
+                // Re-enable with an end time already in hand starts
+                // from the common case: ends the same day.
+                setEndsOtherDay(false);
+              }
             }}
             className="h-4 w-4 rounded border-moss-300"
           />
           {t("events.new.addEndTime")}
         </label>
         {hasEnd && (
-          <fieldset className="flex flex-col gap-2">
+          <fieldset className="min-w-0 flex flex-col gap-2">
             <legend className="sr-only">{t("events.new.endsAt")}</legend>
-            {/* Same-day is the default: one row of [end time | the
-                different-day toggle]. Opting in swaps the toggle's
-                cell for the date input and moves the (checked) toggle
-                below — the common case costs one row, the overnight
-                case two. */}
+            {/* Same-day is the default: just the end time. Opting into
+                a different day adds the date input beside it (stacked
+                on portrait phones, same rules as the Starts row). The
+                different-day toggle lives on its OWN line below the
+                fields — it used to share a grid cell with the time
+                input, and on a portrait phone the picker's intrinsic
+                width painted the checkbox on top of the field. */}
             {/* minmax(0,…) tracks for the same iOS-Safari reason as the
-                Starts row above. */}
+                Starts row above; the 1fr second track in same-day mode
+                keeps the lone time input at the Starts row's time
+                width once columns appear. */}
             <div
               className={
                 endsOtherDay
-                  ? "grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] items-center gap-2 [.text-largest_&]:grid-cols-1"
-                  : "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-2 [.text-largest_&]:grid-cols-1"
+                  ? "grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] landscape-short:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] [.text-largest_&]:grid-cols-1"
+                  : "grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] landscape-short:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] [.text-largest_&]:grid-cols-1"
               }
             >
               {endsOtherDay && (
@@ -782,23 +815,48 @@ export default function EventNewPage() {
                   }
                 />
               )}
+              {/* Same empty-state overlay as the start time. */}
+              <div className="relative min-w-0">
+                <input
+                  type="time"
+                  className="input peer min-w-0"
+                  value={endTime}
+                  onChange={(e) => {
+                    setEndTime(e.target.value);
+                    setPendingDurationMinutes(null);
+                  }}
+                  aria-label={t("events.new.endTimeAria")}
+                  aria-invalid={endBeforeStart || undefined}
+                  aria-describedby={
+                    endBeforeStart ? "event-end-error" : undefined
+                  }
+                />
+                {endTime === "" && (
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-px flex items-center rounded-[11px] bg-white px-3 text-moss-400 peer-focus:hidden dark:bg-moss-900 dark:text-moss-500"
+                  >
+                    {t("events.new.timePlaceholder")}
+                  </span>
+                )}
+              </div>
+            </div>
+            <label className="inline-flex items-center gap-2 text-xs text-moss-600 dark:text-moss-300">
               <input
-                type="time"
-                className="input min-w-0"
-                value={endTime}
+                type="checkbox"
+                checked={endsOtherDay}
                 onChange={(e) => {
-                  setEndTime(e.target.value);
+                  setEndsOtherDay(e.target.checked);
+                  // Opting in starts from the same day the member
+                  // picked — an overnight event is usually
+                  // start-date + 1 tweak away.
+                  if (e.target.checked) setEndDate(startDate);
                   setPendingDurationMinutes(null);
                 }}
-                aria-label={t("events.new.endTimeAria")}
-                aria-invalid={endBeforeStart || undefined}
-                aria-describedby={
-                  endBeforeStart ? "event-end-error" : undefined
-                }
+                className="h-4 w-4 rounded border-moss-300"
               />
-              {!endsOtherDay && endsOtherDayToggle}
-            </div>
-            {endsOtherDay && endsOtherDayToggle}
+              {t("events.new.endsOtherDay")}
+            </label>
             {endBeforeStart && (
               <p
                 id="event-end-error"
@@ -868,7 +926,7 @@ export default function EventNewPage() {
             inputMode="numeric"
             min="1"
             step="1"
-            className="input sm:w-32"
+            className="input w-32"
             value={capacity}
             onChange={(e) => setCapacity(e.target.value)}
             onBlur={() => validation.onBlur("capacity")}

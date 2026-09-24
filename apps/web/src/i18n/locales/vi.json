@@ -610,6 +610,7 @@
       "endsAt": "Kết thúc",
       "endDateAria": "Ngày kết thúc",
       "endTimeAria": "Giờ kết thúc",
+      "timePlaceholder": "Chọn giờ",
       "addEndTime": "Thêm giờ kết thúc",
       "quickPick": {
         "today": "Hôm nay",

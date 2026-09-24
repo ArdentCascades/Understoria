@@ -610,6 +610,7 @@
       "endsAt": "پایان",
       "endDateAria": "تاریخ پایان",
       "endTimeAria": "ساعت پایان",
+      "timePlaceholder": "ساعتی انتخاب کنید",
       "addEndTime": "افزودن ساعت پایان",
       "quickPick": {
         "today": "امروز",
