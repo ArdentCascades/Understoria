@@ -9,6 +9,22 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+- **The calendar now lives in your local days.** Field bug: for
+  members west of UTC, a single evening event (6:00–8:30 PM)
+  crossed UTC midnight and rendered as a two-day "1/2 · 2/2" span,
+  every day header labeled itself one day early, and the
+  today-highlight sat on yesterday; east of UTC, early-morning
+  events had the mirror problem, and the attention rail could miss
+  an event happening tonight. The whole day model moved from UTC
+  days to the member's local calendar days, canonically stamped at
+  UTC midnight so all the DST-proof grid arithmetic survives; day
+  headers now format those stamps with a UTC-pinned formatter, and
+  the "event today" rail item compares local day keys. Pinned by a
+  new timezone regression suite that runs the aggregator under US
+  Eastern (including the 25-hour fall-back day) and NZST —
+  docs/calendar.md §8.3 rewritten with the post-mortem.
+
 ### Added
 - **Reading your messages resets the quiet period.** The message
   ping's four-hour coalescing window now clears whenever the

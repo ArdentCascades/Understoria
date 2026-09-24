@@ -16,8 +16,8 @@ import "@/i18n";
 import { CalendarWeek } from "./CalendarWeek";
 import {
   WEEK_MS,
-  startOfUTCDay,
-  startOfUTCWeek,
+  dayStampOf,
+  weekAnchor,
   type CalendarEntry,
 } from "@/lib/calendar";
 
@@ -30,7 +30,7 @@ function eventEntry(
   return {
     kind: "event",
     id: `event:${startsAt}`,
-    date: startOfUTCDay(startsAt),
+    date: dayStampOf(startsAt),
     eventId: "ev1",
     title: "Repair Café",
     category: "repair",
@@ -57,14 +57,14 @@ function WeekHarness({ entries = [] }: { entries?: CalendarEntry[] }) {
   return (
     <CalendarWeek
       entries={entries}
-      anchorMs={startOfUTCWeek(now) + offset * WEEK_MS}
+      anchorMs={weekAnchor(now) + offset * WEEK_MS}
       locale="en"
       onPrevWeek={() => setOffset((o) => Math.max(o - 1, -MAX_WEEK_OFFSET))}
       onNextWeek={() => setOffset((o) => Math.min(o + 1, MAX_WEEK_OFFSET))}
       onJumpToToday={() => setOffset(0)}
       onJumpToDate={(ms) => {
         const target = Math.round(
-          (startOfUTCWeek(ms) - startOfUTCWeek(now)) / WEEK_MS,
+          (weekAnchor(ms) - weekAnchor(now)) / WEEK_MS,
         );
         setOffset(Math.max(-MAX_WEEK_OFFSET, Math.min(target, MAX_WEEK_OFFSET)));
       }}

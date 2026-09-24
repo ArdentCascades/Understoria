@@ -188,23 +188,43 @@ count. Three counts (1, 5, 20) read as roughly three opacity
 buckets. No numeric overlay by default; tap-to-reveal "20
 exchanges on Tuesday" for members who want the number.
 
-### 8.3 Time zones
+### 8.3 Time zones (REVISED 2026-09-24 — field-falsified)
 
-`buildCalendar` (PR 2) computes day boundaries in **UTC**. The
-UI layer formats display in the member's local time zone via
-`Intl.DateTimeFormat`. A deadline at 23:00 UTC may show as the
-next day for some members; this is correct and matches every
-other calendar app's convention.
+This section originally mandated **UTC** day boundaries, arguing
+it "matches every other calendar app's convention." The field
+proved the opposite within a day of events shipping: a member in
+US Eastern created a single 6:00–8:30 PM event and the calendar
+rendered it on TWO days (it crosses UTC midnight, so the UTC model
+called it a "1/2 · 2/2" span), with every day header labeled one
+day early (UTC midnights formatted through a local formatter) and
+the today-highlight on yesterday. Real calendar apps bucket by the
+VIEWER'S LOCAL day; ours now does too.
 
-The two threats this avoids:
+The model that replaced it (the day-model note atop
+`lib/calendar.ts`): days are the member's **local calendar days**,
+represented by **canonical day stamps** — `Date.UTC(y, m, d)` of
+the LOCAL year/month/day. Stamps are labels, not instants: exactly
+86,400,000 ms apart (DST's 23/25-hour local days are absorbed at
+conversion), so every piece of fixed-ms grid arithmetic the UTC
+model was chosen for survives unchanged. Real instants enter day
+space through `dayStampOf`/`dayKey` (local getters); stamps render
+through `stampKey` (UTC getters) and Intl formatters pinned to
+`timeZone: "UTC"`, which yields the intended local-day label.
 
-1. **"Why does my deadline show on the wrong day?"** Pinning to
-   UTC in the data layer means the same entry never lands on
-   different days between two members in different time zones.
-   The display layer translates.
-2. **Off-by-one boundary bugs.** Day-of-month transitions and
-   DST shifts are formatter problems; the aggregator never
-   touches them.
+What became of the two "threats" the UTC choice was meant to
+avoid:
+
+1. **"Same entry, different days for different members."** True —
+   and correct. A 23:00-EDT gathering IS Wednesday for its New
+   York members and Thursday morning for a traveling member in
+   Nairobi; each member's calendar now tells them the truth about
+   their own wall clock. The stamps are computed per-device, never
+   federated, so no cross-device consistency was ever at stake.
+2. **Off-by-one and DST bugs.** Handled structurally by stamp
+   space (above) and pinned by `lib/calendar.timezone.test.ts`,
+   which runs the aggregator under US Eastern (including the
+   fall-back 25-hour day) and NZST — the regression suite the UTC
+   model never had.
 
 ## 9. Open questions
 

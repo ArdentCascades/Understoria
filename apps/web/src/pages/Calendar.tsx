@@ -25,10 +25,10 @@ import { useProvenanceText } from "@/lib/useTemplateProvenance";
 import { useApp } from "@/state/AppContext";
 import {
   WEEK_MS,
-  addUTCMonths,
+  monthAnchor,
   buildCalendar,
   calendarViewWindow,
-  startOfUTCWeek,
+  weekAnchor,
   type CalendarEntry,
 } from "@/lib/calendar";
 import { useVirtualKeyboardOpen } from "@/lib/useVirtualKeyboard";
@@ -683,7 +683,7 @@ export default function CalendarPage() {
       ) : viewMode === "month" ? (
         <CalendarMonth
           entries={entries}
-          anchorMs={addUTCMonths(now, monthOffset)}
+          anchorMs={monthAnchor(now, monthOffset)}
           locale={i18n.language}
           onPrevMonth={() =>
             setMonthOffset((o) => Math.max(o - 1, -MAX_MONTH_OFFSET))
@@ -699,7 +699,7 @@ export default function CalendarPage() {
       ) : (
         <CalendarWeek
           entries={entries}
-          anchorMs={startOfUTCWeek(now) + weekOffset * WEEK_MS}
+          anchorMs={weekAnchor(now) + weekOffset * WEEK_MS}
           locale={i18n.language}
           onPrevWeek={() =>
             setWeekOffset((o) => Math.max(o - 1, -MAX_WEEK_OFFSET))
@@ -712,7 +712,7 @@ export default function CalendarPage() {
             // Both anchors are Sunday midnights, so the difference is
             // an exact multiple of WEEK_MS; clamp to the paging bounds.
             const target = Math.round(
-              (startOfUTCWeek(ms) - startOfUTCWeek(now)) / WEEK_MS,
+              (weekAnchor(ms) - weekAnchor(now)) / WEEK_MS,
             );
             setWeekOffset(
               Math.max(-MAX_WEEK_OFFSET, Math.min(target, MAX_WEEK_OFFSET)),

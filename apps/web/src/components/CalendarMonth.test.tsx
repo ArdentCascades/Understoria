@@ -15,7 +15,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import "@/i18n";
 import { CalendarMonth } from "./CalendarMonth";
 import {
-  addUTCMonths,
+  monthAnchor,
   buildCalendar,
   calendarViewWindow,
 } from "@/lib/calendar";
@@ -48,7 +48,7 @@ function makeEvent(
 
 // Stateful harness mirroring the page's wiring (`Calendar.tsx`): the
 // offset lives here, the entries window follows the viewed month via
-// `calendarViewWindow`, and the paged anchor is `addUTCMonths`.
+// `calendarViewWindow`, and the paged anchor is `monthAnchor`.
 function MonthHarness({ events = [] }: { events?: Event[] }) {
   const [offset, setOffset] = useState(0);
   const now = Date.now();
@@ -70,7 +70,7 @@ function MonthHarness({ events = [] }: { events?: Event[] }) {
   return (
     <CalendarMonth
       entries={entries}
-      anchorMs={addUTCMonths(now, offset)}
+      anchorMs={monthAnchor(now, offset)}
       locale="en"
       onPrevMonth={() => setOffset((o) => Math.max(o - 1, -MAX_MONTH_OFFSET))}
       onNextMonth={() => setOffset((o) => Math.min(o + 1, MAX_MONTH_OFFSET))}

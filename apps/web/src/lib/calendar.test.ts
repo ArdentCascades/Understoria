@@ -15,7 +15,7 @@ import type {
 } from "@/types";
 import {
   WEEK_MS,
-  addUTCMonths,
+  monthAnchor,
   buildCalendar,
   calendarViewWindow,
   dayKey,
@@ -25,8 +25,8 @@ import {
   groupByDay,
   monthGridRange,
   startOfTodayMs,
-  startOfUTCDay,
-  startOfUTCWeek,
+  dayStampOf,
+  weekAnchor,
   type CalendarEntry,
 } from "./calendar";
 
@@ -135,7 +135,7 @@ function defaultWindow() {
   };
 }
 
-// ─── dayKey + startOfUTCDay + dayKeyToMs ────────────────────────────
+// ─── dayKey + dayStampOf + dayKeyToMs ────────────────────────────
 
 describe("dayKey", () => {
   it("formats a midnight-UTC timestamp", () => {
@@ -153,21 +153,21 @@ describe("dayKey", () => {
   });
 });
 
-describe("startOfUTCDay", () => {
+describe("dayStampOf", () => {
   it("floors to midnight UTC of the same day", () => {
     const noon = Date.UTC(2026, 5, 15, 12, 0, 0);
     const midnight = Date.UTC(2026, 5, 15, 0, 0, 0);
-    expect(startOfUTCDay(noon)).toBe(midnight);
+    expect(dayStampOf(noon)).toBe(midnight);
   });
 
   it("does not move a value already at midnight UTC", () => {
     const midnight = Date.UTC(2026, 5, 15, 0, 0, 0);
-    expect(startOfUTCDay(midnight)).toBe(midnight);
+    expect(dayStampOf(midnight)).toBe(midnight);
   });
 
   it("rolls just-before-midnight down to the same day, not the next", () => {
     const t = Date.UTC(2026, 5, 15, 23, 59, 59, 999);
-    expect(startOfUTCDay(t)).toBe(Date.UTC(2026, 5, 15));
+    expect(dayStampOf(t)).toBe(Date.UTC(2026, 5, 15));
   });
 });
 
@@ -759,7 +759,7 @@ describe("buildCalendar — event", () => {
       exchanges: [],
       events: [
         // A full UTC day before the floored window start.
-        event({ id: "before", startsAt: startOfUTCDay(w.windowStart) - DAY }),
+        event({ id: "before", startsAt: dayStampOf(w.windowStart) - DAY }),
         // After windowEnd.
         event({ id: "after", startsAt: w.windowEnd + DAY }),
         event({ id: "edge_start", startsAt: w.windowStart }),
@@ -848,7 +848,7 @@ describe("buildCalendar — event", () => {
       dayCount: 1,
       dayIndex: 0,
     });
-    expect(events[0].date).toBe(startOfUTCDay(startsAt));
+    expect(events[0].date).toBe(dayStampOf(startsAt));
   });
 
   it("single-day (same-UTC-day endsAt) → one entry, isMultiDay false", () => {
@@ -992,12 +992,12 @@ describe("buildCalendar — event", () => {
     // The previously-dropped continuing event now appears at all.
     expect(events.length).toBeGreaterThan(0);
     // Every emitted day's floored date is >= the floored window start.
-    const windowStartDay = startOfUTCDay(w.windowStart);
+    const windowStartDay = dayStampOf(w.windowStart);
     for (const e of events) {
       expect(e.date).toBeGreaterThanOrEqual(windowStartDay);
     }
     // Pre-window days are absent.
-    expect(events.some((e) => e.date === startOfUTCDay(startsAt))).toBe(false);
+    expect(events.some((e) => e.date === dayStampOf(startsAt))).toBe(false);
     // The first emitted entry reflects the true span position, not 0.
     const firstDayIndex = events[0].kind === "event" ? events[0].dayIndex : -1;
     expect(firstDayIndex).toBeGreaterThan(0);
@@ -1041,7 +1041,7 @@ describe("buildCalendar — event", () => {
     const events = result.filter((e) => e.kind === "event");
     // Window is ~45 days wide; emission is bounded by it, not the raw
     // span. Comfortably under the MAX_EVENT_DAYS clamp too.
-    const windowDays = (w.windowEnd - startOfUTCDay(w.windowStart)) / DAY + 1;
+    const windowDays = (w.windowEnd - dayStampOf(w.windowStart)) / DAY + 1;
     expect(events.length).toBeLessThanOrEqual(Math.ceil(windowDays));
     expect(events.length).toBeLessThanOrEqual(92);
   });
@@ -1141,7 +1141,7 @@ describe("UTC day boundary", () => {
     const a = Date.UTC(2026, 5, 15, 23, 59, 59);
     const b = Date.UTC(2026, 5, 16, 0, 0, 0);
     expect(dayKey(a)).not.toBe(dayKey(b));
-    expect(startOfUTCDay(a)).not.toBe(startOfUTCDay(b));
+    expect(dayStampOf(a)).not.toBe(dayStampOf(b));
   });
 
   it("places a deadline at 23:00 UTC on its UTC day, not the next", () => {
@@ -1207,7 +1207,7 @@ describe("entryIsPast — events", () => {
     return {
       kind: "event",
       id: "event:ev",
-      date: startOfUTCDay(startsAt),
+      date: dayStampOf(startsAt),
       eventId: "ev",
       title: "Test event",
       category: "other",
@@ -1298,19 +1298,19 @@ describe("entryIsPast — events", () => {
   it("multi-day: a start-day entry whose UTC day is fully past → past", () => {
     const { todayStart } = makeAnchor();
     // Day 0 of a 4-day event, two UTC days ago → fully elapsed.
-    const startDay = startOfUTCDay(todayStart - 2 * DAY);
+    const startDay = dayStampOf(todayStart - 2 * DAY);
     expect(entryIsPast(multiDayEntry(startDay, 0, 4), todayStart)).toBe(true);
   });
 
   it("multi-day: a sibling entry on a future day stays visible", () => {
     const { todayStart } = makeAnchor();
-    const futureDay = startOfUTCDay(todayStart + 2 * DAY);
+    const futureDay = dayStampOf(todayStart + 2 * DAY);
     expect(entryIsPast(multiDayEntry(futureDay, 3, 4), todayStart)).toBe(false);
   });
 
   it("multi-day: a day-entry whose date is today → not past", () => {
     const { todayStart } = makeAnchor();
-    const todayUtc = startOfUTCDay(todayStart);
+    const todayUtc = dayStampOf(todayStart);
     expect(entryIsPast(multiDayEntry(todayUtc, 1, 4), todayStart)).toBe(false);
   });
 });
@@ -1482,34 +1482,34 @@ describe("buildCalendar — same-day event time ordering", () => {
   });
 });
 
-// ─── Paging helpers: addUTCMonths / startOfUTCWeek / monthGridRange ─
+// ─── Paging helpers: monthAnchor / weekAnchor / monthGridRange ─
 
-describe("addUTCMonths", () => {
+describe("monthAnchor", () => {
   it("offset 0 → midnight UTC on the first of the containing month", () => {
-    expect(addUTCMonths(NOW, 0)).toBe(Date.UTC(2026, 10, 1));
+    expect(monthAnchor(NOW, 0)).toBe(Date.UTC(2026, 10, 1));
   });
 
   it("rolls forward across a year boundary", () => {
     // Nov 2026 + 2 months = Jan 2027.
-    expect(addUTCMonths(NOW, 2)).toBe(Date.UTC(2027, 0, 1));
+    expect(monthAnchor(NOW, 2)).toBe(Date.UTC(2027, 0, 1));
   });
 
   it("rolls backward across a year boundary", () => {
-    expect(addUTCMonths(Date.UTC(2026, 0, 20), -1)).toBe(Date.UTC(2025, 11, 1));
+    expect(monthAnchor(Date.UTC(2026, 0, 20), -1)).toBe(Date.UTC(2025, 11, 1));
   });
 });
 
-describe("startOfUTCWeek", () => {
+describe("weekAnchor", () => {
   it("snaps a mid-week timestamp to the Sunday on or before", () => {
     // 2026-11-18 is a Wednesday; the prior Sunday is the 15th.
-    expect(startOfUTCWeek(Date.UTC(2026, 10, 18, 9, 30))).toBe(
+    expect(weekAnchor(Date.UTC(2026, 10, 18, 9, 30))).toBe(
       Date.UTC(2026, 10, 15),
     );
   });
 
   it("a Sunday snaps to its own midnight", () => {
     // NOW (2026-11-15 12:00 UTC) is itself a Sunday.
-    expect(startOfUTCWeek(NOW)).toBe(Date.UTC(2026, 10, 15));
+    expect(weekAnchor(NOW)).toBe(Date.UTC(2026, 10, 15));
   });
 });
 
@@ -1559,20 +1559,20 @@ describe("calendarViewWindow", () => {
   it("month paged ahead: windowEnd widens to cover the viewed grid", () => {
     const w = calendarViewWindow({ ...defaults, view: "month", offset: 3 });
     expect(w.windowStart).toBe(defaults.defaultStart);
-    expect(w.windowEnd).toBe(monthGridRange(addUTCMonths(NOW, 3)).end);
+    expect(w.windowEnd).toBe(monthGridRange(monthAnchor(NOW, 3)).end);
     expect(w.windowEnd).toBeGreaterThan(defaults.defaultEnd);
   });
 
   it("month paged back: windowStart widens to cover the viewed grid", () => {
     const w = calendarViewWindow({ ...defaults, view: "month", offset: -3 });
-    expect(w.windowStart).toBe(monthGridRange(addUTCMonths(NOW, -3)).start);
+    expect(w.windowStart).toBe(monthGridRange(monthAnchor(NOW, -3)).start);
     expect(w.windowStart).toBeLessThan(defaults.defaultStart);
     expect(w.windowEnd).toBe(defaults.defaultEnd);
   });
 
   it("week paged ahead: windowEnd widens to the viewed week's end", () => {
     const w = calendarViewWindow({ ...defaults, view: "week", offset: 10 });
-    const anchor = startOfUTCWeek(NOW) + 10 * WEEK_MS;
+    const anchor = weekAnchor(NOW) + 10 * WEEK_MS;
     expect(w.windowStart).toBe(defaults.defaultStart);
     expect(w.windowEnd).toBe(anchor + WEEK_MS - 1);
     expect(w.windowEnd).toBeGreaterThan(defaults.defaultEnd);
