@@ -10,6 +10,13 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **Date and time fields are value-sized pills.** The stacked
+  full-width fields the last pass introduced overshot: a picker
+  showing "Sep 26, 2026" was stretching across the whole phone.
+  Date (11 rem) and time (9 rem) pills now sit side by side at
+  their natural widths, wrapping on very narrow screens, with
+  full-width stacking kept only under the largest-text
+  preference.
 - **The event form fits a phone again.** On portrait mobile the
   Starts time input could run off the right screen edge and the
   "Ends on a different day" checkbox painted over the end time
