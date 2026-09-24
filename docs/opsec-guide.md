@@ -27,6 +27,34 @@ changes.
 - **Lock the app itself** if your device is ever handed around:
   Profile → Settings → Security — set a passphrase, then "Lock now"
   (the session also relocks when the tab closes).
+- **If you turn notifications on, decide what your lock screen may
+  say.** Everything is off by default; if you enable any
+  (Settings → Notifications), three device-only choices matter for
+  an onlooker at a checkpoint, an abusive partner, a hostile
+  workplace:
+  - **The level** — a silent badge, a bare "Something needs you",
+    or the kind of thing it is; settable per kind. Names appear
+    only at the named level, and only with the other side's
+    consent (a sender's own flag for messages, the organizer's
+    flag for an event's name). If your lock screen being read is
+    part of your threat model, stay at generic or silent.
+  - **The neutral title** — notifications say "Understoria" unless
+    you pick another word ("Reminder", anything). This deceives no
+    one the app owes honesty to and protects you from an onlooker.
+    Its limit, stated plainly: someone who unlocks the phone and
+    inspects its notification settings still sees the app. This is
+    mitigation, not invisibility.
+  - **Quiet hours** — a window on your own clock in which arrivals
+    stay silent. It lives only on this device; the server never
+    learns when you sleep.
+  Two honesty items that come with enabling: pushes transit your
+  browser maker's relay (Apple/Google/Mozilla) — sealed so the
+  relay can't read them, but it sees that something small arrived,
+  and when; and the "my name may appear in notifications" switch
+  is a public flag your community can see, so leave it off if
+  being visibly reachable is itself a risk. A device wiped while
+  offline can't unsubscribe itself; its pings stop within three
+  weeks when its registration expires.
 - **Trust the device, or don't open the app.** Understoria runs in
   the browser, which means it can defend against people who *don't*
   have access to your device (the threat model is built for that)

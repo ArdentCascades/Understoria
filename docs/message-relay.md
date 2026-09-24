@@ -98,6 +98,12 @@ the difference is the point:
   peer-federate and never mirror-replicate (§7).
 - Composite `(createdAt, id)` pair cursor, same
   `docs/composite-federation-cursors.md` §2 contract as every feed.
+- **One deliberate side effect** (docs/notifications.md v2): a
+  successful recipient-proved fetch resets that recipient's
+  message-ping quiet period — the proof demonstrates their own
+  device just collected their mail, so the next message may ping
+  without waiting out the coalescing window. Fires whether or not
+  new envelopes come back; a failed proof resets nothing.
 
 ### 4.3 Retention — the shelf, not an archive
 

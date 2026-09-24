@@ -223,6 +223,22 @@ Beyond the signed records you push, the node sees:
 - **Approximate timing** of your activity — when your client posted,
   pulled, or confirmed. This is the unavoidable consequence of any
   client-server protocol.
+- **A push-notification registration, only if you enabled
+  notifications** (everything is off by default): your device's
+  push endpoint and encryption keys, a device identifier, and
+  which notification kinds you chose. Never your lock-screen
+  wording, chosen title, quiet hours, or any message content —
+  those live only on your device. The row expires on its own if
+  your device stops checking in for three weeks (so a wiped
+  device's registration retires itself), and turning everything
+  off deletes it. Because web push transits your browser maker's
+  relay (Apple/Google/Mozilla), that relay learns a sealed ping
+  arrived for your device, and when — never what it says.
+- **Two small public flags, only if you set them**: your "my name
+  may appear in others' notifications" choice, and — for events
+  you organize — a per-event "reminders may name this event"
+  choice. Each is a signed boolean carrying no other data; absence
+  means no.
 
 **Who can read the node's records.** Your community's members. When
 the operator enables member-authenticated reads (`READ_AUTH` —
@@ -296,6 +312,11 @@ can never open an envelope — contents stay between the two of you.
 Stated plainly, the metadata the node's disk does see: who messaged
 whom, when, how often, and envelope sizes. Envelopes never
 replicate to mirrors and never cross to peer communities. If you
+enabled the optional "messages waiting" notification, the node also
+sends your device a sealed nudge — at most one per quiet stretch,
+reset when your device collects your mail — that carries the
+sender's public key and never any content; whether and how it shows
+anything is decided on your device alone. If you
 lose your device or run a hard purge (§9), your DM history is gone
 — there is no backup, and the node's transient envelope store is
 not one.

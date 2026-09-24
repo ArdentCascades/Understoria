@@ -9,6 +9,26 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Documentation
+- **Docs caught up to the notifications-v2 week.** The README's
+  "Why nothing buzzes" section now tells the v2 truth (five
+  switches, the capped-and-read-reset message nudge, two-sided
+  naming consent) instead of v1's "exactly three, no messages
+  ever"; the member guide gains §12b — the notifications section
+  it never had — plus fixes to two flat "no notifications, no
+  buzzing" claims that predated even v1, and a Messages-section
+  note on the nudge; the opsec guide gains the lock-screen
+  levels / neutral-title / quiet-hours guidance (with the
+  public-flag warning) that rung D intended for it; the privacy
+  policy's node-side inventory now names the push registration
+  row, the two public consent booleans, and the message-nudge
+  metadata; the operator guide's table and route lists add v38
+  and `/event-reminder-disclosures`; the message-relay doc states
+  the read-reset side effect on `GET /messages`; the v1 ladder's
+  "designed, unscheduled" message-ping line is marked superseded;
+  and the calendar doc's source table says local day, matching
+  the rewritten §8.3.
+
 ### Fixed
 - **The calendar now lives in your local days.** Field bug: for
   members west of UTC, a single evening event (6:00–8:30 PM)

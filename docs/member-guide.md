@@ -708,7 +708,10 @@ chips on the day they're happening. An **Events only** filter at the
 top hides project deadlines and post expiries when you just want to
 see "what could I show up to?" If an event you've RSVP'd to is
 today, it appears on your attention rail when you open the app —
-pulled, never pushed. No browser notifications, no buzzing.
+pulled, never pushed. Nothing buzzes unless you've asked it to: if
+you turned on **event reminders** in Settings (§12b), your phone
+can nudge you an hour before an event you RSVP'd **Going** to —
+off by default, like every notification here.
 
 ### RSVP'ing
 
@@ -906,6 +909,11 @@ A few things worth knowing:
   (about a month, your operator can tune it) — someone who doesn't
   open the app for months may miss what was sent in between. Your
   own copy stays on your device either way.
+- **Nothing buzzes about a message unless you asked.** If you
+  turned on the *Messages waiting* switch (§12b), your phone gets
+  at most one "words are waiting" nudge per quiet stretch —
+  refreshed each time you've been in to read — and never the
+  message's contents, at any setting.
 - **Conversations start from a post.** To message someone for the
   first time, open one of their posts and tap **Reach out**.
   There's no "search the member list and DM anyone" affordance —
@@ -1148,6 +1156,59 @@ On the new device:
   way to cut it off is to reset your identity entirely from **Profile
   → Emergency** (a hard purge), which starts you over with a new key.
   It's a real cost, so keep your devices close.
+
+## 12b. Notifications — quiet by default
+
+Understoria never buzzes on its own. Every notification is off
+until you turn it on, and many members never do — the attention
+rail (top of the Board) is the designed way to find what needs
+you. But if there are moments you'd rather be interrupted for,
+**Settings → Notifications** has exactly five switches, each with a
+person or a clock on the other end:
+
+- **Shift reminders** — an hour before a shift you signed up for.
+- **Event reminders** — an hour before an event you RSVP'd *Going*
+  to. (A *Maybe* never pings; you kept your options open.)
+- **Guardian requests** — someone who named you guardian needs your
+  help getting back in.
+- **Awaiting your confirmation** — an exchange is finished except
+  for your word.
+- **Messages waiting** — someone's words arrived for you. While
+  you're away, this is at most **one nudge per quiet stretch**,
+  no matter who writes or how often — that cap is what keeps a
+  notification from ever becoming a doorbell someone else can
+  ring at will. Once you've been in and your messages have come to
+  you, the clock starts fresh, so a back-and-forth conversation
+  reaches you reply by reply.
+
+Things you control, per device, that your community's server never
+learns:
+
+- **What the lock screen may say** — nothing but a quiet badge, a
+  bare "Something needs you", or the kind of thing it is — and you
+  can set it per kind (say, named shift reminders but generic
+  everything else).
+- **Quiet hours** — a window on your own clock in which anything
+  that arrives stays silent and waits.
+- **What notifications call themselves** — by default they say
+  "Understoria"; pick any other word if you'd rather this app not
+  name itself on your screen.
+
+Names appear only by consent, on both sides. A message nudge says
+*who* wrote only if that member turned on "people I write to may
+see my name" **and** you chose the named level — otherwise it stays
+generic, and anyone you've blocked can never put their name on
+your screen. An event reminder names the event only if its
+organizer ticked "reminders may name this event" — otherwise it
+says only that *an* event is coming up.
+
+Practical notes: there's a **Send myself a test** button so you can
+see exactly what your choices look like before a real shift depends
+on them; on iPhones the app must be installed to the home screen
+(§1a) before notifications are possible; and turning everything off
+removes this device's registration from your community's server —
+a device that's wiped while offline stops receiving within three
+weeks regardless, by design.
 
 ## 13. Inviting someone new
 

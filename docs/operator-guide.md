@@ -733,7 +733,9 @@ until then. What the node holds and sends:
   (a member pinging their own device to check the plumbing), and
   `/push-name-consents` (v2 — each member's public "my name may
   appear in notifications" boolean; a state feed like seed-vault
-  pledges, replicated by mirrors).
+  pledges, replicated by mirrors) and `/event-reminder-disclosures`
+  (v2 — organizers' per-event named-reminder flags, same shape,
+  organizer-signed).
 - **VAPID keys** are minted automatically on first boot after the
   update and stored in the encrypted ledger's `meta` table. Do not
   rotate them casually: a new key silently invalidates every
@@ -750,6 +752,10 @@ until then. What the node holds and sends:
   ledger that makes reminders fire exactly once across restarts.
   `push_name_consents` (v37) — the per-member name-consent
   booleans; public by design, boolean only, absence means no.
+  `event_reminder_disclosures` (v38) — organizers' per-event
+  "reminders may name this event" booleans, same shape; the event's
+  title itself is only ever read from the (already public) event at
+  send time.
 - **Payloads are sent by your node directly** (standard Web Push,
   no Firebase/OneSignal/etc.). The browser vendor's relay sees
   that something small arrived and when, never what — the cost the

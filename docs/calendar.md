@@ -71,7 +71,7 @@ source, alongside an "Events only" filter chip.
 |---|---|---|
 | `Project.deadline` | Marker on the deadline day, colored by category | Already federated, already visible on the project page, already drives the `project_deadline_approaching` attention item 3 days out |
 | `Post.expiresAt` (status = open) | Marker on the expiry day, visually distinct from project deadlines | Already on the Board; the calendar makes scanning faster, doesn't expose new fields |
-| Completed exchanges, per UTC day | Sparkline density indicator — count per day, no member names, no hours total | Echoes `no-leaderboards`: community metabolism, not individual contest; gives the calendar visible texture even with no future events |
+| Completed exchanges, per local day (§8.3) | Sparkline density indicator — count per day, no member names, no hours total | Echoes `no-leaderboards`: community metabolism, not individual contest; gives the calendar visible texture even with no future events |
 
 Plus the fourth source that shipped later: federated `Event`
 records (`docs/community-events.md`), rendered as event entries

@@ -211,8 +211,10 @@ records each choice as a glossary erratum.
   events, tombstoned shifts and withdrawn signups ping no one.
   Every send is per-member (`sendToMember`) through the same
   category gate.
-- **Follow-up (designed, unscheduled):** coalesced sender-blind
-  message pings.
+- **Follow-up — SUPERSEDED by v2:** the "coalesced sender-blind
+  message pings" sketched here shipped as v2's `message_waiting`
+  (rung H below), grown into named-by-mutual-consent with the
+  read-reset refinement.
 
 ## Field notes (rules learned after shipping)
 
