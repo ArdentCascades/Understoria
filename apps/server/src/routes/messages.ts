@@ -39,6 +39,13 @@ interface Deps {
    *  awaitingTransitions' onNewTransition. Never blocks or fails
    *  the relay write. */
   onNewMessage?: (message: RelayedMessage) => void;
+  /** Fired when a recipient-PROVED fetch succeeds — the
+   *  read-resets-the-quiet-period hook (docs/notifications.md v2):
+   *  the member's own device just collected their mail, so the
+   *  next message may ping without waiting out the window. Fires
+   *  whether or not new envelopes come back — the proof itself is
+   *  the participation signal. */
+  onRecipientFetch?: (recipientKey: string) => void;
 }
 
 /**
@@ -142,6 +149,12 @@ export async function registerMessageRoutes(
       reply.code(401);
       return reply.send({ error: "bad_read_signature" });
     }
+
+    // Proof verified: the recipient's own device is collecting its
+    // mail. Reset their message-ping quiet period BEFORE building
+    // the response — a synchronous primary-key delete, cheap enough
+    // for the read path.
+    deps.onRecipientFetch?.(key);
 
     const since = req.query.since
       ? Number.parseInt(req.query.since, 10)

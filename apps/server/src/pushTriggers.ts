@@ -211,6 +211,36 @@ export function createMessageWaitingNotifier({
   };
 }
 
+/**
+ * Reading your messages resets the quiet period (docs/
+ * notifications.md v2 amendment): every recipient-proved
+ * GET /messages clears the recipient's message_waiting ledger row,
+ * so the NEXT message pings immediately instead of waiting out a
+ * window the member has already answered. The experience falls out
+ * of the sync loop for free — an app open on screen fetches mail
+ * every few seconds, so an active conversation pings reply by
+ * reply, while a pocketed phone fetches nothing and keeps the full
+ * quiet period.
+ *
+ * The cap's guarantee, restated: a sender cannot buzz a recipient
+ * more than once per period WITHOUT the recipient's own device
+ * actively fetching their mail — participation only the
+ * recipient's signed read proof can demonstrate. Kind-scoped
+ * delete: the reminder sweeps' send-once rows are untouched.
+ */
+export function createMessageWindowReset({
+  db,
+}: {
+  db: DatabaseType;
+}): (recipientKey: string) => void {
+  const reset = db.prepare(
+    "DELETE FROM push_reminders_sent WHERE kind = 'message_waiting' AND dedupe_key = ?",
+  );
+  return (recipientKey) => {
+    reset.run(recipientKey);
+  };
+}
+
 export interface ReminderSweepOptions {
   db: DatabaseType;
   sender: PushSender;

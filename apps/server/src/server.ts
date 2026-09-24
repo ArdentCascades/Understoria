@@ -85,6 +85,7 @@ import {
 } from "./push.js";
 import {
   createMessageWaitingNotifier,
+  createMessageWindowReset,
   notifyAwaitingConfirmation,
 } from "./pushTriggers.js";
 import { createNudgeBus } from "./nudgeBus.js";
@@ -580,6 +581,10 @@ export async function buildServer({
       sender: pushSender,
       log: (msg) => app.log.warn(msg),
     }),
+    // Reading resets the quiet period: a recipient-proved fetch
+    // clears the coalescer window, so an active conversation pings
+    // reply by reply while a pocketed phone keeps the full period.
+    onRecipientFetch: createMessageWindowReset({ db }),
   });
   await registerPostRoutes(app, { store: postStore });
   // Voice-board audio blobs (#474): the content-addressed store the

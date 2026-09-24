@@ -10,6 +10,20 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **Reading your messages resets the quiet period.** The message
+  ping's four-hour coalescing window now clears whenever the
+  recipient's own device collects their mail (the signed
+  recipient proof on `GET /messages` — which the sync loop already
+  sends every few seconds while the app is visibly open). The
+  result: an active conversation pings reply by reply; a pocketed
+  phone keeps the full quiet period; and the cap's guarantee holds
+  in its precise form — a sender cannot buzz a recipient more than
+  once per period *without the recipient's own participation*, so
+  the cadence follows the recipient's activity, never any
+  sender's. Server-side only: no client change, no schema, no new
+  setting. The messages category's Settings description was
+  reworded in all eighteen languages so the promise matches the
+  behavior.
 - **Named event reminders, by organizer consent.** A reminder used
   to say only that *an* event was coming up; now an organizer can
   flip a per-event "reminders may name this event" flag (default

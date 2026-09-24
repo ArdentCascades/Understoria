@@ -2625,7 +2625,7 @@
     "catEvent": "Nhắc sự kiện",
     "catEventDesc": "Trước khi một sự kiện bạn nói sẽ đến bắt đầu.",
     "catMessage": "Tin nhắn đang chờ",
-    "catMessageDesc": "Khi có lời nhắn đến cho bạn — ai viết, viết bao nhiêu cũng vậy, nhiều nhất một lần chạm mỗi bốn giờ.",
+    "catMessageDesc": "Khi có lời nhắn đến cho bạn. Lúc bạn vắng mặt: ai viết, viết bao nhiêu cũng vậy, nhiều nhất một lần chạm mỗi bốn giờ. Còn khi bạn đã vào lấy tin của mình, lời tiếp theo có thể chạm đến bạn ngay.",
     "disclosureTitle": "Trước khi bật",
     "disclosure": "Thông báo đẩy đi qua trạm trung chuyển của hãng làm trình duyệt — Google, Mozilla hay Apple, tùy trình duyệt này. Trạm đó không đọc được nội dung (mỗi gói đều niêm phong riêng cho thiết bị này), nhưng thấy được là có một gói nhỏ vừa đến, và đến lúc nào. Máy chủ của cộng đồng bạn chỉ biết bạn chọn những loại nào — không bao giờ biết chữ trên màn hình khóa của bạn, không bao giờ biết tin nhắn. Nếu dấu vết đó là cái giá bạn không muốn trả, cứ bỏ qua: không có thông báo, ứng dụng vẫn đủ đầy.",
     "disclosureContinue": "Tôi hiểu rồi — hỏi trình duyệt đi",

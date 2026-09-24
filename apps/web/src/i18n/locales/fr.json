@@ -2625,7 +2625,7 @@
     "catEvent": "Rappels d'événement",
     "catEventDesc": "Avant le début d'un événement où tu as dit que tu viens.",
     "catMessage": "Messages en attente",
-    "catMessageDesc": "Quand des mots arrivent pour toi — au plus un signe toutes les quatre heures, qui qu'écrive et quoi qu'il arrive.",
+    "catMessageDesc": "Quand des mots arrivent pour toi. Pendant ton absence : au plus un signe toutes les quatre heures, qui qu'écrive et quoi qu'il arrive. Et dès que tu passes relever tes messages, les mots suivants peuvent te faire signe aussitôt.",
     "disclosureTitle": "Avant d'allumer ceci",
     "disclosure": "Les push passent par le relais du fabricant de ton navigateur — Google, Mozilla ou Apple, selon celui-ci. Le relais ne peut pas les lire (chacun est scellé pour cet appareil), mais il voit qu'une petite chose est arrivée, et quand. Le serveur de ta communauté n'apprend que les genres choisis — jamais le texte de ton écran de verrouillage, jamais un message. Si cette trace n'est pas un coût que tu veux payer, passe : l'appli est complète sans.",
     "disclosureContinue": "Compris — demande au navigateur",

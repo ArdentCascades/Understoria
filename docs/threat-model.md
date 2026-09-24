@@ -159,8 +159,12 @@ We are not trying to protect against:
   subscription TTL lapses (days, not minutes); the dead-man TTL
   bounds the window and this line states it. Blocks never leave
   the device — the v2 message category respects that: pings are
-  CAPPED (one per recipient per four-hour quiet period, whatever
-  any sender does — the blocked-abuser doorbell has no clapper),
+  CAPPED (one per recipient per four-hour quiet period of the
+  recipient's own inactivity — the recipient's proved mail fetch
+  resets the window, so an active conversation pings reply by
+  reply, but whatever any sender does they cannot buzz a recipient
+  more than once per period without the recipient's participation:
+  the blocked-abuser doorbell has no clapper),
   the payload carries the triggering sender's key inside the
   encrypted body (visible only to the recipient's device, which
   knew it anyway), and a name renders only when the sender's own
