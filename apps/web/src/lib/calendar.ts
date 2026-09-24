@@ -92,7 +92,7 @@ export type CalendarEntry =
       kind: "exchange_density";
       id: string;
       date: number;
-      /** Number of exchanges completed on this UTC day. The display
+      /** Number of exchanges completed on this local day. The display
        *  layer renders this as opacity / dot-density per the design
        *  note §8.2, not as a raw number on the calendar grid. */
       count: number;
@@ -130,8 +130,8 @@ export type CalendarEntry =
       organizerKey: string;
       /** Deep-link path to the event detail page. */
       path: string;
-      /** True iff the event spans more than one UTC day (its `endsAt`
-       *  lands on a later UTC day than its `startsAt`). A multi-day
+      /** True iff the event spans more than one LOCAL day (its `endsAt`
+       *  lands on a later local day than its `startsAt`). A multi-day
        *  event emits one entry per spanned day; this flag lets a
        *  renderer branch the continuation copy. A `null`-end (single-
        *  point) event is never multi-day. */
@@ -143,7 +143,7 @@ export type CalendarEntry =
        *  true position in the event rather than within the visible
        *  window. */
       dayIndex: number;
-      /** Total number of UTC days the event spans (>= 1). Single-day
+      /** Total number of local days the event spans (>= 1). Single-day
        *  events carry `1`. */
       dayCount: number;
     };
@@ -180,7 +180,7 @@ export interface BuildCalendarInput {
 
 /**
  * Build the calendar entries for a window. Pure function — no
- * Dexie access, no time-zone math beyond UTC day-flooring, no
+ * Dexie access, day math via the canonical local-day stamps above, no
  * react-i18next. Tests stub the inputs directly.
  *
  * Filter rules:
@@ -194,7 +194,7 @@ export interface BuildCalendarInput {
  *   `open` (claimed-already posts that happen to carry an expiry
  *   are not actionable on the calendar), expiry falls within the
  *   window.
- * - `exchange_density`: one entry per UTC day that has at least one
+ * - `exchange_density`: one entry per local day that has at least one
  *   completed exchange in the window. The count is the number of
  *   exchanges on that day. Zero-count days are skipped — sparse,
  *   not dense.
@@ -251,7 +251,7 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
     entries.push({
       kind: "project_deadline",
       id: `project_deadline:${p.id}`,
-      date: startOfUTCDay(p.deadline),
+      date: dayStampOf(p.deadline),
       projectId: p.id,
       projectTitle: displayProjectTitle(p),
       category: p.category,
@@ -266,7 +266,7 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
     entries.push({
       kind: "post_expiring",
       id: `post_expiring:${post.id}`,
-      date: startOfUTCDay(post.expiresAt),
+      date: dayStampOf(post.expiresAt),
       postId: post.id,
       postTitle: post.title,
       postType: post.type,
@@ -274,7 +274,7 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
     });
   }
 
-  // Density: bucket exchanges by their UTC day. One entry per
+  // Density: bucket exchanges by their LOCAL day. One entry per
   // non-empty day. The Map preserves insertion order, but we sort
   // the full output at the end so insertion order doesn't matter.
   //
@@ -302,7 +302,7 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
   }
 
   // Events: skip any whose id has a matching cancellation row, then
-  // emit ONE entry per UTC day the event spans (a Sat–Sun festival or a
+  // emit ONE entry per LOCAL day the event spans (a Sat–Sun festival or a
   // 3-day build shows on every one of its days, not just the first).
   // The window check is per-day below — an event that began before
   // `windowStart` but continues into the window still surfaces its
@@ -324,19 +324,19 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
       }
     }
   }
-  // Window lower bound, floored to its UTC day: a day-floored `dayMs`
-  // (always midnight UTC) must be compared against a day-floored start
+  // Window lower bound, floored to its day stamp: a day-floored `dayMs`
+  // (a canonical stamp) must be compared against a day-floored start
   // so a day whose midnight precedes `windowStart` but whose later hours
   // fall inside the window still counts as in-window.
-  const windowStartDay = startOfUTCDay(input.windowStart);
+  const windowStartDay = dayStampOf(input.windowStart);
   for (const ev of input.events ?? []) {
     if (cancelledIds.has(ev.id)) continue;
-    const firstDay = startOfUTCDay(ev.startsAt);
+    const firstDay = dayStampOf(ev.startsAt);
     // A null `endsAt` is a single-point event; a malformed end before
     // the start is treated as single-day so we never emit a negative
-    // range. UTC days are exactly 86_400_000 ms apart (same arithmetic
+    // range. Day stamps are exactly 86_400_000 ms apart (same arithmetic
     // the grid walks), so the span is a plain division.
-    let lastDay = ev.endsAt === null ? firstDay : startOfUTCDay(ev.endsAt);
+    let lastDay = ev.endsAt === null ? firstDay : dayStampOf(ev.endsAt);
     if (lastDay < firstDay) lastDay = firstDay;
     // Whole span outside the window — no in-window day to emit. Bail
     // before the day loop rather than testing each day for nothing.
@@ -356,7 +356,7 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
       if (dayMs < windowStartDay || dayMs > input.windowEnd) continue;
       entries.push({
         kind: "event",
-        id: `event:${ev.id}:${dayKey(dayMs)}`,
+        id: `event:${ev.id}:${stampKey(dayMs)}`,
         date: dayMs,
         eventId: ev.id,
         title: displayEventTitle(ev),
@@ -406,7 +406,8 @@ export function buildCalendar(input: BuildCalendarInput): CalendarEntry[] {
 }
 
 /**
- * Group a calendar list by UTC day key, preserving the input order
+ * Group a calendar list by local day key (entries' dates are
+ * canonical stamps, so `stampKey`), preserving the input order
  * within each day. Used by the agenda + month views to render
  * day-by-day.
  */
@@ -415,7 +416,7 @@ export function groupByDay(
 ): Map<string, CalendarEntry[]> {
   const map = new Map<string, CalendarEntry[]>();
   for (const e of entries) {
-    const key = dayKey(e.date);
+    const key = stampKey(e.date);
     let bucket = map.get(key);
     if (!bucket) {
       bucket = [];
@@ -426,19 +427,59 @@ export function groupByDay(
   return map;
 }
 
-/**
- * UTC day key for a ms-epoch timestamp. Shape: `YYYY-MM-DD`. Two
- * timestamps with the same key are on the same UTC calendar day.
+/*
+ * ── The day model: LOCAL calendar days, canonically stamped ─────────
  *
- * Why UTC and not the member's local TZ:
- * §8.3 of the design doc — the aggregator runs identically on every
- * device regardless of TZ. The UI layer translates display via
- * `Intl.DateTimeFormat`. A deadline at 23:00 UTC may show as the
- * next day for some members; that's correct and matches every other
- * calendar app's convention.
+ * The calendar buckets by the MEMBER'S LOCAL calendar day. The first
+ * design chose UTC days ("runs identically on every device") and the
+ * field falsified it within a day of events shipping: for a UTC-4
+ * member, a single 6:00–8:30 PM event crosses UTC midnight, so it
+ * rendered as a two-day "1/2 · 2/2" span, and every day header — a
+ * UTC midnight formatted through a local formatter — labeled itself
+ * as the previous day. Real calendar apps bucket locally; now this
+ * one does too.
+ *
+ * The mechanics keep every piece of DST-proof arithmetic the old
+ * model had, via one rule: a day is represented by a CANONICAL DAY
+ * STAMP — `Date.UTC(y, m, d)` of the member's LOCAL year/month/day.
+ * Stamps are labels, not instants: exactly 86_400_000 ms apart
+ * (never a DST seam, because the local 23/25-hour days are absorbed
+ * at conversion time), so week/month grids, span division, and the
+ * send-window walks stay plain fixed-ms arithmetic.
+ *
+ * Two conversion directions, never mixed:
+ *  - a REAL instant (startsAt, completedAt, Date.now()) enters day
+ *    space through `dayStampOf` / `dayKey` (LOCAL getters);
+ *  - a STAMP renders through `stampKey` (UTC getters) and, in the
+ *    views, through Intl formatters pinned to `timeZone: "UTC"` —
+ *    which yields the intended LOCAL day label, because the stamp
+ *    encodes the local day at UTC midnight.
+ * Comparing a stamp against a real instant is a bug; the window
+ * bounds in `buildCalendar` are the one tolerated exception (their
+ * edges are fuzzy by design at ±30/60 days).
+ */
+
+/**
+ * LOCAL day key for a real ms-epoch instant. Shape: `YYYY-MM-DD`.
+ * Two instants with the same key are on the same calendar day of the
+ * member's wall clock.
  */
 export function dayKey(ms: number): string {
   const d = new Date(ms);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/**
+ * Day key of a canonical day STAMP (a `dayStampOf`/`dayKeyToMs`
+ * value — UTC midnight encoding a local day). UTC getters on
+ * purpose: reading a stamp with local getters is exactly the
+ * off-by-one this model exists to kill.
+ */
+export function stampKey(stampMs: number): string {
+  const d = new Date(stampMs);
   const y = d.getUTCFullYear();
   const m = String(d.getUTCMonth() + 1).padStart(2, "0");
   const day = String(d.getUTCDate()).padStart(2, "0");
@@ -446,41 +487,40 @@ export function dayKey(ms: number): string {
 }
 
 /**
- * ms-epoch for midnight UTC on the day that contains `ms`. Floors
- * to the day boundary. Used by `buildCalendar` so entries' `date`
- * fields are comparable and groupable directly.
+ * Canonical day stamp for the LOCAL calendar day containing the real
+ * instant `ms`. Used by `buildCalendar` so entries' `date` fields are
+ * comparable and groupable with plain fixed-ms arithmetic.
  */
-export function startOfUTCDay(ms: number): number {
+export function dayStampOf(ms: number): number {
   const d = new Date(ms);
-  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-/** One UTC week in ms. UTC days are exactly 86_400_000 ms apart (no
- *  DST in UTC), so a week is a plain multiple — the same arithmetic
- *  the grids walk. */
+/** One week of day stamps in ms. Stamps are exactly 86_400_000 ms
+ *  apart (DST is absorbed at conversion, never in stamp space), so a
+ *  week is a plain multiple — the same arithmetic the grids walk. */
 export const WEEK_MS = 7 * 86_400_000;
 
 /**
- * Midnight UTC on the first day of the month that is `months` whole
- * months away from the month containing `ms` (0 = that same month,
- * negative = past). `Date.UTC` normalizes out-of-range month indices,
- * so year rollover is handled for free. Used as the month view's
- * paging anchor: any ms within the target month works for the grid,
- * and the first-of-month is a stable, clock-independent choice.
+ * Day stamp of the first day of the month that is `months` whole
+ * months away from the LOCAL month containing the real instant `ms`
+ * (0 = that same month, negative = past). `Date.UTC` normalizes
+ * out-of-range month indices, so year rollover is handled for free.
+ * Used as the month view's paging anchor.
  */
-export function addUTCMonths(ms: number, months: number): number {
+export function monthAnchor(ms: number, months: number): number {
   const d = new Date(ms);
-  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + months, 1);
+  return Date.UTC(d.getFullYear(), d.getMonth() + months, 1);
 }
 
 /**
- * Midnight UTC of the Sunday on or before `ms` — the week view's
- * anchor convention (week starts Sunday, matching the grids' weekday
- * headers).
+ * Day stamp of the Sunday on or before the LOCAL day containing the
+ * real instant `ms` — the week view's anchor convention (week starts
+ * Sunday, matching the grids' weekday headers).
  */
-export function startOfUTCWeek(ms: number): number {
-  const sod = startOfUTCDay(ms);
-  const weekday = new Date(sod).getUTCDay(); // 0 = Sun
+export function weekAnchor(ms: number): number {
+  const sod = dayStampOf(ms);
+  const weekday = new Date(sod).getUTCDay(); // stamps: UTC getters
   return sod - weekday * 86_400_000;
 }
 
@@ -492,11 +532,12 @@ export function startOfUTCWeek(ms: number): number {
  * `CalendarMonth.tsx` (which derives its grid start from this) so the
  * entries window always covers every rendered cell.
  */
-export function monthGridRange(anchorMs: number): {
+export function monthGridRange(anchorStampMs: number): {
   start: number;
   end: number;
 } {
-  const d = new Date(anchorMs);
+  // The anchor is a day STAMP (from `monthAnchor`), so UTC getters.
+  const d = new Date(anchorStampMs);
   const firstOfMonth = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
   const firstWeekday = new Date(firstOfMonth).getUTCDay(); // 0 = Sun
   const start = firstOfMonth - firstWeekday * 86_400_000;
@@ -532,11 +573,11 @@ export function calendarViewWindow(input: {
   let viewStart: number | null = null;
   let viewEnd: number | null = null;
   if (input.view === "month") {
-    const range = monthGridRange(addUTCMonths(input.now, input.offset));
+    const range = monthGridRange(monthAnchor(input.now, input.offset));
     viewStart = range.start;
     viewEnd = range.end;
   } else if (input.view === "week") {
-    const anchor = startOfUTCWeek(input.now) + input.offset * WEEK_MS;
+    const anchor = weekAnchor(input.now) + input.offset * WEEK_MS;
     viewStart = anchor;
     viewEnd = anchor + WEEK_MS - 1;
   }
@@ -551,27 +592,20 @@ export function calendarViewWindow(input: {
 }
 
 /**
- * Today's UTC day key. Thin wrapper around `dayKey(Date.now())` so the
- * three calendar views can compare each rendered day's key against a
- * single shared "today" without each one re-reading the clock in a
- * slightly different way.
- *
- * Pre-existing limitation: this uses the same UTC-day bucketing as the
- * rest of the calendar. A member whose local time is well past
- * midnight but whose UTC clock has not rolled over yet (or vice versa)
- * may see "today" highlight a day that, in their local calendar, is
- * yesterday or tomorrow. The whole calendar lives in UTC days
- * (§8.3 of docs/calendar.md); migrating that model is out of scope —
- * this helper inherits the same trade-off the rest of the layer makes.
+ * Today's LOCAL day key. Thin wrapper around `dayKey(Date.now())` so
+ * the three calendar views can compare each rendered day's key
+ * against a single shared "today" without each one re-reading the
+ * clock in a slightly different way. Directly comparable with
+ * `stampKey` output — both name local calendar days.
  */
 export function getTodayDayKey(): string {
   return dayKey(Date.now());
 }
 
 /**
- * Inverse of `dayKey` — parse `YYYY-MM-DD` back to its midnight-UTC
- * ms-epoch. Strict: throws on malformed input rather than coercing
- * NaN, which would silently land entries at the Unix epoch.
+ * Parse `YYYY-MM-DD` back to its canonical day STAMP. Strict: throws
+ * on malformed input rather than coercing NaN, which would silently
+ * land entries at the Unix epoch.
  */
 export function dayKeyToMs(key: string): number {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(key);
@@ -598,17 +632,20 @@ export function startOfTodayMs(now: number): number {
 }
 
 /**
- * Returns true if the entry's effective time has already passed
- * relative to `startOfTodayMs` (local-clock start of day).
+ * Returns true if the entry's day has already passed relative to
+ * `todayStampMs` — TODAY's canonical day stamp (`dayStampOf(now)`),
+ * NOT a real instant. Entries' `date` fields are stamps too, so the
+ * whole comparison lives in stamp space and no timezone can shift it.
  *
- * - Single-day events (`dayCount === 1`, including every `endsAt: null`
- *   point event): hide when (endsAt ?? startsAt) < startOfTodayMs.
+ * - Single-day events (`dayCount === 1`, including every
+ *   `endsAt: null` point event): hide once the event's local day is
+ *   over — `dayStampOf(endsAt ?? startsAt) < todayStampMs`.
  * - Multi-day events (`dayCount > 1`): each spanned day is its OWN
  *   entry, judged per-day — a day drops once it has fully elapsed
- *   (`date + 86_400_000 <= startOfTodayMs`), so the past start days of a
- *   still-running event fall away while today's and the remaining days
- *   stay visible.
- * - Project deadlines and post expiries: hide when date < startOfTodayMs.
+ *   (`date + 86_400_000 <= todayStampMs`), so the past start days of
+ *   a still-running event fall away while today's and the remaining
+ *   days stay visible.
+ * - Project deadlines and post expiries: hide when date < today.
  * - Exchange density: NEVER past — aggregate signal stays everywhere.
  *
  * The agenda view filters past entries; month and week views do not
@@ -616,20 +653,19 @@ export function startOfTodayMs(now: number): number {
  */
 export function entryIsPast(
   entry: CalendarEntry,
-  startOfTodayMs: number,
+  todayStampMs: number,
 ): boolean {
   switch (entry.kind) {
     case "event": {
       if (entry.dayCount > 1) {
-        // Per-day: drop only once this UTC day has fully elapsed.
-        return entry.date + 86_400_000 <= startOfTodayMs;
+        // Per-day: drop only once this local day has fully elapsed.
+        return entry.date + 86_400_000 <= todayStampMs;
       }
-      const end = entry.endsAt ?? entry.startsAt;
-      return end < startOfTodayMs;
+      return dayStampOf(entry.endsAt ?? entry.startsAt) < todayStampMs;
     }
     case "project_deadline":
     case "post_expiring":
-      return entry.date < startOfTodayMs;
+      return entry.date < todayStampMs;
     case "exchange_density":
       return false;
   }

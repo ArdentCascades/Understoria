@@ -31,7 +31,7 @@ import {
   type SignedVouch,
   type RedeemedInviteLike,
 } from "@/lib/vouch";
-import { startOfUTCDay } from "./calendar";
+import { dayKey } from "./calendar";
 import { isAuthoritativeCancellation } from "./eventCancellation";
 import { taskCheckInState } from "./taskCheckInState";
 
@@ -726,8 +726,10 @@ export function computeAttentionItems(
       myRsvpByEventId.set(r.eventId, r);
     }
 
-    const todayStart = startOfUTCDay(now);
-    const todayEnd = todayStart + DAY_MS;
+    // "Today" is the member's LOCAL calendar day — compared by day
+    // key, not by a window of raw ms, so an 8:30 PM event tonight is
+    // today everywhere and DST days need no special width.
+    const todayLocalKey = dayKey(now);
     const SEVEN_DAYS_MS = 7 * DAY_MS;
 
     // event_today — non-cancelled events starting today (UTC), for
@@ -735,7 +737,7 @@ export function computeAttentionItems(
     // to render the row + deep link.
     for (const ev of input.events) {
       if (cancellationByEventId.has(ev.id)) continue;
-      if (ev.startsAt < todayStart || ev.startsAt >= todayEnd) continue;
+      if (dayKey(ev.startsAt) !== todayLocalKey) continue;
       const myRsvp = myRsvpByEventId.get(ev.id);
       if (!myRsvp) continue;
       if (myRsvp.status !== "going" && myRsvp.status !== "maybe") continue;

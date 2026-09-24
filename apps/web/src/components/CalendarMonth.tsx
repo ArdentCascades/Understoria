@@ -23,11 +23,10 @@ import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { intlLocale } from "@/i18n";
 import {
-  dayKey,
   getTodayDayKey,
+  stampKey,
   monthGridRange,
   postEntryDisplay,
-  startOfUTCDay,
   type CalendarEntry,
 } from "@/lib/calendar";
 import { eventCategoryMeta, projectCategoryMeta } from "@/lib/categories";
@@ -89,7 +88,7 @@ export function CalendarMonth({
   const byDay = useMemo(() => {
     const map = new Map<string, CalendarEntry[]>();
     for (const e of entries) {
-      const key = dayKey(e.date);
+      const key = stampKey(e.date);
       const bucket = map.get(key);
       if (bucket) bucket.push(e);
       else map.set(key, [e]);
@@ -102,6 +101,7 @@ export function CalendarMonth({
   const monthLabel = useMemo(
     () =>
       new Intl.DateTimeFormat(intlLocale(locale), {
+        timeZone: "UTC", // stamps — see lib/calendar.ts day model
         month: "long",
         year: "numeric",
       }).format(new Date(grid.monthAnchorMs)),
@@ -419,10 +419,11 @@ function buildMonthGrid(anchorMs: number): {
     const ms = gridStart + i * 86400000;
     const cellDate = new Date(ms);
     cells.push({
-      key: dayKey(ms),
+      key: stampKey(ms),
       dayNum: cellDate.getUTCDate(),
       inMonth: cellDate.getUTCMonth() === month,
     });
   }
-  return { cells, monthAnchorMs: startOfUTCDay(firstOfMonth) };
+  // firstOfMonth is already a canonical day stamp.
+  return { cells, monthAnchorMs: firstOfMonth };
 }

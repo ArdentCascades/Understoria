@@ -27,7 +27,7 @@ import {
   getTodayDayKey,
   groupByDay,
   postEntryDisplay,
-  startOfTodayMs,
+  dayStampOf,
   type CalendarEntry,
 } from "@/lib/calendar";
 import { eventCategoryMeta, projectCategoryMeta } from "@/lib/categories";
@@ -75,14 +75,13 @@ export function CalendarAgenda({
   // evening one. groupByDay is called against the filtered list so
   // empty days (all past) drop out naturally.
   const visibleEntries = useMemo(() => {
-    const todayStart = startOfTodayMs(Date.now());
-    return entries.filter((e) => !entryIsPast(e, todayStart));
+    // entryIsPast lives in stamp space: today's canonical day stamp.
+    const todayStamp = dayStampOf(Date.now());
+    return entries.filter((e) => !entryIsPast(e, todayStamp));
   }, [entries]);
 
-  // Today's UTC day key, computed once per render. UTC-day bucketing
-  // (see lib/calendar.ts) means members far from UTC may see the
-  // highlight shift by one day near local midnight — same trade-off
-  // as the rest of the calendar; out of scope to migrate here.
+  // Today's LOCAL day key, computed once per render — comparable
+  // with the group keys (stamps name local days too).
   const todayKey = getTodayDayKey();
 
   const days = useMemo(() => {
@@ -99,6 +98,7 @@ export function CalendarAgenda({
   const dayFmt = useMemo(
     () =>
       new Intl.DateTimeFormat(intlLocale(locale), {
+        timeZone: "UTC", // stamps — see lib/calendar.ts day model
         weekday: "long",
         day: "numeric",
         month: "long",

@@ -24,8 +24,8 @@ import { useTranslation } from "react-i18next";
 import { intlLocale } from "@/i18n";
 import {
   WEEK_MS,
-  dayKey,
   getTodayDayKey,
+  stampKey,
   postEntryDisplay,
   type CalendarEntry,
 } from "@/lib/calendar";
@@ -104,7 +104,7 @@ export function CalendarWeek({
   const byDay = useMemo(() => {
     const map = new Map<string, CalendarEntry[]>();
     for (const e of entries) {
-      const key = dayKey(e.date);
+      const key = stampKey(e.date);
       const bucket = map.get(key);
       if (bucket) bucket.push(e);
       else map.set(key, [e]);
@@ -122,7 +122,7 @@ export function CalendarWeek({
     }> = [];
     for (let i = 0; i < 7; i++) {
       const ms = anchorMs + i * 86400000;
-      const key = dayKey(ms);
+      const key = stampKey(ms);
       const list = byDay.get(key) ?? [];
       const density = list.find((e) => e.kind === "exchange_density") as
         | Extract<CalendarEntry, { kind: "exchange_density" }>
@@ -146,13 +146,18 @@ export function CalendarWeek({
   // The range label carries the year whenever the viewed week touches
   // a year other than the current one — "Dec 28 – Jan 3" is ambiguous
   // once you've paged away from now.
-  const currentYear = new Date().getUTCFullYear();
+  // Today's LOCAL year, compared against stamps' UTC-read year —
+  // both name local calendar days (see lib/calendar.ts day model).
+  const currentYear = new Date().getFullYear();
   const needsYear =
     new Date(days[0].ms).getUTCFullYear() !== currentYear ||
     new Date(days[6].ms).getUTCFullYear() !== currentYear;
   const rangeFmt = useMemo(
     () =>
       new Intl.DateTimeFormat(intlLocale(locale), {
+        // Day STAMPS format in UTC to label their local day — see
+        // the day-model note in lib/calendar.ts.
+        timeZone: "UTC",
         month: "short",
         day: "numeric",
         ...(needsYear ? { year: "numeric" } : {}),
@@ -163,6 +168,7 @@ export function CalendarWeek({
   const headerFmt = useMemo(
     () =>
       new Intl.DateTimeFormat(intlLocale(locale), {
+        timeZone: "UTC", // stamps — see lib/calendar.ts day model
         weekday: "short",
         day: "numeric",
       }),
@@ -173,6 +179,7 @@ export function CalendarWeek({
   const rowFmt = useMemo(
     () =>
       new Intl.DateTimeFormat(intlLocale(locale), {
+        timeZone: "UTC", // stamps — see lib/calendar.ts day model
         weekday: "long",
         month: "short",
         day: "numeric",
@@ -210,6 +217,7 @@ export function CalendarWeek({
   const nextUpFmt = useMemo(
     () =>
       new Intl.DateTimeFormat(intlLocale(locale), {
+        timeZone: "UTC", // stamps — see lib/calendar.ts day model
         month: "short",
         day: "numeric",
         ...(nextUp && new Date(nextUp.date).getUTCFullYear() !== currentYear
