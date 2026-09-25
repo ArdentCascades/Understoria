@@ -2210,7 +2210,9 @@
     "yearsAgo": "{{count}} سال پہلے",
     "inMinutes": "{{count}} منٹ میں",
     "inHours": "{{count}} گھنٹے میں",
-    "inDays": "{{count}} دن میں"
+    "inDays": "{{count}} دن میں",
+    "hoursShort": "{{count}} گھنٹے",
+    "minutesShort": "{{count}} منٹ"
   },
   "trust": {
     "trusted": "بھروسہ حاصل",

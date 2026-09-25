@@ -20,19 +20,24 @@
  */
 import i18n, { intlLocale } from "@/i18n";
 
+// Compact hour/minute amounts ("5h" / "30m") — through the locale
+// files, not hardcoded suffixes: "5h" reads as English on a Chinese
+// dashboard (the Sep 25 field report; zh renders 5小时). Each
+// locale's unit vocabulary matches its own hoursAgo/minutesAgo.
 export function formatHours(hours: number): string {
-  if (Number.isNaN(hours)) return "0h";
+  const t = i18n.t.bind(i18n);
+  if (Number.isNaN(hours)) return t("format.hoursShort", { count: 0 });
   const rounded = Math.round(hours * 10) / 10;
-  if (rounded === 0) return "0h";
+  if (rounded === 0) return t("format.hoursShort", { count: 0 });
   if (rounded < 1) {
     const minutes = Math.round(rounded * 60);
-    return `${minutes}m`;
+    return t("format.minutesShort", { count: minutes });
   }
-  return `${rounded}h`;
+  return t("format.hoursShort", { count: rounded });
 }
 
 export function formatSignedHours(hours: number): string {
-  if (hours === 0) return "0h";
+  if (hours === 0) return formatHours(0);
   const sign = hours > 0 ? "+" : "-";
   return `${sign}${formatHours(Math.abs(hours))}`;
 }

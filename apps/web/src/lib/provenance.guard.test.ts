@@ -47,6 +47,13 @@ const ALLOWED = new Set([
   "pages/Calendar.tsx",
   "pages/Present.tsx",
   "pages/PlugIn.tsx",
+  // Dashboard glance cards (the Sep 25 zh field report: template
+  // titles rendered in their creation language on an otherwise
+  // translated page) — same compact-row rules, every row links to a
+  // marker-carrying detail page.
+  "components/dashboard/ResumeCard.tsx",
+  "components/dashboard/WhereHandsAreWelcome.tsx",
+  "components/dashboard/UpcomingGatherings.tsx",
   "lib/gatheringSlides.ts",
   "lib/gatheringSlides.test.ts",
   "lib/calendar.ts",

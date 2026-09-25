@@ -2210,7 +2210,9 @@
     "yearsAgo": "{{count}} साल पहले",
     "inMinutes": "{{count}} मिनट में",
     "inHours": "{{count}} घंटे में",
-    "inDays": "{{count}} दिन में"
+    "inDays": "{{count}} दिन में",
+    "hoursShort": "{{count}} घंटे",
+    "minutesShort": "{{count}} मिनट"
   },
   "trust": {
     "trusted": "भरोसेमंद",

@@ -16,6 +16,7 @@ import { useApp } from "@/state/AppContext";
 import { selectUpcomingGatherings } from "@/lib/upcomingEvents";
 import { eventCategoryMeta } from "@/lib/categories";
 import { formatRelativeTime } from "@/lib/format";
+import { useProvenanceText } from "@/lib/useTemplateProvenance";
 
 // "Coming up" — a calm Dashboard glance at the next few community events.
 // Discovery surface, not a leaderboard: no attendance counts, just the
@@ -24,6 +25,12 @@ import { formatRelativeTime } from "@/lib/format";
 export function UpcomingGatherings() {
   const { t } = useTranslation();
   const { events, eventCancellations, eventRsvps, currentMember } = useApp();
+  // Compact-row provenance titles (docs/provenance-translation.md):
+  // the scaffold segment of a template event title renders in the
+  // viewer's language, the organizer's own suffix verbatim. No inline
+  // marker by design — each row links to the event page, which
+  // carries the note and the View-original toggle.
+  const provenance = useProvenanceText();
 
   const gatherings = useMemo(
     () =>
@@ -56,7 +63,7 @@ export function UpcomingGatherings() {
               >
                 <span aria-hidden="true">{meta.emoji}</span>
                 <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                  {event.title}
+                  {provenance.eventTitle(event.templateId, event.title)}
                 </span>
                 {viewerGoing ? (
                   <>

@@ -2210,7 +2210,9 @@
     "yearsAgo": "il y a {{count}} an",
     "inMinutes": "dans {{count}} min",
     "inHours": "dans {{count}} h",
-    "inDays": "dans {{count}} j"
+    "inDays": "dans {{count}} j",
+    "hoursShort": "{{count}} h",
+    "minutesShort": "{{count}} min"
   },
   "trust": {
     "trusted": "De confiance",

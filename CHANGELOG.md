@@ -10,6 +10,19 @@ include breaking changes.
 ## [Unreleased]
 
 ### Fixed
+- **The Dashboard speaks your language for template titles too.**
+  Field report from a Chinese-language member: "Recruit and screen
+  volunteers", project names, and "5h" sat untranslated on an
+  otherwise translated Dashboard. The three glance cards (Pick up
+  where you left off, Where hands are welcome, Coming up) now
+  render provenance-verified template titles in the viewer's
+  language — same rules as every other compact list: byte-exact
+  scaffold text translates, anything a member wrote or reworded
+  stays verbatim, and each row links to a page carrying the
+  translation note and View-original toggle. The compact hours
+  format ("5h", "30m", "+2h") now goes through the locale files
+  (5小时) instead of hardcoding English unit letters, everywhere
+  it appears.
 - **Date and time fields are value-sized pills.** The stacked
   full-width fields the last pass introduced overshot: a picker
   showing "Sep 26, 2026" was stretching across the whole phone.

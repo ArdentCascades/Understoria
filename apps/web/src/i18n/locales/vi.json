@@ -2210,7 +2210,9 @@
     "yearsAgo": "{{count}} năm trước",
     "inMinutes": "sau {{count}} phút",
     "inHours": "sau {{count}} giờ",
-    "inDays": "sau {{count}} ngày"
+    "inDays": "sau {{count}} ngày",
+    "hoursShort": "{{count}} giờ",
+    "minutesShort": "{{count}} phút"
   },
   "trust": {
     "trusted": "Được tin cậy",

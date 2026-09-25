@@ -206,6 +206,30 @@ describe("WhereHandsAreWelcome", () => {
     expect(text).not.toContain("Oldest need");
   });
 
+  it("renders an unedited template project name in the viewer's language (provenance)", () => {
+    // The Sep 25 zh field report in reverse (test i18n is en): the
+    // project was created from a template in Chinese and never
+    // renamed, so the byte-exact scaffold title displays translated.
+    // A member-authored NEED in the same list stays verbatim.
+    mockState.posts = [
+      post({ id: "n1", title: "帮忙搬家", createdAt: 2000 }),
+    ];
+    mockState.projects = [
+      project({
+        id: "p1",
+        title: "邻里照应网络",
+        templateId: "neighborhood-care-network",
+        createdAt: 1000,
+      }),
+    ];
+    mockState.projectTasks = [staleClaim("t1", "p1")];
+    render(<WhereHandsAreWelcome />);
+    const text = container.textContent ?? "";
+    expect(text).toContain("Neighborhood Care Network");
+    expect(text).not.toContain("邻里照应网络");
+    expect(text).toContain("帮忙搬家");
+  });
+
   it("ignores paused projects even when their tasks would qualify", () => {
     mockState.projects = [
       project({ id: "p1", title: "Paused project", status: "paused" }),

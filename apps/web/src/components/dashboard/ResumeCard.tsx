@@ -24,6 +24,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db, SETTING_KEYS } from "@/db/database";
 import { useApp } from "@/state/AppContext";
 import { parseLastTouched, resolveLastTouched } from "@/lib/lastTouched";
+import { useProvenanceText } from "@/lib/useTemplateProvenance";
 
 // "Pick up where you left off" — the interruption-recovery doorway
 // (lib/lastTouched.ts). After an interruption, the private plan's
@@ -39,6 +40,12 @@ import { parseLastTouched, resolveLastTouched } from "@/lib/lastTouched";
 export function ResumeCard() {
   const { t } = useTranslation();
   const { currentMember, projects, projectTasks } = useApp();
+  // Compact-row provenance titles (docs/provenance-translation.md):
+  // a template-scaffold title the organizer never edited renders in
+  // the viewer's language; anything member-authored stays verbatim.
+  // No inline marker by design — both lines link to pages that carry
+  // the note and the View-original toggle.
+  const provenance = useProvenanceText();
   const setting = useLiveQuery(
     () => db.settings.get(SETTING_KEYS.lastTouchedTask),
     [],
@@ -64,10 +71,10 @@ export function ResumeCard() {
           to={`/project/${project.id}/task/${task.id}`}
           className="font-medium text-canopy-700 underline-offset-2 hover:underline dark:text-canopy-300"
         >
-          {task.title}
+          {provenance.taskTitle(project.templateId, task.title)}
         </Link>
         <span className="block text-xs text-moss-600 dark:text-moss-300">
-          {project.title}
+          {provenance.projectTitle(project.templateId, project.title)}
         </span>
       </p>
       {/* Says plainly what this card is, so it never reads as the app
