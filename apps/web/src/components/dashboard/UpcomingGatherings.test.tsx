@@ -121,4 +121,23 @@ describe("UpcomingGatherings", () => {
     render(<UpcomingGatherings />);
     expect(container.textContent ?? "").toContain("you're going");
   });
+
+  it("renders a template event's scaffold segment in the viewer's language (provenance)", () => {
+    // The Sep 25 zh field report in reverse (test i18n is en): the
+    // event was created from the potluck template in Chinese; the
+    // scaffold segment displays translated, the organizer's own
+    // suffix verbatim.
+    mockState.events = [
+      event({
+        id: "zh-potluck",
+        title: "百家饭 — 冬至",
+        templateId: "potluck",
+        startsAt: Date.now() + HOUR,
+      }),
+    ];
+    render(<UpcomingGatherings />);
+    const text = container.textContent ?? "";
+    expect(text).toContain("Potluck — 冬至");
+    expect(text).not.toContain("百家饭");
+  });
 });

@@ -723,7 +723,9 @@
     "yearsAgo": "{{count}} နှစ်က",
     "inMinutes": "{{count}} မိနစ်အတွင်း",
     "inHours": "{{count}} နာရီအတွင်း",
-    "inDays": "{{count}} ရက်အတွင်း"
+    "inDays": "{{count}} ရက်အတွင်း",
+    "hoursShort": "{{count}} နာရီ",
+    "minutesShort": "{{count}} မိနစ်"
   },
   "attention": {
     "title": "သင့်ကို စောင့်နေတာများ",

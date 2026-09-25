@@ -2210,7 +2210,9 @@
     "yearsAgo": "{{count}} thn lalu",
     "inMinutes": "dalam {{count}} mnt",
     "inHours": "dalam {{count}} jam",
-    "inDays": "dalam {{count}} hr"
+    "inDays": "dalam {{count}} hr",
+    "hoursShort": "{{count}} jam",
+    "minutesShort": "{{count}} mnt"
   },
   "trust": {
     "trusted": "Terpercaya",

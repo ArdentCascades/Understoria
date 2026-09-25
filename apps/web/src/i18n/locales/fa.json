@@ -2210,7 +2210,9 @@
     "yearsAgo": "{{count}} سال پیش",
     "inMinutes": "{{count}} دقیقه دیگر",
     "inHours": "{{count}} ساعت دیگر",
-    "inDays": "{{count}} روز دیگر"
+    "inDays": "{{count}} روز دیگر",
+    "hoursShort": "{{count}} ساعت",
+    "minutesShort": "{{count}} دقیقه"
   },
   "trust": {
     "trusted": "مورد اعتماد",

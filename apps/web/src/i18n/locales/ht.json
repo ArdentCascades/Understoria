@@ -2210,7 +2210,9 @@
     "yearsAgo": "gen {{count}} lane",
     "inMinutes": "nan {{count}} min",
     "inHours": "nan {{count}} èdtan",
-    "inDays": "nan {{count}} jou"
+    "inDays": "nan {{count}} jou",
+    "hoursShort": "{{count}} èdtan",
+    "minutesShort": "{{count}} min"
   },
   "trust": {
     "trusted": "Moun konfyans",

@@ -2210,7 +2210,9 @@
     "yearsAgo": "{{count}}年前",
     "inMinutes": "{{count}}分钟后",
     "inHours": "{{count}}小时后",
-    "inDays": "{{count}}天后"
+    "inDays": "{{count}}天后",
+    "hoursShort": "{{count}}小时",
+    "minutesShort": "{{count}}分钟"
   },
   "trust": {
     "trusted": "已获信任",

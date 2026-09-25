@@ -2210,7 +2210,9 @@
     "yearsAgo": "miaka {{count}} iliyopita",
     "inMinutes": "ndani ya dk {{count}}",
     "inHours": "ndani ya saa {{count}}",
-    "inDays": "ndani ya siku {{count}}"
+    "inDays": "ndani ya siku {{count}}",
+    "hoursShort": "saa {{count}}",
+    "minutesShort": "dk {{count}}"
   },
   "trust": {
     "trusted": "Anaaminika",

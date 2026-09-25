@@ -14,6 +14,7 @@ import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@/state/AppContext";
 import { projectNeedsMoreHands } from "@/lib/projectFilter";
+import { useProvenanceText } from "@/lib/useTemplateProvenance";
 import { WhyTooltip } from "@/components/WhyTooltip";
 
 // "Where hands are welcome" — the second instance of the Coming-up
@@ -33,6 +34,12 @@ import { WhyTooltip } from "@/components/WhyTooltip";
 export function WhereHandsAreWelcome() {
   const { t } = useTranslation();
   const { posts, projects, projectTasks, nodeConfig } = useApp();
+  // Compact-row provenance titles (docs/provenance-translation.md):
+  // an unedited template project name renders in the viewer's
+  // language; NEED posts are member-authored, so they always stay
+  // verbatim. No inline marker by design — each row links to a page
+  // carrying the note and the View-original toggle.
+  const provenance = useProvenanceText();
 
   const items = useMemo(() => {
     const now = Date.now();
@@ -60,7 +67,7 @@ export function WhereHandsAreWelcome() {
       )
       .map((p) => ({
         key: `project-${p.id}`,
-        title: p.title,
+        title: provenance.projectTitle(p.templateId, p.title),
         createdAt: p.createdAt,
         to: `/project/${p.id}`,
         kind: "project" as const,
@@ -73,7 +80,7 @@ export function WhereHandsAreWelcome() {
     return [...openNeeds, ...welcomingProjects]
       .sort((a, b) => b.createdAt - a.createdAt)
       .slice(0, 3);
-  }, [posts, projects, projectTasks, nodeConfig]);
+  }, [posts, projects, projectTasks, nodeConfig, provenance]);
 
   if (items.length === 0) return null;
 

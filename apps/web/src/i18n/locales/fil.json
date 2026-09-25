@@ -2210,7 +2210,9 @@
     "yearsAgo": "{{count}} taon na",
     "inMinutes": "sa {{count}} min",
     "inHours": "sa {{count}} oras",
-    "inDays": "sa {{count}} araw"
+    "inDays": "sa {{count}} araw",
+    "hoursShort": "{{count}} oras",
+    "minutesShort": "{{count}} min"
   },
   "trust": {
     "trusted": "Pinagkakatiwalaan",

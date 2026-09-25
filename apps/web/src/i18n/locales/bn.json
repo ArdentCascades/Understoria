@@ -2210,7 +2210,9 @@
     "yearsAgo": "{{count}} বছর আগে",
     "inMinutes": "{{count}} মিনিট পরে",
     "inHours": "{{count}} ঘণ্টা পরে",
-    "inDays": "{{count}} দিন পরে"
+    "inDays": "{{count}} দিন পরে",
+    "hoursShort": "{{count}} ঘণ্টা",
+    "minutesShort": "{{count}} মিনিট"
   },
   "trust": {
     "trusted": "বিশ্বস্ত",

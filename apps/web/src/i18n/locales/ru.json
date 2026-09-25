@@ -2262,7 +2262,9 @@
     "yearsAgo": "{{count}} г. назад",
     "inMinutes": "через {{count}} мин",
     "inHours": "через {{count}} ч",
-    "inDays": "через {{count}} дн."
+    "inDays": "через {{count}} дн.",
+    "hoursShort": "{{count}} ч",
+    "minutesShort": "{{count}} мин"
   },
   "trust": {
     "trusted": "Доверенный",

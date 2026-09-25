@@ -2210,7 +2210,9 @@
     "yearsAgo": "ལོ་ {{count}} སྔོན།",
     "inMinutes": "སྐར་མ་ {{count}} ནང་།",
     "inHours": "ཆུ་ཚོད་ {{count}} ནང་།",
-    "inDays": "ཉིན་ {{count}} ནང་།"
+    "inDays": "ཉིན་ {{count}} ནང་།",
+    "hoursShort": "ཆུ་ཚོད་ {{count}}",
+    "minutesShort": "སྐར་མ་ {{count}}"
   },
   "trust": {
     "trusted": "ཡིད་ཆེས་ཅན།",

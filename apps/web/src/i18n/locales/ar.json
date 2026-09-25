@@ -2314,7 +2314,9 @@
     "yearsAgo": "قبل {{count}} سنة",
     "inMinutes": "بعد {{count}} د",
     "inHours": "بعد {{count}} س",
-    "inDays": "بعد {{count}} ي"
+    "inDays": "بعد {{count}} ي",
+    "hoursShort": "{{count}} س",
+    "minutesShort": "{{count}} د"
   },
   "trust": {
     "trusted": "موثوق",
