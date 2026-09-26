@@ -207,7 +207,23 @@ new server endpoints, and do not change what the community node
 sees about you. See `docs/calendar.md` and the threat-model entry
 "Calendar aggregation as a faster surveillance surface" for the
 reasoning and the rejected alternatives (per-member calendar
-URLs, iCal subscription feeds — both out of scope).
+URLs, and unconsented iCal subscription feeds — both out of
+scope).
+
+**The public calendar feed (opt-in, per event).** One narrow
+exception to the no-feeds posture exists, and only by stacked
+consent (`docs/calendar.md` §10.6): if your community's operator
+enables a calendar link, an event appears in it **only when its
+organizer switches on "this event may appear on the public
+calendar feed"** for that specific event. What leaves then is the
+event's name, time, place, and description — never RSVPs, never
+who is going, never any member identity — and it is visible to
+anyone holding the link, including people outside the community
+and the companies running subscribers' calendar apps. Organizers
+can switch it off any time; the event leaves each subscriber's
+calendar at their next refresh, and copies already fetched by
+calendar providers cannot be recalled. Events without the switch
+never enter the feed at all.
 
 ## 5. What the community node sees
 

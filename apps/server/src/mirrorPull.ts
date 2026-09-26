@@ -213,6 +213,16 @@ export const MIRROR_KINDS: readonly MirrorKindSpec[] = [
     id: (r) => str(r.id),
     conflict409: "halt",
   },
+  // Same referent ordering as reminder disclosures: a consent can
+  // land before its event, so an unknown_event 409 halts and retries
+  // after the /events pull has landed.
+  {
+    path: "/event-syndication-consents",
+    bodyKey: "eventSyndicationConsents",
+    ts: (r) => num(r.updatedAt),
+    id: (r) => str(r.id),
+    conflict409: "halt",
+  },
   {
     path: "/shift-signups",
     bodyKey: "shiftSignups",

@@ -24,6 +24,7 @@ import {
 } from "@/db/events";
 import { db } from "@/db/database";
 import { setEventReminderDisclosure } from "@/lib/eventReminderDisclosure";
+import { setEventSyndicationConsent } from "@/lib/eventSyndicationConsent";
 import { getLinkForEvent } from "@/db/eventProjectLinks";
 import { listShiftsForEvent } from "@/db/eventShifts";
 import { getSecretKey } from "@/db/secrets";
@@ -116,6 +117,14 @@ export default function EventDetailPage() {
   const reminderDisclosure = useLiveQuery(
     async () =>
       eventId ? db.eventReminderDisclosures.get(eventId) : undefined,
+    [eventId],
+    undefined,
+  );
+  // Calendar syndication (docs/calendar.md §10.6): the organizer's
+  // per-event feed-consent flag — live for the same reason.
+  const syndicationConsent = useLiveQuery(
+    async () =>
+      eventId ? db.eventSyndicationConsents.get(eventId) : undefined,
     [eventId],
     undefined,
   );
@@ -553,6 +562,37 @@ export default function EventDetailPage() {
           </label>
           <p className="ms-6 -mt-1 text-xs text-moss-600 dark:text-moss-300">
             {t("events.new.namedRemindersHint")}
+          </p>
+          {/* Calendar syndication (docs/calendar.md §10.6): the
+              organizer's per-event layer of the feed's three
+              consents, flippable any time — the feed reads it at
+              render time, so a retraction lands on each subscriber's
+              next poll (and no sooner; the hint says so). */}
+          <label className="flex items-start gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={syndicationConsent?.allow === true}
+              onChange={() => {
+                void setEventSyndicationConsent(
+                  event.id,
+                  syndicationConsent?.allow !== true,
+                ).then((res) => {
+                  if (!res.ok) {
+                    showToast(
+                      res.error === "locked"
+                        ? t("events.detail.cancelLocked")
+                        : t("events.new.errorGeneric"),
+                      "error",
+                    );
+                  }
+                });
+              }}
+            />
+            <span>{t("events.new.syndicateLabel")}</span>
+          </label>
+          <p className="ms-6 -mt-1 text-xs text-moss-600 dark:text-moss-300">
+            {t("events.new.syndicateHint")}
           </p>
           <p className="text-xs text-moss-600 dark:text-moss-300">
             {t("events.detail.cancelHint")}

@@ -650,7 +650,9 @@
       "errorCapacityInvalid": "El cupo debe ser un número entero positivo, o déjalo vacío para cupo abierto.",
       "errorLocked": "Desbloquea este dispositivo con tu frase de acceso antes de firmar el evento.",
       "namedRemindersLabel": "Los recordatorios pueden nombrar este evento",
-      "namedRemindersHint": "Normalmente un recordatorio solo dice que se acerca un evento. Permítelo si el nombre del evento puede aparecer sin riesgo en pantallas de bloqueo — solo lo ven quienes eligieron notificaciones con detalle, y puedes cambiar de idea aquí cuando quieras."
+      "namedRemindersHint": "Normalmente un recordatorio solo dice que se acerca un evento. Permítelo si el nombre del evento puede aparecer sin riesgo en pantallas de bloqueo — solo lo ven quienes eligieron notificaciones con detalle, y puedes cambiar de idea aquí cuando quieras.",
+      "syndicateLabel": "Este evento puede aparecer en el calendario público de la comunidad",
+      "syndicateHint": "Apagado salvo que lo actives. Si tu comunidad comparte un enlace de calendario, cualquiera con ese enlace — incluida gente de fuera de la comunidad y los proveedores de sus calendarios — puede ver el nombre, la hora, el lugar y la descripción de este evento. Puedes apagarlo cuando quieras: desaparece del calendario de cada persona suscrita en su próxima actualización, y las copias ya descargadas no se pueden retirar."
     },
     "detail": {
       "projectLinkLabel": "Proyecto",

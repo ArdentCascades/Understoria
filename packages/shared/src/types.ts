@@ -1625,6 +1625,33 @@ export interface EventReminderDisclosure {
   signature: string;
 }
 
+/** An organizer's per-event "this event may appear on the public
+ *  community calendar feed" flag (docs/calendar.md §10.6 — organizer-
+ *  consented syndication). Default OFF for every event: absence of a
+ *  record means the event never enters the node's iCal feed; with
+ *  `allow: true`, the node's token-gated feed (itself off unless the
+ *  operator enables it) may serve the event's title, times, location
+ *  and description to anyone holding the feed link — including
+ *  people outside the community and their calendar providers.
+ *  Structurally identical to `EventReminderDisclosure` and for the
+ *  same reasons: the event wire format is closed, and an LWW record
+ *  can be flipped or retracted AFTER creation (retraction takes
+ *  effect on each subscriber's next poll). Keyed by `eventId`; the
+ *  single legitimate signer is the stored event's `createdBy`,
+ *  checked as a referent rule by the route and every puller.
+ *  Retraction is `allow: false` (no tombstone — it must keep winning
+ *  LWW over stale allowing copies). */
+export interface EventSyndicationConsent {
+  /** UUID of the row version — identity is `eventId`. */
+  id: string;
+  eventId: string;
+  allow: boolean;
+  /** LWW clock. */
+  updatedAt: number;
+  signerKey: string;
+  signature: string;
+}
+
 /**
  * Founder nomination — the founder's half of the co-founder ceremony
  * (docs/cofounder-ceremony-plan.md). Signed by the community's SOLE

@@ -32,6 +32,7 @@ import type {
   SeedVaultPledge,
   PushNameConsent,
   EventReminderDisclosure,
+  EventSyndicationConsent,
   CapacityPosture,
   ShiftSignupState,
   TaskState,
@@ -2937,6 +2938,93 @@ export async function pullFederatedEventReminderDisclosures(): Promise<Federatio
       continue;
     }
     await db.eventReminderDisclosures.put(record);
+    inserted += 1;
+    advanceCursor();
+  }
+
+  if (maxUpdatedAt !== null) {
+    await setSetting(feed.cursorKey, formatCursor(maxUpdatedAt));
+  }
+  return { inserted, skipped };
+}
+
+const EVENT_SYNDICATION_CONSENT_CURSOR_KEY =
+  "federationLastEventSyndicationConsentPull";
+
+/**
+ * Pull event syndication consents (docs/calendar.md §10.6) — each
+ * organizer's per-event "may appear on the public community calendar
+ * feed" boolean. Identical machinery to reminder disclosures:
+ * single-owner LWW keyed by eventId; authority derives from the
+ * LOCAL event row exactly like shifts (the signer must be the
+ * event's createdBy), so a hostile row never advances the cursor
+ * and a consent whose event hasn't arrived yet retries next cycle.
+ */
+export async function pullFederatedEventSyndicationConsents(): Promise<FederationSyncResult | null> {
+  const feed = await fetchStateFeed<Record<string, unknown>>(
+    "/event-syndication-consents",
+    "eventSyndicationConsents",
+    EVENT_SYNDICATION_CONSENT_CURSOR_KEY,
+  );
+  if (!feed) return null;
+
+  let inserted = 0;
+  let skipped = 0;
+  let maxUpdatedAt: CursorPos | null = feed.cursor;
+
+  for (const r of feed.rows) {
+    if (
+      typeof r.id !== "string" ||
+      typeof r.eventId !== "string" ||
+      typeof r.signerKey !== "string" ||
+      typeof r.signature !== "string" ||
+      typeof r.allow !== "boolean" ||
+      !plausibleCursorStamp(r.updatedAt)
+    ) {
+      skipped += 1;
+      continue;
+    }
+    const record = r as unknown as EventSyndicationConsent;
+    if (!verifyStateRecord(record)) {
+      skipped += 1;
+      continue;
+    }
+
+    const advanceCursor = () => {
+      maxUpdatedAt = advancePair(maxUpdatedAt, record.updatedAt, record.id);
+    };
+
+    // Authority derives from the LOCAL event row — the one signed
+    // artifact we already verified when it arrived.
+    const event = await db.events.get(record.eventId);
+    if (!event) {
+      // Windowing: consents of a windowed-out event never resolve —
+      // advance past them instead of retrying forever.
+      if (
+        !(await windowAdmits("event_child", {
+          ageAt: record.updatedAt,
+          parentPresent: false,
+        }))
+      ) {
+        skipped += 1;
+        advanceCursor();
+        continue;
+      }
+      skipped += 1; // event not here yet — retry next cycle
+      continue;
+    }
+    if (record.signerKey !== event.createdBy) {
+      skipped += 1; // refused — never advance past a hostile row
+      continue;
+    }
+
+    const local = await db.eventSyndicationConsents.get(record.eventId);
+    if (local && record.updatedAt <= local.updatedAt) {
+      skipped += 1;
+      advanceCursor();
+      continue;
+    }
+    await db.eventSyndicationConsents.put(record);
     inserted += 1;
     advanceCursor();
   }

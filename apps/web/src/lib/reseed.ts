@@ -147,6 +147,13 @@ const RESEED_KINDS: readonly ReseedKindSpec[] = [
     table: "eventReminderDisclosures",
     toWire: signedOrNull,
   },
+  // docs/calendar.md §10.6: per-event syndication consents — after
+  // /events above, since the route checks the referent.
+  {
+    path: "/event-syndication-consents",
+    table: "eventSyndicationConsents",
+    toWire: signedOrNull,
+  },
   // docs/member-removal.md M1: governance records — after receipts
   // (their validity reads the closure the receipts rebuild). These
   // rows carry a signatures[] array rather than a single signature;

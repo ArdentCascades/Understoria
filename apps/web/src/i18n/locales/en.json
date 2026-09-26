@@ -650,7 +650,9 @@
       "errorCapacityInvalid": "Capacity must be a positive whole number, or leave it empty for uncapped.",
       "errorLocked": "Unlock this device with your passphrase before signing the event.",
       "namedRemindersLabel": "Reminders may name this event",
-      "namedRemindersHint": "Usually a reminder says only that an event is coming up. Allow this if the event's name is safe to appear on lock screens — it shows only to people who chose detailed notifications, and you can change your mind here any time."
+      "namedRemindersHint": "Usually a reminder says only that an event is coming up. Allow this if the event's name is safe to appear on lock screens — it shows only to people who chose detailed notifications, and you can change your mind here any time.",
+      "syndicateLabel": "This event may appear on the public calendar feed",
+      "syndicateHint": "Off unless you turn it on. If your community shares a calendar link, anyone holding that link — including people outside the community and their calendar providers — can see this event's name, time, place, and description. You can turn it off any time: it leaves each subscriber's calendar at their next refresh, and copies already fetched stay fetched."
     },
     "detail": {
       "projectLinkLabel": "Project",

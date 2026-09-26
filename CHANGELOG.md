@@ -9,6 +9,28 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **An organizer-consented public calendar feed** (off everywhere
+  by default). Communities that want outreach events on people's
+  phone calendars can now have exactly that — and nothing more:
+  the operator enables a token-capability iCal link
+  (`CALENDAR_FEED_TOKEN`; unset means the route doesn't exist),
+  each event enters the feed only when its organizer switches on
+  the new "may appear on the public calendar feed" consent (a
+  signed, retractable per-event record, default off, on the event
+  form and the event page), and each subscriber points their own
+  calendar app at the link. The feed serves local upcoming events
+  only, carries just title/times/place/description — never RSVPs
+  or member identity, no alarms — keeps cancelled events visible
+  as CANCELLED instead of silently vanishing them, renders
+  through the same escaped ICS builder as the single-event
+  export (member text can't inject calendar properties), and
+  answers vendor polls with 304s. Retraction honesty throughout
+  the UI copy: an unticked event leaves each subscriber's
+  calendar at their next refresh, and already-fetched copies stay
+  fetched. Documented as a deliberate, bounded supersession of
+  the calendar design's feed rejection (docs/calendar.md §10.6).
+
 ### Fixed
 - **The Dashboard speaks your language for template titles too.**
   Field report from a Chinese-language member: "Recruit and screen
