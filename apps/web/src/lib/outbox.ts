@@ -37,6 +37,7 @@ import {
   submitSeedVaultPledgeToNode,
   submitPushNameConsentToNode,
   submitEventReminderDisclosureToNode,
+  submitEventSyndicationConsentToNode,
   submitMemberRemovalToNode,
   submitMemberReinstatementToNode,
   submitProposalToNode,
@@ -76,6 +77,7 @@ import type {
   SeedVaultPledge,
   PushNameConsent,
   EventReminderDisclosure,
+  EventSyndicationConsent,
   ShiftSignupState,
   TaskState,
 } from "@understoria/shared/types";
@@ -360,6 +362,18 @@ export async function enqueueEventReminderDisclosureOutbox(
   return enqueueOutbox(
     "event_reminder_disclosure",
     `erd_${record.eventId}`,
+    record,
+  );
+}
+
+export async function enqueueEventSyndicationConsentOutbox(
+  record: EventSyndicationConsent,
+): Promise<OutboxRow | null> {
+  // Natural key IS the event — one live consent version per event in
+  // the queue; a retraction replaces a still-pending allow.
+  return enqueueOutbox(
+    "event_syndication_consent",
+    `esc_${record.eventId}`,
     record,
   );
 }
@@ -791,6 +805,12 @@ export async function flushOutboxOnce(
         cfg,
         { fetchImpl: options.fetchImpl },
       );
+    } else if (row.kind === "event_syndication_consent") {
+      result = await submitEventSyndicationConsentToNode(
+        payload as unknown as EventSyndicationConsent,
+        cfg,
+        { fetchImpl: options.fetchImpl },
+      );
     } else if (row.kind === "member_removal") {
       result = await submitMemberRemovalToNode(
         payload as unknown as MemberRemoval,
@@ -875,6 +895,7 @@ export async function flushOutboxOnce(
       // 409 unknown_event: the disclosure's event may still be in
       // flight ahead of this row — same ordering as shifts.
       "event_reminder_disclosure",
+      "event_syndication_consent",
       // 409 quorum_not_met: the node hasn't seen a signer's receipt
       // yet — retryable by design (docs/member-removal.md M1).
       "member_removal",

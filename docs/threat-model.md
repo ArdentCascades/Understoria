@@ -919,7 +919,21 @@ We are not trying to protect against:
   `docs/calendar.md` §10.5):
   - **iCal subscription URLs.** No authentication boundary; any
     URL holder pulls full schedule data. Surveillance escape
-    valve.
+    valve. *Narrowly superseded 2026-09 by the organizer-consented
+    feed (`docs/calendar.md` §10.6): operator-enabled capability
+    token, per-event organizer opt-in signed as
+    `EventSyndicationConsent` (default off, retractable),
+    local-origin upcoming events only, the same four fields as the
+    single-event export — never RSVPs or member identity. Costs
+    named, not hidden: for opted-in events, calendar vendors'
+    servers ingest the four fields and poll the node; the node
+    sees poller IPs; a retraction lands only on each subscriber's
+    next poll and already-fetched copies stay fetched; the token
+    is a bearer capability that appears in reverse-proxy logs and
+    is revoked by rotation. Consent gates what honest software
+    does — a hostile peer node could republish any federated
+    event with or without this feature. The unconsented and
+    whole-schedule shapes stay rejected.*
   - **Per-member calendar URLs.** Per-member time-spatial
     aggregation is a stalking surface; no values win.
   - **Server-rendered ICS feed via federation.** Federation

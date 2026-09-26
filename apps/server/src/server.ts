@@ -39,6 +39,7 @@ import {
   createSeedVaultPledgeStore,
   createPushNameConsentStore,
   createEventReminderDisclosureStore,
+  createEventSyndicationConsentStore,
   createCapacityPostureStore,
   createMemberRemovalStore,
   createMemberReinstatementStore,
@@ -106,6 +107,8 @@ import { registerParticipationStateRoutes } from "./routes/participationStates.j
 import { registerSeedVaultPledgeRoutes } from "./routes/seedVaultPledges.js";
 import { registerPushNameConsentRoutes } from "./routes/pushNameConsents.js";
 import { registerEventReminderDisclosureRoutes } from "./routes/eventReminderDisclosures.js";
+import { registerEventSyndicationConsentRoutes } from "./routes/eventSyndicationConsents.js";
+import { registerCalendarFeedRoutes } from "./routes/calendarFeed.js";
 import { registerCapacityPostureRoutes } from "./routes/capacityPostures.js";
 import { registerMemberRemovalRoutes } from "./routes/memberRemovals.js";
 import { registerGovernanceRoutes } from "./routes/proposals.governance.js";
@@ -336,6 +339,7 @@ export async function buildServer({
   const seedVaultPledgeStore = createSeedVaultPledgeStore(db);
   const pushNameConsentStore = createPushNameConsentStore(db);
   const eventReminderDisclosureStore = createEventReminderDisclosureStore(db);
+  const eventSyndicationConsentStore = createEventSyndicationConsentStore(db);
   const capacityPostureStore = createCapacityPostureStore(db);
   const memberRemovalStore = createMemberRemovalStore(db);
   const memberReinstatementStore = createMemberReinstatementStore(db);
@@ -690,6 +694,22 @@ export async function buildServer({
   await registerEventReminderDisclosureRoutes(app, {
     store: eventReminderDisclosureStore,
     eventStore,
+  });
+  // Event syndication consents (docs/calendar.md §10.6) — an
+  // organizer's per-event "this event may appear on the public
+  // community calendar feed" flag, same referent-authority shape as
+  // reminder disclosures.
+  await registerEventSyndicationConsentRoutes(app, {
+    store: eventSyndicationConsentStore,
+    eventStore,
+  });
+  // The feed those consents gate: token-capability iCal, OFF unless
+  // the operator set CALENDAR_FEED_TOKEN (see routes/calendarFeed.ts
+  // for the three-consent stack).
+  await registerCalendarFeedRoutes(app, {
+    db,
+    nodeId: config.nodeId,
+    token: config.calendarFeedToken,
   });
   // Capacity postures (docs/capacity-forecast.md §6) — the coarse,
   // node-system-key-signed community capacity attestation. READ-ONLY:

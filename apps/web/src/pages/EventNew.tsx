@@ -16,6 +16,7 @@ import { useApp } from "@/state/AppContext";
 import { useToast } from "@/state/ToastContext";
 import { createEvent, EVENT_START_GRACE_MS } from "@/db/events";
 import { setEventReminderDisclosure } from "@/lib/eventReminderDisclosure";
+import { setEventSyndicationConsent } from "@/lib/eventSyndicationConsent";
 import { scheduleProjectWorkDay } from "@/db/eventProjectLinks";
 import { isOrganizer } from "@/db/projects";
 import { getSecretKey } from "@/db/secrets";
@@ -192,6 +193,12 @@ export default function EventNewPage() {
   // the saved draft — a privacy-relevant flag silently restored
   // from a stale draft would be worse than re-ticking it.
   const [namedReminders, setNamedReminders] = useState(false);
+  // Calendar syndication (docs/calendar.md §10.6): the organizer's
+  // "this event may appear on the public community calendar feed"
+  // flag. Same rules as namedReminders: default OFF, deliberately
+  // NOT part of the saved draft — a publicity-relevant flag silently
+  // restored from a stale draft would be worse than re-ticking it.
+  const [syndicate, setSyndicate] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pendingDraft, setPendingDraft] =
@@ -500,6 +507,9 @@ export default function EventNewPage() {
       // page is the retry path.
       if (namedReminders) {
         await setEventReminderDisclosure(event.id, true).catch(() => {});
+      }
+      if (syndicate) {
+        await setEventSyndicationConsent(event.id, true).catch(() => {});
       }
       // A deep-link visit never touches the stored plain-visit draft —
       // clearing here would delete work that belongs to a different
@@ -968,6 +978,30 @@ export default function EventNewPage() {
         </label>
         <p className="ms-6 mt-1 text-xs text-moss-600 dark:text-moss-300">
           {t("events.new.namedRemindersHint")}
+        </p>
+      </div>
+
+      {/* Calendar syndication (docs/calendar.md §10.6): organizer-side
+          layer of the feed's three consents (operator enables the
+          feed, organizer opts the event in, each subscriber points
+          their own calendar at the link). The hint names exactly
+          what leaves and to whom, and the retraction limit — this
+          is the strongest publicity switch in the app and the copy
+          must not soften it. Above the §3 signing card (layout
+          guardrail: every field precedes the card). */}
+      <div>
+        <label className="flex items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={syndicate}
+            disabled={submitting}
+            onChange={(e) => setSyndicate(e.target.checked)}
+          />
+          <span>{t("events.new.syndicateLabel")}</span>
+        </label>
+        <p className="ms-6 mt-1 text-xs text-moss-600 dark:text-moss-300">
+          {t("events.new.syndicateHint")}
         </p>
       </div>
 

@@ -329,6 +329,7 @@ Two things to know:
 | `READ_AUTH` | `on` | Member-authenticated reads AND member-gated writes (`docs/member-authenticated-reads.md`). `on` (the default) = every federation GET must carry a member's read signature (or a peer token) and every attributable POST must come from a member; a node with no founder yet boots **unclaimed** and prints a one-time setup code. `off` = the explicit dev/demo opt-out (feeds and writes open) |
 | `NODE_FOUNDER_KEYS` | unset | Comma-separated base64 public keys of the founding member(s) — the trust roots the invite chain grows from. Optional since the founder-claim flow: a fresh node is normally claimed in-band with the boot-log setup code (Profile → Community node → Founder setup); set this for mirrors, recovery, or extra roots. Each member's public key is on their Profile page. **Communities start with two founders**: after claiming, the founder invites their co-organizer and runs the in-app **Add a co-founder** ceremony (no env edit) — until then no member can ever become fully vouched, and the node logs a one-time single-founder warning |
 | `SETUP_TOKEN` | random per boot | Operator-chosen setup code for the first-run founder claim. Leave unset to get a random one printed in the boot log; ignored once the node has a founder |
+| `CALENDAR_FEED_TOKEN` | unset (feed off) | Enables the organizer-consented public calendar feed at `GET /calendar/<token>.ics`. Unset means the route 404s everywhere. Use a long random value (`openssl rand -hex 24`); rotating it revokes every previously shared link |
 | `PEER_READ_TOKENS` | unset | JSON map `{"https://peer.example": "<shared token ≥16 chars>"}`. Outgoing pulls to a mapped peer send the token; inbound reads presenting any mapped token are accepted as peer reads. Exchange tokens with the other operator the same way you exchange `PEER_NODE_URLS`. Only needed when either side enforces `READ_AUTH=on` |
 | `MIRROR_NODE_URLS` | unset | Comma-separated base URLs of MIRROR nodes — other nodes of THIS SAME community (`docs/community-resilience.md` §B). Unlike peers, mirrors replicate EVERY durable kind, including project/RSVP/shift state and redemption receipts. Each mirror pulls from the others; set it on every node in the set (full mesh) |
 | `MIRROR_READ_TOKENS` | unset | JSON map `{"https://mirror.example": "<shared token ≥16 chars>"}` — bearer tokens the mirror worker sends when pulling from a `READ_AUTH=on` mirror. Same shape and hygiene as `PEER_READ_TOKENS` |
@@ -786,6 +787,38 @@ curl -s https://aid.our-union.example/api/push/vapid-key
 # ready:      {"publicKey":"B..."}
 # not yet:    a 404
 ```
+
+### The public calendar feed (optional, off by default)
+
+`docs/calendar.md` §10.6. Setting `CALENDAR_FEED_TOKEN` enables
+`GET /calendar/<token>.ics` — an iCal feed members (and anyone
+else the community hands the link to; that is the point) can
+subscribe their phone calendars to. What it serves is doubly
+gated: only events **whose organizer ticked the per-event "may
+appear on the public calendar feed" switch** (a signed
+`EventSyndicationConsent`, default off, retractable any time),
+and only your node's own upcoming events — never a peer's, never
+RSVPs, never member identities.
+
+- **Routes:** the feed above, plus `/event-syndication-consents`
+  (the organizer flags — a state feed like reminder disclosures,
+  replicated by mirrors).
+- **Table:** `event_syndication_consents` (v39) — per-event
+  booleans, public by design, absence means no.
+- **The token is the whole lock.** Treat the URL like a password
+  with a wide blast radius: anyone holding it reads the feed, and
+  it shows up in your reverse proxy's access logs on every poll
+  (Caddy logs request paths by default). Rotation is the
+  revocation story — change the env value and restart; every old
+  link dies and subscribers must re-add the new one.
+- **Retraction physics, so you can answer members honestly:** an
+  organizer who unticks the switch drops the event from the feed
+  immediately, but each subscriber's calendar only notices at its
+  next poll (vendors poll on their own schedule, often 6–24 h),
+  and whatever a calendar provider already ingested is ingested.
+- The subscribe URL to hand out is
+  `https://<your-domain>/api/calendar/<token>.ics` (through the
+  same proxy prefix as everything else).
 
 ## 7. Backups
 

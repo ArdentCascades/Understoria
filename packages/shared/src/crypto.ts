@@ -61,6 +61,7 @@ import type {
   SeedVaultPledge,
   PushNameConsent,
   EventReminderDisclosure,
+  EventSyndicationConsent,
   CapacityPosture,
   MemberRemoval,
   MemberRemovalPayload,
@@ -1371,6 +1372,15 @@ export function verifyPushNameConsent(rec: PushNameConsent): boolean {
  *  enforced by the callers, exactly as event shifts do. */
 export function verifyEventReminderDisclosure(
   rec: EventReminderDisclosure,
+): boolean {
+  return verifyStateRecord(rec);
+}
+
+/** Cryptographic check only — same referent-rule contract as
+ *  `verifyEventReminderDisclosure` (callers check `signerKey` against
+ *  the stored event's `createdBy`). */
+export function verifyEventSyndicationConsent(
+  rec: EventSyndicationConsent,
 ): boolean {
   return verifyStateRecord(rec);
 }

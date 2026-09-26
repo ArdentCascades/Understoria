@@ -309,15 +309,86 @@ entry avoids overclaiming protection the design doesn't provide.
   single member's own RSVP'd events, off by default, gated on an
   informed-consent surface, and revocable via URL rotation —
   that toggle, if shipped, would supersede this rejection for the
-  per-member scope only. The community-wide iCal feed remains
-  out of scope. A client-side single-event `.ics` file export — no
-  server, no URL, nothing polls — is a materially different shape
-  and is settled as permissible; see `docs/community-events.md`
-  §11.5a.
+  per-member scope only. A client-side single-event `.ics` file
+  export — no server, no URL, nothing polls — is a materially
+  different shape and is settled as permissible; see
+  `docs/community-events.md` §11.5a.
+  **Superseded in one further narrowed scope (2026-09):** the
+  organizer-consented community feed of §10.6 below. That
+  supersession is deliberate and bounded — it covers ONLY events
+  whose organizers individually signed an opt-in, behind an
+  operator-enabled capability token, and the "full schedule data"
+  half of this rejection stands untouched: a feed of everything,
+  or of anything an organizer did not opt in, remains rejected
+  for exactly the reasons above.
 - **Per-member calendar URLs (`/member/X/calendar`).** Per-member
   time-spatial aggregation is a stalking surface. No values win.
 - **Server-rendered ICS feed via federation.** Federation surface
   widens for a low-value feature.
+
+### 10.6 The organizer-consented public feed (SHIPPED 2026-09)
+
+The one deliberate, documented supersession of §10.5's iCal
+rejection, argued from what changed: the rejected shape leaked the
+*whole* schedule through a standing URL; this shape serves **only
+events whose organizers individually chose publicity** — the
+"attendance supersedes privacy" case (an outreach event that wants
+strangers' calendars) — and stacks three consents before a byte
+leaves:
+
+1. **Operator** (community level): the feed does not exist until
+   the operator sets `CALENDAR_FEED_TOKEN`. Unset — the default —
+   means `/calendar/…` answers a bare 404 for every path,
+   indistinguishable from a node without the feature; a wrong
+   token answers the identical 404 (constant-time compare), so a
+   prober learns nothing. Rotating the token revokes every
+   previously shared link (subscribers must re-add — a named
+   cost). The token is a bearer capability: it appears in
+   reverse-proxy access logs, which the operator guide says
+   plainly.
+2. **Organizer** (per event): a signed `EventSyndicationConsent`
+   LWW record — the exact `EventReminderDisclosure` machinery,
+   keyed by `eventId`, signer must be the stored event's
+   `createdBy`, retraction (`allow:false`) keeps winning LWW.
+   Default OFF for every event; the checkbox on the event form
+   and the toggle on the event page carry the strongest publicity
+   copy in the app (anyone with the link, including non-members
+   and calendar providers; retraction lands on each subscriber's
+   next poll, already-fetched copies stay fetched).
+3. **Subscriber** (per device): nothing is pushed; each member —
+   or outsider, that's the point — points their own calendar app
+   at the link.
+
+What the feed serves, structurally: **local-origin events only**
+(the organizer consented to this community's link, not every
+peer's; a peer node's feed never carries them — with the honesty
+note that consent gates what honest software does, since a
+hostile peer could republish any federated event regardless);
+only **upcoming** events (still-running through +90 days — a
+notice board, never a public archive); only **title, times,
+location, description** — the §11.5a field set, no RSVPs, no
+member identity, no `VALARM`. A cancelled consented event stays
+listed as `STATUS:CANCELLED` until it ages out, so subscribers
+see the cancellation instead of a silently lingering copy; a
+*retracted* event simply leaves the feed (subscription clients
+treat the feed as authoritative and drop it).
+
+Mechanics worth naming: all ICS text flows through ONE escaping
+implementation (`@understoria/shared/ics`, shared with the
+§11.5a client export) because titles/locations/descriptions are
+member-controlled and ICS is line-oriented — the escaper is the
+injection boundary, tested with hostile input. `DTSTAMP` uses
+per-row LWW clocks rather than "now" so an unchanged feed renders
+byte-identical and the `ETag` turns vendor polling into 304s.
+Server tables gain v39 `event_syndication_consents`; the feed
+route is `GET /calendar/<token>.ics`, exempted from read-auth
+(the token IS the auth) and opening nothing else.
+
+What this does not mitigate, said plainly: un-publishing has
+physics limits (vendor retention, poll latency); vendors' servers
+see consented events and poll the node; the node sees poller IPs.
+Those are disclosure obligations (threat model §7, privacy policy,
+member guide), not engineering gaps.
 
 ## 11. Implementation breakdown
 

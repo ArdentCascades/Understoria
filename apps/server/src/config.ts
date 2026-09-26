@@ -241,6 +241,19 @@ export interface Config {
    */
   setupToken: string | null;
   /**
+   * Capability token for the organizer-consented public calendar
+   * feed (`CALENDAR_FEED_TOKEN`, docs/calendar.md §10.6). Unset
+   * (the default) means the feed does not exist: `/calendar/…`
+   * answers 404 for every path, indistinguishable from a node that
+   * never had the feature. Setting a long random value enables
+   * `GET /calendar/<token>.ics`, serving upcoming LOCAL events whose
+   * organizers explicitly opted in — and rotating the value revokes
+   * every previously shared link. The operator's choice here is the
+   * community-level layer of the feed's three consents (operator,
+   * organizer per event, each subscriber's own device).
+   */
+  calendarFeedToken: string | null;
+  /**
    * Shared read tokens for peer nodes (`PEER_READ_TOKENS`, JSON map of
    * peer base URL → token). Outgoing peer pulls to a mapped URL send
    * `authorization: Bearer <token>`; inbound reads presenting any
@@ -462,6 +475,7 @@ export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Config 
     readAuth: parseReadAuth(env.READ_AUTH),
     founderKeys: parseFounderKeys(env.NODE_FOUNDER_KEYS),
     setupToken: nonEmpty(env.SETUP_TOKEN),
+    calendarFeedToken: nonEmpty(env.CALENDAR_FEED_TOKEN),
     peerReadTokens: parsePeerReadTokens(env.PEER_READ_TOKENS),
     databaseKey: nonEmpty(env.DATABASE_KEY),
     mirrorNodeUrls: parseUrlList("MIRROR_NODE_URLS", env.MIRROR_NODE_URLS),

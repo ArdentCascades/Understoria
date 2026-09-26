@@ -650,7 +650,9 @@
       "errorCapacityInvalid": "Kantite plas la se yon chif antye ki pi gran pase 0 — oswa kite l vid si pa gen limit.",
       "errorLocked": "Ouvri aparèy sa a ak passphrase ou anvan ou siyen evènman an.",
       "namedRemindersLabel": "Rapèl yo ka di non evènman sa a",
-      "namedRemindersHint": "Anjeneral yon rapèl di sèlman gen yon evènman k ap pwoche. Pèmèt sa si non evènman an ka parèt san danje sou ekran vewouyaj — se sèlman moun ki chwazi notifikasyon ki di ki kalite k ap wè l, epi ou ka chanje lide isit la nenpòt lè."
+      "namedRemindersHint": "Anjeneral yon rapèl di sèlman gen yon evènman k ap pwoche. Pèmèt sa si non evènman an ka parèt san danje sou ekran vewouyaj — se sèlman moun ki chwazi notifikasyon ki di ki kalite k ap wè l, epi ou ka chanje lide isit la nenpòt lè.",
+      "syndicateLabel": "Evènman sa a ka parèt sou kalandriye piblik kominote a",
+      "syndicateHint": "Li fèmen sof si ou louvri l. Si kominote w la pataje yon lyen kalandriye, nenpòt moun ki gen lyen an — menm moun deyò kominote a ak konpayi kalandriye yo — ka wè non, lè, kote ak deskripsyon evènman sa a. Ou ka fèmen l nenpòt lè: l ap disparèt nan kalandriye chak moun ki abòne lè kalandriye yo aktyalize ankò, men kopi ki gentan pran yo p ap tounen."
     },
     "detail": {
       "projectLinkLabel": "Pwojè",

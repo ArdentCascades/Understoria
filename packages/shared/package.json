@@ -28,6 +28,10 @@
       "types": "./dist/notifications.d.ts",
       "default": "./dist/notifications.js"
     },
+    "./ics": {
+      "types": "./dist/ics.d.ts",
+      "default": "./dist/ics.js"
+    },
     "./trust": {
       "types": "./dist/trust.d.ts",
       "default": "./dist/trust.js"

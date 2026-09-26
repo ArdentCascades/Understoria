@@ -47,6 +47,7 @@ import type {
   SeedVaultPledge,
   PushNameConsent,
   EventReminderDisclosure,
+  EventSyndicationConsent,
   ShiftSignupState,
   TaskState,
 } from "@understoria/shared/types";
@@ -444,6 +445,17 @@ export async function submitEventReminderDisclosureToNode(
   deps: SubmitDeps = {},
 ): Promise<SubmitResult> {
   return postSignedRecord("/event-reminder-disclosures", record, config, deps);
+}
+
+/** Event syndication consent (docs/calendar.md §10.6) — has an
+ *  event referent, so a 409 (event not on the node yet) is the
+ *  retryable case the outbox flush special-cases, like shifts. */
+export async function submitEventSyndicationConsentToNode(
+  record: EventSyndicationConsent,
+  config: SubmitConfig,
+  deps: SubmitDeps = {},
+): Promise<SubmitResult> {
+  return postSignedRecord("/event-syndication-consents", record, config, deps);
 }
 
 /** Member removal / reinstatement (docs/member-removal.md M2): the
