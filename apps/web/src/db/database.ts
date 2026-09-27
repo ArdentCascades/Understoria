@@ -49,6 +49,7 @@ import type {
   SeedVaultPledge,
   PushNameConsent,
   EventReminderDisclosure,
+  EventSyndicationConsent,
   CapacityPosture,
   ShiftSignupRow,
   TaskComment,
@@ -174,6 +175,10 @@ export interface OutboxRow {
     // Event reminder disclosure (docs/notifications.md v2): the
     // organizer's per-event "reminders may name this event" boolean.
     | "event_reminder_disclosure"
+    // Event syndication consent (docs/calendar.md §10.6): the
+    // organizer's per-event "may appear on the public community
+    // calendar feed" boolean, same machinery.
+    | "event_syndication_consent"
     // Assembled quorum governance records (docs/member-removal.md
     // M2) — queued by the proposer's device after the ceremony.
     | "member_removal"
@@ -603,6 +608,12 @@ export class UnderstoriaDB extends Dexie {
    *  event's createdBy, checked at pull). Absence means OFF. The
    *  boolean only — the title stays on the event. */
   eventReminderDisclosures!: Table<EventReminderDisclosure, string>;
+  /** Event syndication consents (docs/calendar.md §10.6): each
+   *  organizer's per-event "may appear on the public community
+   *  calendar feed" boolean — the same single-owner LWW shape as
+   *  reminder disclosures, keyed by eventId (authority = the local
+   *  event's createdBy, checked at pull). Absence means OFF. */
+  eventSyndicationConsents!: Table<EventSyndicationConsent, string>;
   /** Coarse node-capacity attestations (docs/capacity-forecast.md §6):
    *  node-system-key-signed LWW records keyed by nodeId, carrying only
    *  a band/horizon/trigger — never a byte count. Read-only on this
@@ -1317,6 +1328,16 @@ export class UnderstoriaDB extends Dexie {
     // be the local event's createdBy). Absence means OFF.
     this.version(42).stores({
       eventReminderDisclosures: "eventId, updatedAt",
+    });
+
+    // v43 — event syndication consents (docs/calendar.md §10.6,
+    // organizer-consented calendar feed): each organizer's "this
+    // event may appear on the public community calendar feed"
+    // boolean, keyed by eventId, pulled from the node feed with the
+    // same shift-style authority check as reminder disclosures.
+    // Absence means OFF.
+    this.version(43).stores({
+      eventSyndicationConsents: "eventId, updatedAt",
     });
   }
 }

@@ -650,7 +650,9 @@
       "errorCapacityInvalid": "Le nombre de places doit être un nombre entier positif — ou laisse vide pour ne pas limiter.",
       "errorLocked": "Déverrouille cet appareil avec ta phrase secrète avant de signer l'événement.",
       "namedRemindersLabel": "Les rappels peuvent nommer cet événement",
-      "namedRemindersHint": "D'habitude un rappel dit seulement qu'un événement approche. Autorise-le si le nom de l'événement peut s'afficher sans risque sur des écrans de verrouillage — seules les personnes qui ont choisi les notifications nommées le voient, et tu peux changer d'avis ici à tout moment."
+      "namedRemindersHint": "D'habitude un rappel dit seulement qu'un événement approche. Autorise-le si le nom de l'événement peut s'afficher sans risque sur des écrans de verrouillage — seules les personnes qui ont choisi les notifications nommées le voient, et tu peux changer d'avis ici à tout moment.",
+      "syndicateLabel": "Cet événement peut apparaître dans le calendrier public",
+      "syndicateHint": "Désactivé sauf si tu l'actives. Si ta communauté partage un lien de calendrier, quiconque détient ce lien — y compris des gens hors de la communauté et les fournisseurs de leurs calendriers — peut voir le nom, l'heure, le lieu et la description de cet événement. Tu peux le désactiver à tout moment : il disparaît du calendrier de chaque personne abonnée à sa prochaine actualisation, mais les copies déjà récupérées le restent."
     },
     "detail": {
       "projectLinkLabel": "Projet",

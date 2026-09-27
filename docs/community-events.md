@@ -782,6 +782,15 @@ events iCal toggle, if shipped, is a narrower thing — only the
 RSVP'ing member's events, only at their explicit opt-in — and the
 phase-2 design will re-derive the threading-the-needle argument.
 
+**Update (2026-09):** a different narrowing shipped first — the
+organizer-consented community feed, `docs/calendar.md` §10.6:
+operator-enabled capability URL, per-event organizer opt-in
+(`EventSyndicationConsent`, default off, retractable),
+local-origin upcoming events only, the §11.5a field set. It
+supersedes §10.5's community-feed rejection for exactly that
+consented scope and no further; this section's per-member
+RSVP-feed sketch remains a separate, still-unshipped idea.
+
 ### §11.5a Single-event `.ics` file export (settled: permissible — shipped)
 
 > **Status:** settled as **permissible**; *shipped in PR #289*

@@ -39,6 +39,7 @@ import {
   type SeedVaultPledge,
   type PushNameConsent,
   type EventReminderDisclosure,
+  type EventSyndicationConsent,
   type CapacityPosture,
   type SignedVouch,
   type TaskComment,
@@ -1216,6 +1217,10 @@ export type ParseEventReminderDisclosureResult =
   | { ok: true; value: EventReminderDisclosure }
   | { ok: false; error: string };
 
+export type ParseEventSyndicationConsentResult =
+  | { ok: true; value: EventSyndicationConsent }
+  | { ok: false; error: string };
+
 export type ParseCapacityPostureResult =
   | { ok: true; value: CapacityPosture }
   | { ok: false; error: string };
@@ -1333,6 +1338,26 @@ export function parseEventReminderDisclosure(
   const clock = checkLwwClock(r);
   if (clock) return { ok: false, error: clock };
   return { ok: true, value: r as unknown as EventReminderDisclosure };
+}
+
+export function parseEventSyndicationConsent(
+  input: unknown,
+): ParseEventSyndicationConsentResult {
+  if (typeof input !== "object" || input === null) {
+    return { ok: false, error: "body must be a JSON object" };
+  }
+  const r = input as Record<string, unknown>;
+  for (const f of ["id", "eventId", "signerKey", "signature"]) {
+    if (typeof r[f] !== "string" || (r[f] as string).length === 0) {
+      return { ok: false, error: `${f} must be a non-empty string` };
+    }
+  }
+  if (typeof r.allow !== "boolean") {
+    return { ok: false, error: "allow must be a boolean" };
+  }
+  const clock = checkLwwClock(r);
+  if (clock) return { ok: false, error: clock };
+  return { ok: true, value: r as unknown as EventSyndicationConsent };
 }
 
 export function parseCapacityPosture(

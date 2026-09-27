@@ -650,7 +650,9 @@
       "errorCapacityInvalid": "Dapat buo at positibong numero ang dami ng kasya, o iwanang blangko kung walang takda.",
       "errorLocked": "I-unlock ang device na ito gamit ang passphrase mo bago pirmahan ang event.",
       "namedRemindersLabel": "Maaaring banggitin ng mga paalala ang event na ito",
-      "namedRemindersHint": "Karaniwan, sinasabi lang ng paalala na may paparating na event. Payagan ito kung ligtas lumabas ang pangalan ng event sa mga lock screen — makikita lang ito ng mga pumili ng notipikasyong nagsasabi ng uri, at maaari kang magbago ng isip dito anumang oras."
+      "namedRemindersHint": "Karaniwan, sinasabi lang ng paalala na may paparating na event. Payagan ito kung ligtas lumabas ang pangalan ng event sa mga lock screen — makikita lang ito ng mga pumili ng notipikasyong nagsasabi ng uri, at maaari kang magbago ng isip dito anumang oras.",
+      "syndicateLabel": "Maaaring lumabas ang event na ito sa pampublikong kalendaryo",
+      "syndicateHint": "Nakapatay ito maliban kung buksan mo. Kung nagbabahagi ang komunidad mo ng link ng kalendaryo, kahit sinong may hawak ng link — pati mga taong labas sa komunidad at ang mga provider ng kanilang kalendaryo — ay makikita ang pangalan, oras, lugar, at paglalarawan ng event na ito. Maaari mo itong patayin anumang oras: mawawala ito sa kalendaryo ng bawat naka-subscribe sa susunod nilang pag-refresh, pero hindi na mababawi ang mga kopyang nakuha na."
     },
     "detail": {
       "projectLinkLabel": "Proyekto",

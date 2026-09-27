@@ -508,6 +508,26 @@ Two tools live there:
   under each shift in **In my care** (events themselves have **Add
   to calendar** in their page menu) — a shift's clock time,
   committed weeks ahead, is exactly what's easiest to lose track of.
+- **The community calendar link (if your community runs one).**
+  Some communities share a calendar link you can subscribe your
+  phone's calendar to. Two honest things about it: events appear
+  there **only** when their organizer switched on "may appear on
+  the public calendar feed" for that specific event (off by
+  default, and most events never turn it on), and if you
+  subscribe, the company behind your calendar app fetches those
+  events from the community's server on a schedule — that's how
+  subscriptions work everywhere, said plainly here. Ask whoever
+  runs your community's node for the link.
+- **Organizers: the "may appear on the public calendar feed"
+  switch on your event** is the strongest publicity switch in the
+  app. On means anyone holding the community's calendar link —
+  including people outside the community, and their calendar
+  providers — can see the event's name, time, place, and
+  description. It never includes who RSVP'd. Use it for events
+  where turnout matters more than privacy (an open workshop, a
+  public fundraiser); leave it off for anything sensitive. You
+  can switch it off any time on the event page, but copies
+  calendar apps already fetched stay fetched.
 
 The planned day is a self-promise, not a deadline. If it passes,
 nothing turns red, nothing counts the days, and nobody is told —

@@ -108,6 +108,9 @@ export const WINDOW_PINNED_TABLES = [
   // Per-event reminder disclosures (docs/notifications.md v2) —
   // tiny booleans; organizers' own flags must survive to re-seed.
   "eventReminderDisclosures",
+  // Per-event syndication consents (docs/calendar.md §10.6) — same
+  // class: tiny public booleans, organizers' own flags.
+  "eventSyndicationConsents",
   // Coarse node-capacity attestations (docs/capacity-forecast.md §6):
   // one node-signed row per node, trivially small; the community's
   // capacity signal, always freshly pulled — pin it, never window.

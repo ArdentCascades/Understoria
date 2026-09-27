@@ -45,6 +45,7 @@ import type {
   SeedVaultPledge,
   PushNameConsent,
   EventReminderDisclosure,
+  EventSyndicationConsent,
   CapacityPosture,
   EventShiftState,
   Post,
@@ -1722,6 +1723,36 @@ function applyMigrations(db: DatabaseType): void {
     `);
     db.prepare(
       "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '38')",
+    ).run();
+  }
+
+  // v39 — event syndication consents (docs/calendar.md §10.6,
+  // organizer-consented calendar feed). An organizer's per-event
+  // "this event may appear on the public community calendar feed"
+  // flag: the exact event_reminder_disclosures shape — single-owner
+  // LWW keyed by event_id, its own record because the event wire
+  // format is closed and an LWW record can be flipped or retracted
+  // after creation. Absence means OFF: the token-gated feed (itself
+  // off unless the operator sets a token) serves only events whose
+  // organizers opted in.
+  if (current < 39) {
+    db.exec(`
+      CREATE TABLE event_syndication_consents (
+        event_id TEXT NOT NULL,
+        id TEXT NOT NULL,
+        signer_key TEXT NOT NULL,
+        updated_at INTEGER NOT NULL,
+        payload TEXT NOT NULL,
+        signature TEXT NOT NULL,
+        PRIMARY KEY (event_id)
+      );
+      CREATE INDEX event_syndication_consents_updated_idx
+        ON event_syndication_consents (updated_at);
+      CREATE INDEX event_syndication_consents_signer_idx
+        ON event_syndication_consents (signer_key);
+    `);
+    db.prepare(
+      "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '39')",
     ).run();
   }
 }
@@ -4312,6 +4343,74 @@ export function createEventReminderDisclosureStore(
         "id",
         opts,
       ).map((r) => JSON.parse(r.payload) as EventReminderDisclosure);
+    },
+    count() {
+      return (countStmt.get() as { n: number }).n;
+    },
+  };
+}
+
+/** Event syndication consents (docs/calendar.md §10.6) — the same
+ *  pledge machinery keyed by eventId as reminder disclosures.
+ *  Authority (signer must be the stored event's createdBy) is the
+ *  route's referent check; the store never judges. */
+export interface EventSyndicationConsentStore {
+  get(eventId: string): EventSyndicationConsent | null;
+  /** INSERT OR REPLACE by eventId. The route decides whether to
+   *  call this — the store never compares versions. */
+  upsert(record: EventSyndicationConsent): void;
+  list(opts?: {
+    since?: number;
+    sinceId?: string;
+    limit?: number;
+  }): EventSyndicationConsent[];
+  count(): number;
+}
+
+export function createEventSyndicationConsentStore(
+  db: DatabaseType,
+): EventSyndicationConsentStore {
+  const upsertStmt = db.prepare(`
+    INSERT OR REPLACE INTO event_syndication_consents (
+      event_id, id, signer_key, updated_at, payload, signature
+    ) VALUES (
+      @eventId, @id, @signerKey, @updatedAt, @payload, @signature
+    )
+  `);
+  const getStmt = db.prepare(
+    "SELECT * FROM event_syndication_consents WHERE event_id = ?",
+  );
+  const countStmt = db.prepare(
+    "SELECT COUNT(*) AS n FROM event_syndication_consents",
+  );
+
+  return {
+    get(eventId) {
+      const r = getStmt.get(eventId) as StateRowSqlite | undefined;
+      return r ? (JSON.parse(r.payload) as EventSyndicationConsent) : null;
+    },
+    upsert(record) {
+      upsertStmt.run({
+        eventId: record.eventId,
+        id: record.id,
+        signerKey: record.signerKey,
+        updatedAt: record.updatedAt,
+        payload: JSON.stringify(record),
+        signature: record.signature,
+      });
+    },
+    list(opts = {}) {
+      // Retractions (allow:false) stay in the feed so they keep
+      // winning LWW on every puller — an organizer pulling an event
+      // back OFF the public calendar is exactly the record that must
+      // travel.
+      return pagedRows<StateRowSqlite>(
+        db,
+        "event_syndication_consents",
+        "updated_at",
+        "id",
+        opts,
+      ).map((r) => JSON.parse(r.payload) as EventSyndicationConsent);
     },
     count() {
       return (countStmt.get() as { n: number }).n;

@@ -650,7 +650,9 @@
       "errorCapacityInvalid": "Số chỗ phải là số nguyên dương, hoặc để trống nếu không giới hạn.",
       "errorLocked": "Mở khóa thiết bị này bằng cụm mật khẩu của bạn trước khi ký sự kiện.",
       "namedRemindersLabel": "Lời nhắc có thể nêu tên sự kiện này",
-      "namedRemindersHint": "Bình thường lời nhắc chỉ nói có một sự kiện sắp diễn ra. Hãy cho phép nếu tên sự kiện xuất hiện trên màn hình khóa cũng không sao — chỉ những người chọn thông báo nói rõ loại mới thấy, và bạn có thể đổi ý ở đây bất cứ lúc nào."
+      "namedRemindersHint": "Bình thường lời nhắc chỉ nói có một sự kiện sắp diễn ra. Hãy cho phép nếu tên sự kiện xuất hiện trên màn hình khóa cũng không sao — chỉ những người chọn thông báo nói rõ loại mới thấy, và bạn có thể đổi ý ở đây bất cứ lúc nào.",
+      "syndicateLabel": "Sự kiện này có thể xuất hiện trên lịch công khai của cộng đồng",
+      "syndicateHint": "Mặc định tắt. Nếu cộng đồng của bạn chia sẻ một liên kết lịch, bất kỳ ai giữ liên kết đó — kể cả người ngoài cộng đồng và các nhà cung cấp lịch của họ — đều xem được tên, giờ, địa điểm và mô tả của sự kiện này. Bạn có thể tắt bất cứ lúc nào: sự kiện sẽ biến mất khỏi lịch của mỗi người đăng ký ở lần làm mới tiếp theo, nhưng bản đã tải về thì không thu lại được."
     },
     "detail": {
       "projectLinkLabel": "Dự án",

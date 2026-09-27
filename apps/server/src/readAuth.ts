@@ -81,6 +81,13 @@ const OPEN_PATH_PREFIXES = [
   "/device-link",
   "/link-request",
   "/push/vapid-key",
+  // The organizer-consented calendar feed (docs/calendar.md §10.6):
+  // calendar apps cannot sign read-auth headers, so the route does
+  // its own gating — the capability token IS the path, a wrong or
+  // missing token answers the same 404 as a node with the feed
+  // disabled, and the feed serves only events whose organizers
+  // explicitly opted in. Exempting the prefix opens nothing else.
+  "/calendar",
 ];
 
 export interface MembershipResolver {

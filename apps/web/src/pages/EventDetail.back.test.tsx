@@ -124,7 +124,7 @@ let mockState: MockState;
 
 function setLiveQueries(evt: Event | null | undefined) {
   // event, cancellation, reminder disclosure, rsvp, roster, shifts, link
-  liveSequence = [evt, null, undefined, null, [], [], null];
+  liveSequence = [evt, null, undefined, undefined, null, [], [], null];
   liveCursor = 0;
 }
 

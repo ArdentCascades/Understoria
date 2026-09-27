@@ -153,7 +153,7 @@ function setLiveQueries(
   myRsvp: EventRsvpRow | null = null,
 ) {
   // event, cancellation, reminder disclosure, rsvp, roster, shifts, link
-  liveSequence = [evt, null, undefined, myRsvp, rsvps, [], null];
+  liveSequence = [evt, null, undefined, undefined, myRsvp, rsvps, [], null];
   liveCursor = 0;
 }
 

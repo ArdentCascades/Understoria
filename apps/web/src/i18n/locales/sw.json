@@ -650,7 +650,9 @@
       "errorCapacityInvalid": "Idadi ya nafasi iwe namba kamili chanya, au acha wazi kama hakuna kikomo.",
       "errorLocked": "Fungua kifaa hiki kwa maneno yako ya siri kabla ya kutia sahihi tukio.",
       "namedRemindersLabel": "Vikumbusho vinaweza kutaja tukio hili",
-      "namedRemindersHint": "Kwa kawaida kikumbusho husema tu kwamba tukio linakaribia. Ruhusu kama jina la tukio hili ni salama kuonekana kwenye skrini za kufunga — linaonekana tu kwa waliochagua arifa zinazotaja aina, na unaweza kubadili uamuzi hapa wakati wowote."
+      "namedRemindersHint": "Kwa kawaida kikumbusho husema tu kwamba tukio linakaribia. Ruhusu kama jina la tukio hili ni salama kuonekana kwenye skrini za kufunga — linaonekana tu kwa waliochagua arifa zinazotaja aina, na unaweza kubadili uamuzi hapa wakati wowote.",
+      "syndicateLabel": "Tukio hili linaweza kuonekana kwenye kalenda ya wazi ya jumuiya",
+      "syndicateHint": "Limezimwa hadi ulifungue. Kama jumuiya yako inashiriki kiungo cha kalenda, yeyote mwenye kiungo hicho — wakiwemo watu wa nje ya jumuiya na watoa huduma za kalenda zao — anaweza kuona jina, wakati, mahali na maelezo ya tukio hili. Unaweza kulizima wakati wowote: linatoweka kwenye kalenda ya kila aliyejiunga kwenye usasishaji unaofuata, ila nakala zilizokwisha chukuliwa hazirudishwi."
     },
     "detail": {
       "projectLinkLabel": "Mradi",

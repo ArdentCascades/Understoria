@@ -161,6 +161,23 @@ describe("EventNew quick picks", () => {
     expect(today.getAttribute("aria-pressed")).toBe("false");
   });
 
+  it("both consent switches begin OFF — publicity is never a default", () => {
+    // The named-reminders and public-calendar-feed checkboxes are
+    // the two organizer publicity switches; each must start
+    // unchecked on a fresh form (docs/calendar.md §10.6's
+    // drift-toward-public-by-default guard, form half).
+    render();
+    for (const needle of ["Reminders may name", "public calendar feed"]) {
+      const box = Array.from(
+        container.querySelectorAll<HTMLInputElement>(
+          'input[type="checkbox"]',
+        ),
+      ).find((i) => (i.closest("label")?.textContent ?? "").includes(needle));
+      expect(box, needle).toBeDefined();
+      expect(box!.checked, needle).toBe(false);
+    }
+  });
+
   it("the required-start error replaces the hint after a blur leaves time empty", () => {
     render();
     const input = startTimeInput();

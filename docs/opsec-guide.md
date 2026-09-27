@@ -55,6 +55,20 @@ changes.
   being visibly reachable is itself a risk. A device wiped while
   offline can't unsubscribe itself; its pings stop within three
   weeks when its registration expires.
+- **Organizers: the public-calendar switch publishes, in the full
+  sense.** If your community's operator runs a calendar link,
+  ticking "may appear on the public calendar feed" on your event
+  puts its name, time, place, and description in front of anyone
+  who ever obtains that link — non-members, calendar companies'
+  servers, anyone a subscriber forwards it to. It never carries
+  the RSVP list, but the event text itself is yours to judge:
+  a location string that reads harmless inside the community may
+  not be harmless on the open internet. Off by default, per
+  event, and retractable — with the honest limit that retraction
+  reaches each subscriber's calendar only at its next refresh,
+  and copies already fetched by calendar providers stay fetched.
+  If in doubt, leave it off; the event is still on every member's
+  in-app calendar either way.
 - **Trust the device, or don't open the app.** Understoria runs in
   the browser, which means it can defend against people who *don't*
   have access to your device (the threat model is built for that)

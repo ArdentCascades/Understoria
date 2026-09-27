@@ -650,7 +650,9 @@
       "errorCapacityInvalid": "Kapasitas harus bilangan bulat positif, atau kosongkan kalau tanpa batas.",
       "errorLocked": "Buka kunci perangkat ini dengan frasa sandimu sebelum menandatangani acara.",
       "namedRemindersLabel": "Pengingat boleh menyebut nama acara ini",
-      "namedRemindersHint": "Biasanya pengingat hanya bilang ada acara yang segera mulai. Izinkan kalau nama acara ini aman muncul di layar kunci — hanya terlihat oleh yang memilih notifikasi yang menyebut jenis, dan kamu bisa berubah pikiran di sini kapan saja."
+      "namedRemindersHint": "Biasanya pengingat hanya bilang ada acara yang segera mulai. Izinkan kalau nama acara ini aman muncul di layar kunci — hanya terlihat oleh yang memilih notifikasi yang menyebut jenis, dan kamu bisa berubah pikiran di sini kapan saja.",
+      "syndicateLabel": "Acara ini boleh tampil di kalender publik komunitas",
+      "syndicateHint": "Mati kecuali kamu nyalakan. Kalau komunitasmu membagikan tautan kalender, siapa pun yang memegang tautan itu — termasuk orang di luar komunitas dan penyedia kalender mereka — bisa melihat nama, waktu, tempat, dan deskripsi acara ini. Kamu bisa mematikannya kapan saja: acara hilang dari kalender tiap pelanggan saat penyegaran berikutnya, tapi salinan yang sudah terunduh tidak bisa ditarik."
     },
     "detail": {
       "projectLinkLabel": "Proyek",

@@ -18,6 +18,12 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import {
+  escapeIcsText,
+  foldIcsLine,
+  formatIcsUtc,
+  ICS_CRLF as CRLF,
+} from "@understoria/shared/ics";
 import type { Event, EventShiftRow } from "@/types";
 
 /**
@@ -25,11 +31,16 @@ import type { Event, EventShiftRow } from "@/types";
  * `docs/community-events.md` §11.5a.
  *
  * This module is deliberately pure string-building (no dependency, no
- * DOM, no server): the PWA already holds the event in Dexie, so the
- * whole export is client-side and on-demand. There is NO server route
- * for this, ever — a server-rendered `.ics`, even for one event,
- * recreates the standing-URL subscription shape that
- * `docs/calendar.md` §10.5 permanently rejected.
+ * DOM): the PWA already holds the event in Dexie, so the whole export
+ * is client-side and on-demand. There is NO server route for THIS
+ * shape — a per-member or whole-calendar subscription URL stays
+ * rejected (`docs/calendar.md` §10.5). The one server-rendered `.ics`
+ * that exists — the organizer-consented, operator-enabled community
+ * feed (`docs/calendar.md` §10.6) — is a deliberate, documented
+ * supersession of §10.5 for exactly the events whose organizers
+ * opted in, and it renders through the same shared primitives
+ * (`@understoria/shared/ics`) as this module, so the escaping that
+ * keeps member text from injecting ICS properties lives in ONE place.
  *
  * What the file deliberately does NOT contain:
  *
@@ -48,76 +59,10 @@ import type { Event, EventShiftRow } from "@/types";
  *   `privacy-precondition` argument.
  */
 
-/** RFC 5545 §3.1: content lines are delimited by CRLF. Calendar
- *  apps are picky about this; bare `\n` output breaks importers. */
-const CRLF = "\r\n";
-
-/** RFC 5545 §3.1: "Lines of text SHOULD NOT be longer than 75
- *  octets, excluding the line break." Octets, not characters — the
- *  limit counts UTF-8 bytes, and a fold must never split a
- *  multi-byte character. */
-const MAX_LINE_OCTETS = 75;
-
-const utf8 = new TextEncoder();
-
-/**
- * RFC 5545 §3.3.11 TEXT escaping: backslash, semicolon, and comma
- * are escaped with a backslash; newlines become the literal `\n`
- * sequence. Backslash must be escaped first so it doesn't double up
- * the escapes it introduces.
- */
-export function escapeIcsText(value: string): string {
-  return value
-    .replace(/\\/g, "\\\\")
-    .replace(/\r\n/g, "\\n")
-    .replace(/[\r\n]/g, "\\n")
-    .replace(/;/g, "\\;")
-    .replace(/,/g, "\\,");
-}
-
-/**
- * RFC 5545 §3.1 line folding: a content line longer than 75 octets
- * is split into multiple lines, each continuation prefixed with a
- * single space (CRLF + SP). We measure octets (UTF-8 bytes) and
- * break character-by-character so a fold never lands inside a
- * multi-byte sequence. The continuation's leading space counts
- * toward its 75-octet budget.
- */
-export function foldIcsLine(line: string): string {
-  if (utf8.encode(line).length <= MAX_LINE_OCTETS) return line;
-  const out: string[] = [];
-  let current = "";
-  let currentOctets = 0;
-  // First physical line gets the full 75 octets; continuations lose
-  // one octet to the leading space.
-  let budget = MAX_LINE_OCTETS;
-  for (const ch of line) {
-    const chOctets = utf8.encode(ch).length;
-    if (currentOctets + chOctets > budget) {
-      out.push(current);
-      current = " ";
-      currentOctets = 1;
-      budget = MAX_LINE_OCTETS;
-    }
-    current += ch;
-    currentOctets += chOctets;
-  }
-  out.push(current);
-  return out.join(CRLF);
-}
-
-/** Epoch ms → RFC 5545 UTC basic format `YYYYMMDDTHHMMSSZ` (form #2
- *  of DATE-TIME, §3.3.5). Same UTC discipline as `lib/calendar.ts`:
- *  the federated record carries UTC epoch ms; the export keeps UTC
- *  and lets the member's calendar app localize. */
-export function formatIcsUtc(epochMs: number): string {
-  const d = new Date(epochMs);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return (
-    `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}` +
-    `T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`
-  );
-}
+// Re-exported so existing imports and the test suite keep one entry
+// point on the web side; the implementations live in
+// `@understoria/shared/ics` (see the module comment above for why).
+export { escapeIcsText, foldIcsLine, formatIcsUtc };
 
 /**
  * Conservative ASCII slug for the download filename. Diacritics are

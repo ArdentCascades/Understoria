@@ -74,14 +74,21 @@ vi.mock("@/db/eventProjectLinks", () => ({ getLinkForEvent: vi.fn() }));
 // Named reminders (docs/notifications.md v2): the organizer toggle's
 // write path is a signed outbox record — stubbed so this suite stays
 // off the real DB; the lib has its own unit suite.
-const { setDisclosureMock } = vi.hoisted(() => ({
+const { setDisclosureMock, setSyndicationMock } = vi.hoisted(() => ({
   setDisclosureMock: vi.fn(async (_id: string, allow: boolean) => ({
     ok: true as const,
     disclosure: { allow },
   })),
+  setSyndicationMock: vi.fn(async (_id: string, allow: boolean) => ({
+    ok: true as const,
+    consent: { allow },
+  })),
 }));
 vi.mock("@/lib/eventReminderDisclosure", () => ({
   setEventReminderDisclosure: setDisclosureMock,
+}));
+vi.mock("@/lib/eventSyndicationConsent", () => ({
+  setEventSyndicationConsent: setSyndicationMock,
 }));
 vi.mock("@/db/secrets", () => ({ getSecretKey: vi.fn(async () => "secret") }));
 // EventRsvpControl reads from its own dexie queries; stub it to a marker
@@ -173,6 +180,7 @@ function setLiveQueries(evt: Event | null | undefined) {
     evt, // getEvent
     null, // getEventCancellation
     undefined, // eventReminderDisclosures (named reminders — none)
+    undefined, // eventSyndicationConsents (calendar feed — none)
     null, // getMemberRsvp
     [], // listRsvpsForEvent
     [], // listShiftsForEvent (print roster menu gate)
@@ -334,6 +342,7 @@ describe("EventDetailPage — named-reminders toggle (organizer controls)", () =
       event(), // getEvent
       null, // getEventCancellation
       { eventId: "evt-1", allow: true }, // disclosure — organizer said yes
+      undefined, // syndication consent — none
       null, // getMemberRsvp
       [], // listRsvpsForEvent
       [], // listShiftsForEvent
@@ -349,5 +358,59 @@ describe("EventDetailPage — named-reminders toggle (organizer controls)", () =
     });
     await flush();
     expect(setDisclosureMock).toHaveBeenCalledWith("evt-1", false);
+  });
+});
+
+describe("EventDetailPage — calendar-feed toggle (organizer controls)", () => {
+  function syndicationBox(): HTMLInputElement | undefined {
+    return Array.from(
+      container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+    ).find((i) =>
+      (i.closest("label")?.textContent ?? "").includes(
+        "public calendar feed",
+      ),
+    );
+  }
+
+  it("is absent for a non-organizer viewer", () => {
+    render();
+    expect(syndicationBox()).toBeUndefined();
+  });
+
+  it("shows unchecked by default for the organizer, and a tick signs allow:true", async () => {
+    mockState.currentMember = member(organizerKey, "Olive Organizer");
+    render();
+    const box = syndicationBox();
+    expect(box).toBeDefined();
+    expect(box!.checked).toBe(false);
+    act(() => {
+      box!.click();
+    });
+    await flush();
+    expect(setSyndicationMock).toHaveBeenCalledWith("evt-1", true);
+  });
+
+  it("shows checked when a consent allows, and a tick retracts it", async () => {
+    mockState.currentMember = member(organizerKey, "Olive Organizer");
+    liveSequence = [
+      event(), // getEvent
+      null, // getEventCancellation
+      undefined, // reminder disclosure — none
+      { eventId: "evt-1", allow: true }, // syndication — organizer said yes
+      null, // getMemberRsvp
+      [], // listRsvpsForEvent
+      [], // listShiftsForEvent
+      null, // getLinkForEvent
+    ];
+    liveCursor = 0;
+    render();
+    const box = syndicationBox();
+    expect(box).toBeDefined();
+    expect(box!.checked).toBe(true);
+    act(() => {
+      box!.click();
+    });
+    await flush();
+    expect(setSyndicationMock).toHaveBeenCalledWith("evt-1", false);
   });
 });

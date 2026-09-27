@@ -650,7 +650,9 @@
       "errorCapacityInvalid": "A capacidade precisa ser um número inteiro positivo — ou deixe vazio para não ter limite.",
       "errorLocked": "Desbloqueie este dispositivo com a sua frase de acesso antes de assinar o evento.",
       "namedRemindersLabel": "Os lembretes podem nomear este evento",
-      "namedRemindersHint": "Normalmente um lembrete só diz que um evento está chegando. Permita se o nome do evento puder aparecer sem risco em telas de bloqueio — só vê quem escolheu notificações com detalhe, e você pode mudar de ideia aqui a qualquer momento."
+      "namedRemindersHint": "Normalmente um lembrete só diz que um evento está chegando. Permita se o nome do evento puder aparecer sem risco em telas de bloqueio — só vê quem escolheu notificações com detalhe, e você pode mudar de ideia aqui a qualquer momento.",
+      "syndicateLabel": "Este evento pode aparecer no calendário público",
+      "syndicateHint": "Desligado a menos que você ative. Se a sua comunidade compartilha um link de calendário, qualquer pessoa com esse link — incluindo gente de fora da comunidade e os provedores dos calendários delas — pode ver o nome, o horário, o lugar e a descrição deste evento. Você pode desligar quando quiser: o evento some do calendário de cada assinante na próxima atualização, mas cópias já baixadas continuam por lá."
     },
     "detail": {
       "projectLinkLabel": "Projeto",

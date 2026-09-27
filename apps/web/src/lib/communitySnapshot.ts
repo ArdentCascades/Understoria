@@ -81,6 +81,9 @@ export const SNAPSHOT_TABLES = [
   // organizer's linked device must see (and be able to flip) the
   // flags from its first render.
   "eventReminderDisclosures",
+  // docs/calendar.md §10.6: per-event syndication consents — same
+  // organizer-flag class as reminder disclosures.
+  "eventSyndicationConsents",
   // docs/member-removal.md M1: quorum governance records — a linked
   // device must know who stands removed from its first render.
   "memberRemovals",
