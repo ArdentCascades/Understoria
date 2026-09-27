@@ -161,6 +161,12 @@ search matches signed + substituted text per the rule above. All
 compact surfaces are marker-free by the one-tap-away contract; the
 guard test's allowlist names each one.
 
+Late joiners (PR #654, from a zh field report): the three
+Dashboard glance cards — Pick up where you left off,
+Where hands are welcome, Coming up — which predated the list pass
+and rendered raw stored titles. Same compact-row rules; the
+allowlist grew by the three components.
+
 ## Phase 2c (shipped): event templates
 
 An event stages title = the template's `titleScaffold` (which ends
@@ -256,12 +262,32 @@ list with its new example.
     every glossary's existing decisions BEFORE the strings pass;
     the distinct term lands in the glossary first
     (docs/i18n-glossary/fa.md, my.md — PR #635).
+12. **Hardcoded unit suffixes inside a formatter** (`formatHours`
+    gluing literal `h`/`m` onto every compact amount — "5h" on an
+    otherwise-Chinese Dashboard — reaching every surface that
+    shows hours). Rule: a formatter that emits human-readable
+    units renders them through `t()` keys worded to each locale's
+    existing unit vocabulary; a template literal with an English
+    letter in it is a translation surface. Found by the same zh
+    field report as the Dashboard-cards recurrence of class 4
+    (PR #654).
 
 **For a NEW language launch**, the parity gates force key/structure
 coverage automatically; what they cannot force is walked by hand:
 the surfaces above, in the new language, over an instance created
-in a DIFFERENT language. And two inventory notes for plans drafted
+in a DIFFERENT language. And inventory notes for plans drafted
 before 2026-09-22 (the Korean plan included): the string surface
-has since grown by `push.*` (37 keys) and
-`provenance.editingOriginal`, and Stage 0 gains the
-glossary-collision check for "push notification".
+has since grown by `push.*` (now ~60 keys after notifications v2:
+categories, per-kind lock-screen levels, quiet hours, the test
+ping, name consent, titled reminder templates),
+`provenance.editingOriginal`, `events.new.namedRemindersLabel/
+Hint`, `events.new.syndicateLabel/Hint` (the two organizer
+publicity switches — their hints are the strongest consent copy
+in the app and deserve native-speaker care), `events.new.
+timePlaceholder`, and `format.hoursShort`/`format.minutesShort`
+(worded to each locale's own `hoursAgo`/`minutesAgo` unit
+vocabulary). Stage 0 gains the glossary-collision checks for
+"push notification" and for "feed/calendar link" against each
+glossary's existing calendar vocabulary. The parity gates force
+all of it automatically; this note exists so the hand-walked
+review knows where the new sensitive copy lives.

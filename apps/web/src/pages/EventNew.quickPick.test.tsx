@@ -83,6 +83,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   act(() => {
     root?.unmount();
   });
@@ -129,6 +130,14 @@ describe("EventNew quick picks", () => {
   });
 
   it("a tapped time chip sets the input, aria-pressed, and clears the hint", () => {
+    // Pin the clock to mid-morning (Date only; timers stay real).
+    // Without this the test is time-of-day dependent: after 18:00
+    // local, the tapped 6:00 PM chip is already in the past, the
+    // past-start error renders, and its copy — "Pick a time later
+    // than now" — contains the overlay's own "Pick a time", which
+    // is exactly how this went red only on evening CI runs.
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-07-02T09:00:00"));
     render();
     const evening = chip(/6:00\sPM/i);
     expect(evening.getAttribute("aria-pressed")).toBe("false");
