@@ -225,7 +225,15 @@ Exempt surfaces (open by design, each self-limiting):
 membership is provable), the device-link mailbox and tap-to-link
 rendezvous (`/device-link*`, `/link-request*` — a brand-new device
 has no identity yet; those surfaces authenticate by unguessable
-ids/ciphertext and carry their own TTLs+caps), and CORS preflights.
+ids/ciphertext and carry their own TTLs+caps),
+`GET /push/vapid-key` (the public key devices subscribe against —
+a public key, needed before a subscription exists), the
+organizer-consented calendar feed prefix (`/calendar` — calendar
+apps cannot sign these headers, so the route gates itself: the
+operator-set capability token IS the auth, disabled/wrong answer
+the identical 404, and the feed serves only per-event
+organizer-consented data; `docs/calendar.md` §10.6), and CORS
+preflights.
 
 Locked devices: signing needs the unlocked identity, so a
 passphrase-locked session sends no headers and, under enforcement,

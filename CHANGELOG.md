@@ -9,6 +9,21 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Documentation
+- **Docs caught up to the event-form and Dashboard week.** The
+  member guide's event-creation walkthrough now describes the
+  quick-pick chips, the visible "Pick a time" empty state, the
+  conscious end-time prefill, and the two publicity switches on
+  the form; the read-auth design doc's exempt-surfaces list gains
+  `GET /push/vapid-key` (an omission from the push work) and the
+  token-gated `/calendar` feed prefix with its self-gating
+  argument; the provenance doc's shipped-surfaces list gains the
+  three Dashboard glance cards, its lessons ledger gains class 12
+  (hardcoded unit suffixes inside formatters), and its
+  new-language-launch inventory note is refreshed with every
+  string family added since it was written — including the two
+  organizer publicity hints that deserve native-speaker care.
+
 ### Added
 - **An organizer-consented public calendar feed** (off everywhere
   by default). Communities that want outreach events on people's

@@ -812,9 +812,19 @@ optional end time, and an optional capacity cap. The form saves a
 draft as you type (so an interruption doesn't lose your work) and
 points out problems inline — a start in the past, an end before
 the start — as soon as it can see them. One deliberate thing: the
-**time doesn't pre-fill**. An event is a permanent signed record,
-so the app asks you to consciously pick the time rather than
-letting a default slip through. Before you sign,
+**start time doesn't pre-fill**. An event is a permanent signed
+record, so the app asks you to consciously pick the time rather
+than letting a default slip through — one-tap chips (Today /
+Tomorrow / the weekend, morning / midday / evening) and a visible
+"Pick a time" label on the empty field keep that choice cheap.
+Ticking **Add an end time** does pre-fill two hours after your
+start, visibly and editably, since the tick itself is the
+conscious act. The form also carries the two optional publicity
+switches, both off unless you turn them on: **"Reminders may name
+this event"** (see the notifications section) and **"may appear
+on the public calendar feed"** (see "The community calendar
+link" above — it's the strongest publicity switch in the app,
+and its own hint says exactly what leaves). Before you sign,
 a comparison card spells out exactly what publishing an event
 commits you to: your public key is on the wire as the organizer,
 the time and location are visible on every peer node, the record
