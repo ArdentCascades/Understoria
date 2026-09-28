@@ -614,6 +614,25 @@
   line-height: 1.6;
 }
 
+/* Korean (docs/i18n-glossary/ko.md Stage-0 finding 3): browsers
+ * break Hangul between ANY two syllables by default, splitting
+ * words mid-word on narrow chips ("커뮤니/티"). keep-all is the
+ * standard Korean web fix — words break at spaces — with
+ * overflow-wrap as the safety valve so an unbroken long token
+ * still cannot push past the container. No line-height floor:
+ * Hangul has no stacked clusters, the default leading stands. */
+:lang(ko) {
+  font-family:
+    "Noto Sans KR",
+    "Apple SD Gothic Neo",
+    "Malgun Gothic",
+    Inter,
+    system-ui,
+    sans-serif;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
 /* Paper is always light. Belt to the JS print-theme guard's braces:
    whatever theme class survives into the print snapshot (iOS defers
    print requests past beforeprint), the sheet's own canvas prints

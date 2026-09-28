@@ -9,6 +9,22 @@ include breaking changes.
 
 ## [Unreleased]
 
+### Added
+- **Korean (한국어) — the nineteenth language.** All 3,023
+  interface strings ship in Korean, translated by a six-chunk
+  fleet against the ko glossary's fences and reconciled into one
+  voice: 해요체 throughout, the debt/rank/surveillance fences
+  held at zero, 확정 reserved for the moment hours move, the
+  operator as 서버지기, and the two organizer publicity hints
+  carried at full strength. Korean needs no digit pin (its CLDR
+  default is already Western) — the launch's typography decision
+  is `word-break: keep-all` under `:lang(ko)`, so Hangul words
+  stop breaking mid-word on narrow chips. Newly translated, not
+  yet read by a native speaker — Settings says so, and the
+  authored corpus (playbooks, templates, help pages) follows
+  next; until then those read in English with the standard
+  fallback disclosure.
+
 ### Documentation
 - **Docs caught up to the event-form and Dashboard week.** The
   member guide's event-creation walkthrough now describes the

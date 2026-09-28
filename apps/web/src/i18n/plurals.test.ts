@@ -38,6 +38,7 @@ import bn from "./locales/bn.json";
 import ht from "./locales/ht.json";
 import fa from "./locales/fa.json";
 import my from "./locales/my.json";
+import ko from "./locales/ko.json";
 import { LANGUAGES } from "./languages";
 
 // CLDR plural-suffix completeness for every shipped locale
@@ -80,6 +81,7 @@ const LOCALES: ReadonlyArray<{ code: string; data: unknown }> = [
   // derived from Intl.PluralRules("my") directly
   // (docs/i18n-glossary/my.md, Stage-0 finding 1).
   { code: "my", data: my },
+  { code: "ko", data: ko },
 ];
 
 function flatKeys(obj: unknown, prefix = ""): string[] {

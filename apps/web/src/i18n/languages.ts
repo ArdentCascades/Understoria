@@ -322,6 +322,19 @@ export const LANGUAGES = [
     content: "full",
     intlNumbering: "latn",
   },
+  // Korean — the nineteenth language (docs/i18n-glossary/ko.md).
+  // Single-"other" plural (zh/bo pattern); default numbering is
+  // already latn, so no intlNumbering pin — the first launch since
+  // the pin existed that needs none. content flips to "full" when
+  // the authored corpus ships.
+  {
+    code: "ko",
+    endonym: "한국어",
+    dir: "ltr",
+    speakLang: "ko",
+    reviewStatus: "new",
+    content: "ui-only",
+  },
 ] as const satisfies readonly LanguageInfo[];
 
 export type SupportedLanguage = (typeof LANGUAGES)[number]["code"];
