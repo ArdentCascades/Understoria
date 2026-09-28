@@ -290,6 +290,69 @@ above.
   compounds; the gates adjudicate them by hand, the csw/fa
   precedent — recorded so the next run knows.
 
+### Errata from the corpus round
+
+Recorded after the twelve-agent content fleet was assembled
+(4,782 strings across the ten authored surfaces); native review
+should read these alongside the UI errata above.
+
+- **tax filing = 세금 보고** — the Korean diaspora's own term for
+  the yearly filing (the free-tax-prep playbook's VITA context is
+  exactly that community), and it clears the 신고 fence for free.
+  신고 itself survives only inside **신고 의무**, the
+  mandatory-reporting law's actual name, confined to foster-care
+  and youth-program safety content where en names that law.
+- **background check = 범죄 경력 조회** fleet-wide (신원 stays
+  reserved for cryptographic identity; 확인 stays generic).
+- **volunteer = 일손 / 돕는 사람** (no 봉사); **hub = 거점**;
+  **coordinator = 조율을 맡은 사람**; deposit on physical lending
+  = **보증금** (an everyday lexeme, not 보증-vouch).
+- **Units are metric**, on the zh corpus's precedent: 23킬로그램
+  for the fifty-pound lifting rule, 1세제곱미터 for the compost
+  pile, «한 근쯤» for the eyeballed pound — except the Media Mail
+  two-pound parcel, kept literal because US postal rates are
+  priced in pounds (like 몇 달러, a diaspora-currency literal).
+- **-bank project names carry no banking frame**: 기저귀·위생용품
+  나눔터, 공동체 장작곳간 (rhyming with the shipped 씨앗곳간) —
+  while the National Diaper Bank Network, a real-world proper
+  referent people must be able to search, stays 기저귀 은행.
+  시간은행 stands as the app's own settled name.
+- **Skills chips unified to one per English tag** (majority vote
+  across the four template agents; two semantic overrides: 식물
+  가꾸기 over the majority 텃밭 가꾸기 because one tag covers the
+  orchard too, and the four-way outreach split settled on 이웃
+  만나기). Full table lives in the assembly ledger; anchors:
+  일 꾸리기, 서류 챙기기, 전자기기 도움, 그래픽 디자인,
+  모임 진행, 자료 입력, 먹거리 안전, 고치기, 이야기 나누기.
+- **길잡이 carries two senses knowingly**: the playbook (UI
+  errata above) and the health-navigation navigator — natural
+  Korean polysemy for "guide", accepted rather than coining a
+  stiffer 안내자; ⚠ native review may split them.
+- **품앗이 appears exactly twice**, both genuinely reciprocal
+  (이삿짐 품앗이 as the moving-crew name; 육아 품앗이 방식 in
+  childcare) — the lived-practice carve-out working as designed;
+  weatherization deliberately does NOT use it (one-directional).
+- **Coined in content and worth keeping**: 골목지기 (block
+  captain, defusing the rank word), 곁이 되어 주는 어른 (mentor,
+  no 선배/멘토), 곁 지킴이 (peer supporter), 망지기 (mesh admin),
+  곳간지기 (librarians), 식사 이어달리기 (meal train), 갈무리
+  (food preservation), 이삭줍기 (gleaning), 형편껏 내기
+  (pay-what-you-can), 맞바꾸기 (goods swap — 교환 stays reserved
+  for the app's hour-exchange), 반짝 쉼터 (pop-up center),
+  모두의 부엌 (People's Kitchen), 살림 힘 돋우기 (financial
+  empowerment).
+- **The disability movement's slogan** ships as the established
+  «우리 없이 우리에 대한 것은 없다» — a quoted slogan keeps its
+  -다 ending inside quotes, the one sanctioned register exception.
+- **Corpus benign residues** (adjudicated by hand, alongside the
+  UI list): 접수 (the everyday desk word), 임대 (a lease),
+  지원서/복지 급여 신청 (external applications), EPA
+  등재/등록된 (regulatory literals), 세입자 조합/노동조합,
+  연체료/벌금/융자/대여 (physical-lending and external-finance
+  literals), 은행 계좌 (the warning against routing the
+  solidarity fund through one), and 빌리다 for objects — never
+  hours.
+
 ## Known hard strings
 
 - **The tagline** — "The unit of progress is 'we', not 'I'." —

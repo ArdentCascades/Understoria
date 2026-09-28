@@ -10,6 +10,24 @@ include breaking changes.
 ## [Unreleased]
 
 ### Added
+- **The Korean authored corpus — all nineteen languages
+  content-complete.** Every authored surface now reads in Korean:
+  all 64 project playbooks with their task steps and tips, the 14
+  event templates, the help pages, the start-a-community guide,
+  the twelve design principles, and the member/opsec/study
+  guides — 4,782 strings from a twelve-agent fleet, assembled
+  with zero structural errors on the first pass. Assembly unified
+  the skills chips to one per English tag, converted imperial
+  units to metric on the zh corpus's precedent, repointed
+  cross-template references to their Korean names, and held the
+  fences with exactly the sanctioned exceptions: the debt formula
+  once in the FAQ and once in the member guide, the seed
+  library's «선물이에요 — 갚는 게 아니에요», tax filing as the
+  diaspora's 세금 보고, 신고 only inside the
+  mandatory-reporting law's own name, voter registration with no
+  enrollment root at all, and 품앗이 exactly where the practice
+  is genuinely reciprocal. The Settings fallback note for Korean
+  retires; content is `full` like the other eighteen.
 - **Korean (한국어) — the nineteenth language.** All 3,023
   interface strings ship in Korean, translated by a six-chunk
   fleet against the ko glossary's fences and reconciled into one

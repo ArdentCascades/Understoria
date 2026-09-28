@@ -35,7 +35,7 @@ import * as enBundle from "./bundles/en";
 export type ContentBundle = typeof enBundle;
 
 // One loader per language WITH translated content — every shipped
-// language (all eighteen as of the Burmese corpus). A
+// language (all nineteen as of the Korean corpus). A
 // future ui-only language (UI strings translated, content not yet)
 // simply has no entry here: it
 // falls back to English below, which is exactly what a registry
@@ -60,6 +60,7 @@ const LOADERS: Record<string, () => Promise<ContentBundle>> = {
   ht: () => import("./bundles/ht"),
   fa: () => import("./bundles/fa"),
   my: () => import("./bundles/my"),
+  ko: () => import("./bundles/ko"),
 };
 
 const cache = new Map<string, ContentBundle>([["en", enBundle]]);
