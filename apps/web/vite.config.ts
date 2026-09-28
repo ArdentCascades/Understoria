@@ -245,6 +245,10 @@ export default defineConfig({
               name: "locale-my",
               test: /src[\\/]i18n[\\/]locales[\\/]my\.json/,
             },
+            {
+              name: "locale-ko",
+              test: /src[\\/]i18n[\\/]locales[\\/]ko\.json/,
+            },
             // Lazy per-language CONTENT bundles (templates, tips,
             // steps, FAQ — i18n Phase 2a): the distinct "lazy-"
             // prefix keeps the SW globs below from ever colliding

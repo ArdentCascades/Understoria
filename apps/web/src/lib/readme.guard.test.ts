@@ -55,6 +55,7 @@ const WORDS = [
   "sixteen",
   "seventeen",
   "eighteen",
+  "nineteen",
 ] as const;
 
 /** Counts above the small-number range the README spells out in words. */
@@ -121,6 +122,7 @@ describe("README: claims the code decides", () => {
       "Haitian Creole": "ht",
       Persian: "fa",
       Burmese: "my",
+      Korean: "ko",
     };
     const shipped = new Set<string>(LANGUAGES.map((l) => l.code));
     const claimed = Object.entries(endonymByEnglishName)

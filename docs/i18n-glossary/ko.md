@@ -249,6 +249,47 @@ review adjudicates first.
 | calendar / public feed / subscribe | 달력 / «공개 달력 링크» / 구독 | rule 14 |
 | tagline | see hard strings | |
 
+### Errata from the UI fleet reconciliation
+
+Recorded after the six-chunk fleet was reconciled into one voice;
+the native-review cycle should confirm these alongside the table
+above.
+
+- **organizer, resolved as two senses** (the table shipped without
+  a row): an EVENT's organizer is **모임을 꾸린 사람** (creator
+  framing — the record is immutable); a PROJECT's organizer role
+  is the **이끔이** family (**공동 이끔이** co-organizer,
+  **중심 이끔이** primary — the transferable-role words the
+  fleet's project chunk chose from Korea's own co-op register,
+  kept over a rank-fence hesitation because 이끔이 is precisely
+  the word those communities use to avoid 리더/장 titles; ⚠
+  native review adjudicates). The co-organize invitation surface
+  bridges them: the activity is 함께 꾸리기, the role named on
+  the page is 공동 이끔이.
+- **key = 열쇠 fleet-wide** (신원 열쇠, 공개/비밀 열쇠, 열쇠
+  전체 보기) — enforced over two chunks' 키 drift; 패스키 stays
+  the platform loanword (rule 13).
+- **playbook = 길잡이** (the table's 틀 is the form-template
+  sense; a project's how-it-runs playbook is 길잡이) — enforced
+  over one chunk's 본보기.
+- **project history = 걸어온 길** — 발자취 stays reserved for
+  achievements, which the table never named; suggested table row.
+- **sign-up sheet = 이름 올리기 용지** — unifying 이름 올리기
+  종이 / 이름 적기 용지 drift; extends the table's 이름 올리기.
+- **coined and adopted fleet-wide**: 신원 (cryptographic
+  identity), 공유지 (commons) with 돌봄/돌보는 사람들
+  (stewardship), 문턱값 (threshold), 찬성/막기/기권 (consensus
+  votes — 막기, never 차단, which stays contact-only),
+  공동체 결정 (governance), 정원 (event capacity), 발자취
+  (achievements), 소식 (project updates), 내 책상 (the desk),
+  기다리는 일들 (the attention rail — push의 neutral body
+  «기다리는 일이 있어요» rhymes with it by design), 등대는
+  아직 미정 — storm hub strings live in content, not UI.
+- **The 그대/간부 scanner residue rule**: 그대로 (as-is) and
+  순간부터 (from-the-moment) contain banned substrings as benign
+  compounds; the gates adjudicate them by hand, the csw/fa
+  precedent — recorded so the next run knows.
+
 ## Known hard strings
 
 - **The tagline** — "The unit of progress is 'we', not 'I'." —

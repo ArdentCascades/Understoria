@@ -322,6 +322,25 @@ the disability slogan in authentic member first person; the
 compelled-biometrics passage passed line-by-line fidelity review
 with the canonical refusal sentence verbatim. All eighteen
 registry entries are `content: "full"`.
+
+Korean (ko) followed as the nineteenth language on the same
+rails, with the Stage-0 novelties recorded in
+docs/i18n-glossary/ko.md: the first launch since the numbering
+pin existed to need none (CLDR ko is already latn), a typography
+decision instead of a script one (`word-break: keep-all` under
+`:lang(ko)` so Hangul stops breaking mid-word, with no leading
+floor), and an NFC gate hardened against macOS's decomposed-jamo
+filenames. The six-chunk UI fleet delivered all 3,023 strings
+gate-clean on the first assembly — zero structural errors,
+interpolation multisets intact, the register scan (합쇼체, 당신,
+저희) at zero — and the reconciliation pass unified the drift the
+chunks disclosed themselves: the organizer families (events say
+모임을 꾸린 사람, projects keep the 이끔이 role family, the
+invitation surface bridges them), 열쇠 over 키 everywhere, three
+quoted-UI cross-references re-matched byte-exact, 길잡이 for
+playbook, and the roster sheet named 이름 올리기 용지 once.
+Wiring ships `content: "ui-only"`; the corpus follows on the
+Phase 2 rails.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from
