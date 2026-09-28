@@ -339,8 +339,35 @@ chunks disclosed themselves: the organizer families (events say
 invitation surface bridges them), 열쇠 over 키 everywhere, three
 quoted-UI cross-references re-matched byte-exact, 길잡이 for
 playbook, and the roster sheet named 이름 올리기 용지 once.
-Wiring ships `content: "ui-only"`; the corpus follows on the
-Phase 2 rails.
+The corpus then SHIPPED on the same rails, twelve agents across
+the ten authored surfaces (4,782 strings), and assembled with
+zero structural errors on the first pass — invariants byte-equal,
+counts index-aligned, budgets held with room (longest step 64 of
+120 chars, longest tip 158 of 400; Hangul is dense). Assembly
+unified twelve drifted skills-tag families into one chip per
+English tag (majority vote, with two semantic overrides: 식물
+가꾸기 over the majority 텃밭 가꾸기 because one tag must cover
+the orchard, and the four-way outreach split settled on 이웃
+만나기), converted the imperial units to metric on the zh
+corpus's precedent (23킬로그램, 1세제곱미터, 한 근 for the
+eyeballed pound — with the Media Mail two-pound parcel kept
+literal, US postal rates being priced in pounds), and repointed
+the cross-template references to their Korean names (기저귀
+나눔터, 이웃맞이, 차 태워주기, 잘하는 것 나누기 — while the
+National Diaper Bank Network stays 기저귀 은행, a real-world
+proper referent). Register on the record: the debt formula
+exactly once in the FAQ balance answer and once in the member
+guide's credits; the seed library's «선물이에요 — 갚는 게
+아니에요» exactly where en refuses repayment framing; tax filing
+as the diaspora's own 세금 보고 with the 신고 root confined to
+신고 의무, the mandatory-reporting law's actual name, in the
+foster-care and youth safety content; voter registration written
+entirely without the enrollment root (명부 and 이름 올리기); the
+admin word only inside the sanctioned denials; 명단 once, in the
+design principle whose example is subpoenaed membership lists;
+and the books-to-prisoners playbook naming 수감된 이웃 plainly
+where en says prisoners. All nineteen registry entries are
+`content: "full"`.
 Baseline numbers below refreshed 2026-07-27.
 
 ## Where we start from

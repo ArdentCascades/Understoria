@@ -41,3 +41,4 @@ await ensureContent("bn");
 await ensureContent("ht");
 await ensureContent("fa");
 await ensureContent("my");
+await ensureContent("ko");

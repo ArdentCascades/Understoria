@@ -226,6 +226,17 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "981d24f50fc162839d2c817476be8bc8",
         "007ef0d0e9ae2296d28656b3eebdae7d"
       ]
+    },
+    "ko": {
+      "d": "5a93cffc68c22e1ed75cdf13eccf4966",
+      "t": [
+        "7f78f5489b7a16768a775b37b18c5978",
+        "393a0a272a72770096802fc1b8887df5",
+        "dd62ecd5424ca401f565cb2248157803",
+        "8ab2a52294f6bcc18062b76aca83b15e",
+        "73b0006b768143340033a28c0dd64a8c",
+        "65a913287bc5e7d36e370bc92dbe921e"
+      ]
     }
   },
   "community-garden": {
@@ -443,6 +454,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "0073d10bc60e2f579205903472124f32",
         "49793425ee56f944151d92c4d0e7b19f",
         "1601d318c40f83365ddd546d80cf7b9c"
+      ]
+    },
+    "ko": {
+      "d": "9f39ae8d30355de190d0a9fedacffd34",
+      "t": [
+        "3d213ca7d8fd01c6cc343ce7f29251cc",
+        "f5bbd2fba8244970610418aa654964ce",
+        "952f988c4fb600426ebee725e8d892ef",
+        "210a58b14089993ae3bddcbb1917ad93",
+        "7a254e9b4b281844189c78060fa15d00",
+        "bd2b1e25b7dc9cc48f849d088733792d",
+        "406c918c8a470b3911e0b490c83a9537"
       ]
     }
   },
@@ -662,6 +685,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "dd50ffde58e113a9e261e583b5456116",
         "2859e69f0a3022d5da19ac1d7d1b279b"
       ]
+    },
+    "ko": {
+      "d": "a4cf83c5780617dfed2f3deaa7bab954",
+      "t": [
+        "ff0ad10b4b105e0004c7d5a4da0c47fa",
+        "ae302f11e3b10aee261411be21ee1d71",
+        "ba214d093836ae6682ce9b1610c958a7",
+        "efe77a2e910974c87bef7e5b97e00792",
+        "2502dbb41ca2bf8e5458c583a088a8a6",
+        "304f4e6a92c9de547fadc8d0eb4149d5",
+        "2cb5d5324272dc6b212300626ce685ac"
+      ]
     }
   },
   "neighborhood-care-network": {
@@ -879,6 +914,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "55c98775aa4969df4a2e1f8ad1f50aad",
         "ec95191fcb2b003c7bf120941566a310",
         "92e113e9e579166bc86ab98e40fa0cab"
+      ]
+    },
+    "ko": {
+      "d": "a3e7ab51018acaabbd6f1f4f18687112",
+      "t": [
+        "9ee3cd781a3a5977b17e1c8c3ac28a64",
+        "e7c82608e972ac42ed5ce1310da0add4",
+        "10cb8d41eaf6c5dd416a4514201eb4be",
+        "db564abd0237306511a21a9c2e1ba4c4",
+        "f27190676e32548a2fcb439ffedb60b0",
+        "2d5985dfe110d1f040e9c72f7e195c88",
+        "b522c51b85e07ddde8cc4ac837a42bc6"
       ]
     }
   },
@@ -1098,6 +1145,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "8b177ae17b2b4d110a9da28cbb2762aa",
         "84ddc35bac8fb0d6238068682cee4ce6"
       ]
+    },
+    "ko": {
+      "d": "d3c75f91fa3b796bcf88fe69a89d8c35",
+      "t": [
+        "989378d40b3be1411500a19e8d366728",
+        "f100ab0fe2c8eabe1c0846fcd94142a4",
+        "4b37e6200d24d4d0271d995cf2723057",
+        "5f50f7e9b95c2f170b91e3593b559f35",
+        "02e94c5c41cbc547351e11be0149ab78",
+        "8ed624e2a3708228d56043e4d18fd7a9",
+        "e1b471b849ecb7a5a524cfa5c0001251"
+      ]
     }
   },
   "free-store": {
@@ -1298,6 +1357,17 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "09ef1c0d0ca4f7f674f6add922febb1e",
         "e40a4a667999503cc96e6903415d4d6a"
       ]
+    },
+    "ko": {
+      "d": "53f5e5944f0ba6051cc49a91cbdd0e11",
+      "t": [
+        "d02670570cb7b2617e9ad62d3c2a0ef1",
+        "e4fa69222ae7df4aab4f18b7029bb6fe",
+        "f31ed3f9270f680a757b5544a6b74d48",
+        "b94d936bf7558c353939623333623b0f",
+        "9c7bb2ac0d83b16ccac74214d7f145b5",
+        "5357782dbd9d0fa49a1946a34985547f"
+      ]
     }
   },
   "skill-share": {
@@ -1354,6 +1424,9 @@ export const TEMPLATE_DESC_MANIFEST: Record<
     },
     "my": {
       "e": "1d9a6941d6a23d38dc8da61eaf99b423"
+    },
+    "ko": {
+      "e": "1d3c5b6dbf558f8029beaba5a43ade22"
     }
   },
   "bulk-buying-coop": {
@@ -1572,6 +1645,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "bf3e1485aab911ca06d07b010bfddde0",
         "abb979a8734d479c90077ee1dc547ced"
       ]
+    },
+    "ko": {
+      "d": "c9eee3cdb27f1bee47532fd3c7b9a052",
+      "t": [
+        "20693844905412e36ba2ad9a3b4472ca",
+        "6285d1d8bc5092b1efa0ad6682c96349",
+        "3b08856a5da1eaa946b0a188ef5d15c0",
+        "e715987c0c51bbbb2800dc3c2de52717",
+        "93b8f9bf014592715b9b3713180766c7",
+        "2288c11870adec57b12bce3395709c04",
+        "70c272cbd9ab73603afe905d9d871fd5"
+      ]
     }
   },
   "repair-cafe": {
@@ -1628,6 +1713,9 @@ export const TEMPLATE_DESC_MANIFEST: Record<
     },
     "my": {
       "e": "a4c0705551ef99cab0f1dfa8f24a3037"
+    },
+    "ko": {
+      "e": "8a6c8667316f7a19100e53eba3b0a005"
     }
   },
   "rides-transportation": {
@@ -1845,6 +1933,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "8334fccc0772802c1395772879bef2c8",
         "a9032401a6c9171121d6e05e28605678",
         "94cf827f04756d7b50ac129a1342c930"
+      ]
+    },
+    "ko": {
+      "d": "982e4afd52cd653aaae2fe6a8e3f1440",
+      "t": [
+        "4ba0fc262769906dcce9fe466d5384ce",
+        "f08ffdae341b8d1608786171694a9d03",
+        "204adc726085521afc96c3554ce43246",
+        "cb45a6c8b837801c38c2c372500fd624",
+        "724c6d3df0fdf2f54484053852e46dc3",
+        "b91458b510c44ce944ce712c7d756112",
+        "c7cd40036345ee9c9ebaf6602c06a77e"
       ]
     }
   },
@@ -2064,6 +2164,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "cf01839ef79b2dde902bff13cc51617b",
         "97a690957ed4a8b01ed6680c4a0b961c"
       ]
+    },
+    "ko": {
+      "d": "5b0201d7c7c9ca21b516787c6df18681",
+      "t": [
+        "6a365e988cac201c64c7cb87c4dcd862",
+        "fc83cd54c598dac1f894978d0c6ec307",
+        "fcb907750c282ead3f58138ffc1b233c",
+        "41816f4a36efdeb0972b10b493e730aa",
+        "5acbdf134fd1e2bbd1348bcdd3d9a2d1",
+        "286d45d2ef027592b9d350f460d430ac",
+        "d5eb80d312e68d228adf5fb48abe7c8c"
+      ]
     }
   },
   "childcare-collective": {
@@ -2281,6 +2393,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "bf8ae48d63bf35956f43139154c9d292",
         "6fb764263a72acc8a9dd2c5ea37956eb",
         "5ce365ddba2fad456087685c5ee9d7d0"
+      ]
+    },
+    "ko": {
+      "d": "843d0e2cc2e6ca6149a69832564959c5",
+      "t": [
+        "c3125a6e7114346841a584c1fbcb5422",
+        "866a76ca18db57193a7ba31de1bf817d",
+        "804e01fa4e6c14a6db77b2fbf868465b",
+        "73cc54a5e356d2a1890cb6d83b5280e5",
+        "74c5c11ba3a53aa10ad8f948bfae3e01",
+        "c5ead91e8e81d7c6173d91a0217cabeb",
+        "29cf7c6be678e73fc22cc4fa4d6b37e0"
       ]
     }
   },
@@ -2500,6 +2624,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "61fc9a606ef65f50ae3930ff277dc3b3",
         "2e8edfbb49a7ee9035e3a18aa306427c"
       ]
+    },
+    "ko": {
+      "d": "78bf49d24614eeee61b5d3f1f3a8ba87",
+      "t": [
+        "b42bf9799a1deddc91613a076fe46ea3",
+        "829bc8030d5a773466afddd4c5171ae9",
+        "32985b6afcb7443889408bba1712838d",
+        "513af5f846d811243a73b3206bde35d0",
+        "d52da4ff701d700424a05b627aa86b5e",
+        "96f05dee4918c68f84c0afc3c6db739b",
+        "2c1d5f717cf19cceeef1093a807a0ef2"
+      ]
     }
   },
   "free-little-library": {
@@ -2681,6 +2817,16 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "ff0cad1d3982594da79be85f114cf87a",
         "44657b9031e3448dbc0ac70e59a3e4ca",
         "c7bffcec8532577d2e29dd103488bb72"
+      ]
+    },
+    "ko": {
+      "d": "8009463f80d448c8a7797662b77cf98e",
+      "t": [
+        "8183d126a74bbc5fd3bdb7bedc16270d",
+        "d1111ff10b836f0a769644d3b3592a48",
+        "5775b1d3d93b374eab34554716ec1e0d",
+        "949543f808888ae694ec9b33a087e39e",
+        "724fed27f5efbe6125143191f1494070"
       ]
     }
   },
@@ -2881,6 +3027,17 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "ede650473d0cb1c057383cf24d95691d",
         "8f598a9c60cbf235a56591a29c2f2bdf",
         "1d2f03f60013f940a041438cbded966f"
+      ]
+    },
+    "ko": {
+      "d": "580ca0ecdfae6c420a033ddfc5d857c5",
+      "t": [
+        "60bc296a853566508ee21635abaaa532",
+        "f3ac9a3e31c5f460de371e38099ac2b0",
+        "f42f01b1a0b6e830e39ecf3647c59ec5",
+        "9045ed7ad57dbcaa81f5cffca60fed13",
+        "c04bdf9229202cb57b090ea47403248b",
+        "06585f94a870e27ed0f9431accc962a8"
       ]
     }
   },
@@ -3100,6 +3257,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "68f407bfda387802fd4dbb6802a05f99",
         "37e5b08375e6f2bb3df75ebc1e580713"
       ]
+    },
+    "ko": {
+      "d": "9a9ccb28d5ba8d4c37c5af6c2d9f6ea5",
+      "t": [
+        "99c3f93e2a91f7bf16b73bc9da937af9",
+        "b7ac10f541848fd838b2a7ef2a541fc5",
+        "935f6d7427d325943e7502f10720dced",
+        "ed60a591d3a86549acc9e04273dc5bc9",
+        "10d2f0bf1b001e8c8fca9abfc168ae96",
+        "694378d683df938244e3bb34c2e394a1",
+        "bfff8a1f772b12f1e1ae4a0da2d727e1"
+      ]
     }
   },
   "solidarity-fund": {
@@ -3318,6 +3487,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "9e056993ede4ddcd0995edcba3f02417",
         "cd943289e63253ad5120479bbf732d82"
       ]
+    },
+    "ko": {
+      "d": "15863c474ca633719e6f5979f9354c97",
+      "t": [
+        "29057683e077063455c17d7c8280d6a5",
+        "cbe318186ebd0952c41da49d3835c205",
+        "fa2cb80a6e5f6395371ee2b3a0735171",
+        "e8d2874bef22ff2574ce559de372d922",
+        "58e0c344645c5ea37196de132faaa87e",
+        "ca2fa84b9779897add052bc7bf81f7f8",
+        "853a6ebedcf72ef2a93e8f8dcf468916"
+      ]
     }
   },
   "diaper-hygiene-bank": {
@@ -3499,6 +3680,16 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "29cb31c715b8d6a9d5f99cf5ead64b16",
         "0df14da6439524870c636ae8960cf110",
         "d32fcbebddf94ba2b594fd0ee10479da"
+      ]
+    },
+    "ko": {
+      "d": "0e58e504f6bb14b72c15cabcb2962343",
+      "t": [
+        "aadf27e9d6a80861629f9ed292533b0c",
+        "815aa89b01c4e5ae021173ae36826620",
+        "3c4ab2fb1dc63ff24bfe0bd531d8dd9a",
+        "cca4f2ba296a9bbe82f199aa1a2dece0",
+        "90aaeb76281a1bf3ef7ac6386f90c45e"
       ]
     }
   },
@@ -3700,6 +3891,17 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "54fd4bfaca09153807c93c8c11b283f6",
         "aa946867a9709891b8f6a9159c1009ec"
       ]
+    },
+    "ko": {
+      "d": "cc4e060494d7fc6b29b01c4d09887cdf",
+      "t": [
+        "7b28a9193952e9f5499646737e869557",
+        "a0672178767c5d008ede5d9cad33a383",
+        "61cc98e9af89d03cd760125391aa1164",
+        "dee73c1e11e0232fb8acfaea6c6b8ef0",
+        "01a687ab18a0dc328ba5e6a693264bc5",
+        "0eb08b54bb23b1bd80ce81d9469985ae"
+      ]
     }
   },
   "newcomer-translation-network": {
@@ -3899,6 +4101,17 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "5410cb70ae7c51dc180a2a5b832957ac",
         "f5a276c5feb161b1d5567188b631fce0",
         "6c727c6fa7e7c15cf9b98edd67c530c3"
+      ]
+    },
+    "ko": {
+      "d": "3cfa38045882f4e336ee790276b5efdb",
+      "t": [
+        "4debb06200c42e70e22556be765914e5",
+        "b97ab47e8e697f3a739b2c334998c3d1",
+        "7afdfd14359eb6e33e56eda6f995a1b8",
+        "c32d493cfaaee3b3859e7622d8070520",
+        "af054ef1fa6657666c395ee9821be28e",
+        "4042e0f493f3737a78a3b5ca812a9cf6"
       ]
     }
   },
@@ -4118,6 +4331,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "85f6762e9bc5edc105599c739de47d62",
         "52416c7ac5108467468ad8f48fec38f9"
       ]
+    },
+    "ko": {
+      "d": "91c20bf1e66cb43ce628ae42a9829a6a",
+      "t": [
+        "fcc28a7890e269ef496174ae264e6416",
+        "a0bdc02b656097b60e59577beb981d47",
+        "27e1794c27b99912855f108dc8b90539",
+        "980e4e2c568364489f66e834dfdf4902",
+        "ee29e70180a67c8e0891451bd77af897",
+        "0fa514e51fbde4b0f87262eabd57b69c",
+        "f66f5a969eabcc44cab2cebb291380d1"
+      ]
     }
   },
   "seed-library": {
@@ -4299,6 +4524,16 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "784d1931482206c7e78917a68d800f78",
         "2afdc6fb6dadc8e68324954a02237839",
         "be175c56e14c6f5777058bda6610c0d8"
+      ]
+    },
+    "ko": {
+      "d": "480ea1a1f43eec28b29f24787cb44af4",
+      "t": [
+        "e70fcbfeb17cb3ced2d13bf29854c6e1",
+        "2fe9f22372b77cc4673cba7e9ad8b7bd",
+        "6d7a3514de23db9dc7c35d2ce7ff1ac3",
+        "6ef47c07d53486e4f278998df7027105",
+        "e7a9b864c285895c4dfd124879c8707e"
       ]
     }
   },
@@ -4518,6 +4753,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "5166682edd6e8287ae816906cce59595",
         "20be06f0f66e009a730918730259180c"
       ]
+    },
+    "ko": {
+      "d": "9e74d6bc3b28dddf2ca795464dc09025",
+      "t": [
+        "918f8b6f4cc3b012bb87fdfddc05d814",
+        "857de54dc8e7c55dcddb6eae64cd9a69",
+        "d8497af32f28f50c768fc9b416a6a4fd",
+        "4e48f4c2b0a9e67c726771d2d3638722",
+        "44448664d651b2d0b1f4d0c46b5705a4",
+        "00ffcdb7afa8bd9ffa6611c3b7803a0d",
+        "df03016b58f7a6ffd82fe19bce605627"
+      ]
     }
   },
   "weatherization-brigade": {
@@ -4718,6 +4965,17 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "2ab606948521fa653b9b26f389309d14",
         "31b0de8cce23f544cf274c8866568b35"
       ]
+    },
+    "ko": {
+      "d": "f4dda628c170d6a58efa5b2e2d8b626f",
+      "t": [
+        "ebb3a358d5f7ed84842f1f1060ad621e",
+        "4ab069ee974ccb728914d12289abdf0f",
+        "02c99697d1ba3e271f8bfb0458a12c45",
+        "37675b5d367b2736cc7eab79c552b617",
+        "046f4f257e3acd85fa47d445d357d483",
+        "377605fd9957f196915168329fee6333"
+      ]
     }
   },
   "pet-food-bank": {
@@ -4899,6 +5157,16 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "bf2dd5c375ac823d2d6b23885ee1190d",
         "65901c9eb7bd3cb8e6bd577bfa25fa46",
         "7c109d2d1a40b9b6026376d9e1084b7e"
+      ]
+    },
+    "ko": {
+      "d": "4d7851fd0a85435d24639cdf3cc8279b",
+      "t": [
+        "44bf0d4010136833846d7e97d53861d5",
+        "55681587734ec213d1f3717b9db60dac",
+        "04ceb564e2c24ab2e6e6b533eb083bf8",
+        "9bbf2c23e4fe03f83a225de0822c12ad",
+        "931e6e593035a6e30dc3ca02f7b90818"
       ]
     }
   },
@@ -5118,6 +5386,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "4ca4b1ca8a0e18a49f180f488f4902eb",
         "76b33fef892ca78624f8d331fab84260"
       ]
+    },
+    "ko": {
+      "d": "bd373bae4afdbeedd9d38fc035f9de92",
+      "t": [
+        "81a411b545c558ece4e523b3531dcf6d",
+        "04c2d8365fb4fc0e76e5c9f665b80ebe",
+        "623ebfabbaa812c3bd83767294735133",
+        "f5ca78b3b5428f735cd3a537e5d06119",
+        "6e3ee7944d173ba583f86a5320b73850",
+        "115296bfb989ad46aa404505b84cf9d0",
+        "05f4979cf1c5debb73c418d5bbb45d74"
+      ]
     }
   },
   "gleaning-network": {
@@ -5335,6 +5615,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "2934508cb47747def17c6c15b6d10220",
         "1ceae73262090db8580971f12b048243",
         "2f8b49a4975be22cc639685717741582"
+      ]
+    },
+    "ko": {
+      "d": "746c2f07e1ac34acb7468669ac3afd02",
+      "t": [
+        "49b365b4f9f2b91ea67c8b7ffb473d26",
+        "bc5355aad17844d9084aa75c9e525b4b",
+        "96c3d6dfc7df8d855f90df43cddc2cfa",
+        "12ebe2da7d305baf3b2dff375497dcf1",
+        "682eef6d3d688fc7bae0e2903d2b5bed",
+        "27d22de070b002f505e3a1ce95bbb2a1",
+        "c47b02229eaa19967624653c36662bcf"
       ]
     }
   },
@@ -5554,6 +5846,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "d3eada9ab051f0c1408fe990dea0ff1c",
         "5ddbaddae52b6bd2435dd167cccd6ba4"
       ]
+    },
+    "ko": {
+      "d": "17abb2e958ef1e0d375a7c05e2c3dafa",
+      "t": [
+        "bd50746c1ee926d046fa3ccebdb08a01",
+        "04cfd924b8bb9a3bb4dcd0bcd64c5ada",
+        "72f28ca68cd840bc32662902b91485f7",
+        "5fe2ab70940989a0161e5a662d5d15ec",
+        "5d3a3f2177b24b3f0bda5fdd5e058ccb",
+        "a1212bb783e956b507fb8b298fd312ac",
+        "ebd9a8d2004ed46f6de884850d595785"
+      ]
     }
   },
   "reentry-support": {
@@ -5771,6 +6075,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "03d32ec4de35c953ccbfd40a0ee7dc8d",
         "5031357529f93aa629e562f2572fc4e2",
         "e196f4d8aba3292a52201135d56aeded"
+      ]
+    },
+    "ko": {
+      "d": "3e38d62dad4d5645568174a60acc54aa",
+      "t": [
+        "10751a18c635d7441d8fea185767d0af",
+        "e544cbce0c20f52a1cdcacb2d20fe551",
+        "7ca7eabc3eba9fdd2dcc538783278362",
+        "962644b6463876beb2ffae3becc7363a",
+        "c25d0d7277d4e4da2c7f260937651f60",
+        "e280e5278b67d661e61ace5a528dc158",
+        "1f40be943e0465c25f9302ffd63198d1"
       ]
     }
   },
@@ -5990,6 +6306,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "362d9d2ff97c3065326e2ba8f9f7e018",
         "61341af29a6e21381a6443cac0631bf4"
       ]
+    },
+    "ko": {
+      "d": "a64759cd95af7d7dfa814042c8b51749",
+      "t": [
+        "a1b14cdcdac3c3e697dcc1c5afdb8c61",
+        "b37f1708e6e30530af37e33961692b73",
+        "e21ef2881d5239dcb243868a0ab0d204",
+        "7bdf7c686ee0fde80111a429e235aa1b",
+        "edf5341bf6a735cb74cbb919da6de57b",
+        "468f07e217f16544c9da64e9bfc31526",
+        "de464a3782cec65881f003574d4ba7bd"
+      ]
     }
   },
   "community-wifi-mesh": {
@@ -6207,6 +6535,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "c5dcd2376702983ad7ad8c2fa37fb4ac",
         "0ba90937c430e7d658922a032a90a498",
         "58c7e44b38cbcbad6afa3d51c4dc17ed"
+      ]
+    },
+    "ko": {
+      "d": "1403928b7f55a19cc657feb8d9ee515d",
+      "t": [
+        "9715a86cf897f26f868c5c3d359465ce",
+        "3019259f8f11885f1a99cbad62e415fb",
+        "664b0c8fab7b2abda95bf29d13018323",
+        "f4bf9c75f6b330e1069a0c6873353027",
+        "fdedcbb0f1fea865ad75df53e7b850a1",
+        "eebceb02b53816a2748fd4ee651ec048",
+        "08a1075bdd044cf068f764591b8d56b4"
       ]
     }
   },
@@ -6426,6 +6766,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "58ae55478562ac12d371ee881992d37e",
         "963f99878bbdb04cbe260d7c7559ee0c"
       ]
+    },
+    "ko": {
+      "d": "7e6e25fe7c06044ea12fe4031f8a8a2c",
+      "t": [
+        "34be6235bf5181cb0775b9b3cf6a36a2",
+        "52eb3c6dd263db93034b17bd3fa1856f",
+        "cbc66ba51c6d5bd07693defb581b07c2",
+        "6d7039e835ad89a3a03d3053b3671698",
+        "1a31294d5ca9576b603288dfadc34c51",
+        "12fa6cdd7a7ee895930c9e368ea7d0b0",
+        "89a222a4f5c3283a8987a86f3d2cf561"
+      ]
     }
   },
   "community-cleanup": {
@@ -6607,6 +6959,16 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "272b755334913f68af52a238ccc99810",
         "b1b5fa90dd0e7fa90e5c6c09aaa6a77b",
         "55eb96b98e1452ae558225eeb608c538"
+      ]
+    },
+    "ko": {
+      "d": "d6bf3ea71599683935f80d64058ab722",
+      "t": [
+        "b709d1406f7f959e85f7d5ce06e9e5c2",
+        "88bb77faa9e63e9246c7500e966796fa",
+        "330c84896744707195a2633066269b23",
+        "5a86907f1ec6e294eec1fbf66dd8fb84",
+        "16ede94ee8903421decd88f8da1512f8"
       ]
     }
   },
@@ -6826,6 +7188,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "e960124250852b43f833c93a84a05d09",
         "4098b63f5fd9a786754d32180ba468e4"
       ]
+    },
+    "ko": {
+      "d": "c8e6c05cbe348fbb07bf22fe76606d9d",
+      "t": [
+        "57ae3a1fb44af39595f23710ed8b1421",
+        "d166db8f1c49d0fd6cc13081ca96d9b0",
+        "3a7cdc5ef44c707ae56039ec97ebc23a",
+        "62a8a5ed3996c35c430f831597e575b5",
+        "92759d3dbe776e4e64515ba938165e48",
+        "6b9f598902e8870b648040fa2d8a296c",
+        "08d8a39e9ebcf5882de1e0f6504ab734"
+      ]
     }
   },
   "community-market": {
@@ -7044,6 +7418,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "8a48636c46e1cce5f0ff9f18053ea135",
         "8f5f8f09a3cd3eb0c6252564e2c7e691"
       ]
+    },
+    "ko": {
+      "d": "12b391363cfde1dfe2c9ab88b14406d9",
+      "t": [
+        "ea4123ee7c6ba2dc37f4a1715339278d",
+        "1024a95225c4b69bf70f17d900c5f66d",
+        "ddaa525affeefbaff7a66f577ccb14f0",
+        "7eb3e6519f114c13f16aac1792f4874f",
+        "01310af7279382706595d7742d17ce1f",
+        "0bf77db5ede551e4d7d71e8fa1d23930",
+        "599367e47c33e11be6b40cc20816bdb7"
+      ]
     }
   },
   "welcome-wagon": {
@@ -7225,6 +7611,16 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "1869e81ef7f7b3c7dd10604107f08b93",
         "8a6279e79edeafc71026c909b43e5714",
         "173d910f99ac4e897e4447b36562a983"
+      ]
+    },
+    "ko": {
+      "d": "fd87260b3ee80c7b85b8d6eb6e2a8fc1",
+      "t": [
+        "a8e8f61689342032f7ca04f69114030c",
+        "c5223c929d84664a96def244d12fd306",
+        "bb097d12eaf38135281150a87f660495",
+        "9d5b19784d5f1a90dcf8cc4276838fee",
+        "3cf11677c3b94b7abc6fbac46ab0804f"
       ]
     }
   },
@@ -7444,6 +7840,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "bb115904b006eaf9135ac32f649425fe",
         "caff248abb341929acc0a55d3cbe80f0"
       ]
+    },
+    "ko": {
+      "d": "dbe7f6e6e0639dd9252a9f2a959b3970",
+      "t": [
+        "b7c5e631f8d2f5aaf17977894e20065b",
+        "432f1d3943cb5f998cf77f21a3a097fc",
+        "3433283412947314e93cdbd71a793339",
+        "d650a159088647c437b7485d80d354b5",
+        "f00f7ae40d71260ff3231268e1ab333c",
+        "93513829a330440c72627d410bf90947",
+        "dc507a514ae81cd8bc01fe866bab63f4"
+      ]
     }
   },
   "laundry-shower-access": {
@@ -7644,6 +8052,17 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "6c617766c737de81013ec9462257ca1e",
         "b46780d22b707333e5fc414351777dd3"
       ]
+    },
+    "ko": {
+      "d": "c74d36d5f6485f827bdf61bc18b93984",
+      "t": [
+        "c1d86dcd6d574ce0060046ce4c1f4a99",
+        "b2784bd3453596f79deb8d571b4813b0",
+        "fa6ef68251401263b4f174f2bafd70a0",
+        "bc3ed8913fd8cdc35bd0708c692302ea",
+        "98e496f341e897f96e458f59bbe45fed",
+        "9578a93b6a17268a3d86f559fdd27d85"
+      ]
     }
   },
   "voter-registration": {
@@ -7843,6 +8262,17 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "3a0f1a0023d8f4fbb46dccbafbc55fee",
         "6e680e605c56abd39d389e38461b4a4d",
         "d053c81df5b55247b4c7e82a8a82f62e"
+      ]
+    },
+    "ko": {
+      "d": "e59963a4a3341dc37230b093483f32b8",
+      "t": [
+        "deb6bb0a15ff5c69573632a511bba848",
+        "9ec4061bb7aab9a166c4b42e4311b6a3",
+        "30e30953d6e84766ce969d0a83b55ee1",
+        "8069decfe4393c6a118d37fab6cf9c5a",
+        "b7a51cc42715ac58d62bd1e6c249e600",
+        "81c4a421214470a3564bf2cd4a04efa2"
       ]
     }
   },
@@ -8062,6 +8492,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "ac9b6ad0ce454eb117f69e6292c2b887",
         "77fb7cce05ffea3680578609ce3bb7c5"
       ]
+    },
+    "ko": {
+      "d": "11f485579f015ce22ac22597640e399a",
+      "t": [
+        "1d02c30171762d05f5094a0d868021c2",
+        "6de6640fa1e62d35fbec3c0ca0abed2a",
+        "5616d2b06635668a8ea105024fbebfd7",
+        "bd36dea924ffc3ef4b59ce864b051d9a",
+        "841edf27a3b1d6b6c1f4e22790bdc4da",
+        "f2f5cc7b2be7b6f36b1859c371a9d398",
+        "1fb98d8801b61af7624b35d1ef5898ec"
+      ]
     }
   },
   "toy-library": {
@@ -8243,6 +8685,16 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "52be016ea8bab60f9ed8d9c4aaa150d8",
         "fea39b3821830c395957165b5965f238",
         "189d46ffbbf1f450b383e806673b7efc"
+      ]
+    },
+    "ko": {
+      "d": "1739bc2ff374ffbc197f6e039763d7c0",
+      "t": [
+        "322d1d8a2b725032e956fe492b32e604",
+        "e8fa08757b73d0621634870bc4f3a06f",
+        "084edebfc2940038b2c5c2d713daefb0",
+        "dd2cff9945909f310531f615143b55aa",
+        "5042f8f2bea9197e33cdd03f09752a83"
       ]
     }
   },
@@ -8462,6 +8914,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "12a1d2c712a1fd041606a4c6d615de88",
         "a77f16feabec44dd3c203a6c3fdc3271"
       ]
+    },
+    "ko": {
+      "d": "e8c35ad23a18d7a41d71bac6d3e2b25e",
+      "t": [
+        "3c18466e3dc376bf5e748c88271ff03c",
+        "06d07545deeb8d3f746ce01096cb4d3d",
+        "bfc2d0f784c34a803644720c521b8abd",
+        "51df260e3dcb0baa7abeb66445e6c721",
+        "7492811a07026f4d048d2b82473d24d6",
+        "9fc5ca4e5a98ab7abef1e2e4e7796a61",
+        "3925baec0b1635d7575e2211e76056fc"
+      ]
     }
   },
   "free-haircut": {
@@ -8643,6 +9107,16 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "e99becaaea044e1553499de71d39a69b",
         "0e89abb1d259cd89b56bd75dd5b130a0",
         "b2d5e5ba946f9485d3559e68ae57f1f2"
+      ]
+    },
+    "ko": {
+      "d": "344ba38149f6eb501810aabe755b02bc",
+      "t": [
+        "62fcf10add0c0f7219a2974e55ad187a",
+        "d7789cf6f4b274247aeb0261d3b26076",
+        "6006838fcb8591b3a8bc976ae496d224",
+        "da9da8a812ed7010ea96f1fab58453d8",
+        "b7a72e143dd84117146d14bf7e367d0a"
       ]
     }
   },
@@ -8862,6 +9336,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "112486d28ba46aef2c12ca6865879ff9",
         "7ed7e0763e4a39c5971d90b378fc6c16"
       ]
+    },
+    "ko": {
+      "d": "831113a5795ff6e406dc21ce0a40b748",
+      "t": [
+        "f041440d69093a03e02443f89a83e42f",
+        "afab04312afab7d0bc3321125e447905",
+        "46abfd7e5588b0b3dd181df5aeba40d8",
+        "2e170b832867e85c642bd1e6e36ee629",
+        "b23f28909af5ba8820aae7e0d950d66a",
+        "139195e3d128982745de7512c598ba30",
+        "2fe1e8ea17514429c560f4d05e3d6786"
+      ]
     }
   },
   "disability-support-network": {
@@ -9080,6 +9566,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "a1b77bbb2435af0dd1516f8fb96e8730",
         "d4d7cca4e7e777349bb3c2ffb499638f"
       ]
+    },
+    "ko": {
+      "d": "7076ce0c4290a613af41bb622340223d",
+      "t": [
+        "08e51abbde9175250b2fc7790fcd2300",
+        "43d056f14696e7d5cd6e335868e10bcf",
+        "1de52dec7b3ed05332447a875e00df74",
+        "f99bf34ae29de630892a8890641f24dc",
+        "8aea1a3ff36a42879e8df4d38a8ffc54",
+        "7128b558d39b4f50e1664ab9a6e352c6",
+        "8a382553ec3d11a8003577d31caee45b"
+      ]
     }
   },
   "books-to-prisoners": {
@@ -9279,6 +9777,17 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "88a1fee3619a8301a942c58df1834e08",
         "7e84d916d0d22520f66c78dbb97ba2dc",
         "d9410056bd252cd78fe5a585f1044cc5"
+      ]
+    },
+    "ko": {
+      "d": "212455012fbd4718d4377b3d29e57a07",
+      "t": [
+        "f3e7163db0c1b07670fdf1d90b42a513",
+        "b0ba4b92a7c16b4bfc05de3b4a3bb091",
+        "c77c18208cf5005e1dbcbfcd0321a81c",
+        "1066ae81a74450d806c1f4c51e2fbd86",
+        "1ce3944606f5e9717b349879cf35a2e8",
+        "14e864a2eeb3fb4af9c2690d6c3b912a"
       ]
     }
   },
@@ -9480,6 +9989,17 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "7e4acf04b93954661cbc052cb6f3e175",
         "785fbd4251c40832d50f0b9a283734db"
       ]
+    },
+    "ko": {
+      "d": "e1090acf41e4e81566064797f0230814",
+      "t": [
+        "0ed81374ae09e4e87a6db1fc42daf528",
+        "6b41bfa02c5d417d8f5f855f6a9520c6",
+        "a0137a6f11483d7663ee12451022d037",
+        "5da66d831eb2e3ff48708d6a057ab101",
+        "dfaa6205a77bdca246a0cb3cba39288c",
+        "1b0e943e2293ed04d740311ea517c698"
+      ]
     }
   },
   "school-supply-program": {
@@ -9661,6 +10181,16 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "9f84f2ba975d38b9e6d6b0b5bc242cde",
         "0cc9874e2728e35c6dd2db02e82b0623",
         "d6764c5f2d57588faaf15d13cd57de31"
+      ]
+    },
+    "ko": {
+      "d": "575909549f2ba0ce7a2f1a6b2a7a1c1b",
+      "t": [
+        "b846c6958a63c26e116498d37d94d7d5",
+        "b1c03c826b2cf1ce2a81f04cf4ee86ba",
+        "18dbd32d4be5b81feb34c19c4c1649e1",
+        "eda217042b5d971b9bbc613bd9ffd2a8",
+        "2839b15207efaab2360e7450597e64d7"
       ]
     }
   },
@@ -9880,6 +10410,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "35fad5bc1d915f1fe565c6b4979e657d",
         "b0481070193229509ff5db8e37681407"
       ]
+    },
+    "ko": {
+      "d": "3242d08ec4e400adda67e6ff5ac89073",
+      "t": [
+        "bb30d94a8894da10ee97b495172d8369",
+        "834e97b11b2840de4d26114d4aa590ef",
+        "c1ffd6ab77e3a7e847351223ce93f9ce",
+        "007c026ed7f93db2f41de8f272157bea",
+        "a704bef4fa031f381cd3745f8a700f3c",
+        "2aae219bf16a5ddca63259ed315e4bf2",
+        "e7ede6adf020f31f758247f2e9427e47"
+      ]
     }
   },
   "resource-hub-dispatch": {
@@ -10098,6 +10640,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "e99be978ad6a7fccb4284dca0c01a356",
         "0872662f6e5dc3ebc150fb138d2a7f13"
       ]
+    },
+    "ko": {
+      "d": "4985ebfc9f116b0dc866c17e874431e0",
+      "t": [
+        "602bf746ccadc26891fc982301e85078",
+        "38043a0c5cb00e3c687ff5e972d29116",
+        "da44cdbdee09984facca2d1d10680669",
+        "c50ccbbd6c568db402d8583922f32916",
+        "b3222a40b7184516b8ab0955e35981a9",
+        "22d3a69d51e34a388669b2b4a94c0984",
+        "a4ce0afef57b53f2a17c6dcff06361fb"
+      ]
     }
   },
   "harm-reduction-supplies": {
@@ -10298,6 +10852,17 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "f8071d53caed05d4855e67da91b5bf99",
         "232904f4dd99ecd10291ede6926c077c"
       ]
+    },
+    "ko": {
+      "d": "13191ef0e341078479a64d44974efe8e",
+      "t": [
+        "6ce780f92bf848e407c12903e8d13028",
+        "8d4049daeaf5494c514d4334340c1dcf",
+        "a3d844864b79320a20e7a7e4151de923",
+        "de920c2b274faa0f20730825823f91dc",
+        "8628f29a40db0a474e18e541318cfbd0",
+        "462c04b43d4908097a7a2603f052202b"
+      ]
     }
   },
   "court-support": {
@@ -10497,6 +11062,17 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "60ea8eb864a1fb713c5af66fd8497a54",
         "5fae10a5647b822873ecef97ee95f4ce",
         "0b9ad83fbc59a5ea5d51757b04c5ed21"
+      ]
+    },
+    "ko": {
+      "d": "cf53e4ba1a1d3edc574139fd42e281c6",
+      "t": [
+        "b468226617e2eb6adef5519598e12990",
+        "572193aa64799cd5d4122864c37a9b8a",
+        "62ef4dee2a5cacb14ed023e78f56217e",
+        "2533eebcd573abcf465c6d9e106d61e8",
+        "d98b2bd0cb7aa53040e9ed3d59520a87",
+        "d827d393ab9dcb64e65bf4080d98d71b"
       ]
     }
   },
@@ -10716,6 +11292,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "e55473be4d94db736222b42fed9847d7",
         "91865f113fb6d0f281fee2b51f62b7df"
       ]
+    },
+    "ko": {
+      "d": "adaf5fddc1c2016d6a2759d7583b40f7",
+      "t": [
+        "f352ade768ee24101d391d59b25e44da",
+        "f53bf98448fc94c79becd16b2d5e2fc4",
+        "454cc1b9920bd9eaef4f8a5d753aeab8",
+        "03623abfe4c5946837a406b94fb4ae97",
+        "e441c3f2b7857e2b50be89d6c8e282d5",
+        "8e20776182e90401df6f50ff42be1acc",
+        "2786ff4d38cceafefbbfb06d6ea2b9e1"
+      ]
     }
   },
   "community-oral-history": {
@@ -10879,6 +11467,15 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "3b401cbac6e30e1459d3c7274e5a4f8a",
         "3fda809be2c98d4ada034864bd8778f9",
         "cf63511e31b7881fc4feda797fe44b6f"
+      ]
+    },
+    "ko": {
+      "d": "1388c14b8390cdcf2ef0304614d6b25a",
+      "t": [
+        "a5c678848061e07cb67217afe5e867ba",
+        "c808ce1a0c97cef526f0201ed75fbf91",
+        "38234da2bff02317e8443b8ab6badb1a",
+        "ba54e6506874581cd543ccbcf0b3ea33"
       ]
     }
   },
@@ -11098,6 +11695,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "8dd5a32a999e3e7c57922b1e85c2fbea",
         "e0358efe01a7723f8dcbfbbae4a4d9c0"
       ]
+    },
+    "ko": {
+      "d": "536ee12fcda9cd1a69bb9822b5e527a2",
+      "t": [
+        "ce60ffbeacfcbba0738af3c4bcedcdfb",
+        "54cd6e4a94da331c62ea7adbd354736d",
+        "d2fc20bae65cfb5b1249f5d2efadd419",
+        "aa14d33c6251d7d7ce33b9ffa447ae2c",
+        "657f7131292bb9b8b7a536a2babea84c",
+        "f0ec9a340770f746be4c8f8b9730c803",
+        "4e22fb6b7f0c80730841bd843307be82"
+      ]
     }
   },
   "worker-coop-incubator": {
@@ -11315,6 +11924,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "4d132062bc53ded1e13a204190c49db6",
         "d2283495cff2824d05b718212f12ed3c",
         "086e02825c9e412b60465ca37771473a"
+      ]
+    },
+    "ko": {
+      "d": "f0591af2b12a38465ca1e5a16008a99a",
+      "t": [
+        "35ddc54e76c34002553b73d9ed8ed200",
+        "727b18e3629d4dcdbfd056717c96c8ee",
+        "221cd3dbc8f4da628dfe0385175c3011",
+        "235f3687d743b6366c4fca97d86cb03f",
+        "472edd3eda723edd080a3b349d532470",
+        "9544f7bbbe13060ca45e3f15292f4123",
+        "513c41d3c18881077794917f002466ff"
       ]
     }
   },
@@ -11534,6 +12155,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "e5ad7c624149604f5f1da2a9e48b419d",
         "7a431a702223ab752ba3626aee19daa7"
       ]
+    },
+    "ko": {
+      "d": "6acf77f806e4256cc447fd2cbfe23cd5",
+      "t": [
+        "17fe9c00b5f1c8a400f2ec261c038240",
+        "bd2c376d8ec2ce6eb2f4d1ba062c00d8",
+        "64f2850eb1054fea45dff10bbf8d7a8b",
+        "973a14525f1271f698f8576cd9c96cfd",
+        "77d5f39ebcce95c92169bd9659f7f2d9",
+        "04832dde3878b6c24ebad916baf57532",
+        "bffb637a76c24ca0d8941fddfc2cf58f"
+      ]
     }
   },
   "disaster-relief-hub": {
@@ -11751,6 +12384,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "5ca283d9c6297edadd8ee35fd0e229b2",
         "6b1e1f3296f8f0cccb4d67b250f82268",
         "a755fe72db2d88bd28503e1ef0f31453"
+      ]
+    },
+    "ko": {
+      "d": "6b871684df0847bf55a489d4bca65b2d",
+      "t": [
+        "8fb19f6f987f5411595ecef2b83cee9a",
+        "1b01a26fbbdf4eb0911840fe2a087816",
+        "5a90fa9de8ac4cd23ebb0eb2a0639ee9",
+        "a397c6874e165a96e3d93e6c4df04a93",
+        "83eb103f3722681e62f6154b044e24e0",
+        "c80fe57b40c68e3b0e84c4fbf6824d4d",
+        "66351894af56db0764c7adaf3e14b2ad"
       ]
     }
   },
@@ -11970,6 +12615,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "242cd79fca573471d3554c587a17e3a2",
         "bee998aeff555987107fdc1f4aa975b1"
       ]
+    },
+    "ko": {
+      "d": "a83cedf5827aaf48d7e7c58e173c344c",
+      "t": [
+        "c1f5659604e0d6ee2dfdaff637ec4409",
+        "325742b5c0e797ac7a917307e98cdf5c",
+        "4bc91099f163d43cbe61c5b6976a3e70",
+        "beb808592e72c2a82d4fb8f8c288e112",
+        "1e1a8264630926f975920ad9e6ee0ec1",
+        "aab581c75733ff2a228ac2199a1eed0d",
+        "15456757443267274df146f4a04d9f72"
+      ]
     }
   },
   "community-fitness": {
@@ -12187,6 +12844,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "fba30c8dd2fbddd6150398d2a28f48d2",
         "6bfddc81131ff7922a81f0d625e69ba3",
         "af622c0fe4f5e89b15be38edf18308e8"
+      ]
+    },
+    "ko": {
+      "d": "ea929ca61faf2df99250e4b450013fc8",
+      "t": [
+        "44f88a00235644a8f464d0e3bcd84b08",
+        "a5f4cf66c26b866fda6c8997f94589c6",
+        "77962f0fc59f7b35f410b9371f3daa68",
+        "32a82ebe87dc64c985192093e9522bf7",
+        "ccde7e45e5ceca433304ddd3d2bfaf0c",
+        "fbcc5c060c0c0e9949cdbeb21419dd19",
+        "b31940b2ca7d31f745912b62566f6479"
       ]
     }
   },
@@ -12406,6 +13075,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "8c8e092c3f1ad91cf6422a9f78c0c3ca",
         "9aebe583cb9493c2fd90de9eac60b9f6"
       ]
+    },
+    "ko": {
+      "d": "f538b417ccfdcb9ba93cd66d64a87f93",
+      "t": [
+        "1560ce5f0a43d268bfb20c39cbc06f10",
+        "1eeae7195510c377af61af4e468c2a46",
+        "7d22579431e09e0046f2f9a8274bd5d4",
+        "fe51dd3b17374253a23baf73f49c4c1e",
+        "ab455dc2a865b534050819684507bde5",
+        "6f0d53934975a04f8880c9089724ae7e",
+        "228a84ddbf62c8429162c3760c4341f4"
+      ]
     }
   },
   "new-parent-support": {
@@ -12623,6 +13304,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "d1561a46bffb194e834e68beebbc4e50",
         "6e51e0273760e4c9f504210cb86030f6",
         "8cb74f4a8b30bea106ecb60ec52ee846"
+      ]
+    },
+    "ko": {
+      "d": "9ee16a196743a3dac0cca4cc62557962",
+      "t": [
+        "864ea100841f938398f15169ae8b14fc",
+        "d134599c2ccd6ea21c334a4965c32be5",
+        "b72d2189363444fd07cb8c73d92d87b6",
+        "2cb778b231a6af7ce8b4d8b29fc2abe3",
+        "81b980aefa0ba88a90409aa15e662dbd",
+        "f0beda3946cef3de7e2c824f506e4914",
+        "9f40a0266eede95f33a4d54ed16dfa9c"
       ]
     }
   },
@@ -12842,6 +13535,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "74bc87278171ae3ba3afc2876507881f",
         "526009d416aacdf063b89c84723f38b8"
       ]
+    },
+    "ko": {
+      "d": "9bd37ff7d5f4a26183777a2193b54ce1",
+      "t": [
+        "420c73355439450e4e8279f2bdc1d785",
+        "635a973134d6946c7ac007bfa9015c0e",
+        "884dac1c6ae554a30c4a478b27d94ad6",
+        "81f4eee6d85a019d2949411d8c9c02c6",
+        "a36ee2a68e188aabdb39c3faad7f75bb",
+        "e27c47b8ebfd411e293e11568c5e87fd",
+        "6d485771d085c7c38d52fe19f7395ab1"
+      ]
     }
   },
   "weather-survival-outreach": {
@@ -13060,6 +13765,18 @@ export const TEMPLATE_DESC_MANIFEST: Record<
         "e2895764a0890a77db2fc31624ad449a",
         "e63d3b3bb6edd4518656faf02f7e16eb"
       ]
+    },
+    "ko": {
+      "d": "80f82969986ae510ae2e03b1a6275a3c",
+      "t": [
+        "0ac58de229dbcbd10077a44fabf11341",
+        "5be00bfa22fe4b4e28e46a406a43cca1",
+        "a5bf75e1a0a49da90ec9b84264c0e509",
+        "e5200c58e988257bc267e5cb9df453d4",
+        "2c30d5909a70b186b7a397057a74cd10",
+        "b94fce1442fb297cff259e8f259f5cfa",
+        "a787ac5fbcf6f4dc312a61fc010f9e17"
+      ]
     }
   },
   "potluck": {
@@ -13116,6 +13833,9 @@ export const TEMPLATE_DESC_MANIFEST: Record<
     },
     "my": {
       "e": "a711d21c52ec9758a5f27d97a0fa87f9"
+    },
+    "ko": {
+      "e": "cdab051130f1a4e931b783c351886f05"
     }
   },
   "shared-meal": {
@@ -13172,6 +13892,9 @@ export const TEMPLATE_DESC_MANIFEST: Record<
     },
     "my": {
       "e": "9788c201c00c054c9a74d1ed79980286"
+    },
+    "ko": {
+      "e": "47d46d74c1dbcaef6769f67ebe50727b"
     }
   },
   "game-night": {
@@ -13228,6 +13951,9 @@ export const TEMPLATE_DESC_MANIFEST: Record<
     },
     "my": {
       "e": "f340439e260dfacfe847d88ce0dc17ff"
+    },
+    "ko": {
+      "e": "4596650af23a8624d3d6723974b4641c"
     }
   },
   "movie-night": {
@@ -13284,6 +14010,9 @@ export const TEMPLATE_DESC_MANIFEST: Record<
     },
     "my": {
       "e": "8f2236bb096ccfb3186116deb680e13f"
+    },
+    "ko": {
+      "e": "31d7e6c6f4954f52b52735f7da426a60"
     }
   },
   "craft-circle": {
@@ -13340,6 +14069,9 @@ export const TEMPLATE_DESC_MANIFEST: Record<
     },
     "my": {
       "e": "3b329ec5bfbac9b0106894360dceb8c3"
+    },
+    "ko": {
+      "e": "1d3afc9ea3beac1decff90fd2c531e2c"
     }
   },
   "walk-hike": {
@@ -13396,6 +14128,9 @@ export const TEMPLATE_DESC_MANIFEST: Record<
     },
     "my": {
       "e": "a1ca733b537e9e30393ec9a591b6814c"
+    },
+    "ko": {
+      "e": "ed7c1fa2bec92d8f5756c560b192b476"
     }
   },
   "welcome-gathering": {
@@ -13452,6 +14187,9 @@ export const TEMPLATE_DESC_MANIFEST: Record<
     },
     "my": {
       "e": "f268e202d84d036547635dec18344917"
+    },
+    "ko": {
+      "e": "87481f4198f465572bc7ea04fc603990"
     }
   },
   "music-jam": {
@@ -13508,6 +14246,9 @@ export const TEMPLATE_DESC_MANIFEST: Record<
     },
     "my": {
       "e": "b34019bab19d1624e42aea3861764110"
+    },
+    "ko": {
+      "e": "a9565b4540e34b9d1eb9f2c6d8c7e83b"
     }
   },
   "celebration": {
@@ -13564,6 +14305,9 @@ export const TEMPLATE_DESC_MANIFEST: Record<
     },
     "my": {
       "e": "aa2d1eaf940796730e998585dc1ee471"
+    },
+    "ko": {
+      "e": "3c8d4d7ee88651134cf6d0635f4a6d28"
     }
   },
   "work-day": {
@@ -13620,6 +14364,9 @@ export const TEMPLATE_DESC_MANIFEST: Record<
     },
     "my": {
       "e": "a5bde1f66db28cf6747981619facf968"
+    },
+    "ko": {
+      "e": "7b02c91de6e9ced7ee264c35719058ff"
     }
   },
   "care-circle": {
@@ -13676,6 +14423,9 @@ export const TEMPLATE_DESC_MANIFEST: Record<
     },
     "my": {
       "e": "c0ade1bc1707540f143bbc13d7b7436a"
+    },
+    "ko": {
+      "e": "42074e1bb5d9d533cc620a7c29686591"
     }
   },
   "meeting": {
@@ -13732,6 +14482,9 @@ export const TEMPLATE_DESC_MANIFEST: Record<
     },
     "my": {
       "e": "0503579db0da6b4dcfeb16b3b4728824"
+    },
+    "ko": {
+      "e": "8f37ae02937ceff5d910c5811e515cdc"
     }
   }
 };

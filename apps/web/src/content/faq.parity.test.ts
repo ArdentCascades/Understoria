@@ -28,6 +28,7 @@ import { FAQ_SECTIONS_BN } from "./faq.bn";
 import { FAQ_SECTIONS_HT } from "./faq.ht";
 import { FAQ_SECTIONS_FA } from "./faq.fa";
 import { FAQ_SECTIONS_MY } from "./faq.my";
+import { FAQ_SECTIONS_KO } from "./faq.ko";
 
 // Guardrail against translation drift. The FAQ ids are stable URL
 // fragments shared across languages (`/help#confirm-exchange`), so
@@ -54,6 +55,7 @@ describe.each([
   ["Haitian Creole", FAQ_SECTIONS_HT],
   ["Persian", FAQ_SECTIONS_FA],
   ["Burmese", FAQ_SECTIONS_MY],
+  ["Korean", FAQ_SECTIONS_KO],
 ] as const)("FAQ parity — English ↔ %s", (localeName, FAQ_SECTIONS_TR) => {
   it("has the same section ids in both languages", () => {
     const enSectionIds = FAQ_SECTIONS.map((s) => s.id).sort();

@@ -325,15 +325,17 @@ export const LANGUAGES = [
   // Korean — the nineteenth language (docs/i18n-glossary/ko.md).
   // Single-"other" plural (zh/bo pattern); default numbering is
   // already latn, so no intlNumbering pin — the first launch since
-  // the pin existed that needs none. content flips to "full" when
-  // the authored corpus ships.
+  // the pin existed that needs none. Shipped UI-first; the full
+  // authored corpus (templates, tips, steps, FAQ, guides,
+  // principles) has since shipped on the Phase 2 rails
+  // (content/bundles/ko.ts), so content is "full" like the others.
   {
     code: "ko",
     endonym: "한국어",
     dir: "ltr",
     speakLang: "ko",
     reviewStatus: "new",
-    content: "ui-only",
+    content: "full",
   },
 ] as const satisfies readonly LanguageInfo[];
 
