@@ -305,6 +305,7 @@
   },
   "common": {
     "loading": "Đang ươm cộng đồng của bạn…",
+    "loadingStuck": "Bộ nhớ của thiết bị này không phản hồi. Đóng hẳn ứng dụng rồi mở lại — vậy là ổn.",
     "you": "Bạn",
     "back": "← Quay lại",
     "cancel": "Hủy",

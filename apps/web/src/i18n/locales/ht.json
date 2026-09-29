@@ -305,6 +305,7 @@
   },
   "common": {
     "loading": "Kominote w la ap pouse…",
+    "loadingStuck": "Depo aparèy sa a pa reponn. Fèmen aplikasyon an nèt epi ouvri l ankò — sa ap regle sa.",
     "you": "Ou",
     "back": "← Tounen",
     "cancel": "Anile",

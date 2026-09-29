@@ -305,6 +305,7 @@
   },
   "common": {
     "loading": "Cultivando sua comunidade…",
+    "loadingStuck": "O armazenamento deste dispositivo não está respondendo. Feche o aplicativo por completo e abra de novo — isso resolve.",
     "you": "Você",
     "back": "← Voltar",
     "cancel": "Cancelar",

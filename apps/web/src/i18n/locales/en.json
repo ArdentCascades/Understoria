@@ -305,6 +305,7 @@
   },
   "common": {
     "loading": "Growing your community...",
+    "loadingStuck": "The device's storage isn't answering. Fully close the app and open it again — that clears it.",
     "you": "You",
     "back": "← Back",
     "cancel": "Cancel",

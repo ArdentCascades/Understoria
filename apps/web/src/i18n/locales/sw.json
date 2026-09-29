@@ -305,6 +305,7 @@
   },
   "common": {
     "loading": "Jumuiya yako inakua…",
+    "loadingStuck": "Hifadhi ya kifaa hiki haijibu. Funga programu kabisa kisha uifungue tena — hilo hutatua tatizo.",
     "you": "Wewe",
     "back": "← Rudi",
     "cancel": "Ghairi",

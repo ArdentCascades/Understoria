@@ -96,6 +96,18 @@ include breaking changes.
   boot or a schema upgrade, never reloads more than once a minute,
   and a probe that errors counts as alive: only silence is death
   (docs/sync-liveness.md).
+- **And the boot can no longer hang on the splash when storage
+  stays dead.** The follow-up report: the recovery reload landed on
+  a boot stuck forever at "Growing your community…", because in the
+  wedged WebKit state even a fresh page's IndexedDB open can go
+  unanswered. Boot now prods the engine awake first (polling
+  `indexedDB.databases()` — the established Safari cure, costing
+  one sub-millisecond call on healthy devices), and if the splash
+  is still waiting after ten seconds it stops pretending: it says
+  the device's storage isn't answering and that fully closing and
+  reopening the app clears it — the one action that always restarts
+  the storage process — with a retry button alongside. The stuck
+  notice ships in all nineteen languages.
 - **The Dashboard speaks your language for template titles too.**
   Field report from a Chinese-language member: "Recruit and screen
   volunteers", project names, and "5h" sat untranslated on an

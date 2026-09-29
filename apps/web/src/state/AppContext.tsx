@@ -72,6 +72,7 @@ import {
   type LockState,
 } from "@/db/secrets";
 import { ensurePersistentStorage } from "@/lib/storageBudget";
+import { nudgeIndexedDB } from "@/lib/idbNudge";
 import { communityNodeIdSet, readNodeIdAliases } from "@/lib/nodeIdentity";
 import {
   LAST_SEEN_FOUNDER_HASHES,
@@ -291,6 +292,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // reports which state we're in.
     void ensurePersistentStorage();
     (async () => {
+      // Prod the IndexedDB engine awake before the first Dexie read.
+      // In WebKit's wedged-storage-process state a fresh page's
+      // open() can hang forever (the eternal-splash field report);
+      // polling databases() un-wedges it (lib/idbNudge). Costs one
+      // sub-millisecond call on healthy devices, never rejects, and
+      // gives up after its deadline so boot can't be held hostage —
+      // the splash's own watchdog owns the still-stuck case.
+      await nudgeIndexedDB();
+      if (cancelled) return;
       const node = await ensureNodeId();
       const initialLock = await currentLockState();
       if (cancelled) return;
