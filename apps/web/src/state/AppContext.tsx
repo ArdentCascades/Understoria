@@ -403,6 +403,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, [ready]);
 
+  // Storage watchdog (lib/storageWatchdog): WebKit can hand a resumed
+  // home-screen PWA a dead IndexedDB connection — every Dexie promise
+  // then hangs with no rejection (the stuck-"Working…" confirm bug).
+  // On each wake it races a trivial read against a timeout and, when
+  // storage provably stopped answering, recovers with one throttled
+  // reload.
+  useEffect(() => {
+    if (!ready) return;
+    let stop: (() => void) | null = null;
+    let cancelled = false;
+    void import("@/lib/storageWatchdog").then(({ startStorageWatchdog }) => {
+      if (cancelled) return;
+      stop = startStorageWatchdog();
+    });
+    return () => {
+      cancelled = true;
+      stop?.();
+    };
+  }, [ready]);
+
   // Push-subscription TTL feed (docs/notifications.md): a member who
   // opted into notifications renews their node row on app open,
   // throttled inside the lib to once a day. For the (default) member

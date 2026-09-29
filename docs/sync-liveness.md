@@ -128,3 +128,41 @@ device makes — the marginal disclosure was judged worth ~1s delivery
 for a mutual-aid app whose members are coordinating in real time
 (`docs/operator-powers.md`, `docs/threat-model.md` §7 unchanged in
 substance: the operator learns timing, never content).
+
+## The storage watchdog — waking with a dead IndexedDB connection
+
+Field report (iOS, installed app, opened by tapping a
+notification): an organizer taps Confirm on a completed task and
+the button stays at "Working…" forever, with no error toast and
+"Completed by —" above it. The confirm path is entirely local —
+Dexie reads and writes plus synchronous signing — so a promise
+that never settles there means the storage layer itself stopped
+answering. That is a known WebKit failure mode: when the OS
+suspends a home-screen PWA and later resumes it, the page can
+come back holding a dead IndexedDB connection whose requests
+never fire success *or* error. No rejection ever reaches the
+error-toast path, `usePendingAction`'s `finally` never runs, and
+every subsequent tap hangs the same way. The page is a brick that
+still looks alive.
+
+`lib/storageWatchdog.ts` (started from AppContext alongside the
+outbox worker) heals it at the moment it matters: on the same
+wake signals the sync loop pulls on (`visibilitychange` →
+visible, `focus`, `pageshow`), it races one trivial settings read
+against a 3s budget. Silence is re-checked once after a second —
+a wake-burst write queue or a groaning disk gets its chance to
+answer, and a probe that *rejects* counts as answering, because
+only silence is death. Double-confirmed silence triggers the one
+honest recovery: a reload, which mints a fresh connection and
+rebuilds every live query. The app is local-first and boots in
+moments, and at that point nothing on the page could have
+completed anyway. Guards, each pinned by
+`storageWatchdog.test.ts`: never probe while hidden; never probe
+while the database is not open (boot or a version upgrade — the
+dead-after-resume state reads as *open*, since the open long ago
+succeeded and the connection died underneath it); coalesce the
+wake burst to one check; and throttle recovery to one reload per
+minute per session, so a profile a reload cannot fix degrades to
+a logged warning instead of a reload loop. A fresh page never
+probes at start — the dead state only arises when an *existing*
+page is resumed.

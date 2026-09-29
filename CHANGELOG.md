@@ -81,6 +81,21 @@ include breaking changes.
   the calendar design's feed rejection (docs/calendar.md §10.6).
 
 ### Fixed
+- **Confirming a task no longer sticks at "Working…" after the app
+  wakes from a notification.** Field report from an installed iOS
+  app: tapping Confirm on a completed task hung forever with no
+  error. The confirm path is entirely local, so the hang was the
+  storage layer itself — WebKit can resume a suspended home-screen
+  app with a dead IndexedDB connection whose requests never answer,
+  which also left "Completed by —" unresolved on the same screen. A
+  new storage watchdog probes the connection on every wake (the same
+  signals the sync loop pulls on) and, when storage provably stops
+  answering — a trivial read timing out twice in a row — recovers
+  with one throttled reload so the page comes back with a working
+  connection instead of hanging on every tap. It never probes during
+  boot or a schema upgrade, never reloads more than once a minute,
+  and a probe that errors counts as alive: only silence is death
+  (docs/sync-liveness.md).
 - **The Dashboard speaks your language for template titles too.**
   Field report from a Chinese-language member: "Recruit and screen
   volunteers", project names, and "5h" sat untranslated on an
