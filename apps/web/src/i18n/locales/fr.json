@@ -305,6 +305,7 @@
   },
   "common": {
     "loading": "Ta communauté pousse…",
+    "loadingStuck": "Le stockage de cet appareil ne répond pas. Ferme complètement l'app et rouvre-la — ça règle le problème.",
     "you": "Toi",
     "back": "← Retour",
     "cancel": "Annuler",

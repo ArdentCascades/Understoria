@@ -305,6 +305,7 @@
   },
   "common": {
     "loading": "Pinauusbong ang komunidad mo…",
+    "loadingStuck": "Hindi sumasagot ang storage ng device na ito. Isara nang tuluyan ang app at buksan ulit — maaayos iyon.",
     "you": "Ikaw",
     "back": "← Bumalik",
     "cancel": "Kanselahin",

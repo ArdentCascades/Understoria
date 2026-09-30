@@ -166,3 +166,23 @@ minute per session, so a profile a reload cannot fix degrades to
 a logged warning instead of a reload loop. A fresh page never
 probes at start — the dead state only arises when an *existing*
 page is resumed.
+
+The follow-up field report completed the picture: the watchdog's
+reload can land on a boot that hangs too, because in the wedged
+state even a fresh document's `indexedDB.open()` may never answer
+— the storage *process* is stuck, not just one connection — and
+the watchdog deliberately stands down while the database is not
+open, so nothing interrupted an eternal "Growing your
+community…". Two more layers close that: `lib/idbNudge.ts` prods
+the engine with `indexedDB.databases()` polls before AppContext's
+first Dexie read (the widely-shipped safari-14-idb-fix pattern —
+the polling itself un-wedges WebKit's engine, one sub-millisecond
+call on healthy devices, deadline-capped so boot is never held
+hostage), and the boot splash (`components/Splash.tsx`) turns
+honest after ten quiet seconds: boot is a handful of local reads,
+so ten silent seconds means storage is not going to answer, and
+the splash then names the recovery instead of growing forever —
+`common.loadingStuck` (shipped in all nineteen languages) tells
+the member to fully close the app and reopen it, the one action
+that always restarts WebKit's storage process, with a Try-again
+reload button for the lucky case.

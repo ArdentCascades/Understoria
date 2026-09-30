@@ -19,7 +19,6 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { Outlet } from "react-router";
-import { useTranslation } from "react-i18next";
 import { AppHeader } from "./AppHeader";
 import { BottomNav } from "./BottomNav";
 import { DemoBanner } from "./DemoBanner";
@@ -33,7 +32,7 @@ import { ToastContainer } from "./ToastContainer";
 import { UpdatePrompt } from "./UpdatePrompt";
 import { useApp } from "@/state/AppContext";
 import { useOnlineStatus } from "@/lib/useOnlineStatus";
-import { IllustrationSapling } from "@/components/visual";
+import { Splash } from "./Splash";
 
 export function Layout() {
   const { ready, lockState } = useApp();
@@ -137,16 +136,6 @@ export function Layout() {
       {/* Rendered even while locked: the notice is about the software
           itself, and a stale build on the lock screen is still stale. */}
       <UpdatePrompt />
-    </div>
-  );
-}
-
-function Splash() {
-  const { t } = useTranslation();
-  return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-stack-sm px-6 text-center">
-      <IllustrationSapling className="text-canopy-700 dark:text-canopy-300" />
-      <p className="text-moss-600 dark:text-moss-300">{t("common.loading")}</p>
     </div>
   );
 }

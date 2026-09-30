@@ -305,6 +305,7 @@
   },
   "common": {
     "loading": "Menumbuhkan komunitasmu…",
+    "loadingStuck": "Penyimpanan perangkat ini tidak merespons. Tutup aplikasinya sepenuhnya lalu buka lagi — itu akan membereskannya.",
     "you": "Kamu",
     "back": "← Kembali",
     "cancel": "Batal",
